@@ -1,0 +1,23 @@
+{
+  "pkg": "@jrk/design",
+  "globalName": "JrkDesign",
+  "projectId": "6ae6f5da-9e47-47eb-9e46-7d3cc6aa361a",
+  "shape": "package",
+  "buildCmd": "npm run build",
+  "srcDir": "react/src",
+  "tsconfig": "tsconfig.json",
+  "cssEntry": "css/index.css",
+  "tokensGlob": "dist/jrk-tokens.css",
+  "guidelinesGlob": [
+    ".claude/skills/jrk-design/SKILL.md",
+    ".claude/skills/jrk-design/references/*.md"
+  ],
+  "extraFonts": [
+    ".ds-sync/node_modules/@fontsource/inter/latin-400.css",
+    ".ds-sync/node_modules/@fontsource/inter/latin-500.css",
+    ".ds-sync/node_modules/@fontsource/inter/latin-600.css",
+    ".ds-sync/node_modules/@fontsource/inter/latin-700.css",
+    ".ds-sync/node_modules/@fontsource/jetbrains-mono/latin-400.css",
+    ".ds-sync/node_modules/@fontsource/jetbrains-mono/latin-500.css"
+  ]
+}

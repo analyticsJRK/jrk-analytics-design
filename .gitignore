@@ -228,3 +228,19 @@ node_modules/
 # output is committed. It is still generated — edit tokens/tokens.json and run
 # `npm run build`; never hand-edit dist/.
 !dist/
+
+# ---------------------------------------------------------------------------
+# design-sync (claude.ai/design import) — generated + machine state
+# ---------------------------------------------------------------------------
+# Staged converter scripts and their deps; regenerated per run from the skill.
+.ds-sync/
+# Converter output bundle.
+ds-bundle/
+# Machine-local verification state and subagent scratch.
+.design-sync/.cache/
+.design-sync/learnings/
+# Fork symlink for lib overrides — recreated per clone, never committed.
+.design-sync/node_modules
+# Generated TS declarations for the design-sync API contract (tsc -p
+# .ds-sync/tsconfig.dts.json). Not part of the library's committed dist/.
+dist/types/
