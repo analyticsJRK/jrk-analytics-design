@@ -1,0 +1,405 @@
+/* Form controls — field wrapper, text inputs, select, checkbox, radio, switch. */
+
+/* ============================== field wrapper ============================== */
+
+/* Wraps label + control + help/error so spacing and the error state are
+   declared once rather than per control. */
+.jrk-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-1_5);
+}
+
+.jrk-field__label {
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-medium);
+  color: var(--jrk-text-secondary);
+}
+
+/* Marks a required control for sighted users; pair with `required` on the
+   input so assistive tech gets it too. */
+.jrk-field__label[data-required]::after {
+  content: '*';
+  margin-inline-start: 2px;
+  color: var(--jrk-status-critical-text);
+}
+
+.jrk-field__help {
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+}
+
+/* Wire to the control with aria-describedby, and set aria-invalid on the
+   control — color is never the only signal that something is wrong. */
+.jrk-field__error {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-status-critical-text);
+}
+
+.jrk-field__error svg {
+  width: var(--jrk-icon-sm);
+  height: var(--jrk-icon-sm);
+}
+
+.jrk-field--horizontal {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--jrk-space-3);
+}
+
+/* ============================== text inputs ============================== */
+
+/* Controls take the RAISED (white) fill and the strong border, not the near-
+   invisible card border. A card can afford to be borderless because nothing
+   depends on knowing exactly where it ends; an input cannot — the reader has
+   to see the target they are about to type into. On a tinted card the white
+   fill does most of that work; on the white page chrome the border does.
+
+   Note: WCAG 1.4.11 wants 3:1 for a control boundary. border-strong measures
+   ~1.4:1 on the card, so this leans on the fill difference plus the border
+   together. Use .jrk-input--filled on white chrome, where the fill flips. */
+.jrk-input,
+.jrk-select,
+.jrk-textarea {
+  width: 100%;
+  height: var(--jrk-control-md);
+  padding-inline: var(--jrk-space-3);
+  font-size: var(--jrk-text-md);
+  color: var(--jrk-text-primary);
+  background: var(--jrk-surface-raised);
+  border: 1px solid var(--jrk-border-strong);
+  border-radius: var(--jrk-radius-md);
+  transition:
+    border-color var(--jrk-transition),
+    background-color var(--jrk-transition);
+}
+
+/* Soft filled field for the topbar and other white-chrome contexts, where a
+   white input would disappear into its surroundings. */
+.jrk-input--filled,
+.jrk-select--filled {
+  background: var(--jrk-surface-default);
+  border-color: transparent;
+}
+
+.jrk-input--filled:hover:not(:disabled),
+.jrk-select--filled:hover:not(:disabled) {
+  background: var(--jrk-surface-hover);
+}
+
+.jrk-textarea {
+  height: auto;
+  min-height: calc(var(--jrk-control-md) * 2);
+  padding-block: var(--jrk-space-2);
+  line-height: var(--jrk-leading-normal);
+  resize: vertical;
+}
+
+.jrk-input::placeholder,
+.jrk-textarea::placeholder {
+  color: var(--jrk-text-muted);
+}
+
+.jrk-input:hover:not(:disabled),
+.jrk-select:hover:not(:disabled),
+.jrk-textarea:hover:not(:disabled) {
+  border-color: var(--jrk-border-strong);
+}
+
+.jrk-input:disabled,
+.jrk-select:disabled,
+.jrk-textarea:disabled {
+  background: var(--jrk-surface-disabled);
+  color: var(--jrk-text-disabled);
+  cursor: not-allowed;
+}
+
+.jrk-input[aria-invalid='true'],
+.jrk-select[aria-invalid='true'],
+.jrk-textarea[aria-invalid='true'] {
+  border-color: var(--jrk-status-critical-mark);
+}
+
+.jrk-input--sm,
+.jrk-select--sm {
+  height: var(--jrk-control-sm);
+  font-size: var(--jrk-text-sm);
+  padding-inline: var(--jrk-space-2);
+}
+
+.jrk-input--lg,
+.jrk-select--lg {
+  height: var(--jrk-control-lg);
+  font-size: var(--jrk-text-lg);
+}
+
+/* Numeric inputs align on the decimal when stacked in a column. */
+.jrk-input--numeric {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* ---------- input with leading/trailing adornment ---------- */
+
+.jrk-input-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.jrk-input-group__icon {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: var(--jrk-icon-md);
+  height: var(--jrk-icon-md);
+  color: var(--jrk-text-muted);
+  pointer-events: none;
+}
+
+.jrk-input-group__icon:first-child {
+  inset-inline-start: var(--jrk-space-2_5);
+}
+
+.jrk-input-group__icon:last-child {
+  inset-inline-end: var(--jrk-space-2_5);
+}
+
+.jrk-input-group__icon:first-child ~ .jrk-input {
+  padding-inline-start: calc(var(--jrk-space-2_5) * 2 + var(--jrk-icon-md));
+}
+
+.jrk-input-group:has(.jrk-input-group__icon:last-child) .jrk-input {
+  padding-inline-end: calc(var(--jrk-space-2_5) * 2 + var(--jrk-icon-md));
+}
+
+/* ============================== select ============================== */
+
+.jrk-select {
+  appearance: none;
+  padding-inline-end: calc(var(--jrk-space-2_5) * 2 + var(--jrk-icon-sm));
+  cursor: pointer;
+  /* Chevron is inlined so the control needs no extra markup. currentColor is
+     not available inside a data: URL, so the muted ink value is written in
+     literally for each mode. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%235f5f73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right var(--jrk-space-2_5) center;
+  background-size: var(--jrk-icon-sm);
+}
+
+[data-theme='dark'] .jrk-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2382829a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) .jrk-select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%2382829a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
+  }
+}
+
+/* ============================== checkbox & radio ============================== */
+
+.jrk-check {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--jrk-space-2);
+  cursor: pointer;
+}
+
+.jrk-check input[type='checkbox'],
+.jrk-check input[type='radio'] {
+  appearance: none;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  /* Optically centers the box against the first line of a 14px/1.5 label. */
+  margin-top: 2px;
+  background: var(--jrk-surface-raised);
+  border: 1px solid var(--jrk-border-strong);
+  /* Not radius-sm: at 6px on a 16px box the corners read as a circle and the
+     checkbox stops being distinguishable from the radio. */
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background-color var(--jrk-transition),
+    border-color var(--jrk-transition);
+}
+
+.jrk-check input[type='radio'] {
+  border-radius: var(--jrk-radius-full);
+}
+
+.jrk-check input:checked {
+  background-color: var(--jrk-accent-solid);
+  border-color: var(--jrk-accent-solid);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jrk-check input[type='checkbox']:checked {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8.5l3.5 3.5L13 5'/%3E%3C/svg%3E");
+  background-size: 12px;
+}
+
+.jrk-check input[type='checkbox']:indeterminate {
+  background-color: var(--jrk-accent-solid);
+  border-color: var(--jrk-accent-solid);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round'%3E%3Cpath d='M4 8h8'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 12px;
+}
+
+.jrk-check input[type='radio']:checked {
+  background-image: radial-gradient(circle, #ffffff 0 3px, transparent 3.5px);
+}
+
+.jrk-check input:disabled {
+  background-color: var(--jrk-surface-disabled);
+  border-color: var(--jrk-border-default);
+  cursor: not-allowed;
+}
+
+.jrk-check input:disabled + .jrk-check__label {
+  color: var(--jrk-text-disabled);
+}
+
+.jrk-check__label {
+  font-size: var(--jrk-text-md);
+  line-height: var(--jrk-leading-snug);
+  user-select: none;
+}
+
+.jrk-check__hint {
+  display: block;
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+}
+
+/* ============================== switch ============================== */
+
+/* For settings that apply immediately. If the change needs a Save press, use a
+   checkbox instead — a switch that does not take effect at once misleads. */
+.jrk-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  cursor: pointer;
+}
+
+.jrk-switch input {
+  appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 34px;
+  height: 20px;
+  margin: 0;
+  background: var(--jrk-border-strong);
+  border-radius: var(--jrk-radius-full);
+  cursor: pointer;
+  transition: background-color var(--jrk-transition);
+}
+
+.jrk-switch input::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+  border-radius: var(--jrk-radius-full);
+  box-shadow: var(--jrk-shadow-sm);
+  transition: transform var(--jrk-transition);
+}
+
+.jrk-switch input:checked {
+  background: var(--jrk-accent-solid);
+}
+
+.jrk-switch input:checked::after {
+  transform: translateX(14px);
+}
+
+.jrk-switch input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ============================== filter bar ============================== */
+
+/* Filters sit in ONE row above the charts they govern — never scattered
+   between them, and never inside a chart card. */
+.jrk-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  padding: var(--jrk-space-3) 0;
+}
+
+.jrk-filter-bar .jrk-select,
+.jrk-filter-bar .jrk-input {
+  width: auto;
+  min-width: 160px;
+  height: var(--jrk-control-sm);
+  font-size: var(--jrk-text-sm);
+}
+
+/* ---------- date range presets ---------- */
+
+/* A list of preset rows with a bold check on the selected one, and custom
+   range behind a hairline in the footer. */
+.jrk-daterange {
+  min-width: 200px;
+  padding: var(--jrk-space-1);
+  background: var(--jrk-surface-raised);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-lg);
+  box-shadow: var(--jrk-shadow-lg);
+}
+
+.jrk-daterange__option {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  width: 100%;
+  padding: var(--jrk-space-1_5) var(--jrk-space-2);
+  font-size: var(--jrk-text-sm);
+  text-align: start;
+  background: none;
+  border: 0;
+  border-radius: var(--jrk-radius-md);
+  cursor: pointer;
+}
+
+.jrk-daterange__option:hover {
+  background: var(--jrk-surface-hover);
+}
+
+.jrk-daterange__option[aria-selected='true'] {
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-daterange__check {
+  width: var(--jrk-icon-md);
+  height: var(--jrk-icon-md);
+  stroke-width: 3;
+  color: var(--jrk-accent-text);
+  visibility: hidden;
+}
+
+.jrk-daterange__option[aria-selected='true'] .jrk-daterange__check {
+  visibility: visible;
+}
+
+.jrk-daterange__footer {
+  margin-top: var(--jrk-space-1);
+  padding-top: var(--jrk-space-2);
+  border-top: 1px solid var(--jrk-border-subtle);
+}

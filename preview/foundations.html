@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Foundations — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="preview.css">
+</head>
+<body>
+
+<div class="gal-page">
+  <header class="gal-page__head">
+    <h1>Foundations</h1>
+    <p>
+      The token layer. Contrast figures below are measured live against the surface
+      each token actually renders on — switch the theme in the nav and every number
+      recomputes.
+    </p>
+  </header>
+
+  <section class="gal-sec">
+    <h2>Surfaces &amp; ink</h2>
+    <p class="gal-sec__note">
+      Dark values are selected for the dark surface, not flipped from light. Body text
+      clears 4.5:1 on both the card surface and the page plane — the validator checks
+      both, because a token that passes on white can fail on the canvas behind it.
+    </p>
+    <div class="gal-swatches" id="sw-core"></div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Accent &amp; focus</h2>
+    <div class="gal-swatches" id="sw-accent"></div>
+    <div class="gal-rule">
+      The solid button fill is <code class="jrk-mono">blue-500</code>, not
+      <code class="jrk-mono">blue-450</code>. 450 with white text measures 4.42:1 —
+      under AA. That is the kind of near-miss a build gate catches and an eye does not.
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Status</h2>
+    <p class="gal-sec__note">
+      Reserved meanings, never reused as a chart series. Each ships as three steps:
+      a <em>mark</em> for fills and dots, an AA-4.5:1 <em>text</em> step, and a
+      <em>wash</em> for the soft badge fill.
+    </p>
+    <div class="gal-demo">
+      <span class="jrk-badge jrk-badge--good"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5L5 9l4.5-5"/></svg>Reconciled</span>
+      <span class="jrk-badge jrk-badge--warning"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1.5L11 10.5H1L6 1.5zM6 5v2.5M6 9h.01"/></svg>Needs review</span>
+      <span class="jrk-badge jrk-badge--serious"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="5"/><path d="M6 3.5v3M6 8.5h.01"/></svg>Late</span>
+      <span class="jrk-badge jrk-badge--critical"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>Failed</span>
+      <span class="jrk-badge">Draft</span>
+    </div>
+    <div class="gal-rule">
+      On the light surface <strong>warning</strong> and <strong>serious</strong> sit below
+      3:1 by design. The icon-plus-label pairing is the mitigation, which is why the
+      <code class="jrk-mono">&lt;Badge&gt;</code> component renders the icon automatically
+      for status tones and only lets you turn it off on decorative ones.
+    </div>
+    <div class="gal-swatches" id="sw-status"></div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Neutral ramp</h2>
+    <div class="gal-ramp" id="ramp-neutral"></div>
+    <h2 style="margin-top:var(--jrk-space-4)">Blue ramp</h2>
+    <div class="gal-ramp" id="ramp-blue"></div>
+    <p class="gal-sec__note">
+      Components never reference a ramp step directly — they go through a semantic
+      token, which is what makes the dark theme a swap rather than a rewrite.
+      <code class="jrk-mono">npm run check:css</code> fails on a raw hex in a component file.
+    </p>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Type scale</h2>
+    <div class="gal-demo gal-demo--stack">
+      <div class="gal-scale" id="type-scale"></div>
+    </div>
+    <p class="gal-sec__note">
+      Inter, with the system stack behind it. Large standalone numbers use proportional
+      figures; <code class="jrk-mono">tabular-nums</code> is reserved for columns that must
+      align vertically — table rows and axis ticks.
+    </p>
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">Proportional vs tabular at display size</span>
+      <div style="display:flex;gap:var(--jrk-space-8)">
+        <div><div class="jrk-caption">proportional</div><div style="font-size:var(--jrk-text-4xl);font-weight:600">121,489</div></div>
+        <div><div class="jrk-caption">tabular</div><div class="jrk-tabular" style="font-size:var(--jrk-text-4xl);font-weight:600">121,489</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Spacing</h2>
+    <div class="gal-demo gal-demo--stack">
+      <div class="gal-scale" id="space-scale"></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Radius &amp; elevation</h2>
+    <div class="gal-demo" id="radius-demo"></div>
+    <div class="gal-demo" style="background:var(--jrk-surface-canvas)" id="shadow-demo"></div>
+    <p class="gal-sec__note">
+      Elevation is opt-in. A dashboard of many tiles reads calmer flat — shadow is for
+      things that genuinely float. In dark mode the lightened surface does nearly all
+      the work: against a true black page a drop shadow is invisible, so the grey tile
+      itself is the elevation cue and the shadow only tightens the edge.
+    </p>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Focus</h2>
+    <p class="gal-sec__note">
+      One ring for the whole system, <code class="jrk-mono">:focus-visible</code> only —
+      a mouse click never paints one, every keyboard path does. Tab through these.
+    </p>
+    <div class="gal-demo">
+      <button class="jrk-btn jrk-btn--primary">Primary</button>
+      <button class="jrk-btn jrk-btn--secondary">Secondary</button>
+      <input class="jrk-input" style="width:200px" placeholder="Input" aria-label="Focus demo input">
+      <a href="#">A link</a>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+import { contrast, tokenValue } from './preview.js';
+
+const surface = () => tokenValue('--jrk-surface-default');
+const canvas = () => tokenValue('--jrk-surface-canvas');
+
+function swatch(name, note) {
+  const hex = tokenValue(name);
+  const el = document.createElement('div');
+  el.className = 'gal-swatch';
+  el.innerHTML = `
+    <div class="gal-swatch__chip" style="background:${hex}"></div>
+    <div class="gal-swatch__name">${name.replace('--jrk-', '')}</div>
+    <div class="gal-swatch__meta">${hex}${note ? ' · ' + note : ''}</div>`;
+  return el;
+}
+
+function render() {
+  const core = document.getElementById('sw-core');
+  const accent = document.getElementById('sw-accent');
+  const status = document.getElementById('sw-status');
+  [core, accent, status].forEach((n) => (n.innerHTML = ''));
+
+  for (const n of ['--jrk-surface-canvas', '--jrk-surface-default', '--jrk-surface-subtle', '--jrk-surface-raised']) {
+    core.append(swatch(n));
+  }
+  for (const [n, bg] of [
+    ['--jrk-text-primary', surface()],
+    ['--jrk-text-secondary', surface()],
+    ['--jrk-text-muted', canvas()],
+    ['--jrk-text-link', surface()],
+  ]) {
+    core.append(swatch(n, contrast(tokenValue(n), bg).toFixed(2) + ':1'));
+  }
+  for (const n of ['--jrk-border-subtle', '--jrk-border-default', '--jrk-border-strong']) {
+    core.append(swatch(n));
+  }
+
+  accent.append(swatch('--jrk-accent-solid', 'white text ' + contrast('#ffffff', tokenValue('--jrk-accent-solid')).toFixed(2) + ':1'));
+  accent.append(swatch('--jrk-accent-solid-hover'));
+  accent.append(swatch('--jrk-accent-wash'));
+  accent.append(swatch('--jrk-accent-wash-text', contrast(tokenValue('--jrk-accent-wash-text'), tokenValue('--jrk-accent-wash')).toFixed(2) + ':1 on wash'));
+  accent.append(swatch('--jrk-focus-ring', contrast(tokenValue('--jrk-focus-ring'), surface()).toFixed(2) + ':1'));
+
+  for (const s of ['good', 'warning', 'serious', 'critical', 'neutral']) {
+    status.append(swatch(`--jrk-status-${s}-mark`, contrast(tokenValue(`--jrk-status-${s}-mark`), surface()).toFixed(2) + ':1'));
+    status.append(swatch(`--jrk-status-${s}-text`, contrast(tokenValue(`--jrk-status-${s}-text`), surface()).toFixed(2) + ':1'));
+  }
+
+  const nr = document.getElementById('ramp-neutral');
+  const br = document.getElementById('ramp-blue');
+  nr.innerHTML = '';
+  br.innerHTML = '';
+  for (const step of [0, 25, 50, 100, 150, 200, 300, 400, 500, 550, 600, 700, 750, 800, 850, 875, 900, 925, 950, 975]) {
+    const hex = tokenValue(`--jrk-neutral-${step}`);
+    nr.insertAdjacentHTML('beforeend',
+      `<div style="background:${hex};color:${step > 400 ? '#fff' : '#10151c'}">${step}</div>`);
+  }
+  for (const step of [100, 150, 200, 250, 300, 350, 400, 450, 500, 550, 600, 650, 700]) {
+    const hex = tokenValue(`--jrk-blue-${step}`);
+    br.insertAdjacentHTML('beforeend',
+      `<div style="background:${hex};color:${step > 350 ? '#fff' : '#10151c'}">${step}</div>`);
+  }
+}
+
+// Type scale
+const TYPE = [['2xs','11'],['xs','12'],['sm','13'],['md','14 · body'],['lg','16'],['xl','18'],['2xl','22'],['3xl','28'],['4xl','36 · stat'],['5xl','48 · hero']];
+document.getElementById('type-scale').innerHTML = TYPE.map(([k, note]) =>
+  `<div class="gal-scale__row">
+     <span class="gal-scale__key">${k} · ${note}</span>
+     <span style="font-size:var(--jrk-text-${k});line-height:1.2">Portfolio occupancy</span>
+   </div>`).join('');
+
+// Spacing scale
+const SPACE = ['0_5','1','1_5','2','2_5','3','4','5','6','8','10','12','16','20','24'];
+document.getElementById('space-scale').innerHTML = SPACE.map((k) =>
+  `<div class="gal-scale__row">
+     <span class="gal-scale__key">space-${k.replace('_', '.')}</span>
+     <span class="gal-space-bar" style="width:var(--jrk-space-${k})"></span>
+   </div>`).join('');
+
+// Radius
+document.getElementById('radius-demo').innerHTML = ['sm','md','lg','xl','2xl','full'].map((k) =>
+  `<div style="text-align:center">
+     <div style="width:64px;height:64px;background:var(--jrk-accent-wash);border:1px solid var(--jrk-border-accent);border-radius:var(--jrk-radius-${k})"></div>
+     <div class="jrk-caption" style="margin-top:4px">${k}</div>
+   </div>`).join('');
+
+// Elevation
+document.getElementById('shadow-demo').innerHTML = ['sm','md','lg','xl'].map((k) =>
+  `<div style="text-align:center">
+     <div style="width:96px;height:64px;background:var(--jrk-surface-default);border-radius:var(--jrk-radius-lg);box-shadow:var(--jrk-shadow-${k})"></div>
+     <div class="jrk-caption" style="margin-top:8px">${k}</div>
+   </div>`).join('');
+
+render();
+// Recompute every readout when the theme changes.
+new MutationObserver(render).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+</script>
+</body>
+</html>

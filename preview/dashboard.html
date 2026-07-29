@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dashboard — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="preview.css">
+<style>
+  /* The shell is full-height by design; inside the gallery it sits in flow. */
+  .jrk-app { min-height: 0; }
+  .jrk-sidebar { height: auto; min-height: 640px; position: static; }
+  .jrk-topbar { position: static; }
+  .gal-frame {
+    margin: var(--jrk-space-6);
+    border: 1px solid var(--jrk-border-default);
+    border-radius: var(--jrk-radius-2xl);
+    overflow: hidden;
+  }
+</style>
+</head>
+<body>
+
+<div class="gal-frame">
+<div class="jrk-app">
+
+  <nav class="jrk-sidebar" aria-label="Main">
+    <div class="jrk-sidebar__brand"><span class="gal-nav__mark">J</span> <span>JRK Analytics</span></div>
+    <div class="jrk-sidebar__nav">
+      <a class="jrk-nav-item" href="#" aria-current="page">
+        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="7" rx="1.5"/><rect x="11" y="3" width="6" height="4" rx="1.5"/><rect x="3" y="12" width="6" height="5" rx="1.5"/><rect x="11" y="9" width="6" height="8" rx="1.5"/></svg>
+        <span class="jrk-nav-item__label">Overview</span>
+      </a>
+      <a class="jrk-nav-item" href="#">
+        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V9M8 16V4M13 16v-5M18 16V7"/></svg>
+        <span class="jrk-nav-item__label">Performance</span>
+      </a>
+      <a class="jrk-nav-item" href="#">
+        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>
+        <span class="jrk-nav-item__label">Delinquency</span>
+        <span class="jrk-nav-item__badge"><span class="jrk-badge jrk-badge--critical jrk-badge--sm">12</span></span>
+      </a>
+
+      <div class="jrk-sidebar__group">Portfolio</div>
+      <a class="jrk-nav-item" href="#">
+        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17V8l7-5 7 5v9"/><path d="M8 17v-5h4v5"/></svg>
+        <span class="jrk-nav-item__label">Properties</span>
+      </a>
+      <a class="jrk-nav-item" href="#">
+        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v4M13 2v4"/></svg>
+        <span class="jrk-nav-item__label">Renewals</span>
+      </a>
+      <a class="jrk-nav-item" href="#">
+        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12v12H4z"/><path d="M7 8h6M7 12h4"/></svg>
+        <span class="jrk-nav-item__label">GL quality</span>
+      </a>
+    </div>
+    <div class="jrk-sidebar__footer">
+      <a class="jrk-nav-item" href="#">
+        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.5"/><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1L4.7 4.7"/></svg>
+        <span class="jrk-nav-item__label">Settings</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="jrk-main">
+    <header class="jrk-topbar">
+      <span class="jrk-input-group jrk-topbar__search">
+        <span class="jrk-input-group__icon">
+          <svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+        </span>
+        <input class="jrk-input jrk-input--sm jrk-input--filled" placeholder="Search properties, units, tenants" aria-label="Search">
+      </span>
+      <span class="jrk-spacer"></span>
+      <span class="jrk-status"><span class="jrk-dot jrk-dot--good jrk-dot--pulse" aria-hidden="true"></span><span class="jrk-caption">Synced 4m ago</span></span>
+      <button class="jrk-btn jrk-btn--ghost jrk-btn--icon jrk-btn--sm" aria-label="Notifications">
+        <svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2a4 4 0 00-4 4v3l-1 2h10l-1-2V6a4 4 0 00-4-4zM6.5 13a1.5 1.5 0 003 0"/></svg>
+      </button>
+      <button class="jrk-btn jrk-btn--secondary jrk-btn--sm">Export</button>
+    </header>
+
+    <main class="jrk-content">
+      <div class="jrk-content__inner">
+
+        <div>
+          <nav aria-label="Breadcrumb">
+            <ol class="jrk-breadcrumbs">
+              <li><a href="#">Portfolio</a></li>
+              <li><span aria-current="page">Overview</span></li>
+            </ol>
+          </nav>
+          <div class="jrk-page-header">
+            <div>
+              <h1 class="jrk-page-header__title">Portfolio overview</h1>
+              <p class="jrk-page-header__desc">47 properties · 8,412 units · accrual basis</p>
+            </div>
+            <div class="jrk-page-header__actions">
+              <div class="jrk-btn-group" role="group" aria-label="Period">
+                <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="false">30d</button>
+                <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="true">QTD</button>
+                <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="false">YTD</button>
+              </div>
+              <button class="jrk-btn jrk-btn--primary jrk-btn--sm">Run report</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="jrk-alert jrk-alert--warning" role="status">
+          <svg class="jrk-alert__icon" viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5L18.5 17h-17L10 2.5zM10 8v4M10 14.5h.01"/></svg>
+          <div class="jrk-alert__body">
+            <p class="jrk-alert__title">3 properties missing July close</p>
+            <p class="jrk-alert__text">Riverside Flats, Cedar Grove, and Old Mill Yard have not posted. Portfolio totals exclude them.</p>
+          </div>
+        </div>
+
+        <!-- KPI band -->
+        <div class="jrk-stat-row jrk-stat-row--split">
+          <div class="jrk-stat">
+            <span class="jrk-stat__label">Collected rent</span>
+            <span class="jrk-stat__value">$4.21<span class="jrk-stat__unit">M</span></span>
+            <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--good"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5V2.5M3 5.5L6 2.5l3 3"/></svg><span class="jrk-sr-only">up</span>+3.1% <span class="jrk-text-muted">vs last quarter</span></span></span>
+          </div>
+          <div class="jrk-stat">
+            <span class="jrk-stat__label">Occupancy</span>
+            <span class="jrk-stat__value">93.8<span class="jrk-stat__unit">%</span></span>
+            <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--bad"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5v7M3 6.5l3 3 3-3"/></svg><span class="jrk-sr-only">down</span>−0.6pt <span class="jrk-text-muted">vs last quarter</span></span></span>
+          </div>
+          <div class="jrk-stat">
+            <span class="jrk-stat__label">Delinquency rate</span>
+            <span class="jrk-stat__value">4.7<span class="jrk-stat__unit">%</span></span>
+            <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--good"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5v7M3 6.5l3 3 3-3"/></svg><span class="jrk-sr-only">down</span>−1.2pt <span class="jrk-text-muted">vs last quarter</span></span></span>
+          </div>
+          <div class="jrk-stat jrk-stat--with-spark">
+            <span class="jrk-stat__label">Avg days to turn</span>
+            <span class="jrk-stat__value jrk-stat__value--sm">18.4</span>
+            <svg class="jrk-stat__spark" viewBox="0 0 96 40" preserveAspectRatio="none" aria-hidden="true" id="spark"></svg>
+          </div>
+        </div>
+
+        <!-- charts -->
+        <div class="jrk-grid" style="--jrk-grid-min:min(100%, 420px)">
+          <div class="jrk-chart-card">
+            <div class="jrk-chart-card__header">
+              <div>
+                <h3 class="jrk-chart-card__title">Collections by region</h3>
+                <p class="jrk-chart-card__subtitle">Monthly, $ thousands · last 12 months</p>
+              </div>
+              <div class="jrk-card__actions">
+                <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" id="tbl-btn" aria-expanded="false">Show table</button>
+              </div>
+            </div>
+            <div class="jrk-chart-card__body">
+              <div class="jrk-chart" id="line-chart"></div>
+              <div id="line-table" hidden></div>
+            </div>
+          </div>
+
+          <div class="jrk-chart-card">
+            <div class="jrk-chart-card__header">
+              <div>
+                <h3 class="jrk-chart-card__title">Delinquent balance</h3>
+                <p class="jrk-chart-card__subtitle">Top 6 properties · as of 29 Jul 2026</p>
+              </div>
+            </div>
+            <div class="jrk-chart-card__body">
+              <div class="jrk-chart"><div class="jrk-bars" id="bar-list" style="--jrk-bars-label:150px"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- table -->
+        <section class="jrk-section">
+          <div class="jrk-section__header">
+            <h2 class="jrk-section__title">Properties needing attention</h2>
+            <button class="jrk-btn jrk-btn--link jrk-btn--sm">View all 47</button>
+          </div>
+          <div class="jrk-table-wrap">
+            <table class="jrk-table">
+              <caption class="jrk-sr-only">Properties needing attention, sorted by delinquency descending</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Property</th>
+                  <th scope="col">Region</th>
+                  <th scope="col">Status</th>
+                  <th scope="col" class="jrk-num">Units</th>
+                  <th scope="col" class="jrk-num">Occupancy</th>
+                  <th scope="col" class="jrk-num">Balance</th>
+                  <th scope="col" aria-sort="descending" class="jrk-num">
+                    <button class="jrk-table__sort" type="button">Delinquency
+                      <svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5V2.5M3 5.5L6 2.5l3 3"/></svg>
+                    </button>
+                  </th>
+                </tr>
+              </thead>
+              <tbody id="rows"></tbody>
+            </table>
+            <div class="jrk-table-footer">
+              <span>6 of 47 properties</span>
+              <div class="jrk-pagination">
+                <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" disabled>Previous</button>
+                <button class="jrk-btn jrk-btn--ghost jrk-btn--sm">Next</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+</div>
+</div>
+
+<script type="module" src="preview.js"></script>
+<script type="module">
+const $ = (id) => document.getElementById(id);
+
+/* ---------------- line chart ---------------- */
+const LABELS = ['Aug','Sep','Oct','Nov','Dec','Jan','Feb','Mar','Apr','May','Jun','Jul'];
+const SERIES = [
+  { name: 'Southeast', values: [1420,1465,1390,1510,1580,1620,1595,1660,1710,1690,1745,1802] },
+  { name: 'Midwest',   values: [ 980,1010, 995,1040,1075,1030,1088,1120,1095,1160,1185,1210] },
+  { name: 'Northeast', values: [ 640, 620, 705, 688, 730, 762, 744, 790, 815, 802, 848, 872] },
+];
+/* viewBox measured from the container so user units stay 1:1 with CSS pixels —
+   a fixed viewBox stretched by width:100% scales the axis text too. */
+let W=560;
+const H=230,padL=44,padR=16,padT=12,padB=26;
+const maxV = Math.ceil(Math.max(...SERIES.flatMap(s=>s.values))/500)*500;
+const x=(i)=>padL+i*(W-padL-padR)/(LABELS.length-1);
+const y=(v)=>H-padB-(v/maxV)*(H-padT-padB);
+const line=(v)=>v.map((n,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(n).toFixed(1)}`).join(' ');
+const ticks=[0,0.25,0.5,0.75,1].map(f=>f*maxV);
+
+function renderLine() {
+$('line-chart').innerHTML = `
+  <div class="jrk-chart__plot" id="plot">
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Line chart. Three series (Southeast, Midwest, Northeast) of monthly collections across the last 12 months. Full values in the table view.">
+      <g class="jrk-grid">${ticks.map(t=>`<line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}"/>`).join('')}</g>
+      <g class="jrk-axis">
+        <line x1="${padL}" x2="${W-padR}" y1="${y(0)}" y2="${y(0)}"/>
+        ${ticks.map(t=>`<text x="${padL-8}" y="${y(t)+4}" text-anchor="end">${t/1000}K</text>`).join('')}
+        ${LABELS.map((l,i)=>i%2===0?`<text x="${x(i)}" y="${H-8}" text-anchor="middle">${l}</text>`:'').join('')}
+      </g>
+      <line class="jrk-chart__crosshair" id="cross" y1="${padT}" y2="${y(0)}" style="display:none"/>
+      ${SERIES.map((s,si)=>`<g class="jrk-s${si+1}"><path class="jrk-line" d="${line(s.values)}"/><circle class="jrk-dot" r="4" data-dot style="display:none"/></g>`).join('')}
+    </svg>
+    <div class="jrk-chart-tooltip" id="tip" style="display:none"></div>
+  </div>
+  <div class="jrk-legend">${SERIES.map((s,i)=>`<span class="jrk-legend__item jrk-s${i+1}"><span class="jrk-legend__swatch jrk-legend__swatch--line"></span>${s.name}</span>`).join('')}</div>`;
+
+const plot=$('plot'),tip=$('tip'),cross=$('cross');
+plot.addEventListener('mousemove',(e)=>{
+  const box=plot.getBoundingClientRect();
+  const i=Math.max(0,Math.min(LABELS.length-1,Math.round(((((e.clientX-box.left)/box.width)*W)-padL)/((W-padL-padR)/(LABELS.length-1)))));
+  cross.style.display=''; cross.setAttribute('x1',x(i)); cross.setAttribute('x2',x(i));
+  plot.querySelectorAll('[data-dot]').forEach((d,si)=>{d.style.display='';d.setAttribute('cx',x(i));d.setAttribute('cy',y(SERIES[si].values[i]));});
+  tip.style.display='';
+  tip.style.left=`${(x(i)/W)*100}%`;
+  tip.style.transform=i>LABELS.length/2?'translateX(calc(-100% - 14px))':'translateX(14px)';
+  tip.innerHTML=`<div class="jrk-chart-tooltip__header">${LABELS[i]}</div>`+SERIES.map((s,si)=>
+    `<div class="jrk-chart-tooltip__row jrk-s${si+1}"><span class="jrk-chart-tooltip__swatch"></span><span class="jrk-chart-tooltip__label">${s.name}</span><span class="jrk-chart-tooltip__value">$${s.values[i].toLocaleString()}K</span></div>`).join('');
+});
+plot.addEventListener('mouseleave',()=>{tip.style.display='none';cross.style.display='none';plot.querySelectorAll('[data-dot]').forEach(d=>d.style.display='none');});
+}
+
+new ResizeObserver(([e])=>{
+  const next=Math.max(320,Math.round(e.contentRect.width));
+  if(next!==W){W=next;renderLine();}
+}).observe($('line-chart'));
+renderLine();
+
+$('line-table').innerHTML=`<div class="jrk-table-wrap" style="border:0"><table class="jrk-table jrk-table--compact">
+  <caption class="jrk-sr-only">Collections by region, monthly, $ thousands</caption>
+  <thead><tr><th scope="col">Month</th>${SERIES.map(s=>`<th scope="col" class="jrk-num">${s.name}</th>`).join('')}</tr></thead>
+  <tbody>${LABELS.map((l,i)=>`<tr><td>${l}</td>${SERIES.map(s=>`<td class="jrk-num">$${s.values[i].toLocaleString()}K</td>`).join('')}</tr>`).join('')}</tbody>
+</table></div>`;
+const tb=$('tbl-btn');
+tb.onclick=()=>{const show=$('line-table').hidden;$('line-table').hidden=!show;$('line-chart').hidden=show;tb.textContent=show?'Show chart':'Show table';tb.setAttribute('aria-expanded',String(show));};
+
+/* ---------------- bar list ---------------- */
+const BARS=[['Riverside Flats',612470],['Harbor Point',481200],['Bellevue Commons',344900],['Cedar Grove',289100],['Lakeshore East',176300],['Old Mill Yard',98450]];
+const peak=Math.max(...BARS.map(b=>b[1]));
+$('bar-list').innerHTML=BARS.map(([l,v])=>`<div class="jrk-bars__row">
+  <span class="jrk-bars__label" title="${l}">${l}</span>
+  <span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:${(v/peak)*100}%"></span></span>
+  <span class="jrk-bars__value">$${Math.round(v/1000)}K</span></div>`).join('');
+
+/* ---------------- sparkline ---------------- */
+{
+  const S=[24,23,25,22,21,22,20,19,20,19,18,18.4],w=96,h=40,p=3;
+  const mn=Math.min(...S),mx=Math.max(...S);
+  const sx=i=>p+i*(w-p*2)/(S.length-1), sy=v=>h-p-((v-mn)/(mx-mn))*(h-p*2);
+  const d=S.map((v,i)=>`${i?'L':'M'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+  $('spark').innerHTML=`<path class="jrk-spark-area" d="${d} L${sx(S.length-1)},${h} L${sx(0)},${h} Z"/><path d="${d}"/>`;
+}
+
+/* ---------------- table rows ---------------- */
+const ICON={good:'<path d="M2.5 6.5L5 9l4.5-5"/>',warning:'<path d="M6 1.5L11 10.5H1L6 1.5zM6 5v2.5M6 9h.01"/>',critical:'<path d="M3 3l6 6M9 3l-6 6"/>'};
+const LABEL={good:'Current',warning:'Review',critical:'Escalated'};
+const ROWS=[
+  ['Riverside Flats','Southeast','critical',156,84.0,612470,9.2],
+  ['Harbor Point','Southeast','critical',412,91.2,481200,7.4],
+  ['Cedar Grove','Midwest','warning',204,89.5,289100,5.1],
+  ['Bellevue Commons','Northeast','warning',248,96.4,344900,4.7],
+  ['Lakeshore East','Midwest','good',322,94.8,176300,2.3],
+  ['Old Mill Yard','Northeast','good',118,97.1,98450,1.4],
+];
+const maxD=Math.max(...ROWS.map(r=>r[6]));
+$('rows').innerHTML=ROWS.map(([name,region,tone,units,occ,bal,del])=>`
+  <tr>
+    <td>${name}</td>
+    <td class="jrk-text-muted">${region}</td>
+    <td><span class="jrk-badge jrk-badge--${tone}"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round">${ICON[tone]}</svg>${LABEL[tone]}</span></td>
+    <td class="jrk-num">${units}</td>
+    <td class="jrk-num">${occ.toFixed(1)}%</td>
+    <td class="jrk-num">$${bal.toLocaleString()}</td>
+    <td class="jrk-num"><span class="jrk-cell-bar">
+      <span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill" style="width:${(del/maxD)*100}%"></span></span>
+      <span class="jrk-cell-bar__value">${del.toFixed(1)}%</span></span></td>
+  </tr>`).join('');
+</script>
+</body>
+</html>

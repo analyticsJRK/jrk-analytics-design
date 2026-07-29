@@ -1,0 +1,173 @@
+/* Stat tile / KPI — the answer to "is this even a chart?" when the data is a
+   single headline number. A tile beats a one-bar chart every time. */
+
+.jrk-stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-1);
+  padding: var(--jrk-space-4) var(--jrk-space-5);
+  background: var(--jrk-surface-default);
+  border: 1px solid transparent;
+  border-radius: var(--jrk-radius-2xl);
+}
+
+/* Periwinkle KPI tile — the band across the top of a dashboard. */
+.jrk-stat--tinted {
+  background: var(--jrk-surface-tinted);
+}
+
+.jrk-stat__label {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-1_5);
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-medium);
+  color: var(--jrk-text-secondary);
+}
+
+/* The hero figure. Proportional figures by default — tabular-nums is for
+   columns that must align vertically, and a standalone number reads better
+   without it. Add .jrk-tabular only when tiles are in a strict grid and the
+   digit jitter is distracting. */
+.jrk-stat__value {
+  font-size: var(--jrk-text-4xl);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: var(--jrk-leading-tight);
+  letter-spacing: var(--jrk-tracking-tight);
+  color: var(--jrk-text-primary);
+}
+
+.jrk-stat__value--sm {
+  font-size: var(--jrk-text-3xl);
+}
+
+/* Trailing unit — smaller and recessive so the number keeps the emphasis. */
+.jrk-stat__unit {
+  margin-inline-start: 2px;
+  font-size: var(--jrk-text-xl);
+  font-weight: var(--jrk-weight-medium);
+  color: var(--jrk-text-muted);
+}
+
+.jrk-stat__meta {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+}
+
+/* ---------- delta ---------- */
+
+/* Direction is carried by the arrow glyph, not by the color — the color only
+   reinforces it. Always name the comparison window ("vs last 30d") or the
+   number means nothing. */
+.jrk-delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-delta svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.5;
+}
+
+/* `up`/`down` describe direction; `good`/`bad` describe interpretation. They
+   are separate because for churn or error rate, down IS good. Never assume
+   up means good. */
+.jrk-delta--good { color: var(--jrk-chart-delta-up); }
+.jrk-delta--bad  { color: var(--jrk-chart-delta-down); }
+.jrk-delta--flat { color: var(--jrk-text-muted); }
+
+/* ---------- tile with sparkline ---------- */
+
+.jrk-stat--with-spark {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  align-items: end;
+  gap: var(--jrk-space-1) var(--jrk-space-4);
+}
+
+.jrk-stat--with-spark .jrk-stat__label { grid-column: 1; grid-row: 1; }
+.jrk-stat--with-spark .jrk-stat__value { grid-column: 1; grid-row: 2; }
+
+.jrk-stat__spark {
+  grid-column: 2;
+  grid-row: 1 / -1;
+  width: 96px;
+  height: 40px;
+  align-self: center;
+}
+
+/* A sparkline has no axes and no labels — it shows shape only. If the reader
+   needs to read values off it, it needs to be a real chart. */
+.jrk-stat__spark path {
+  fill: none;
+  stroke: var(--jrk-chart-1);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.jrk-stat__spark .jrk-spark-area {
+  fill: var(--jrk-chart-1);
+  opacity: 0.12;
+  stroke: none;
+}
+
+/* ---------- KPI row ---------- */
+
+/* Tiles that share a border rather than each carrying their own — reads as one
+   band across the top of a dashboard. */
+/* Joined band — tiles share one rounded container and are divided by hairlines. */
+.jrk-stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  background: var(--jrk-surface-default);
+  border: 1px solid transparent;
+  border-radius: var(--jrk-radius-2xl);
+  overflow: hidden;
+}
+
+.jrk-stat-row--tinted {
+  background: var(--jrk-surface-tinted);
+}
+
+.jrk-stat-row > .jrk-stat {
+  background: none;
+  border: 0;
+  border-radius: 0;
+  border-inline-start: 1px solid var(--jrk-border-subtle);
+}
+
+.jrk-stat-row > .jrk-stat:first-child {
+  border-inline-start: 0;
+}
+
+/* Separated band — discrete rounded tiles with a gap, as in the reference.
+   Each keeps its own fill and radius. */
+.jrk-stat-row--split {
+  display: grid;
+  /* 180px, not 200: with a 16px gap, 200 puts the fourth tile on its own row
+     at common dashboard widths, which reads as a mistake rather than a wrap. */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--jrk-space-4);
+  background: none;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.jrk-stat-row--split > .jrk-stat {
+  background: var(--jrk-surface-tinted);
+  border-radius: var(--jrk-radius-2xl);
+  border-inline-start: 0;
+}

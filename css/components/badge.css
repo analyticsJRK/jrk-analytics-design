@@ -1,0 +1,148 @@
+/* Badge / status pill / tag.
+
+   A status badge ALWAYS carries an icon plus a text label. Color is a
+   reinforcement, never the signal — on the light surface `warning` and
+   `serious` sit below 3:1 by design, and the icon + label pairing is the
+   documented mitigation. */
+
+.jrk-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+  padding: 2px var(--jrk-space-2);
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-medium);
+  line-height: 1.4;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  border-radius: var(--jrk-radius-full);
+  background: var(--jrk-status-neutral-wash);
+  color: var(--jrk-status-neutral-text);
+}
+
+.jrk-badge svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.5;
+}
+
+.jrk-badge--sm {
+  padding: 0 var(--jrk-space-1_5);
+  font-size: var(--jrk-text-2xs);
+}
+
+/* Square-ish variant for counts and IDs. */
+.jrk-badge--square {
+  border-radius: var(--jrk-radius-sm);
+}
+
+/* ---------- status variants ---------- */
+
+.jrk-badge--good {
+  background: var(--jrk-status-good-wash);
+  color: var(--jrk-status-good-text);
+}
+
+.jrk-badge--warning {
+  background: var(--jrk-status-warning-wash);
+  color: var(--jrk-status-warning-text);
+}
+
+.jrk-badge--serious {
+  background: var(--jrk-status-serious-wash);
+  color: var(--jrk-status-serious-text);
+}
+
+.jrk-badge--critical {
+  background: var(--jrk-status-critical-wash);
+  color: var(--jrk-status-critical-text);
+}
+
+.jrk-badge--accent {
+  background: var(--jrk-accent-wash);
+  color: var(--jrk-accent-wash-text);
+}
+
+/* Outline flavor for dense tables, where many filled pills get noisy. */
+.jrk-badge--outline {
+  background: transparent;
+  border-color: currentColor;
+}
+
+/* ---------- dot indicator ---------- */
+
+/* The bare dot is decorative. It must sit beside a text label, never alone in
+   a cell — a color with no text is unreadable to a screen reader and to a
+   colorblind user both. */
+.jrk-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--jrk-radius-full);
+  background: var(--jrk-status-neutral-mark);
+  flex-shrink: 0;
+}
+
+.jrk-dot--good     { background: var(--jrk-status-good-mark); }
+.jrk-dot--warning  { background: var(--jrk-status-warning-mark); }
+.jrk-dot--serious  { background: var(--jrk-status-serious-mark); }
+.jrk-dot--critical { background: var(--jrk-status-critical-mark); }
+
+.jrk-status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jrk-space-1_5);
+  font-size: var(--jrk-text-sm);
+}
+
+/* A live-updating status dot. The ring is drawn with box-shadow so it costs no
+   extra element and does not affect layout. */
+.jrk-dot--pulse {
+  box-shadow: 0 0 0 0 currentColor;
+  animation: jrk-pulse 2s var(--jrk-ease-standard) infinite;
+}
+
+@keyframes jrk-pulse {
+  70%,
+  100% {
+    box-shadow: 0 0 0 5px transparent;
+  }
+}
+
+/* ---------- tag (removable) ---------- */
+
+.jrk-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+  padding: 2px 2px 2px var(--jrk-space-2);
+  font-size: var(--jrk-text-xs);
+  background: var(--jrk-surface-subtle);
+  color: var(--jrk-text-secondary);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-md);
+}
+
+.jrk-tag__remove {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--jrk-radius-sm);
+  color: var(--jrk-text-muted);
+  cursor: pointer;
+}
+
+.jrk-tag__remove:hover {
+  background: var(--jrk-surface-active);
+  color: var(--jrk-text-primary);
+}
+
+.jrk-tag__remove svg {
+  width: 10px;
+  height: 10px;
+  stroke-width: 2.5;
+}

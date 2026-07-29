@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="preview.css">
+</head>
+<body>
+
+<div class="gal-page">
+  <header class="gal-page__head">
+    <h1>JRK Analytics Design</h1>
+    <p>
+      Tokens, plain-CSS components, and React wrappers for analytics dashboards.
+      One token layer feeds both stacks: Jinja templates link one stylesheet, the
+      Next.js apps import the same tokens as a Tailwind v4 theme. Every color here
+      passed an automated gate — nothing was eyeballed.
+    </p>
+  </header>
+
+  <section class="gal-sec">
+    <h2>Pages</h2>
+    <div class="gal-cards">
+      <a class="gal-card" href="foundations.html">
+        <span class="gal-card__title">Foundations</span>
+        <span class="gal-card__desc">Color, type, spacing, radius, elevation, focus — with live contrast readouts.</span>
+      </a>
+      <a class="gal-card" href="components.html">
+        <span class="gal-card__title">Components</span>
+        <span class="gal-card__desc">Buttons, forms, badges, tables, shell, modals, toasts, empty states.</span>
+      </a>
+      <a class="gal-card" href="charts.html">
+        <span class="gal-card__title">Charts</span>
+        <span class="gal-card__desc">Series palette, marks, legend, tooltip, table view, texture fallback.</span>
+      </a>
+      <a class="gal-card" href="dashboard.html">
+        <span class="gal-card__title">Dashboard</span>
+        <span class="gal-card__desc">A full page assembled from the library, in both themes.</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>How it is consumed</h2>
+
+    <div class="gal-sec">
+      <span class="gal-label">Jinja / plain HTML — jrk-audit-platform, JRK_FORMS</span>
+      <pre class="gal-code">&lt;link rel="stylesheet" href="/static/jrk/index.css"&gt;
+
+&lt;button class="jrk-btn jrk-btn--primary"&gt;Run audit&lt;/button&gt;
+&lt;span class="jrk-badge jrk-badge--good"&gt;Reconciled&lt;/span&gt;</pre>
+    </div>
+
+    <div class="gal-sec">
+      <span class="gal-label">Tailwind v4 + React — jrk_agents</span>
+      <pre class="gal-code">/* app/globals.css */
+@import "tailwindcss";
+@import "@jrk/design/dist/jrk-tokens.css";
+@import "@jrk/design/dist/jrk-theme.tailwind.css";
+@import "@jrk/design/css/index.css";</pre>
+      <pre class="gal-code">import { Button, Stat, DataTable } from '@jrk/design';
+
+&lt;Stat label="Collected rent" value="$4.2M" delta={{ value: 3.1, vs: 'vs last month' }} /&gt;</pre>
+    </div>
+
+    <p class="gal-sec__note">
+      Both paths resolve to the same CSS custom properties, so a Tailwind utility and a
+      <code class="jrk-mono">jrk-*</code> class produce the same color and both follow the theme toggle.
+    </p>
+  </section>
+
+  <section class="gal-sec">
+    <h2>The rules the library enforces</h2>
+
+    <div class="gal-rule">
+      <strong>Color is computed, not chosen.</strong>
+      <code class="jrk-mono">npm run validate</code> runs the palette through a lightness band,
+      a chroma floor, colorblind separation under simulated protanopia and deuteranopia,
+      a normal-vision floor, and WCAG contrast — in both themes, against the real surfaces.
+      It fails the build, not a review comment.
+    </div>
+
+    <div class="gal-rule">
+      <strong>The series palette is never cycled.</strong>
+      Eight slots in a fixed order; the order is the colorblind-safety mechanism.
+      A ninth series folds into “Other” or facets into small multiples.
+      <code class="jrk-mono">seriesColor(8)</code> throws rather than inventing a hue.
+    </div>
+
+    <div class="gal-rule">
+      <strong>Color is never the only signal.</strong>
+      Status badges ship an icon and a label. Deltas state their direction in text.
+      Every chart has a table view. Three light-mode series hues sit below 3:1 by
+      design — the visible value labels are the documented relief, and the validator
+      cross-checks that the list of them in the tokens is not stale.
+    </div>
+
+    <div class="gal-rule">
+      <strong>One axis, thin marks, recessive chrome.</strong>
+      No dual-axis charts. Bars cap at 24px with a 4px data-end. Touching fills are
+      separated by a 2px gap in the surface color, never by a stroke — a stroke adds
+      ink that is not data.
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Repo layout</h2>
+    <pre class="gal-code">tokens/tokens.json          source of truth — the only file you hand-edit
+scripts/build-tokens.mjs    -> dist/ (CSS vars, Tailwind @theme, typed TS)
+scripts/validate-colors.mjs the color gate — six checks + WCAG, both themes
+scripts/check-css.mjs       brace balance, token typos, raw-hex discipline
+css/                        plain-CSS library — works with no build step
+react/src/                  React wrappers over the same class names
+preview/                    this gallery — static, no build step</pre>
+  </section>
+</div>
+
+<script type="module" src="preview.js"></script>
+</body>
+</html>

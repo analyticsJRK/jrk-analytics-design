@@ -1,0 +1,32 @@
+/* JRK Analytics Design — full plain-CSS library.
+ *
+ * Consumers that are NOT using Tailwind (Jinja templates, plain HTML, any
+ * server-rendered app) need only this one file:
+ *
+ *   <link rel="stylesheet" href="/static/jrk/index.css">
+ *
+ * Consumers that ARE using Tailwind v4 import the tokens and theme instead,
+ * and pull in whichever component files they want:
+ *
+ *   @import "tailwindcss";
+ *   @import "@jrk/design/dist/jrk-tokens.css";
+ *   @import "@jrk/design/dist/jrk-theme.tailwind.css";
+ *   @import "@jrk/design/css/index.css";
+ *
+ * Both paths resolve to the same CSS custom properties, so a Tailwind app and
+ * a Jinja template render identically and follow the same theme toggle.
+ */
+
+@import url('../dist/jrk-tokens.css');
+
+@import url('./base.css');
+
+@import url('./components/button.css');
+@import url('./components/form.css');
+@import url('./components/card.css');
+@import url('./components/badge.css');
+@import url('./components/stat.css');
+@import url('./components/table.css');
+@import url('./components/shell.css');
+@import url('./components/feedback.css');
+@import url('./components/chart.css');

@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Charts — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="preview.css">
+</head>
+<body>
+
+<div class="gal-page">
+  <header class="gal-page__head">
+    <h1>Charts</h1>
+    <p>
+      The data-viz layer. Every color below cleared an automated gate: a lightness band,
+      a chroma floor, colorblind separation under simulated protanopia and deuteranopia,
+      a normal-vision floor, and contrast against the real surface — in both themes.
+      Run it yourself with <code class="jrk-mono">npm run validate</code>.
+    </p>
+  </header>
+
+  <!-- ======================= palette ======================= -->
+  <section class="gal-sec">
+    <h2>Series palette</h2>
+    <p class="gal-sec__note">
+      Eight slots in a fixed order. The <em>order</em> is the colorblind-safety mechanism,
+      not a style choice — neighbors are what touch in a stack or a line chart, so adjacent
+      pairs are what the separation gate measures.
+    </p>
+    <div class="gal-swatches" id="series-swatches"></div>
+
+    <div class="gal-rule">
+      <strong>Never cycled.</strong> A ninth series is not a generated hue — it folds into
+      “Other”, facets into small multiples, or takes a second encoding.
+      <code class="jrk-mono">seriesColor(8)</code> throws instead of wrapping around.
+    </div>
+    <div class="gal-rule">
+      <strong>Scatter and bubble cap at three series.</strong> There, any two marks can sit
+      side by side, so the harder all-pairs test applies and only the first three slots
+      clear it. That is a series cap, not a palette change — no ordering of eight can pass.
+    </div>
+  </section>
+
+  <!-- ======================= line ======================= -->
+  <section class="gal-sec">
+    <h2>Line chart</h2>
+    <p class="gal-sec__note">Hover the plot — the crosshair and tooltip ship by default. An SVG chart is interactive; values the eye cannot read off the axis have to be reachable.</p>
+
+    <div class="jrk-chart-card">
+      <div class="jrk-chart-card__header">
+        <div>
+          <h3 class="jrk-chart-card__title">Collections by region</h3>
+          <p class="jrk-chart-card__subtitle">Monthly, $ thousands · Jan–Dec 2025</p>
+        </div>
+        <div class="jrk-card__actions">
+          <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" id="toggle-table" aria-expanded="false">Show table</button>
+        </div>
+      </div>
+      <div class="jrk-chart-card__body">
+        <div class="jrk-chart" id="line-chart"></div>
+        <div id="line-table" hidden></div>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      Lines are 2px with round joins; the hover dot is 8px with a 2px ring in the surface
+      color so it stays legible where lines cross. Gridlines are hairline and solid —
+      never dashed, because a dashed line reads as data.
+    </div>
+  </section>
+
+  <!-- ======================= bars ======================= -->
+  <section class="gal-sec">
+    <h2>Ranked bars</h2>
+    <p class="gal-sec__note">
+      Nominal categories — property names — all take slot 1. Bar length already encodes the
+      value, so coloring each bar differently would spend the identity channel re-encoding
+      what length already shows.
+    </p>
+    <div class="jrk-grid jrk-grid-2">
+      <div class="jrk-chart-card">
+        <div class="jrk-chart-card__header">
+          <div>
+            <h3 class="jrk-chart-card__title">Delinquent balance by property</h3>
+            <p class="jrk-chart-card__subtitle">Top 6 · as of 29 Jul 2026</p>
+          </div>
+        </div>
+        <div class="jrk-chart-card__body">
+          <div class="jrk-chart"><div class="jrk-bars" id="bar-list"></div></div>
+        </div>
+      </div>
+
+      <div class="jrk-chart-card">
+        <div class="jrk-chart-card__header">
+          <div>
+            <h3 class="jrk-chart-card__title">Unit mix</h3>
+            <p class="jrk-chart-card__subtitle">Share of 2,140 units</p>
+          </div>
+        </div>
+        <div class="jrk-chart-card__body">
+          <div class="jrk-chart" id="stack-demo">
+            <div class="jrk-stack-bar" id="stack-bar"></div>
+            <div class="jrk-legend" id="stack-legend"></div>
+            <label class="jrk-switch" style="margin-top:var(--jrk-space-3)">
+              <input type="checkbox" role="switch" id="texture-toggle">
+              <span class="jrk-check__label">Texture fallback</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      Stacked segments are separated by a <strong>2px gap in the surface color</strong>, one
+      consistent width across the stack — never by a stroke around each segment. A stroke
+      adds ink that is not data. The texture switch shows the backup identity channel used
+      for full-severity colorblindness, grayscale print, and forced-colors mode: one
+      hand-drawn fill at 45° and its 135° mirror only.
+    </div>
+  </section>
+
+  <!-- ======================= tints ======================= -->
+  <section class="gal-sec">
+    <h2>Pastel tints</h2>
+    <p class="gal-sec__note">
+      The soft fill set. These sit above the lightness band and below the chroma floor,
+      so they cannot carry identity — and the validator does not check them for
+      colorblind separation, because that is not the job they do.
+    </p>
+
+    <div class="jrk-grid jrk-grid-2">
+      <div class="jrk-chart-card">
+        <div class="jrk-chart-card__header"><div>
+          <h3 class="jrk-chart-card__title">Traffic by device</h3>
+          <p class="jrk-chart-card__subtitle">Sessions, last 30 days</p>
+        </div></div>
+        <div class="jrk-chart-card__body">
+          <div class="jrk-chart"><svg viewBox="0 0 420 200" id="tint-cols" role="img"
+            aria-label="Column chart of sessions by device across six platforms. Values in the table view."></svg></div>
+        </div>
+      </div>
+
+      <div class="jrk-chart-card">
+        <div class="jrk-chart-card__header"><div>
+          <h3 class="jrk-chart-card__title">Unit mix</h3>
+          <p class="jrk-chart-card__subtitle">Share of 2,140 units</p>
+        </div></div>
+        <div class="jrk-chart-card__body">
+          <div class="jrk-chart">
+            <div class="jrk-stack-bar jrk-stack-bar--tinted" id="tint-stack"></div>
+            <div class="jrk-legend" id="tint-legend"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      Legal <strong>because identity is already carried</strong> — the columns are named on
+      the axis, and the stack's legend prints the share beside each swatch. Reach for a tint
+      where color <em>is</em> the identity channel — an unlabelled multi-series line, a
+      scatter — and it is a bug that no gate will catch for you.
+    </div>
+  </section>
+
+  <!-- ======================= tiles ======================= -->
+  <section class="gal-sec">
+    <h2>Stat tiles</h2>
+    <p class="gal-sec__note">
+      When the data is a single headline number, a tile beats a one-bar chart. The delta
+      names its comparison window — a percentage with no window means nothing.
+    </p>
+
+    <div class="jrk-stat-row">
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Collected rent</span>
+        <span class="jrk-stat__value">$4.21<span class="jrk-stat__unit">M</span></span>
+        <span class="jrk-stat__meta">
+          <span class="jrk-delta jrk-delta--good">
+            <svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5V2.5M3 5.5L6 2.5l3 3"/></svg>
+            <span class="jrk-sr-only">up</span>+3.1% <span class="jrk-text-muted">vs last month</span>
+          </span>
+        </span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Occupancy</span>
+        <span class="jrk-stat__value">93.8<span class="jrk-stat__unit">%</span></span>
+        <span class="jrk-stat__meta">
+          <span class="jrk-delta jrk-delta--bad">
+            <svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5v7M3 6.5l3 3 3-3"/></svg>
+            <span class="jrk-sr-only">down</span>−0.6pt <span class="jrk-text-muted">vs last month</span>
+          </span>
+        </span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Delinquency rate</span>
+        <span class="jrk-stat__value">4.7<span class="jrk-stat__unit">%</span></span>
+        <span class="jrk-stat__meta">
+          <!-- Down IS good here — direction and interpretation are separate. -->
+          <span class="jrk-delta jrk-delta--good">
+            <svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5v7M3 6.5l3 3 3-3"/></svg>
+            <span class="jrk-sr-only">down</span>−1.2pt <span class="jrk-text-muted">vs last month</span>
+          </span>
+        </span>
+      </div>
+      <div class="jrk-stat jrk-stat--with-spark">
+        <span class="jrk-stat__label">Work orders</span>
+        <span class="jrk-stat__value">1,284</span>
+        <svg class="jrk-stat__spark" viewBox="0 0 96 40" preserveAspectRatio="none" aria-hidden="true" id="spark"></svg>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>Down is not always bad.</strong> Delinquency falling is good, so the tile is
+      green while the arrow still points down. The component takes direction and
+      interpretation as separate inputs and never assumes up means good. The direction is
+      also stated in text for screen readers — the arrow glyph and the color are both
+      reinforcement.
+    </div>
+  </section>
+
+  <!-- ======================= meters ======================= -->
+  <section class="gal-sec">
+    <h2>Meters &amp; progress</h2>
+    <div class="gal-demo gal-demo--stack" style="max-width:520px">
+      <div>
+        <div class="jrk-row-between" style="margin-bottom:var(--jrk-space-1_5)"><span class="jrk-body-sm">Budget used</span><span class="jrk-body-sm jrk-tabular">62%</span></div>
+        <div class="jrk-meter"><div class="jrk-meter__fill" style="width:62%"></div></div>
+      </div>
+      <div>
+        <div class="jrk-row-between" style="margin-bottom:var(--jrk-space-1_5)"><span class="jrk-body-sm">Turn time vs target</span><span class="jrk-body-sm jrk-tabular">88%</span></div>
+        <div class="jrk-meter jrk-meter--warning"><div class="jrk-meter__fill" style="width:88%"></div></div>
+      </div>
+      <div>
+        <div class="jrk-row-between" style="margin-bottom:var(--jrk-space-1_5)"><span class="jrk-body-sm">Aged receivables</span><span class="jrk-body-sm jrk-tabular">96%</span></div>
+        <div class="jrk-meter jrk-meter--critical"><div class="jrk-meter__fill" style="width:96%"></div></div>
+      </div>
+    </div>
+    <p class="gal-sec__note">The unfilled track is a lighter step of the same ramp as the fill, so severity reads across the whole bar rather than only in the filled part.</p>
+  </section>
+
+  <!-- ======================= anti-patterns ======================= -->
+  <section class="gal-sec">
+    <h2>What the library will not do</h2>
+    <div class="gal-rule"><strong>No dual-axis charts.</strong> Two y-scales let the author choose the correlation by picking the scales. Two measures of different magnitude become two charts, small multiples, or values indexed to a common base.</div>
+    <div class="gal-rule"><strong>No color by rank.</strong> A filter that changes the series count must not repaint the survivors — color follows the entity, so slot assignment is by identity and stays put.</div>
+    <div class="gal-rule"><strong>No rainbow sequential ramps, no hue at a diverging midpoint.</strong> Sequential is one hue light→dark. Diverging is two hues with a neutral gray middle, so “nothing” reads as nothing.</div>
+    <div class="gal-rule"><strong>No status color as a series color.</strong> When a series <em>means</em> good or bad — an error rate, a pass/fail — it wears status tokens. When it is just “series 4” it wears categorical. Never both in one chart.</div>
+    <div class="gal-rule"><strong>No value label on every point.</strong> Labels work because they are sparing: the endpoint, the extreme, the one series the story is about. The axis, the legend, and the table view carry the rest.</div>
+  </section>
+</div>
+
+<script type="module" src="preview.js"></script>
+<script type="module">
+import { tokenValue, contrast } from './preview.js';
+
+const HUES = ['blue','orange','aqua','yellow','magenta','green','violet','red'];
+const $ = (id) => document.getElementById(id);
+
+/* ------------------------- palette swatches ------------------------- */
+function renderSwatches() {
+  const surface = tokenValue('--jrk-surface-default');
+  $('series-swatches').innerHTML = HUES.map((hue, i) => {
+    const hex = tokenValue(`--jrk-chart-${i + 1}`);
+    const c = contrast(hex, surface);
+    const relief = c < 3 ? ' · needs labels' : '';
+    return `<div class="gal-swatch">
+      <div class="gal-swatch__chip" style="background:${hex}"></div>
+      <div class="gal-swatch__name">slot ${i + 1} · ${hue}</div>
+      <div class="gal-swatch__meta">${hex} · ${c.toFixed(2)}:1${relief}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ------------------------- line chart ------------------------- */
+const LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const SERIES = [
+  { name: 'Southeast', values: [1420,1465,1390,1510,1580,1620,1595,1660,1710,1690,1745,1802] },
+  { name: 'Midwest',   values: [ 980,1010, 995,1040,1075,1030,1088,1120,1095,1160,1185,1210] },
+  { name: 'Northeast', values: [ 640, 620, 705, 688, 730, 762, 744, 790, 815, 802, 848, 872] },
+];
+
+/* The viewBox is measured from the container, not fixed. A fixed viewBox
+   stretched by width:100% scales the TEXT too — 12px axis labels land near
+   18px on a wide card. Keeping user units equal to CSS pixels is what holds
+   the type scale and the hairline weights. */
+let W = 640;
+const H = 260, padL = 48, padR = 20, padT = 12, padB = 28;
+const maxV = Math.ceil(Math.max(...SERIES.flatMap(s => s.values)) / 500) * 500;
+const x = (i) => padL + i * (W - padL - padR) / (LABELS.length - 1);
+const y = (v) => H - padB - (v / maxV) * (H - padT - padB);
+const line = (vals) => vals.map((v,i) => `${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+const ticks = [0,0.25,0.5,0.75,1].map(f => f * maxV);
+
+function renderLine() {
+$('line-chart').innerHTML = `
+  <div class="jrk-chart__plot" id="plot">
+    <svg viewBox="0 0 ${W} ${H}" role="img"
+         aria-label="Line chart. Three series (Southeast, Midwest, Northeast) of monthly collections across 12 months, January to December 2025. Full values in the table view.">
+      <g class="jrk-grid">${ticks.map(t => `<line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}"/>`).join('')}</g>
+      <g class="jrk-axis">
+        <line x1="${padL}" x2="${W-padR}" y1="${y(0)}" y2="${y(0)}"/>
+        ${ticks.map(t => `<text x="${padL-8}" y="${y(t)+4}" text-anchor="end">${t/1000}K</text>`).join('')}
+        ${LABELS.map((l,i) => i % 2 === 0 ? `<text x="${x(i)}" y="${H-8}" text-anchor="middle">${l}</text>` : '').join('')}
+      </g>
+      <line class="jrk-chart__crosshair" id="cross" x1="0" x2="0" y1="${padT}" y2="${y(0)}" style="display:none"/>
+      ${SERIES.map((s,si) => `
+        <g class="jrk-s${si+1}">
+          <path class="jrk-line" d="${line(s.values)}"/>
+          <circle class="jrk-dot" r="4" data-dot="${si}" style="display:none"/>
+        </g>`).join('')}
+      <!-- Direct end-label on the lead series only. Labels work because they are sparing. -->
+      <text class="jrk-chart__value" x="${x(11)-4}" y="${y(1802)-10}" text-anchor="end">$1.80M</text>
+    </svg>
+    <div class="jrk-chart-tooltip" id="tip" style="display:none"></div>
+  </div>
+  <div class="jrk-legend">
+    ${SERIES.map((s,i) => `<span class="jrk-legend__item jrk-s${i+1}"><span class="jrk-legend__swatch jrk-legend__swatch--line"></span>${s.name}</span>`).join('')}
+  </div>`;
+
+const plot = $('plot'), tip = $('tip'), cross = $('cross');
+plot.addEventListener('mousemove', (e) => {
+  const box = plot.getBoundingClientRect();
+  const svgX = ((e.clientX - box.left) / box.width) * W;
+  const i = Math.max(0, Math.min(LABELS.length - 1, Math.round((svgX - padL) / ((W - padL - padR) / (LABELS.length - 1)))));
+  cross.style.display = '';
+  cross.setAttribute('x1', x(i)); cross.setAttribute('x2', x(i));
+  plot.querySelectorAll('[data-dot]').forEach((d, si) => {
+    d.style.display = '';
+    d.setAttribute('cx', x(i)); d.setAttribute('cy', y(SERIES[si].values[i]));
+  });
+  tip.style.display = '';
+  tip.style.left = `${(x(i) / W) * 100}%`;
+  tip.style.transform = i > LABELS.length / 2 ? 'translateX(calc(-100% - 14px))' : 'translateX(14px)';
+  tip.innerHTML = `<div class="jrk-chart-tooltip__header">${LABELS[i]} 2025</div>` +
+    SERIES.map((s, si) => `<div class="jrk-chart-tooltip__row jrk-s${si+1}">
+        <span class="jrk-chart-tooltip__swatch"></span>
+        <span class="jrk-chart-tooltip__label">${s.name}</span>
+        <span class="jrk-chart-tooltip__value">$${s.values[i].toLocaleString()}K</span>
+      </div>`).join('');
+});
+plot.addEventListener('mouseleave', () => {
+  tip.style.display = 'none';
+  cross.style.display = 'none';
+  plot.querySelectorAll('[data-dot]').forEach((d) => (d.style.display = 'none'));
+});
+}
+
+// Re-render at the container's real width. The SVG is width:100% of its
+// parent, so writing a new viewBox cannot change that width — no loop.
+const chartHost = $('line-chart');
+new ResizeObserver(([e]) => {
+  const next = Math.max(320, Math.round(e.contentRect.width));
+  if (next !== W) { W = next; renderLine(); }
+}).observe(chartHost);
+renderLine();
+
+/* ------------------------- table view ------------------------- */
+$('line-table').innerHTML = `
+  <div class="jrk-table-wrap">
+    <table class="jrk-table jrk-table--compact">
+      <caption class="jrk-sr-only">Collections by region, monthly, $ thousands</caption>
+      <thead><tr><th scope="col">Month</th>${SERIES.map(s => `<th scope="col" class="jrk-num">${s.name}</th>`).join('')}</tr></thead>
+      <tbody>${LABELS.map((l,i) => `<tr><td>${l}</td>${SERIES.map(s => `<td class="jrk-num">$${s.values[i].toLocaleString()}K</td>`).join('')}</tr>`).join('')}</tbody>
+    </table>
+  </div>`;
+
+const btn = $('toggle-table');
+btn.onclick = () => {
+  const showing = $('line-table').hidden;
+  $('line-table').hidden = !showing;
+  $('line-chart').hidden = showing;
+  btn.textContent = showing ? 'Show chart' : 'Show table';
+  btn.setAttribute('aria-expanded', String(showing));
+};
+
+/* ------------------------- bar list ------------------------- */
+const BARS = [
+  ['Riverside Flats', 612470], ['Harbor Point', 481200], ['Bellevue Commons', 344900],
+  ['Cedar Grove', 289100], ['Lakeshore East', 176300], ['Old Mill Yard', 98450],
+];
+const peak = Math.max(...BARS.map(b => b[1]));
+$('bar-list').innerHTML = BARS.map(([label, v]) => `
+  <div class="jrk-bars__row">
+    <span class="jrk-bars__label" title="${label}">${label}</span>
+    <span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:${(v/peak)*100}%"></span></span>
+    <span class="jrk-bars__value">$${Math.round(v/1000)}K</span>
+  </div>`).join('');
+
+/* ------------------------- stacked bar ------------------------- */
+const MIX = [['Studio', 312], ['1 bed', 884], ['2 bed', 702], ['3 bed', 242]];
+const total = MIX.reduce((a, [, v]) => a + v, 0);
+$('stack-bar').innerHTML = MIX.map(([, v]) => `<span class="jrk-stack-bar__seg" style="flex:${v}"></span>`).join('');
+$('stack-legend').innerHTML = MIX.map(([name, v], i) =>
+  `<span class="jrk-legend__item jrk-s${i+1}"><span class="jrk-legend__swatch"></span>${name} · ${Math.round(v/total*100)}%</span>`).join('');
+
+$('texture-toggle').onchange = (e) => {
+  $('stack-demo').dataset.texture = e.target.checked ? 'on' : 'off';
+};
+
+/* ------------------------- tint demos ------------------------- */
+{
+  const DEV = [['Linux',12],['Mac',21],['iOS',17],['Windows',27],['Android',9],['Other',19]];
+  const W=420,H=200,padL=34,padR=10,padT=16,padB=26;
+  const max=30, n=DEV.length;
+  const band=(W-padL-padR)/n;
+  // Cap the column and leave the band's remainder as air.
+  const bw=Math.min(24, band*0.55);
+  const y=v=>H-padB-(v/max)*(H-padT-padB);
+  let s=`<g class="jrk-grid">${[0,10,20,30].map(t=>`<line x1="${padL}" x2="${W-padR}" y1="${y(t)}" y2="${y(t)}"/>`).join('')}</g>
+    <g class="jrk-axis"><line x1="${padL}" x2="${W-padR}" y1="${y(0)}" y2="${y(0)}"/>
+    ${[0,10,20,30].map(t=>`<text x="${padL-7}" y="${y(t)+4}" text-anchor="end">${t}K</text>`).join('')}</g>`;
+  DEV.forEach(([label,v],i)=>{
+    const cx=padL+band*i+band/2;
+    s+=`<g class="jrk-t${i+1}">
+      <rect class="jrk-bar" x="${cx-bw/2}" y="${y(v)}" width="${bw}" height="${y(0)-y(v)}" rx="6"/>
+    </g>
+    <text class="jrk-chart__tick" x="${cx}" y="${H-8}" text-anchor="middle">${label}</text>`;
+  });
+  document.getElementById('tint-cols').innerHTML=s;
+
+  const MIX=[['Studio',312],['1 bed',884],['2 bed',702],['3 bed',242]];
+  const tot=MIX.reduce((a,[,v])=>a+v,0);
+  document.getElementById('tint-stack').innerHTML=MIX.map(([,v])=>`<span class="jrk-stack-bar__seg" style="flex:${v}"></span>`).join('');
+  // The legend prints the share, which is what makes the pale fills legal here.
+  document.getElementById('tint-legend').innerHTML=MIX.map(([name,v],i)=>
+    `<span class="jrk-legend__item jrk-t${i+1}"><span class="jrk-legend__swatch"></span>${name} · ${Math.round(v/tot*100)}%</span>`).join('');
+}
+
+/* ------------------------- sparkline ------------------------- */
+const SPARK = [42,48,44,52,58,55,63,61,68,72,70,78];
+{
+  const w = 96, h = 40, pad = 3;
+  const mn = Math.min(...SPARK), mx = Math.max(...SPARK);
+  const sx = (i) => pad + i * (w - pad*2) / (SPARK.length - 1);
+  const sy = (v) => h - pad - ((v - mn) / (mx - mn)) * (h - pad*2);
+  const d = SPARK.map((v,i) => `${i?'L':'M'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+  $('spark').innerHTML = `<path class="jrk-spark-area" d="${d} L${sx(SPARK.length-1)},${h} L${sx(0)},${h} Z"/><path d="${d}"/>`;
+}
+
+renderSwatches();
+new MutationObserver(renderSwatches).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderSwatches);
+</script>
+</body>
+</html>

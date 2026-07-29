@@ -1,0 +1,326 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="preview.css">
+</head>
+<body>
+
+<div class="gal-page">
+  <header class="gal-page__head">
+    <h1>Components</h1>
+    <p>Every element on this page is plain HTML plus a <code class="jrk-mono">jrk-*</code> class — no framework, no build step. The React wrappers emit exactly these class names.</p>
+  </header>
+
+  <!-- ============================ buttons ============================ -->
+  <section class="gal-sec">
+    <h2>Buttons</h2>
+    <div class="gal-demo">
+      <button class="jrk-btn jrk-btn--primary">Run report</button>
+      <button class="jrk-btn jrk-btn--secondary">Export</button>
+      <button class="jrk-btn jrk-btn--ghost">Cancel</button>
+      <button class="jrk-btn jrk-btn--danger">Delete</button>
+      <button class="jrk-btn jrk-btn--danger-quiet">Remove</button>
+      <button class="jrk-btn jrk-btn--link">View details</button>
+      <button class="jrk-btn jrk-btn--primary" disabled>Disabled</button>
+      <button class="jrk-btn jrk-btn--primary" data-loading="true" aria-busy="true"><span>Saving</span></button>
+    </div>
+
+    <div class="gal-demo">
+      <span class="gal-label">Sizes &amp; icons</span>
+      <button class="jrk-btn jrk-btn--secondary jrk-btn--sm">Small</button>
+      <button class="jrk-btn jrk-btn--secondary">Medium</button>
+      <button class="jrk-btn jrk-btn--secondary jrk-btn--lg">Large</button>
+      <button class="jrk-btn jrk-btn--primary">
+        <svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg>
+        <span>New view</span>
+      </button>
+      <button class="jrk-btn jrk-btn--secondary jrk-btn--icon" aria-label="Filter">
+        <svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h12M4.5 8h7M7 12h2"/></svg>
+      </button>
+    </div>
+
+    <div class="gal-demo">
+      <span class="gal-label">Segmented group</span>
+      <div class="jrk-btn-group" role="group" aria-label="Granularity">
+        <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="true">Day</button>
+        <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="false">Week</button>
+        <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="false">Month</button>
+      </div>
+    </div>
+    <div class="gal-rule">
+      An icon-only button carries no text, so it needs <code class="jrk-mono">aria-label</code>.
+      The React <code class="jrk-mono">&lt;Button iconOnly&gt;</code> warns in development if you forget.
+    </div>
+  </section>
+
+  <!-- ============================ forms ============================ -->
+  <section class="gal-sec">
+    <h2>Forms</h2>
+    <div class="gal-demo gal-demo--stack">
+      <div class="jrk-grid jrk-grid-3">
+        <div class="jrk-field">
+          <label class="jrk-field__label" for="f-prop" data-required>Property</label>
+          <select class="jrk-select" id="f-prop">
+            <option>All properties</option>
+            <option>Bellevue Commons</option>
+            <option>Harbor Point</option>
+          </select>
+        </div>
+
+        <div class="jrk-field">
+          <label class="jrk-field__label" for="f-search">Search</label>
+          <span class="jrk-input-group">
+            <span class="jrk-input-group__icon">
+              <svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+            </span>
+            <input class="jrk-input" id="f-search" placeholder="Unit or tenant">
+          </span>
+          <span class="jrk-field__help">Matches unit number or tenant name.</span>
+        </div>
+
+        <div class="jrk-field">
+          <label class="jrk-field__label" for="f-amt">Amount</label>
+          <input class="jrk-input jrk-input--numeric" id="f-amt" value="4,208.00" aria-describedby="f-amt-err" aria-invalid="true">
+          <span class="jrk-field__error" id="f-amt-err" role="alert">
+            <svg viewBox="0 0 16 16" aria-hidden="true" stroke-width="2" stroke-linecap="round"><circle cx="8" cy="8" r="6.5"/><path d="M8 5v3.5M8 11h.01"/></svg>
+            Exceeds the approved variance.
+          </span>
+        </div>
+      </div>
+
+      <div class="jrk-row" style="gap:var(--jrk-space-6);flex-wrap:wrap">
+        <label class="jrk-check"><input type="checkbox" checked><span class="jrk-check__label">Include vacant units</span></label>
+        <label class="jrk-check"><input type="checkbox"><span class="jrk-check__label">Roll up to portfolio<span class="jrk-check__hint">Hides per-property rows</span></span></label>
+        <label class="jrk-check"><input type="radio" name="r" checked><span class="jrk-check__label">Accrual</span></label>
+        <label class="jrk-check"><input type="radio" name="r"><span class="jrk-check__label">Cash</span></label>
+        <label class="jrk-switch"><input type="checkbox" role="switch" checked><span class="jrk-check__label">Auto-refresh</span></label>
+      </div>
+    </div>
+
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">Filter bar — one row, above the charts it governs</span>
+      <div class="jrk-filter-bar">
+        <select class="jrk-select jrk-select--sm" aria-label="Period"><option>Last 30 days</option><option>Quarter to date</option></select>
+        <select class="jrk-select jrk-select--sm" aria-label="Region"><option>All regions</option><option>Southeast</option></select>
+        <span class="jrk-tag">Occupancy &gt; 90%<button class="jrk-tag__remove" aria-label="Remove filter"><svg viewBox="0 0 10 10" aria-hidden="true" stroke-linecap="round"><path d="M2 2l6 6M8 2l-6 6"/></svg></button></span>
+        <span class="jrk-spacer"></span>
+        <button class="jrk-btn jrk-btn--ghost jrk-btn--sm">Reset</button>
+      </div>
+    </div>
+    <div class="gal-rule">
+      An error is never signalled by the red border alone. The React
+      <code class="jrk-mono">&lt;Input error&gt;</code> sets <code class="jrk-mono">aria-invalid</code>,
+      wires <code class="jrk-mono">aria-describedby</code> to the message, and renders an icon with it.
+    </div>
+  </section>
+
+  <!-- ============================ badges ============================ -->
+  <section class="gal-sec">
+    <h2>Badges, status, tags</h2>
+    <div class="gal-demo">
+      <span class="jrk-badge jrk-badge--good"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5L5 9l4.5-5"/></svg>Paid</span>
+      <span class="jrk-badge jrk-badge--warning"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1.5L11 10.5H1L6 1.5zM6 5v2.5M6 9h.01"/></svg>Partial</span>
+      <span class="jrk-badge jrk-badge--critical"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>Delinquent</span>
+      <span class="jrk-badge jrk-badge--accent">Beta</span>
+      <span class="jrk-badge jrk-badge--outline jrk-badge--good">Outline</span>
+      <span class="jrk-badge jrk-badge--square jrk-badge--sm">v2.1</span>
+      <span class="jrk-status"><span class="jrk-dot jrk-dot--good jrk-dot--pulse" aria-hidden="true"></span>Sync running</span>
+      <span class="jrk-status"><span class="jrk-dot jrk-dot--critical" aria-hidden="true"></span>Feed stalled</span>
+    </div>
+  </section>
+
+  <!-- ============================ table ============================ -->
+  <section class="gal-sec">
+    <h2>Data table</h2>
+    <div class="jrk-table-wrap">
+      <table class="jrk-table">
+        <caption class="jrk-sr-only">Delinquency by property</caption>
+        <thead>
+          <tr>
+            <th scope="col" aria-sort="descending">
+              <button class="jrk-table__sort" type="button">Property
+                <svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5V2.5M3 5.5L6 2.5l3 3"/></svg>
+              </button>
+            </th>
+            <th scope="col">Status</th>
+            <th scope="col" class="jrk-num">Units</th>
+            <th scope="col" class="jrk-num">Occupancy</th>
+            <th scope="col" class="jrk-num">Balance</th>
+            <th scope="col" class="jrk-num">Delinquency</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Bellevue Commons</td>
+            <td><span class="jrk-badge jrk-badge--good"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5L5 9l4.5-5"/></svg>Current</span></td>
+            <td class="jrk-num">248</td>
+            <td class="jrk-num">96.4%</td>
+            <td class="jrk-num">$1,284,900</td>
+            <td class="jrk-num"><span class="jrk-cell-bar"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill" style="width:18%"></span></span><span class="jrk-cell-bar__value">1.8%</span></span></td>
+          </tr>
+          <tr aria-selected="true">
+            <td>Harbor Point</td>
+            <td><span class="jrk-badge jrk-badge--warning"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1.5L11 10.5H1L6 1.5zM6 5v2.5M6 9h.01"/></svg>Review</span></td>
+            <td class="jrk-num">412</td>
+            <td class="jrk-num">91.2%</td>
+            <td class="jrk-num">$2,041,330</td>
+            <td class="jrk-num"><span class="jrk-cell-bar"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill" style="width:47%"></span></span><span class="jrk-cell-bar__value">4.7%</span></span></td>
+          </tr>
+          <tr>
+            <td>Riverside Flats</td>
+            <td><span class="jrk-badge jrk-badge--critical"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>Escalated</span></td>
+            <td class="jrk-num">156</td>
+            <td class="jrk-num">84.0%</td>
+            <td class="jrk-num">$612,470</td>
+            <td class="jrk-num"><span class="jrk-cell-bar"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill" style="width:92%"></span></span><span class="jrk-cell-bar__value">9.2%</span></span></td>
+          </tr>
+          <tr class="jrk-table__skeleton">
+            <td><span class="jrk-skeleton" style="width:70%"></span></td>
+            <td><span class="jrk-skeleton" style="width:50%"></span></td>
+            <td><span class="jrk-skeleton" style="width:40%"></span></td>
+            <td><span class="jrk-skeleton" style="width:40%"></span></td>
+            <td><span class="jrk-skeleton" style="width:60%"></span></td>
+            <td><span class="jrk-skeleton" style="width:40%"></span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="jrk-table-footer">
+        <span>3 of 47 properties</span>
+        <div class="jrk-pagination">
+          <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" disabled>Previous</button>
+          <button class="jrk-btn jrk-btn--ghost jrk-btn--sm">Next</button>
+        </div>
+      </div>
+    </div>
+    <div class="gal-rule">
+      Sortable headers are real <code class="jrk-mono">&lt;button&gt;</code>s carrying
+      <code class="jrk-mono">aria-sort</code>, so keyboard and screen-reader users get the
+      same affordance as a mouse click. Every money and count column is right-aligned on
+      tabular figures so digits stack.
+    </div>
+  </section>
+
+  <!-- ============================ feedback ============================ -->
+  <section class="gal-sec">
+    <h2>Feedback</h2>
+    <div class="gal-demo gal-demo--stack">
+      <div class="jrk-alert jrk-alert--critical" role="alert">
+        <svg class="jrk-alert__icon" viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M10 6v5M10 13.5h.01"/></svg>
+        <div class="jrk-alert__body">
+          <p class="jrk-alert__title">Snowflake sync failed</p>
+          <p class="jrk-alert__text">Last successful load was 14 hours ago. Figures below may be stale.</p>
+        </div>
+      </div>
+      <div class="jrk-alert jrk-alert--accent" role="status">
+        <svg class="jrk-alert__icon" viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.5h.01"/></svg>
+        <div class="jrk-alert__body">
+          <p class="jrk-alert__title">Accrual basis</p>
+          <p class="jrk-alert__text">Switch to cash basis in the filter bar to match the GL export.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="jrk-grid jrk-grid-2">
+      <div class="jrk-card">
+        <div class="jrk-card__body">
+          <div class="jrk-empty">
+            <svg class="jrk-empty__icon" viewBox="0 0 40 40" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="9" width="28" height="24" rx="3"/><path d="M6 16h28M14 9v24"/></svg>
+            <p class="jrk-empty__title">No delinquencies</p>
+            <p class="jrk-empty__text">Nothing is past due in this period. Widen the date range or clear the occupancy filter to see more.</p>
+            <div class="jrk-empty__actions"><button class="jrk-btn jrk-btn--secondary jrk-btn--sm">Clear filters</button></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="jrk-card">
+        <div class="jrk-card__body">
+          <div class="jrk-loading">
+            <span class="jrk-spinner jrk-spinner--lg" aria-hidden="true"></span>
+            <span role="status">Loading portfolio data…</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">Menu &amp; toast</span>
+      <div style="display:flex;gap:var(--jrk-space-5);flex-wrap:wrap;align-items:flex-start">
+        <div class="jrk-menu" style="position:static">
+          <div class="jrk-menu__label">Export</div>
+          <button class="jrk-menu__item"><svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>Download CSV</button>
+          <button class="jrk-menu__item"><svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round"><rect x="3" y="2" width="10" height="12" rx="2"/><path d="M6 6h4M6 9h4"/></svg>Download XLSX</button>
+          <hr class="jrk-menu__separator">
+          <button class="jrk-menu__item jrk-menu__item--danger"><svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round"><path d="M3 4h10M6 4V2.5h4V4M5 4l.5 9h5L11 4"/></svg>Delete view</button>
+        </div>
+
+        <div class="jrk-toast" style="max-width:340px">
+          <svg class="jrk-toast__icon" viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 8.5L6.5 11.5 12.5 5"/></svg>
+          <div class="jrk-toast__body">
+            <p class="jrk-toast__title">Report scheduled</p>
+            <p class="jrk-toast__text">Delivers weekdays at 7:00 AM ET.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-demo">
+      <button class="jrk-btn jrk-btn--secondary" id="open-modal">Open modal</button>
+      <dialog class="jrk-modal" id="demo-modal" aria-labelledby="dm-title">
+        <div class="jrk-modal__header">
+          <h2 class="jrk-modal__title" id="dm-title">Escalate 3 accounts?</h2>
+        </div>
+        <div class="jrk-modal__body">
+          These accounts move to the collections queue and the on-site team is notified. This cannot be undone from here.
+        </div>
+        <div class="jrk-modal__footer">
+          <button class="jrk-btn jrk-btn--ghost" data-close>Cancel</button>
+          <button class="jrk-btn jrk-btn--danger" data-close>Escalate</button>
+        </div>
+      </dialog>
+    </div>
+    <div class="gal-rule">
+      The modal is a native <code class="jrk-mono">&lt;dialog&gt;</code>, so focus trapping,
+      Esc-to-close, and inertness behind the backdrop come from the platform rather than
+      from a script that has to get them right.
+    </div>
+  </section>
+
+  <!-- ============================ shell ============================ -->
+  <section class="gal-sec">
+    <h2>Navigation</h2>
+    <div class="gal-demo gal-demo--stack">
+      <nav aria-label="Breadcrumb">
+        <ol class="jrk-breadcrumbs">
+          <li><a href="#">Portfolio</a></li>
+          <li><a href="#">Southeast</a></li>
+          <li><span aria-current="page">Harbor Point</span></li>
+        </ol>
+      </nav>
+
+      <div class="jrk-tabs" role="tablist" aria-label="Report sections">
+        <button class="jrk-tab" role="tab" aria-selected="true">Overview</button>
+        <button class="jrk-tab" role="tab" aria-selected="false">Delinquency<span class="jrk-tab__count">12</span></button>
+        <button class="jrk-tab" role="tab" aria-selected="false">Renewals</button>
+        <button class="jrk-tab" role="tab" aria-selected="false" disabled>Forecast</button>
+      </div>
+
+      <div class="jrk-tabs jrk-tabs--pills" role="tablist" aria-label="View mode" style="align-self:flex-start">
+        <button class="jrk-tab" role="tab" aria-selected="true">Chart</button>
+        <button class="jrk-tab" role="tab" aria-selected="false">Table</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script type="module" src="preview.js"></script>
+<script>
+  const modal = document.getElementById('demo-modal');
+  document.getElementById('open-modal').onclick = () => modal.showModal();
+  modal.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => modal.close()));
+</script>
+</body>
+</html>

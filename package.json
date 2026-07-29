@@ -1,0 +1,41 @@
+{
+  "name": "@jrk/design",
+  "version": "0.1.0",
+  "private": true,
+  "description": "JRK analytics design library — tokens, plain-CSS components, and React wrappers for web app and dashboard development",
+  "type": "module",
+  "files": [
+    "dist",
+    "css",
+    "react/src",
+    "tokens"
+  ],
+  "exports": {
+    ".": "./react/src/index.ts",
+    "./css": "./css/index.css",
+    "./css/*": "./css/*",
+    "./tokens": "./dist/tokens.ts",
+    "./tokens.css": "./dist/jrk-tokens.css",
+    "./tailwind": "./dist/jrk-theme.tailwind.css"
+  },
+  "scripts": {
+    "build": "node scripts/build-tokens.mjs",
+    "validate": "node scripts/validate-colors.mjs",
+    "check:css": "node scripts/check-css.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "preview": "node scripts/serve-preview.mjs",
+    "test": "npm run build && npm run check:css && npm run validate && npm run typecheck"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "peerDependenciesMeta": {
+    "react": { "optional": true },
+    "react-dom": { "optional": true }
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "typescript": "^5.7.0"
+  }
+}

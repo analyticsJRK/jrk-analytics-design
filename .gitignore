@@ -216,3 +216,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---------------------------------------------------------------------------
+# Node / this design library
+# ---------------------------------------------------------------------------
+node_modules/
+
+# dist/ is excluded above by the Python packaging rules, but here it holds the
+# generated token layer (jrk-tokens.css, the Tailwind theme, tokens.ts). Half
+# the consumers are Python + Jinja apps with no Node toolchain, so the built
+# output is committed. It is still generated — edit tokens/tokens.json and run
+# `npm run build`; never hand-edit dist/.
+!dist/

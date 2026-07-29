@@ -1,0 +1,544 @@
+/* Chart layer.
+
+   The rules encoded here are not stylistic preferences — they are the specs
+   that keep a chart readable:
+
+     - Marks are thin. Bars cap at 24px; the band's leftover is air.
+     - Data-ends round 4px; the baseline end stays square.
+     - Lines are 2px, round join/cap. Markers are >= 8px.
+     - Touching fills are separated by a 2px gap in the SURFACE color, never
+       by a stroke — a stroke adds ink that is not data.
+     - Dots carry a 2px surface ring so they stay legible where they overlap.
+     - Grid and axes are hairline, solid, recessive. Never dashed.
+     - Text wears text tokens, never the series color.
+
+   Series color is applied by setting --series on the mark's container, which
+   every mark class then inherits:  <g class="jrk-line" style="--series: var(--jrk-chart-2)"> */
+
+.jrk-chart {
+  --series: var(--jrk-chart-1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-3);
+  color: var(--jrk-chart-label);
+}
+
+.jrk-chart__plot {
+  position: relative;
+  width: 100%;
+}
+
+/* The chart SVG fills its container, so its viewBox MUST be sized from the
+   container's real width — one user unit has to equal one CSS pixel. A fixed
+   viewBox stretched to fit scales the text and the strokes with it: 12px axis
+   labels render near 18px on a wide card, and a 1px hairline stops being a
+   hairline. Measure with a ResizeObserver and rewrite the viewBox; the React
+   <LineChart> does this already. Where a stroke must stay put regardless,
+   use vector-effect: non-scaling-stroke. */
+.jrk-chart svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+
+/* ============================== chrome ============================== */
+
+/* Hairline, solid, one step off the surface. Dashed gridlines read as data. */
+.jrk-grid line,
+.jrk-grid path {
+  stroke: var(--jrk-chart-grid);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+/* The zero/category baseline is one step stronger than the grid — it is the
+   thing every bar is measured from. */
+.jrk-axis line,
+.jrk-axis path {
+  stroke: var(--jrk-chart-axis);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+.jrk-axis text,
+.jrk-chart__tick {
+  fill: var(--jrk-chart-tick);
+  font-size: var(--jrk-text-xs);
+  font-variant-numeric: tabular-nums;
+  stroke: none;
+}
+
+.jrk-chart__axis-title {
+  fill: var(--jrk-chart-label);
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-medium);
+  stroke: none;
+}
+
+/* ============================== marks: SVG ============================== */
+
+.jrk-line {
+  fill: none;
+  stroke: var(--series);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+/* ~10% wash. A saturated area block hides everything behind it. */
+.jrk-area {
+  fill: var(--series);
+  fill-opacity: 0.1;
+  stroke: none;
+}
+
+/* r >= 4 so the mark is >= 8px. The surface ring keeps it readable where it
+   crosses a line or another dot — and it is part of the hover target. */
+.jrk-dot {
+  fill: var(--series);
+  stroke: var(--jrk-chart-surface);
+  stroke-width: 2;
+}
+
+.jrk-bar {
+  fill: var(--series);
+  stroke: none;
+}
+
+/* De-emphasized comparison series — a prior period, a benchmark. Reads as
+   context rather than as a competing series. */
+.jrk-line--muted {
+  stroke: var(--jrk-chart-axis);
+  stroke-width: 2;
+}
+
+.jrk-bar--muted {
+  fill: var(--jrk-surface-active);
+}
+
+/* Threshold / target line. Dashed is legal HERE and only here — it marks a
+   reference value, not data, and the dash is what says so. */
+.jrk-threshold {
+  fill: none;
+  stroke: var(--jrk-chart-tick);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.jrk-threshold-label {
+  fill: var(--jrk-chart-tick);
+  font-size: var(--jrk-text-2xs);
+  font-weight: var(--jrk-weight-medium);
+  stroke: none;
+}
+
+/* Direct value labels ride the marks. Sparingly — the endpoint, the extreme,
+   the one series the story is about. Never a number on every point. */
+.jrk-chart__value {
+  fill: var(--jrk-text-primary);
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  stroke: none;
+}
+
+/* A label set INSIDE a colored fill is the one place text may leave the text
+   tokens — pick the variant that clears contrast against that fill. */
+.jrk-chart__value--on-fill  { fill: #ffffff; }
+.jrk-chart__value--on-light { fill: var(--jrk-neutral-950); }
+
+/* ============================== marks: CSS bars ============================== */
+
+/* For bars built from elements rather than SVG (a Jinja template, a table
+   cell). The 2px surface gap comes from flex `gap`, so the separation is real
+   negative space and not a stroke. */
+
+.jrk-bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-2_5);
+}
+
+.jrk-bars__row {
+  display: grid;
+  grid-template-columns: var(--jrk-bars-label, 140px) 1fr auto;
+  align-items: center;
+  gap: var(--jrk-space-3);
+}
+
+.jrk-bars__label {
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.jrk-bars__track {
+  position: relative;
+  height: 100%;
+  min-height: 16px;
+  display: flex;
+  align-items: center;
+}
+
+/* Square at the baseline (inline-start), 4px round at the data-end. Capped at
+   24px — a bar that fills its band leaves no air. */
+.jrk-bars__fill {
+  height: 16px;
+  max-height: 24px;
+  background: var(--series);
+  border-start-end-radius: var(--jrk-radius-data-end);
+  border-end-end-radius: var(--jrk-radius-data-end);
+}
+
+.jrk-bars__value {
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-primary);
+  min-width: 5ch;
+  text-align: right;
+}
+
+/* ---------- stacked bar ---------- */
+
+/* Segments are separated by a 2px gap in the surface color, one consistent
+   width across the whole stack. */
+.jrk-stack-bar {
+  display: flex;
+  gap: 2px;
+  height: 16px;
+  width: 100%;
+}
+
+.jrk-stack-bar__seg {
+  background: var(--series);
+  min-width: 2px;
+}
+
+.jrk-stack-bar__seg:first-child {
+  border-start-start-radius: var(--jrk-radius-data-end);
+  border-end-start-radius: var(--jrk-radius-data-end);
+}
+
+.jrk-stack-bar__seg:last-child {
+  border-start-end-radius: var(--jrk-radius-data-end);
+  border-end-end-radius: var(--jrk-radius-data-end);
+}
+
+.jrk-stack-bar__seg:nth-child(1) { --series: var(--jrk-chart-1); }
+.jrk-stack-bar__seg:nth-child(2) { --series: var(--jrk-chart-2); }
+.jrk-stack-bar__seg:nth-child(3) { --series: var(--jrk-chart-3); }
+.jrk-stack-bar__seg:nth-child(4) { --series: var(--jrk-chart-4); }
+.jrk-stack-bar__seg:nth-child(5) { --series: var(--jrk-chart-5); }
+.jrk-stack-bar__seg:nth-child(6) { --series: var(--jrk-chart-6); }
+.jrk-stack-bar__seg:nth-child(7) { --series: var(--jrk-chart-7); }
+.jrk-stack-bar__seg:nth-child(8) { --series: var(--jrk-chart-8); }
+
+/* ---------- meter ---------- */
+
+/* The unfilled track is a lighter step of the SAME ramp, so severity reads
+   across the whole bar rather than only in the filled part. */
+.jrk-meter {
+  display: block;
+  height: 8px;
+  background: var(--jrk-chart-seq-1);
+  border-radius: var(--jrk-radius-full);
+  overflow: hidden;
+}
+
+/* Explicit display:block so the component works whether the caller reaches for
+   a <div> or a <span> — an inline box would ignore the width entirely. */
+.jrk-meter__fill {
+  display: block;
+  height: 100%;
+  background: var(--jrk-chart-1);
+  border-radius: var(--jrk-radius-full);
+}
+
+.jrk-meter--warning { background: var(--jrk-status-warning-wash); }
+.jrk-meter--warning .jrk-meter__fill { background: var(--jrk-status-warning-mark); }
+
+.jrk-meter--critical { background: var(--jrk-status-critical-wash); }
+.jrk-meter--critical .jrk-meter__fill { background: var(--jrk-status-critical-mark); }
+
+/* ============================== series slots ============================== */
+
+/* Assign in order, never cycle. There is deliberately no slot 9 — a ninth
+   series folds into "Other", facets into small multiples, or takes a second
+   encoding. Generating a hue would break the CVD guarantee the eight-slot
+   order exists to provide. */
+.jrk-s1 { --series: var(--jrk-chart-1); }
+.jrk-s2 { --series: var(--jrk-chart-2); }
+.jrk-s3 { --series: var(--jrk-chart-3); }
+.jrk-s4 { --series: var(--jrk-chart-4); }
+.jrk-s5 { --series: var(--jrk-chart-5); }
+.jrk-s6 { --series: var(--jrk-chart-6); }
+.jrk-s7 { --series: var(--jrk-chart-7); }
+.jrk-s8 { --series: var(--jrk-chart-8); }
+
+/* ---------- pastel tints ---------- */
+
+/* Soft fills for LARGE marks whose identity is already carried by something
+   else — a category label on the axis, a direct value label, or a legend with
+   numbers beside it. This is the set that produces the soft reference look.
+
+   These are NOT categorical colors. They sit above the lightness band and
+   below the chroma floor, so they cannot carry identity and the validator does
+   not check them for colorblind separation. Reaching for a tint where color IS
+   the identity channel — an unlabelled multi-series line chart, a scatter — is
+   a bug, and no gate will catch it for you.
+
+   Because they are pale, a tint fill needs ink, not a colored label:
+   use .jrk-chart__value--on-tint for anything set inside one. */
+.jrk-t1 { --series: var(--jrk-chart-tint-1); }
+.jrk-t2 { --series: var(--jrk-chart-tint-2); }
+.jrk-t3 { --series: var(--jrk-chart-tint-3); }
+.jrk-t4 { --series: var(--jrk-chart-tint-4); }
+.jrk-t5 { --series: var(--jrk-chart-tint-5); }
+.jrk-t6 { --series: var(--jrk-chart-tint-6); }
+.jrk-t7 { --series: var(--jrk-chart-tint-7); }
+.jrk-t8 { --series: var(--jrk-chart-tint-8); }
+
+.jrk-chart__value--on-tint {
+  fill: var(--jrk-chart-tint-ink);
+}
+
+/* Tinted bars round more, since the endpoint ambiguity a big radius creates is
+   mitigated by the value label these fills already require. */
+.jrk-bars--tinted .jrk-bars__fill {
+  border-radius: var(--jrk-radius-sm);
+}
+
+.jrk-stack-bar--tinted .jrk-stack-bar__seg:nth-child(1) { --series: var(--jrk-chart-tint-1); }
+.jrk-stack-bar--tinted .jrk-stack-bar__seg:nth-child(2) { --series: var(--jrk-chart-tint-2); }
+.jrk-stack-bar--tinted .jrk-stack-bar__seg:nth-child(3) { --series: var(--jrk-chart-tint-3); }
+.jrk-stack-bar--tinted .jrk-stack-bar__seg:nth-child(4) { --series: var(--jrk-chart-tint-4); }
+.jrk-stack-bar--tinted .jrk-stack-bar__seg:nth-child(5) { --series: var(--jrk-chart-tint-5); }
+.jrk-stack-bar--tinted .jrk-stack-bar__seg:nth-child(6) { --series: var(--jrk-chart-tint-6); }
+.jrk-stack-bar--tinted .jrk-stack-bar__seg:nth-child(7) { --series: var(--jrk-chart-tint-7); }
+.jrk-stack-bar--tinted .jrk-stack-bar__seg:nth-child(8) { --series: var(--jrk-chart-tint-8); }
+
+/* ============================== legend ============================== */
+
+/* Present whenever there are two or more series. A single series gets none —
+   the title already names what is plotted, and a one-swatch box just
+   restates it. */
+.jrk-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jrk-space-1) var(--jrk-space-4);
+  font-size: var(--jrk-text-xs);
+}
+
+.jrk-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jrk-space-1_5);
+  color: var(--jrk-chart-label);
+  background: none;
+  border: 0;
+  padding: 2px;
+  border-radius: var(--jrk-radius-sm);
+}
+
+/* Interactive legends filter the chart, so they are buttons with aria-pressed. */
+button.jrk-legend__item {
+  cursor: pointer;
+}
+
+button.jrk-legend__item:hover {
+  color: var(--jrk-text-primary);
+}
+
+.jrk-legend__item[aria-pressed='false'] {
+  opacity: 0.4;
+}
+
+.jrk-legend__swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--series);
+  flex-shrink: 0;
+}
+
+/* Line charts get a line-key rather than a block, matching the mark shape. */
+.jrk-legend__swatch--line {
+  width: 14px;
+  height: 2px;
+  border-radius: var(--jrk-radius-full);
+}
+
+.jrk-legend__swatch--dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--jrk-radius-full);
+}
+
+/* ============================== tooltip & crosshair ============================== */
+
+/* An HTML/SVG chart IS interactive — the hover layer ships by default. The
+   only form that skips it is a bare stat tile with no plot. */
+
+.jrk-chart__crosshair {
+  stroke: var(--jrk-chart-axis);
+  stroke-width: 1;
+  pointer-events: none;
+}
+
+.jrk-chart-tooltip {
+  position: absolute;
+  z-index: var(--jrk-z-tooltip);
+  min-width: 140px;
+  padding: var(--jrk-space-2) var(--jrk-space-2_5);
+  font-size: var(--jrk-text-xs);
+  background: var(--jrk-surface-raised);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-md);
+  box-shadow: var(--jrk-shadow-lg);
+  pointer-events: none;
+}
+
+.jrk-chart-tooltip__header {
+  padding-bottom: var(--jrk-space-1_5);
+  margin-bottom: var(--jrk-space-1_5);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-primary);
+  border-bottom: 1px solid var(--jrk-border-subtle);
+}
+
+/* Rows are a grid so values align in a column no matter the label length. */
+.jrk-chart-tooltip__row {
+  display: grid;
+  grid-template-columns: 10px 1fr auto;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  padding: 1px 0;
+}
+
+.jrk-chart-tooltip__swatch {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--series);
+}
+
+.jrk-chart-tooltip__label {
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-chart-tooltip__value {
+  font-weight: var(--jrk-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-primary);
+}
+
+/* Hit targets are bigger than the marks — an 8px dot is far too small to
+   hover reliably. Widen the target without drawing anything. */
+.jrk-chart__hit {
+  fill: transparent;
+  stroke: none;
+  cursor: pointer;
+}
+
+/* ============================== table view ============================== */
+
+/* Every chart has one. It is the relief channel for the sub-3:1 light-mode
+   hues, the answer for screen readers, and the way anyone gets exact values. */
+.jrk-chart__toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+}
+
+.jrk-chart__table[hidden] {
+  display: none;
+}
+
+/* ============================== texture ============================== */
+
+/* The backup identity channel, for full-severity CVD, grayscale print, and
+   forced-colors. 45 degrees and its 135 mirror only — horizontal or vertical
+   hatching reads as gridlines. Never on by default. */
+:root {
+  --jrk-hatch-45: repeating-linear-gradient(45deg, transparent 0 3px, rgba(0, 0, 0, 0.28) 3px 5px);
+  --jrk-hatch-135: repeating-linear-gradient(135deg, transparent 0 3px, rgba(0, 0, 0, 0.28) 3px 5px);
+}
+
+/* Odd slots take 45deg, even slots the 135deg mirror, so neighbors differ by
+   texture as well as hue. */
+.jrk-chart[data-texture='on'] .jrk-bars__fill,
+.jrk-chart[data-texture='on'] .jrk-stack-bar__seg {
+  background-image: var(--jrk-hatch-45);
+}
+
+.jrk-chart[data-texture='on'] .jrk-stack-bar__seg:nth-child(even),
+.jrk-chart[data-texture='on'] .jrk-s2 .jrk-bars__fill,
+.jrk-chart[data-texture='on'] .jrk-s4 .jrk-bars__fill,
+.jrk-chart[data-texture='on'] .jrk-s6 .jrk-bars__fill,
+.jrk-chart[data-texture='on'] .jrk-s8 .jrk-bars__fill {
+  background-image: var(--jrk-hatch-135);
+}
+
+@media print {
+  .jrk-bars__fill,
+  .jrk-stack-bar__seg {
+    background-image: var(--jrk-hatch-45);
+    print-color-adjust: exact;
+  }
+
+  .jrk-stack-bar__seg:nth-child(even) {
+    background-image: var(--jrk-hatch-135);
+  }
+}
+
+@media (forced-colors: active) {
+  .jrk-bars__fill,
+  .jrk-stack-bar__seg {
+    forced-color-adjust: none;
+    background-image: repeating-linear-gradient(
+      45deg,
+      transparent 0 3px,
+      rgba(0, 0, 0, 0.35) 3px 5px
+    );
+  }
+}
+
+/* ============================== chart card ============================== */
+
+.jrk-chart-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--jrk-surface-default);
+  border: 1px solid transparent;
+  border-radius: var(--jrk-radius-2xl);
+}
+
+.jrk-chart-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--jrk-space-3);
+  padding: var(--jrk-space-4) var(--jrk-space-5) var(--jrk-space-2);
+}
+
+.jrk-chart-card__title {
+  font-size: var(--jrk-text-md);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+/* Names the comparison window or the unit. A chart whose title does not say
+   what period it covers is not finished. */
+.jrk-chart-card__subtitle {
+  margin-top: 2px;
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+}
+
+.jrk-chart-card__body {
+  padding: var(--jrk-space-2) var(--jrk-space-5) var(--jrk-space-4);
+}

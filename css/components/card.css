@@ -1,0 +1,123 @@
+/* Card / panel — the container every dashboard tile and chart sits in. */
+
+/* The card separates from the white page by its FILL, not by a rule — that is
+   what produces the soft, borderless look. The transparent border is kept so
+   the box model does not shift and so the forced-colors rule in base.css can
+   put a real border back when the fill is unavailable. */
+.jrk-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--jrk-surface-default);
+  border: 1px solid transparent;
+  border-radius: var(--jrk-radius-2xl);
+}
+
+/* Periwinkle wash, for tiles that lead a page. */
+.jrk-card--tinted {
+  background: var(--jrk-surface-tinted);
+}
+
+/* Opt back in to a hairline where a card sits ON a tinted surface and the
+   fill alone no longer separates it. */
+.jrk-card--outlined {
+  border-color: var(--jrk-border-default);
+}
+
+/* Elevation is opt-in. A dashboard of many tiles reads calmer flat — reserve
+   shadow for things that genuinely float (menus, modals, toasts). */
+.jrk-card--raised {
+  box-shadow: var(--jrk-shadow-md);
+}
+
+.jrk-card--flush {
+  border: 0;
+  background: transparent;
+}
+
+.jrk-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--jrk-space-3);
+  padding: var(--jrk-space-4) var(--jrk-space-5);
+}
+
+/* A header directly followed by content gets no bottom padding — the body
+   supplies it, so the two never double up. */
+.jrk-card__header + .jrk-card__body {
+  padding-top: 0;
+}
+
+.jrk-card__title {
+  font-size: var(--jrk-text-lg);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: var(--jrk-leading-snug);
+}
+
+.jrk-card__subtitle {
+  margin-top: 2px;
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-muted);
+}
+
+/* Right-hand slot for a menu, toggle, or time-range control. */
+.jrk-card__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+  flex-shrink: 0;
+}
+
+.jrk-card__body {
+  flex: 1;
+  padding: var(--jrk-space-4) var(--jrk-space-5);
+}
+
+.jrk-card__body--flush {
+  padding: 0;
+}
+
+.jrk-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--jrk-space-2);
+  padding: var(--jrk-space-3) var(--jrk-space-5);
+  border-top: 1px solid var(--jrk-border-subtle);
+}
+
+/* Whole card is a link/button to a detail view. */
+.jrk-card--interactive {
+  cursor: pointer;
+  text-align: start;
+  transition:
+    border-color var(--jrk-transition),
+    background-color var(--jrk-transition);
+}
+
+.jrk-card--interactive:hover {
+  border-color: var(--jrk-border-strong);
+  background: var(--jrk-surface-hover);
+}
+
+/* ============================== section ============================== */
+
+/* Groups several cards under one heading. Not a card itself. */
+.jrk-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-3);
+}
+
+.jrk-section__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--jrk-space-3);
+}
+
+.jrk-section__title {
+  font-size: var(--jrk-text-md);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-secondary);
+}

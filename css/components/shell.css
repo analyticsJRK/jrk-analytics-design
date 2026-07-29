@@ -1,0 +1,356 @@
+/* App shell — sidebar, topbar, page header, tabs, breadcrumbs.
+
+   Layout contract:
+     .jrk-app > .jrk-sidebar + .jrk-main
+     .jrk-main > .jrk-topbar + .jrk-content */
+
+.jrk-app {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  min-height: 100vh;
+  background: var(--jrk-surface-canvas);
+}
+
+/* ============================== sidebar ============================== */
+
+.jrk-sidebar {
+  display: flex;
+  flex-direction: column;
+  width: var(--jrk-sidebar-expanded);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  /* Chrome stays on the white page plane so the tinted cards in the content
+     area are the things that read as raised. */
+  background: var(--jrk-surface-canvas);
+  border-inline-end: 1px solid var(--jrk-border-subtle);
+  transition: width var(--jrk-duration-base) var(--jrk-ease-standard);
+  overflow: hidden;
+}
+
+.jrk-sidebar[data-collapsed='true'] {
+  width: var(--jrk-sidebar-collapsed);
+}
+
+.jrk-sidebar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2_5);
+  height: var(--jrk-topbar-default);
+  padding-inline: var(--jrk-space-4);
+  flex-shrink: 0;
+  font-weight: var(--jrk-weight-semibold);
+  white-space: nowrap;
+}
+
+.jrk-sidebar__nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--jrk-space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.jrk-sidebar__group {
+  padding: var(--jrk-space-4) var(--jrk-space-3) var(--jrk-space-1);
+  font-size: var(--jrk-text-2xs);
+  font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-caps);
+  text-transform: uppercase;
+  color: var(--jrk-text-muted);
+  white-space: nowrap;
+}
+
+.jrk-sidebar[data-collapsed='true'] .jrk-sidebar__group {
+  opacity: 0;
+}
+
+.jrk-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2_5);
+  height: var(--jrk-control-lg);
+  padding-inline: var(--jrk-space-3);
+  font-size: var(--jrk-text-md);
+  font-weight: var(--jrk-weight-medium);
+  color: var(--jrk-text-secondary);
+  text-decoration: none;
+  white-space: nowrap;
+  border-radius: var(--jrk-radius-md);
+  transition:
+    background-color var(--jrk-transition),
+    color var(--jrk-transition);
+}
+
+.jrk-nav-item svg {
+  width: var(--jrk-icon-lg);
+  height: var(--jrk-icon-lg);
+  stroke-width: 1.75;
+  flex-shrink: 0;
+}
+
+.jrk-nav-item:hover {
+  background: var(--jrk-surface-hover);
+  color: var(--jrk-text-primary);
+}
+
+/* Current page. Set aria-current="page" on the anchor — the styling keys off
+   the same attribute assistive tech reads, so the two can never disagree. */
+.jrk-nav-item[aria-current='page'] {
+  background: var(--jrk-accent-wash);
+  color: var(--jrk-accent-wash-text);
+}
+
+.jrk-nav-item__badge {
+  margin-inline-start: auto;
+}
+
+/* Collapsed rail: the icon centers and the label is hidden but stays in the
+   accessibility tree, so the nav still reads correctly to a screen reader. */
+.jrk-sidebar[data-collapsed='true'] .jrk-nav-item {
+  justify-content: center;
+  padding-inline: 0;
+}
+
+.jrk-sidebar[data-collapsed='true'] .jrk-nav-item__label,
+.jrk-sidebar[data-collapsed='true'] .jrk-nav-item__badge,
+.jrk-sidebar[data-collapsed='true'] .jrk-sidebar__brand span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+
+.jrk-sidebar__footer {
+  padding: var(--jrk-space-2);
+  border-top: 1px solid var(--jrk-border-subtle);
+  flex-shrink: 0;
+}
+
+/* ============================== topbar ============================== */
+
+.jrk-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0; /* lets wide children scroll internally instead of stretching the grid */
+}
+
+.jrk-topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-3);
+  height: var(--jrk-topbar-default);
+  padding-inline: var(--jrk-space-5);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: var(--jrk-z-sticky);
+  background: var(--jrk-surface-canvas);
+  border-bottom: 1px solid var(--jrk-border-subtle);
+}
+
+.jrk-topbar__search {
+  max-width: 420px;
+  flex: 1;
+}
+
+.jrk-content {
+  flex: 1;
+  padding: var(--jrk-space-6) var(--jrk-space-5);
+  min-width: 0;
+}
+
+.jrk-content__inner {
+  max-width: var(--jrk-container-xl);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-5);
+}
+
+/* ============================== page header ============================== */
+
+.jrk-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--jrk-space-4);
+  flex-wrap: wrap;
+}
+
+.jrk-page-header__title {
+  font-size: var(--jrk-text-2xl);
+  font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-tight);
+}
+
+.jrk-page-header__desc {
+  margin-top: var(--jrk-space-1);
+  font-size: var(--jrk-text-md);
+  color: var(--jrk-text-muted);
+  max-width: 68ch;
+}
+
+.jrk-page-header__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+}
+
+/* ============================== breadcrumbs ============================== */
+
+.jrk-breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-1_5);
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-muted);
+  list-style: none;
+  padding: 0;
+  margin-bottom: var(--jrk-space-2);
+}
+
+.jrk-breadcrumbs li {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-1_5);
+}
+
+/* Separator is generated content so it is never announced by a screen reader. */
+.jrk-breadcrumbs li + li::before {
+  content: '/';
+  color: var(--jrk-border-strong);
+}
+
+.jrk-breadcrumbs a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.jrk-breadcrumbs a:hover {
+  color: var(--jrk-text-primary);
+  text-decoration: underline;
+}
+
+.jrk-breadcrumbs [aria-current='page'] {
+  color: var(--jrk-text-primary);
+  font-weight: var(--jrk-weight-medium);
+}
+
+/* ============================== tabs ============================== */
+
+/* Markup: role="tablist" > role="tab" buttons, each with aria-selected and
+   aria-controls pointing at its role="tabpanel". */
+.jrk-tabs {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+  border-bottom: 1px solid var(--jrk-border-default);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.jrk-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.jrk-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jrk-space-1_5);
+  padding: var(--jrk-space-2_5) var(--jrk-space-3);
+  font-size: var(--jrk-text-md);
+  font-weight: var(--jrk-weight-medium);
+  color: var(--jrk-text-muted);
+  white-space: nowrap;
+  background: none;
+  border: 0;
+  /* Transparent underline reserves the space, so selecting a tab does not
+     shift the row by 2px. */
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  cursor: pointer;
+  transition: color var(--jrk-transition), border-color var(--jrk-transition);
+}
+
+.jrk-tab:hover {
+  color: var(--jrk-text-primary);
+}
+
+.jrk-tab[aria-selected='true'] {
+  color: var(--jrk-accent-text);
+  border-bottom-color: var(--jrk-border-accent);
+}
+
+.jrk-tab:disabled {
+  color: var(--jrk-text-disabled);
+  cursor: not-allowed;
+}
+
+.jrk-tab__count {
+  padding: 0 var(--jrk-space-1_5);
+  font-size: var(--jrk-text-2xs);
+  font-variant-numeric: tabular-nums;
+  background: var(--jrk-surface-active);
+  border-radius: var(--jrk-radius-full);
+}
+
+/* Pill variant — for switching a view mode rather than a page section. */
+.jrk-tabs--pills {
+  gap: 2px;
+  padding: 3px;
+  border-bottom: 0;
+  background: var(--jrk-surface-subtle);
+  border-radius: var(--jrk-radius-lg);
+  display: inline-flex;
+}
+
+.jrk-tabs--pills .jrk-tab {
+  padding: var(--jrk-space-1_5) var(--jrk-space-3);
+  font-size: var(--jrk-text-sm);
+  border-bottom: 0;
+  margin-bottom: 0;
+  border-radius: var(--jrk-radius-md);
+}
+
+.jrk-tabs--pills .jrk-tab[aria-selected='true'] {
+  background: var(--jrk-surface-default);
+  color: var(--jrk-text-primary);
+  box-shadow: var(--jrk-shadow-sm);
+}
+
+/* ============================== responsive ============================== */
+
+/* Below the sidebar breakpoint the rail collapses to icons; below the narrow
+   breakpoint it leaves the flow entirely and becomes an overlay drawer. */
+@media (max-width: 1024px) {
+  .jrk-sidebar:not([data-collapsed='false']) {
+    width: var(--jrk-sidebar-collapsed);
+  }
+}
+
+@media (max-width: 720px) {
+  .jrk-app {
+    grid-template-columns: 1fr;
+  }
+
+  .jrk-sidebar {
+    position: fixed;
+    inset-inline-start: 0;
+    top: 0;
+    z-index: var(--jrk-z-overlay);
+    width: var(--jrk-sidebar-expanded);
+    transform: translateX(-100%);
+    box-shadow: var(--jrk-shadow-xl);
+  }
+
+  .jrk-sidebar[data-open='true'] {
+    transform: translateX(0);
+  }
+
+  .jrk-content {
+    padding: var(--jrk-space-4) var(--jrk-space-3);
+  }
+}

@@ -1,0 +1,223 @@
+/* Button — .jrk-btn + one variant modifier + optional size modifier. */
+
+.jrk-btn {
+  --btn-h: var(--jrk-control-md);
+  --btn-px: var(--jrk-space-3);
+  --btn-fs: var(--jrk-text-md);
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--jrk-space-2);
+  height: var(--btn-h);
+  padding-inline: var(--btn-px);
+  font-size: var(--btn-fs);
+  font-weight: var(--jrk-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  border: 1px solid transparent;
+  border-radius: var(--jrk-radius-md);
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background-color var(--jrk-transition),
+    border-color var(--jrk-transition),
+    color var(--jrk-transition);
+}
+
+.jrk-btn svg {
+  width: var(--jrk-icon-md);
+  height: var(--jrk-icon-md);
+  stroke-width: 2;
+}
+
+.jrk-btn:disabled,
+.jrk-btn[aria-disabled='true'] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* ---------- sizes ---------- */
+
+.jrk-btn--sm {
+  --btn-h: var(--jrk-control-sm);
+  --btn-px: var(--jrk-space-2);
+  --btn-fs: var(--jrk-text-sm);
+}
+
+.jrk-btn--sm svg {
+  width: var(--jrk-icon-sm);
+  height: var(--jrk-icon-sm);
+}
+
+.jrk-btn--lg {
+  --btn-h: var(--jrk-control-lg);
+  --btn-px: var(--jrk-space-4);
+  --btn-fs: var(--jrk-text-lg);
+}
+
+.jrk-btn--lg svg {
+  width: var(--jrk-icon-lg);
+  height: var(--jrk-icon-lg);
+}
+
+/* Square icon-only button. Always needs an aria-label — the icon is the only
+   content, so nothing else names it. */
+.jrk-btn--icon {
+  width: var(--btn-h);
+  padding-inline: 0;
+}
+
+.jrk-btn--block {
+  display: flex;
+  width: 100%;
+}
+
+/* ---------- variants ---------- */
+
+.jrk-btn--primary {
+  background: var(--jrk-accent-solid);
+  color: var(--jrk-text-inverse);
+}
+
+.jrk-btn--primary:hover:not(:disabled) {
+  background: var(--jrk-accent-solid-hover);
+}
+
+.jrk-btn--primary:active:not(:disabled) {
+  background: var(--jrk-accent-solid-active);
+}
+
+.jrk-btn--secondary {
+  background: var(--jrk-surface-default);
+  color: var(--jrk-text-primary);
+  border-color: var(--jrk-border-default);
+}
+
+.jrk-btn--secondary:hover:not(:disabled) {
+  background: var(--jrk-surface-hover);
+  border-color: var(--jrk-border-strong);
+}
+
+.jrk-btn--secondary:active:not(:disabled) {
+  background: var(--jrk-surface-active);
+}
+
+.jrk-btn--ghost {
+  background: transparent;
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-btn--ghost:hover:not(:disabled) {
+  background: var(--jrk-surface-hover);
+  color: var(--jrk-text-primary);
+}
+
+.jrk-btn--ghost:active:not(:disabled) {
+  background: var(--jrk-surface-active);
+}
+
+/* Destructive. Reserved for actions that lose data — never as an accent. */
+.jrk-btn--danger {
+  background: var(--jrk-status-critical-mark);
+  color: #ffffff;
+}
+
+.jrk-btn--danger:hover:not(:disabled) {
+  background: var(--jrk-status-critical-text);
+}
+
+.jrk-btn--danger-quiet {
+  background: transparent;
+  color: var(--jrk-status-critical-text);
+}
+
+.jrk-btn--danger-quiet:hover:not(:disabled) {
+  background: var(--jrk-status-critical-wash);
+}
+
+/* Reads as an inline link but keeps the button hit target and semantics. */
+.jrk-btn--link {
+  height: auto;
+  padding: 0;
+  background: none;
+  color: var(--jrk-text-link);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- loading ---------- */
+
+/* Content stays in flow at zero opacity so the button does not resize mid-action. */
+.jrk-btn[data-loading='true'] {
+  position: relative;
+  cursor: progress;
+  color: transparent;
+}
+
+.jrk-btn[data-loading='true'] > * {
+  opacity: 0;
+}
+
+.jrk-btn[data-loading='true']::after {
+  content: '';
+  position: absolute;
+  width: var(--jrk-icon-md);
+  height: var(--jrk-icon-md);
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: var(--jrk-radius-full);
+  color: var(--jrk-text-inverse);
+  animation: jrk-spin var(--jrk-duration-slow) linear infinite;
+}
+
+.jrk-btn--secondary[data-loading='true']::after,
+.jrk-btn--ghost[data-loading='true']::after {
+  color: var(--jrk-text-secondary);
+}
+
+@keyframes jrk-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- group ---------- */
+
+/* Segmented control / toolbar cluster. Buttons share borders, so only the
+   outer corners round. */
+.jrk-btn-group {
+  display: inline-flex;
+  isolation: isolate;
+}
+
+.jrk-btn-group > .jrk-btn {
+  border-radius: 0;
+  margin-inline-start: -1px;
+}
+
+.jrk-btn-group > .jrk-btn:first-child {
+  border-start-start-radius: var(--jrk-radius-md);
+  border-end-start-radius: var(--jrk-radius-md);
+  margin-inline-start: 0;
+}
+
+.jrk-btn-group > .jrk-btn:last-child {
+  border-start-end-radius: var(--jrk-radius-md);
+  border-end-end-radius: var(--jrk-radius-md);
+}
+
+/* Raise the focused and selected buttons so their border wins over neighbors. */
+.jrk-btn-group > .jrk-btn:focus-visible,
+.jrk-btn-group > .jrk-btn[aria-pressed='true'],
+.jrk-btn-group > .jrk-btn[aria-selected='true'] {
+  z-index: 1;
+}
+
+.jrk-btn-group > .jrk-btn[aria-pressed='true'],
+.jrk-btn-group > .jrk-btn[aria-selected='true'] {
+  background: var(--jrk-accent-wash);
+  color: var(--jrk-accent-wash-text);
+  border-color: var(--jrk-border-accent);
+}

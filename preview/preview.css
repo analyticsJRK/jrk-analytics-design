@@ -1,0 +1,273 @@
+/* Gallery chrome only — not part of the library. Keeps the preview pages
+   themselves out of the component CSS. */
+
+.gal-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-4);
+  padding: var(--jrk-space-3) var(--jrk-space-6);
+  background: var(--jrk-surface-default);
+  border-bottom: 1px solid var(--jrk-border-default);
+}
+
+.gal-nav__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-tight);
+}
+
+.gal-nav__mark {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  font-size: 11px;
+  font-weight: var(--jrk-weight-bold);
+  color: var(--jrk-text-inverse);
+  background: var(--jrk-accent-solid);
+  border-radius: var(--jrk-radius-md);
+}
+
+.gal-nav__links {
+  display: flex;
+  gap: var(--jrk-space-1);
+}
+
+.gal-nav a {
+  padding: var(--jrk-space-1_5) var(--jrk-space-3);
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-medium);
+  color: var(--jrk-text-secondary);
+  text-decoration: none;
+  border-radius: var(--jrk-radius-md);
+}
+
+.gal-nav a:hover {
+  background: var(--jrk-surface-hover);
+  color: var(--jrk-text-primary);
+}
+
+.gal-nav a[aria-current='page'] {
+  background: var(--jrk-accent-wash);
+  color: var(--jrk-accent-wash-text);
+}
+
+.gal-page {
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: var(--jrk-space-8) var(--jrk-space-6) var(--jrk-space-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-10);
+}
+
+.gal-page__head h1 {
+  margin-bottom: var(--jrk-space-2);
+}
+
+.gal-page__head p {
+  color: var(--jrk-text-muted);
+  max-width: 70ch;
+}
+
+.gal-sec {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-4);
+}
+
+.gal-sec > h2 {
+  padding-bottom: var(--jrk-space-2);
+  border-bottom: 1px solid var(--jrk-border-default);
+}
+
+.gal-sec__note {
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-muted);
+  max-width: 76ch;
+}
+
+/* A rule the library enforces. Called out so the reasoning travels with the
+   component instead of living only in a doc nobody opens. */
+.gal-rule {
+  padding: var(--jrk-space-3) var(--jrk-space-4);
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-secondary);
+  background: var(--jrk-surface-subtle);
+  border-inline-start: 3px solid var(--jrk-border-accent);
+  border-radius: 0 var(--jrk-radius-md) var(--jrk-radius-md) 0;
+  max-width: 80ch;
+}
+
+.gal-rule strong {
+  color: var(--jrk-text-primary);
+}
+
+.gal-demo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jrk-space-3);
+  padding: var(--jrk-space-5);
+  background: var(--jrk-surface-default);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-xl);
+}
+
+.gal-demo--stack {
+  flex-direction: column;
+  align-items: stretch;
+  /* Must reset the base's wrap: a COLUMN flex container with flex-wrap:wrap
+     goes multi-line, and align-content:stretch then inflates each line —
+     which silently stretched the field grid to 3x its content height. */
+  flex-wrap: nowrap;
+}
+
+.gal-demo--plain {
+  background: none;
+  border: 0;
+  padding: 0;
+}
+
+.gal-label {
+  width: 100%;
+  font-size: var(--jrk-text-2xs);
+  font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-caps);
+  text-transform: uppercase;
+  color: var(--jrk-text-muted);
+}
+
+/* ---------- token tables ---------- */
+
+.gal-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--jrk-space-2);
+}
+
+.gal-swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-1);
+  padding: var(--jrk-space-2);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-lg);
+  background: var(--jrk-surface-default);
+}
+
+.gal-swatch__chip {
+  height: 44px;
+  border-radius: var(--jrk-radius-md);
+  border: 1px solid var(--jrk-border-subtle);
+}
+
+.gal-swatch__name {
+  font-family: var(--jrk-font-mono);
+  font-size: var(--jrk-text-2xs);
+  color: var(--jrk-text-secondary);
+  word-break: break-all;
+}
+
+.gal-swatch__meta {
+  font-size: var(--jrk-text-2xs);
+  color: var(--jrk-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.gal-ramp {
+  display: flex;
+  border-radius: var(--jrk-radius-lg);
+  overflow: hidden;
+  border: 1px solid var(--jrk-border-default);
+}
+
+.gal-ramp > div {
+  flex: 1;
+  height: 48px;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 4px;
+  font-size: 9px;
+  font-family: var(--jrk-font-mono);
+}
+
+.gal-scale {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-3);
+}
+
+.gal-scale__row {
+  display: grid;
+  grid-template-columns: 90px 1fr;
+  align-items: baseline;
+  gap: var(--jrk-space-4);
+}
+
+.gal-scale__key {
+  font-family: var(--jrk-font-mono);
+  font-size: var(--jrk-text-2xs);
+  color: var(--jrk-text-muted);
+}
+
+.gal-space-bar {
+  height: 14px;
+  background: var(--jrk-accent-wash);
+  border-radius: 2px;
+}
+
+/* ---------- code ---------- */
+
+.gal-code {
+  padding: var(--jrk-space-3) var(--jrk-space-4);
+  font-family: var(--jrk-font-mono);
+  font-size: var(--jrk-text-xs);
+  line-height: var(--jrk-leading-relaxed);
+  color: var(--jrk-text-secondary);
+  background: var(--jrk-surface-subtle);
+  border: 1px solid var(--jrk-border-subtle);
+  border-radius: var(--jrk-radius-lg);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+/* ---------- gallery cards on the index ---------- */
+
+.gal-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--jrk-space-4);
+}
+
+.gal-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-1);
+  padding: var(--jrk-space-5);
+  text-decoration: none;
+  color: inherit;
+  background: var(--jrk-surface-default);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-xl);
+  transition: border-color 120ms, background-color 120ms;
+}
+
+.gal-card:hover {
+  border-color: var(--jrk-border-accent);
+  background: var(--jrk-surface-hover);
+}
+
+.gal-card__title {
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.gal-card__desc {
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-muted);
+}

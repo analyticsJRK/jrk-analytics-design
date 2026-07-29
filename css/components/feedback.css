@@ -1,0 +1,348 @@
+/* Feedback — alert, empty state, spinner, tooltip, modal, toast, menu. */
+
+/* ============================== alert ============================== */
+
+/* Inline, persistent message. Needs role="status" (or role="alert" for
+   critical) so it is announced, and an icon + heading so the status reads
+   without color. */
+.jrk-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--jrk-space-3);
+  padding: var(--jrk-space-3) var(--jrk-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--jrk-radius-lg);
+  background: var(--jrk-status-neutral-wash);
+  color: var(--jrk-text-primary);
+}
+
+.jrk-alert__icon {
+  width: var(--jrk-icon-lg);
+  height: var(--jrk-icon-lg);
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--jrk-status-neutral-text);
+}
+
+.jrk-alert__body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.jrk-alert__title {
+  font-size: var(--jrk-text-md);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-alert__text {
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-alert--good     { background: var(--jrk-status-good-wash); }
+.jrk-alert--warning  { background: var(--jrk-status-warning-wash); }
+.jrk-alert--serious  { background: var(--jrk-status-serious-wash); }
+.jrk-alert--critical { background: var(--jrk-status-critical-wash); }
+.jrk-alert--accent   { background: var(--jrk-accent-wash); }
+
+.jrk-alert--good .jrk-alert__icon     { color: var(--jrk-status-good-text); }
+.jrk-alert--warning .jrk-alert__icon  { color: var(--jrk-status-warning-text); }
+.jrk-alert--serious .jrk-alert__icon  { color: var(--jrk-status-serious-text); }
+.jrk-alert--critical .jrk-alert__icon { color: var(--jrk-status-critical-text); }
+.jrk-alert--accent .jrk-alert__icon   { color: var(--jrk-accent-wash-text); }
+
+/* ============================== empty state ============================== */
+
+/* Every data surface needs one. An empty table with no explanation reads as a
+   bug; say what would appear here and give the action that produces it. */
+.jrk-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--jrk-space-2);
+  padding: var(--jrk-space-12) var(--jrk-space-5);
+  text-align: center;
+}
+
+.jrk-empty__icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: var(--jrk-space-1);
+  stroke-width: 1.25;
+  color: var(--jrk-text-disabled);
+}
+
+.jrk-empty__title {
+  font-size: var(--jrk-text-lg);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-empty__text {
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-muted);
+  max-width: 46ch;
+}
+
+.jrk-empty__actions {
+  display: flex;
+  gap: var(--jrk-space-2);
+  margin-top: var(--jrk-space-2);
+}
+
+/* Compact variant for inside a chart card, where the tile height is fixed. */
+.jrk-empty--inline {
+  padding: var(--jrk-space-8) var(--jrk-space-4);
+}
+
+/* ============================== spinner ============================== */
+
+.jrk-spinner {
+  display: inline-block;
+  width: var(--jrk-icon-lg);
+  height: var(--jrk-icon-lg);
+  border: 2px solid var(--jrk-border-strong);
+  border-top-color: var(--jrk-accent-solid);
+  border-radius: var(--jrk-radius-full);
+  animation: jrk-spin 0.7s linear infinite;
+}
+
+.jrk-spinner--sm { width: var(--jrk-icon-sm); height: var(--jrk-icon-sm); }
+.jrk-spinner--lg { width: 32px; height: 32px; border-width: 3px; }
+
+/* A spinner alone announces nothing. Pair it with visible or sr-only text and
+   aria-busy on the region it covers. */
+.jrk-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--jrk-space-3);
+  padding: var(--jrk-space-10);
+  color: var(--jrk-text-muted);
+  font-size: var(--jrk-text-sm);
+}
+
+/* ============================== tooltip ============================== */
+
+/* Descriptive hint on hover/focus. NOT the chart tooltip — that one lives in
+   chart.css and carries values, not prose. */
+.jrk-tooltip {
+  position: absolute;
+  z-index: var(--jrk-z-tooltip);
+  max-width: 260px;
+  padding: var(--jrk-space-1_5) var(--jrk-space-2_5);
+  font-size: var(--jrk-text-xs);
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-inverse);
+  background: var(--jrk-surface-inverse);
+  border-radius: var(--jrk-radius-md);
+  box-shadow: var(--jrk-shadow-lg);
+  pointer-events: none;
+}
+
+/* ============================== popover / menu ============================== */
+
+.jrk-menu {
+  min-width: 180px;
+  padding: var(--jrk-space-1);
+  background: var(--jrk-surface-raised);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-lg);
+  box-shadow: var(--jrk-shadow-lg);
+  z-index: var(--jrk-z-popover);
+}
+
+.jrk-menu__item {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2_5);
+  width: 100%;
+  padding: var(--jrk-space-1_5) var(--jrk-space-2_5);
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-primary);
+  text-align: start;
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: var(--jrk-radius-md);
+  cursor: pointer;
+}
+
+.jrk-menu__item svg {
+  width: var(--jrk-icon-md);
+  height: var(--jrk-icon-md);
+  color: var(--jrk-text-muted);
+}
+
+.jrk-menu__item:hover {
+  background: var(--jrk-surface-hover);
+}
+
+.jrk-menu__item:disabled {
+  color: var(--jrk-text-disabled);
+  cursor: not-allowed;
+}
+
+.jrk-menu__item--danger {
+  color: var(--jrk-status-critical-text);
+}
+
+.jrk-menu__item--danger svg {
+  color: currentColor;
+}
+
+.jrk-menu__separator {
+  height: 1px;
+  margin: var(--jrk-space-1) 0;
+  background: var(--jrk-border-subtle);
+  border: 0;
+}
+
+.jrk-menu__label {
+  padding: var(--jrk-space-1_5) var(--jrk-space-2_5) var(--jrk-space-1);
+  font-size: var(--jrk-text-2xs);
+  font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-caps);
+  text-transform: uppercase;
+  color: var(--jrk-text-muted);
+}
+
+/* ============================== modal ============================== */
+
+/* Built on <dialog> so focus trapping, Esc, and inertness come from the
+   platform instead of a script that has to get them right. */
+.jrk-modal {
+  width: min(560px, calc(100vw - var(--jrk-space-8)));
+  max-height: calc(100vh - var(--jrk-space-16));
+  padding: 0;
+  color: var(--jrk-text-primary);
+  background: var(--jrk-surface-raised);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-2xl);
+  box-shadow: var(--jrk-shadow-xl);
+  overflow: hidden;
+}
+
+.jrk-modal::backdrop {
+  background: rgba(16, 21, 28, 0.5);
+  backdrop-filter: blur(2px);
+}
+
+.jrk-modal--sm { width: min(400px, calc(100vw - var(--jrk-space-8))); }
+.jrk-modal--lg { width: min(800px, calc(100vw - var(--jrk-space-8))); }
+
+.jrk-modal__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--jrk-space-4);
+  padding: var(--jrk-space-5) var(--jrk-space-5) var(--jrk-space-3);
+}
+
+.jrk-modal__title {
+  font-size: var(--jrk-text-xl);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-modal__body {
+  padding: 0 var(--jrk-space-5) var(--jrk-space-5);
+  overflow-y: auto;
+  font-size: var(--jrk-text-md);
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--jrk-space-2);
+  padding: var(--jrk-space-3) var(--jrk-space-5);
+  background: var(--jrk-surface-subtle);
+  border-top: 1px solid var(--jrk-border-subtle);
+}
+
+/* ============================== toast ============================== */
+
+.jrk-toast-region {
+  position: fixed;
+  bottom: var(--jrk-space-5);
+  inset-inline-end: var(--jrk-space-5);
+  z-index: var(--jrk-z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-2);
+  width: min(380px, calc(100vw - var(--jrk-space-8)));
+  pointer-events: none;
+}
+
+/* The region needs aria-live="polite" (or "assertive" for errors) on the
+   container, not on each toast — otherwise nothing is announced. */
+.jrk-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--jrk-space-3);
+  padding: var(--jrk-space-3) var(--jrk-space-4);
+  background: var(--jrk-surface-raised);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-lg);
+  box-shadow: var(--jrk-shadow-lg);
+  pointer-events: auto;
+  animation: jrk-toast-in var(--jrk-duration-base) var(--jrk-ease-enter);
+}
+
+.jrk-toast__icon {
+  width: var(--jrk-icon-md);
+  height: var(--jrk-icon-md);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.jrk-toast--good .jrk-toast__icon     { color: var(--jrk-status-good-text); }
+.jrk-toast--critical .jrk-toast__icon { color: var(--jrk-status-critical-text); }
+.jrk-toast--warning .jrk-toast__icon  { color: var(--jrk-status-warning-text); }
+
+.jrk-toast__body {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--jrk-text-sm);
+}
+
+.jrk-toast__title {
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-toast__text {
+  color: var(--jrk-text-secondary);
+}
+
+@keyframes jrk-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* ============================== progress ============================== */
+
+.jrk-progress {
+  display: block;
+  height: 6px;
+  background: var(--jrk-surface-active);
+  border-radius: var(--jrk-radius-full);
+  overflow: hidden;
+}
+
+.jrk-progress__fill {
+  display: block;
+  height: 100%;
+  background: var(--jrk-accent-solid);
+  border-radius: var(--jrk-radius-full);
+  transition: width var(--jrk-duration-slow) var(--jrk-ease-standard);
+}
+
+.jrk-progress--good .jrk-progress__fill     { background: var(--jrk-status-good-mark); }
+.jrk-progress--warning .jrk-progress__fill  { background: var(--jrk-status-warning-mark); }
+.jrk-progress--critical .jrk-progress__fill { background: var(--jrk-status-critical-mark); }

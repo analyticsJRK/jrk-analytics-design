@@ -1,0 +1,264 @@
+/* Data table — the core of an analytics surface.
+
+   Markup contract: a real <table> inside .jrk-table-wrap. The wrapper owns the
+   scroll so a wide table never scrolls the page body. Use <th scope="col">,
+   and put aria-sort on the sorted header. */
+
+.jrk-table-wrap {
+  overflow: auto;
+  max-width: 100%;
+  background: var(--jrk-surface-default);
+  border: 1px solid transparent;
+  border-radius: var(--jrk-radius-2xl);
+}
+
+.jrk-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: var(--jrk-text-sm);
+}
+
+.jrk-table caption {
+  padding: var(--jrk-space-3) var(--jrk-space-4);
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-muted);
+  text-align: start;
+}
+
+/* ---------- header ---------- */
+
+.jrk-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: var(--jrk-space-2_5) var(--jrk-space-4);
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-wide);
+  text-transform: uppercase;
+  text-align: start;
+  white-space: nowrap;
+  color: var(--jrk-text-muted);
+  background: var(--jrk-surface-subtle);
+  border-bottom: 1px solid var(--jrk-border-default);
+}
+
+/* Sortable headers are real buttons so keyboard and screen-reader users get
+   the same affordance as a mouse click. */
+.jrk-table__sort {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+  padding: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.jrk-table__sort:hover {
+  color: var(--jrk-text-primary);
+}
+
+.jrk-table__sort svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 2.5;
+  opacity: 0;
+  transition: opacity var(--jrk-transition);
+}
+
+.jrk-table__sort:hover svg {
+  opacity: 0.4;
+}
+
+/* The active sort column keeps its arrow visible and its label at full ink. */
+.jrk-table th[aria-sort] .jrk-table__sort {
+  color: var(--jrk-text-primary);
+}
+
+.jrk-table th[aria-sort] .jrk-table__sort svg {
+  opacity: 1;
+}
+
+.jrk-table th[aria-sort='descending'] .jrk-table__sort svg {
+  transform: rotate(180deg);
+}
+
+/* ---------- body ---------- */
+
+.jrk-table tbody td {
+  padding: var(--jrk-space-2_5) var(--jrk-space-4);
+  border-bottom: 1px solid var(--jrk-border-subtle);
+  vertical-align: middle;
+}
+
+.jrk-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.jrk-table tbody tr:hover td {
+  background: var(--jrk-surface-hover);
+}
+
+.jrk-table tbody tr[aria-selected='true'] td {
+  background: var(--jrk-accent-wash);
+}
+
+/* ---------- column alignment ---------- */
+
+/* Numbers right-align on tabular figures so digits stack. Text stays left. */
+.jrk-table .jrk-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.jrk-table .jrk-col-center {
+  text-align: center;
+}
+
+/* Row-identifying first column. Sticks horizontally so it stays visible while
+   the reader scrolls a wide table sideways. */
+.jrk-table--sticky-first th:first-child,
+.jrk-table--sticky-first td:first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 2;
+  background: var(--jrk-surface-default);
+  border-inline-end: 1px solid var(--jrk-border-default);
+}
+
+.jrk-table--sticky-first thead th:first-child {
+  z-index: 3;
+  background: var(--jrk-surface-subtle);
+}
+
+.jrk-table--sticky-first tbody tr:hover td:first-child {
+  background: var(--jrk-surface-hover);
+}
+
+/* ---------- density ---------- */
+
+.jrk-table--compact thead th,
+.jrk-table--compact tbody td {
+  padding-block: var(--jrk-space-1_5);
+}
+
+.jrk-table--comfortable thead th,
+.jrk-table--comfortable tbody td {
+  padding-block: var(--jrk-space-3);
+}
+
+/* Zebra striping is off by default — the row hairline already separates rows,
+   and stripes fight with the selected-row tint. Opt in for very wide tables. */
+.jrk-table--zebra tbody tr:nth-child(even) td {
+  background: var(--jrk-surface-subtle);
+}
+
+.jrk-table--zebra tbody tr:hover td {
+  background: var(--jrk-surface-hover);
+}
+
+/* ---------- in-cell bar ---------- */
+
+/* Magnitude inside a table cell. The number stays visible beside the bar —
+   the bar is a second encoding of a value the reader can still read. */
+.jrk-cell-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  justify-content: flex-end;
+}
+
+.jrk-cell-bar__track {
+  display: block;
+  flex: 1;
+  min-width: 40px;
+  max-width: 120px;
+  height: 6px;
+  background: var(--jrk-surface-active);
+  border-radius: var(--jrk-radius-full);
+  overflow: hidden;
+}
+
+/* display:block is load-bearing, not tidiness. These are <span>s inside a
+   table cell; an inline box ignores width and height, so the fill would
+   collapse to nothing and the bar would render as an empty track. */
+.jrk-cell-bar__fill {
+  display: block;
+  height: 100%;
+  background: var(--jrk-chart-1);
+  border-radius: var(--jrk-radius-full);
+}
+
+.jrk-cell-bar__value {
+  font-variant-numeric: tabular-nums;
+  min-width: 4ch;
+  text-align: right;
+}
+
+/* ---------- footer / pagination ---------- */
+
+.jrk-table-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jrk-space-3);
+  padding: var(--jrk-space-2_5) var(--jrk-space-4);
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-muted);
+  border-top: 1px solid var(--jrk-border-default);
+}
+
+.jrk-pagination {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+}
+
+/* ---------- selection column ---------- */
+
+.jrk-table__select {
+  width: 1%;
+  padding-inline-end: 0;
+}
+
+/* ---------- states ---------- */
+
+/* Skeleton rows keep the table's geometry while data loads, so the layout does
+   not jump when it arrives. */
+.jrk-table__skeleton td {
+  padding-block: var(--jrk-space-3);
+}
+
+.jrk-skeleton {
+  display: block;
+  height: 0.75em;
+  background: linear-gradient(
+    90deg,
+    var(--jrk-surface-active) 25%,
+    var(--jrk-surface-subtle) 50%,
+    var(--jrk-surface-active) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--jrk-radius-sm);
+  animation: jrk-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes jrk-shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .jrk-skeleton {
+    animation: none;
+    background: var(--jrk-surface-active);
+  }
+}
