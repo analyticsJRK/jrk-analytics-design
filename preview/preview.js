@@ -5,6 +5,7 @@ const PAGES = [
   ['foundations.html', 'Foundations'],
   ['components.html', 'Components'],
   ['charts.html', 'Charts'],
+  ['report.html', 'Report'],
   ['dashboard.html', 'Dashboard'],
 ];
 

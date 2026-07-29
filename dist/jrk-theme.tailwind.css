@@ -13,6 +13,7 @@
   --color-surface-subtle: var(--jrk-surface-subtle);
   --color-surface-raised: var(--jrk-surface-raised);
   --color-surface-inverse: var(--jrk-surface-inverse);
+  --color-surface-banner: var(--jrk-surface-banner);
   --color-surface-hover: var(--jrk-surface-hover);
   --color-surface-active: var(--jrk-surface-active);
   --color-surface-disabled: var(--jrk-surface-disabled);
@@ -21,6 +22,8 @@
   --color-ink-muted: var(--jrk-text-muted);
   --color-ink-disabled: var(--jrk-text-disabled);
   --color-ink-inverse: var(--jrk-text-inverse);
+  --color-ink-on-banner: var(--jrk-text-onBanner);
+  --color-ink-on-banner-muted: var(--jrk-text-onBannerMuted);
   --color-ink-link: var(--jrk-text-link);
   --color-border-subtle: var(--jrk-border-subtle);
   --color-border-default: var(--jrk-border-default);

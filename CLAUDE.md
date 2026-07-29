@@ -69,6 +69,16 @@ CVD separation — the spread has to survive; only the mean can move.
 `light` and `dark` entry chosen for that surface. Do not compute one from the
 other.
 
+**`.jrk-sheet` is a grid, not a table, and that is on purpose.** One shared
+`--jrk-sheet-cols` track list is the only way a single Excel-style column bar can
+align with many stacked metric blocks. Do not "fix" it into a `<table>`, and do
+not set the track list per row. Because it is a grid, ARIA roles are mandatory:
+`role="grid"` / `row` / `rowheader` / `gridcell`, with the letter bar and number
+gutter `aria-hidden` (they are a coordinate system, not data).
+
+In a sheet, tone comes from the metric's `inverted` flag, never from the sign of
+the number — for delinquency or an expense variance, down is the good outcome.
+
 ## Layout gotchas that have already bitten
 
 - **`display: block` on bar fills is load-bearing.** `.jrk-cell-bar__fill` and

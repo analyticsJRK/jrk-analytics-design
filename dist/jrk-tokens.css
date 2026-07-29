@@ -53,6 +53,7 @@
   --jrk-surface-subtle: #eeeef5;
   --jrk-surface-raised: #ffffff;
   --jrk-surface-inverse: #1e1e2b;
+  --jrk-surface-banner: #353781;
   --jrk-surface-hover: #eeeef5;
   --jrk-surface-active: #e7e7f0;
   --jrk-surface-disabled: #eeeef5;
@@ -61,6 +62,8 @@
   --jrk-text-muted: #5f5f73;
   --jrk-text-disabled: #9a9ab0;
   --jrk-text-inverse: #ffffff;
+  --jrk-text-on-banner: #ffffff;
+  --jrk-text-on-banner-muted: #b9bbe8;
   --jrk-text-link: #4c4fb5;
   --jrk-border-subtle: #eaeaf2;
   --jrk-border-default: #e2e2ec;
@@ -190,6 +193,15 @@
   --jrk-container-md: 960px;
   --jrk-container-lg: 1280px;
   --jrk-container-xl: 1600px;
+  --jrk-sheet-row: 26px;
+  --jrk-sheet-row-banner: 30px;
+  --jrk-sheet-row-meta: 38px;
+  --jrk-sheet-gutter: 34px;
+  --jrk-sheet-label: 104px;
+  --jrk-sheet-cell: 78px;
+  --jrk-sheet-total: 96px;
+  --jrk-sheet-wide: 116px;
+  --jrk-sheet-chart: 300px;
   --jrk-min-touch: 44px;
   --jrk-duration-instant: 0ms;
   --jrk-duration-fast: 120ms;
@@ -226,6 +238,7 @@
     --jrk-surface-subtle: #212121;
     --jrk-surface-raised: #262626;
     --jrk-surface-inverse: #eeeef5;
+    --jrk-surface-banner: #2e2e2e;
     --jrk-surface-hover: #212121;
     --jrk-surface-active: #292929;
     --jrk-surface-disabled: #1f1f1f;
@@ -234,6 +247,8 @@
     --jrk-text-muted: #8f8f8f;
     --jrk-text-disabled: #5c5c5c;
     --jrk-text-inverse: #141414;
+    --jrk-text-on-banner: #f5f5f5;
+    --jrk-text-on-banner-muted: #a8a8a8;
     --jrk-text-link: #b3b9f0;
     --jrk-border-subtle: #262626;
     --jrk-border-default: #303030;
@@ -304,6 +319,7 @@
     --jrk-surface-subtle: #212121;
     --jrk-surface-raised: #262626;
     --jrk-surface-inverse: #eeeef5;
+    --jrk-surface-banner: #2e2e2e;
     --jrk-surface-hover: #212121;
     --jrk-surface-active: #292929;
     --jrk-surface-disabled: #1f1f1f;
@@ -312,6 +328,8 @@
     --jrk-text-muted: #8f8f8f;
     --jrk-text-disabled: #5c5c5c;
     --jrk-text-inverse: #141414;
+    --jrk-text-on-banner: #f5f5f5;
+    --jrk-text-on-banner-muted: #a8a8a8;
     --jrk-text-link: #b3b9f0;
     --jrk-border-subtle: #262626;
     --jrk-border-default: #303030;

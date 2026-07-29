@@ -1,0 +1,480 @@
+/* Sheet — spreadsheet-style report rendering.
+ *
+ * For dense financial reports that mirror a workbook: a year of months across,
+ * many years down, totals and growth columns on the right, and a chart riding
+ * alongside. The AM Report is the reference case.
+ *
+ * WHY A GRID AND NOT A TABLE
+ * The Excel-style column bar (A, B, C…) and the continuous row-number gutter
+ * span the WHOLE report, across many stacked metric blocks. A per-block
+ * <table> cannot align with one global column bar without duplicating the
+ * track widths in a <colgroup>. One grid with a single shared track list makes
+ * the alignment structural instead of coincidental.
+ *
+ * The cost is that semantics have to be declared rather than inherited, so the
+ * markup contract is not optional:
+ *
+ *   <div class="jrk-sheet" role="grid" aria-label="AM Report — Summit at Red Rocks">
+ *     <div class="jrk-sheet__colbar" aria-hidden="true"> … A B C … </div>
+ *     <div class="jrk-sheet__row" role="row">
+ *       <div class="jrk-sheet__gutter" aria-hidden="true">4</div>
+ *       <div class="jrk-sheet__cell" role="rowheader">2024</div>
+ *       <div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell">$506,212</div>
+ *     </div>
+ *   </div>
+ *
+ * The column bar and the row-number gutter are spreadsheet affordances, not
+ * data — they carry aria-hidden so a screen reader gets the report, not the
+ * coordinate system. Every real header cell still needs role="columnheader"
+ * or role="rowheader".
+ *
+ * TRACK LIST
+ * Every row shares --jrk-sheet-cols. Override it on .jrk-sheet to change the
+ * shape of the report; do not set it per row, or the column bar stops lining
+ * up with the data underneath it. */
+
+.jrk-sheet {
+  /* gutter · label · 12 months · total · ytd · yoy · cagr · chart */
+  --jrk-sheet-cols:
+    var(--jrk-sheet-gutter)
+    var(--jrk-sheet-label)
+    repeat(12, minmax(var(--jrk-sheet-cell), 1fr))
+    var(--jrk-sheet-total)
+    var(--jrk-sheet-total)
+    var(--jrk-sheet-wide)
+    var(--jrk-sheet-wide)
+    minmax(var(--jrk-sheet-chart), 1.6fr);
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  max-width: 100%;
+  max-height: var(--jrk-sheet-height, 82vh);
+  background: var(--jrk-surface-default);
+  border-radius: var(--jrk-radius-xl);
+  /* Dense reports want crisp edges, not the app's soft type. */
+  font-size: var(--jrk-text-2xs);
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-primary);
+}
+
+/* ============================== toolbar ============================== */
+
+.jrk-sheet__toolbar {
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  padding: var(--jrk-space-2) var(--jrk-space-3);
+  background: var(--jrk-surface-canvas);
+  border-bottom: 1px solid var(--jrk-border-default);
+}
+
+/* ============================== column bar ============================== */
+
+/* The A…Y strip. Sticky on both axes so it survives horizontal scrolling. */
+.jrk-sheet__colbar {
+  position: sticky;
+  top: var(--jrk-sheet-toolbar-h, 0px);
+  z-index: 30;
+  display: grid;
+  grid-template-columns: var(--jrk-sheet-cols);
+  background: var(--jrk-surface-subtle);
+  border-bottom: 1px solid var(--jrk-border-strong);
+}
+
+.jrk-sheet__col {
+  padding: 3px 0;
+  text-align: center;
+  font-size: 9px;
+  font-weight: var(--jrk-weight-medium);
+  color: var(--jrk-text-muted);
+  border-inline-end: 1px solid var(--jrk-border-subtle);
+  user-select: none;
+}
+
+/* The corner cell above the row-number gutter — sticky on both axes, so it
+   parks over the gutter rather than scrolling away from it. */
+.jrk-sheet__colbar > .jrk-sheet__col:first-child {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 1;
+  background: var(--jrk-surface-subtle);
+}
+
+/* ============================== rows ============================== */
+
+.jrk-sheet__row {
+  display: grid;
+  grid-template-columns: var(--jrk-sheet-cols);
+  min-height: var(--jrk-sheet-row);
+  border-bottom: 1px solid var(--jrk-border-subtle);
+}
+
+/* Row-number gutter. Frozen to the left edge like a workbook's. */
+.jrk-sheet__gutter {
+  position: sticky;
+  inset-inline-start: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--jrk-text-muted);
+  background: var(--jrk-surface-subtle);
+  border-inline-end: 1px solid var(--jrk-border-default);
+  user-select: none;
+}
+
+.jrk-sheet__cell {
+  display: flex;
+  align-items: center;
+  padding: 0 var(--jrk-space-1_5);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Numbers right-align on tabular figures so digits stack down the column —
+   the entire point of a financial sheet. */
+.jrk-sheet__cell--num {
+  justify-content: flex-end;
+  font-variant-numeric: tabular-nums;
+}
+
+.jrk-sheet__cell--center { justify-content: center; }
+
+/* The row-label column (year, metric name). Frozen beside the gutter. */
+.jrk-sheet__cell--label {
+  position: sticky;
+  inset-inline-start: var(--jrk-sheet-gutter);
+  z-index: 10;
+  font-weight: var(--jrk-weight-medium);
+  background: inherit;
+  border-inline-end: 1px solid var(--jrk-border-default);
+}
+
+/* A sticky cell inherits `background: inherit`, which is transparent unless the
+   row paints one. Rows therefore carry an explicit fill — without it the frozen
+   label column shows the scrolling data sliding underneath it. */
+.jrk-sheet__row {
+  background: var(--jrk-surface-default);
+}
+
+/* ============================== gridlines ============================== */
+
+/* Off by default: the row hairline is enough separation, and a full grid of
+   rules is most of what makes a spreadsheet feel like one. Turn on for parity
+   with the workbook. */
+.jrk-sheet--gridlines .jrk-sheet__cell {
+  border-inline-end: 1px solid var(--jrk-border-subtle);
+}
+
+/* ============================== title bar ============================== */
+
+.jrk-sheet__title {
+  display: grid;
+  grid-template-columns: var(--jrk-sheet-cols);
+  min-height: var(--jrk-sheet-row-banner);
+  background: var(--jrk-surface-banner);
+  color: var(--jrk-text-on-banner);
+}
+
+.jrk-sheet__title .jrk-sheet__gutter {
+  background: var(--jrk-surface-banner);
+  color: var(--jrk-text-on-banner-muted);
+  border-inline-end-color: rgba(255, 255, 255, 0.15);
+}
+
+.jrk-sheet__title-code {
+  display: flex;
+  align-items: center;
+  padding-inline: var(--jrk-space-3);
+  font-weight: var(--jrk-weight-bold);
+  letter-spacing: var(--jrk-tracking-wide);
+}
+
+/* Spans the remaining tracks so the property name centers over the data. */
+.jrk-sheet__title-name {
+  grid-column: 3 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-bold);
+  letter-spacing: var(--jrk-tracking-wide);
+  text-transform: uppercase;
+}
+
+/* ============================== metadata strip ============================== */
+
+.jrk-sheet__meta {
+  display: grid;
+  grid-template-columns: var(--jrk-sheet-cols);
+  min-height: var(--jrk-sheet-row-meta);
+  background: var(--jrk-surface-banner);
+  color: var(--jrk-text-on-banner);
+}
+
+.jrk-sheet__meta .jrk-sheet__gutter {
+  background: var(--jrk-surface-banner);
+  color: var(--jrk-text-on-banner-muted);
+  border-inline-end-color: rgba(255, 255, 255, 0.15);
+}
+
+/* The fields flow across the remaining tracks rather than being pinned to
+   columns — there are more fields than the grid has useful slots, and they are
+   labelled pairs, not positional data. */
+.jrk-sheet__meta-cells {
+  grid-column: 2 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.jrk-sheet__meta-cell {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  flex: 1 1 auto;
+  min-width: 96px;
+  padding: var(--jrk-space-1) var(--jrk-space-2_5);
+  border-inline-end: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.jrk-sheet__meta-label {
+  font-size: 8px;
+  font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-caps);
+  text-transform: uppercase;
+  color: var(--jrk-text-on-banner-muted);
+}
+
+.jrk-sheet__meta-value {
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+/* ============================== section band ============================== */
+
+/* "FINANCIALS". Deliberately lighter than the title bar — in the workbook every
+   band is the same heavy navy, which flattens the hierarchy so nothing leads. */
+.jrk-sheet__band {
+  display: grid;
+  grid-template-columns: var(--jrk-sheet-cols);
+  min-height: var(--jrk-sheet-row-banner);
+  background: var(--jrk-surface-tinted);
+  border-block: 1px solid var(--jrk-border-default);
+}
+
+.jrk-sheet__band .jrk-sheet__gutter {
+  background: var(--jrk-surface-tinted);
+}
+
+.jrk-sheet__band-label {
+  grid-column: 2 / -1;
+  display: flex;
+  align-items: center;
+  padding-inline: var(--jrk-space-3);
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-bold);
+  letter-spacing: var(--jrk-tracking-caps);
+  text-transform: uppercase;
+  color: var(--jrk-text-primary);
+}
+
+/* Subsection band — revenue / expenses / capital. */
+.jrk-sheet__band--sub {
+  background: var(--jrk-surface-subtle);
+}
+
+.jrk-sheet__band--sub .jrk-sheet__gutter { background: var(--jrk-surface-subtle); }
+
+.jrk-sheet__band--sub .jrk-sheet__band-label {
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-secondary);
+}
+
+/* ============================== metric block ============================== */
+
+.jrk-sheet__block-head {
+  display: grid;
+  grid-template-columns: var(--jrk-sheet-cols);
+  min-height: var(--jrk-sheet-row);
+  background: var(--jrk-surface-subtle);
+  border-bottom: 1px solid var(--jrk-border-strong);
+  font-size: 9px;
+  font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-caps);
+  text-transform: uppercase;
+  color: var(--jrk-text-muted);
+}
+
+.jrk-sheet__block-head .jrk-sheet__gutter { background: var(--jrk-surface-subtle); }
+
+.jrk-sheet__block-head .jrk-sheet__cell--label {
+  background: var(--jrk-surface-subtle);
+  color: var(--jrk-text-primary);
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-bold);
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.jrk-sheet__block-head .jrk-sheet__cell {
+  justify-content: flex-end;
+}
+
+/* The small ordinal beside a metric name. */
+.jrk-sheet__block-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 14px;
+  height: 14px;
+  margin-inline-end: var(--jrk-space-1_5);
+  padding-inline: 3px;
+  font-size: 9px;
+  font-weight: var(--jrk-weight-bold);
+  color: var(--jrk-accent-wash-text);
+  background: var(--jrk-accent-wash);
+  border-radius: var(--jrk-radius-sm);
+}
+
+/* ============================== special rows ============================== */
+
+/* Budget row — a plan, not an actual. Tinted so the eye never confuses the two. */
+.jrk-sheet__row--budget {
+  background: var(--jrk-status-warning-wash);
+  border-block: 1px solid var(--jrk-border-default);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-sheet__row--budget .jrk-sheet__gutter,
+.jrk-sheet__row--budget .jrk-sheet__cell--label {
+  background: var(--jrk-status-warning-wash);
+}
+
+/* Variance row — signed deltas against budget, smaller and lighter so it reads
+   as an annotation on the row above rather than another data row. */
+.jrk-sheet__row--variance {
+  min-height: 20px;
+  font-size: 9px;
+}
+
+.jrk-sheet__row--variance .jrk-sheet__cell--label {
+  font-weight: var(--jrk-weight-regular);
+  font-style: italic;
+  color: var(--jrk-text-muted);
+}
+
+/* Totals / current-year emphasis. */
+.jrk-sheet__row--total {
+  font-weight: var(--jrk-weight-semibold);
+  border-top: 1px solid var(--jrk-border-strong);
+}
+
+.jrk-sheet__row:hover {
+  background: var(--jrk-surface-hover);
+}
+
+.jrk-sheet__row:hover .jrk-sheet__gutter,
+.jrk-sheet__row:hover .jrk-sheet__cell--label {
+  background: var(--jrk-surface-hover);
+}
+
+/* ============================== value tone ============================== */
+
+/* Direction is carried by the sign, which is always printed. The color only
+   reinforces it — and `pos`/`neg` mean GOOD/BAD, not up/down, because for
+   delinquency or expense variance a decrease is the good outcome. Pick the
+   class from the metric's `inverted` flag, never from the sign. */
+.jrk-sheet__val--pos { color: var(--jrk-chart-delta-up); font-weight: var(--jrk-weight-semibold); }
+.jrk-sheet__val--neg { color: var(--jrk-chart-delta-down); font-weight: var(--jrk-weight-semibold); }
+.jrk-sheet__val--flat { color: var(--jrk-text-muted); }
+
+/* A figure the source workbook did not supply. An empty cell is ambiguous —
+   it reads as zero. */
+.jrk-sheet__val--empty::after {
+  content: '–';
+  color: var(--jrk-text-disabled);
+}
+
+/* Threshold shading, from the metric's own green/amber cut-offs. Always paired
+   with the printed number, so the fill is reinforcement and never the value. */
+.jrk-sheet__cell--good     { background: var(--jrk-status-good-wash); }
+.jrk-sheet__cell--warning  { background: var(--jrk-status-warning-wash); }
+.jrk-sheet__cell--critical { background: var(--jrk-status-critical-wash); }
+
+/* ============================== chart cell ============================== */
+
+/* A block is one grid so a single chart can span every row of it. The rows
+   become subgrid participants, which is what keeps their cells aligned with
+   the global column bar. */
+.jrk-sheet__block {
+  display: grid;
+  grid-template-columns: var(--jrk-sheet-cols);
+}
+
+.jrk-sheet__block > .jrk-sheet__row,
+.jrk-sheet__block > .jrk-sheet__block-head {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+}
+
+/* When the block carries a chart, the rows stop one track short so the last
+   track is free for it. Without this the rows occupy the chart's column and
+   auto-placement drops the chart into a band BELOW the block. */
+.jrk-sheet__block:has(> .jrk-sheet__chart) > .jrk-sheet__row,
+.jrk-sheet__block:has(> .jrk-sheet__chart) > .jrk-sheet__block-head {
+  grid-column: 1 / -2;
+}
+
+/* Rides the last track, pinned to the block's first row. `span var(--span)` and
+   not `1 / -1`: the rows are implicit, so -1 does not resolve to the end of
+   them. --span is the block's row count. */
+.jrk-sheet__chart {
+  grid-column: -2 / -1;
+  grid-row: 1 / span var(--span, 1);
+  display: flex;
+  align-items: center;
+  padding: var(--jrk-space-2);
+  border-inline-start: 1px solid var(--jrk-border-default);
+  background: var(--jrk-surface-default);
+  overflow: hidden;
+}
+
+.jrk-sheet__chart .jrk-chart {
+  width: 100%;
+}
+
+/* ============================== print ============================== */
+
+@media print {
+  .jrk-sheet {
+    max-height: none;
+    overflow: visible;
+    font-size: 8px;
+  }
+
+  .jrk-sheet__toolbar { display: none; }
+
+  /* Frozen panes are a screen affordance; on paper they would print the label
+     column over the data. */
+  .jrk-sheet__gutter,
+  .jrk-sheet__cell--label,
+  .jrk-sheet__colbar {
+    position: static;
+  }
+
+  .jrk-sheet__row { break-inside: avoid; }
+  .jrk-sheet__band { break-after: avoid; }
+}

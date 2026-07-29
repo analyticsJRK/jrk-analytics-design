@@ -1,0 +1,311 @@
+<!-- @dsCard group="Sheet" name="Workbook-style report grid" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Report — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="preview.css">
+</head>
+<body>
+
+<div class="gal-page" style="max-width:none">
+  <header class="gal-page__head">
+    <h1>Sheet</h1>
+    <p>
+      Spreadsheet-style report rendering for dense financial output — a year of months
+      across, many years down, totals and growth on the right, a chart alongside.
+      Frozen row numbers and column letters, like the workbook it mirrors.
+      Scroll it sideways: the gutter, the year column, and the letter bar all stay put.
+    </p>
+  </header>
+
+  <div class="jrk-row" style="gap:var(--jrk-space-4);flex-wrap:wrap">
+    <label class="jrk-switch"><input type="checkbox" role="switch" id="t-grid"><span class="jrk-check__label">Workbook gridlines</span></label>
+    <label class="jrk-switch"><input type="checkbox" role="switch" id="t-cols" checked><span class="jrk-check__label">Column letters</span></label>
+    <label class="jrk-switch"><input type="checkbox" role="switch" id="t-thresh" checked><span class="jrk-check__label">Threshold shading</span></label>
+  </div>
+
+  <div class="jrk-sheet" id="sheet" role="grid" aria-label="AM Report — Summit at Red Rocks"></div>
+
+  <section class="gal-sec">
+    <h2>What was modernised</h2>
+    <div class="gal-rule">
+      <strong>Hierarchy instead of uniform navy.</strong> In the workbook the title bar,
+      the metadata strip and every section band are the same heavy fill, so nothing leads.
+      Here the title and metadata keep the strong band, section headers step down to a
+      tint, and metric headers step down again — the page now has an outline you can scan.
+    </div>
+    <div class="gal-rule">
+      <strong>Gridlines are optional.</strong> A full grid of rules is most of what makes a
+      spreadsheet feel like one. The row hairline already separates rows, so the rules are
+      off by default and available for parity with the source workbook.
+    </div>
+    <div class="gal-rule">
+      <strong>Sign first, color second.</strong> Variance and growth cells always print the
+      signed number; the green/red only reinforces it. And the tone comes from the metric's
+      <code class="jrk-mono">inverted</code> flag, not the sign — for delinquency or an
+      expense variance, down is the good outcome.
+    </div>
+    <div class="gal-rule">
+      <strong>Frozen panes are a screen affordance.</strong> They unfreeze under
+      <code class="jrk-mono">@media print</code>, because a sticky label column printed over
+      the data is worse than no freeze at all.
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Markup contract</h2>
+    <p class="gal-sec__note">
+      This is a CSS grid, not a <code class="jrk-mono">&lt;table&gt;</code> — one shared
+      track list is what lets a single column bar align with every stacked block. Semantics
+      therefore have to be declared. The letter bar and the number gutter are
+      <code class="jrk-mono">aria-hidden</code>: they are a coordinate system, not data.
+    </p>
+    <pre class="gal-code">&lt;div class="jrk-sheet" role="grid" aria-label="AM Report — Summit at Red Rocks"&gt;
+
+  &lt;div class="jrk-sheet__colbar" aria-hidden="true"&gt;
+    &lt;span class="jrk-sheet__col"&gt;&lt;/span&gt;&lt;span class="jrk-sheet__col"&gt;A&lt;/span&gt; …
+  &lt;/div&gt;
+
+  &lt;div class="jrk-sheet__row" role="row"&gt;
+    &lt;div class="jrk-sheet__gutter" aria-hidden="true"&gt;5&lt;/div&gt;
+    &lt;div class="jrk-sheet__cell jrk-sheet__cell--label" role="rowheader"&gt;2024&lt;/div&gt;
+    &lt;div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell"&gt;$506,212&lt;/div&gt;
+    …
+  &lt;/div&gt;
+&lt;/div&gt;</pre>
+    <p class="gal-sec__note">
+      Change the report's shape by overriding <code class="jrk-mono">--jrk-sheet-cols</code>
+      on <code class="jrk-mono">.jrk-sheet</code> — never per row, or the letter bar stops
+      lining up with the data under it.
+    </p>
+  </section>
+</div>
+
+<script type="module" src="preview.js"></script>
+<script type="module">
+const MONTHS = ['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+
+/* One letter per data track, derived from the track list rather than typed out
+   — a hardcoded A..Y overflows a 19-track grid and wraps onto a second row. */
+const DATA_TRACKS = 1 /* label */ + 12 /* months */ + 4 /* total, ytd, yoy, cagr */ + 1 /* chart */;
+const LETTERS = Array.from({ length: DATA_TRACKS }, (_, i) => String.fromCharCode(65 + i));
+
+const META = [
+  ['City','Golden'],['State','CO'],['Zip','80401'],['Units','316'],['Year Built','1973'],
+  ['Acquisition Date','01/01/1993'],['Fund','EK23'],['Region','CO - Denver'],
+  ['Asset Manager','Max McCoy'],['Director of Ops','Allison Evans'],['Analyst','Parker Raymond'],
+  ['Last Visit','2020-01-01'],['Last Updated','02/23/2026'],['Property Rating','Green'],['Latest Data','2026-06'],
+];
+
+/* Deterministic pseudo-data — no Math.random, so the page renders identically
+   every time and screenshots stay diffable. */
+function series(seed, base, growth, noise) {
+  let s = seed;
+  const rnd = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
+  const out = {};
+  for (let yr = 2014; yr <= 2026; yr++) {
+    const months = [];
+    const n = yr === 2026 ? 7 : 12;
+    for (let m = 0; m < n; m++) {
+      const t = (yr - 2014) + m / 12;
+      months.push(Math.round(base * (1 + growth * t) * (1 + (rnd() - 0.5) * noise)));
+    }
+    out[yr] = months;
+  }
+  return out;
+}
+
+const fmtUSD = (n) => (n < 0 ? '-' : '') + '$' + Math.abs(Math.round(n)).toLocaleString();
+const fmtPct = (n) => (n > 0 ? '+' : '') + n.toFixed(2) + '%';
+
+/* The variance row carries two figures in one 78px cell, so the dollar side is
+   compacted. Truncating it instead would clip the leading "$" and the digits
+   that matter — the exact figure stays available in the CSV export. */
+const fmtUSDk = (n) => {
+  const a = Math.abs(n), sign = n < 0 ? '-' : '+';
+  if (a >= 1e6) return `${sign}$${(a / 1e6).toFixed(1)}M`;
+  if (a >= 1e3) return `${sign}$${Math.round(a / 1e3)}K`;
+  return `${sign}$${Math.round(a)}`;
+};
+const fmtPct1 = (n) => (n > 0 ? '+' : '') + n.toFixed(1) + '%';
+const sum = (a) => a.reduce((x, y) => x + y, 0);
+
+/* Row numbers run continuously down the whole sheet, exactly as the workbook
+   does — the gutter is a coordinate, not a per-block index. */
+let ROW = 0;
+const gutter = () => `<div class="jrk-sheet__gutter" aria-hidden="true">${++ROW}</div>`;
+
+function metricBlock(num, label, data, opts = {}) {
+  const { inverted = false, budget = null, thresholds = true } = opts;
+  const years = Object.keys(data).map(Number);
+  let html = `<div class="jrk-sheet__block">`;
+
+  // header
+  html += `<div class="jrk-sheet__block-head" role="row">${gutter()}
+    <div class="jrk-sheet__cell jrk-sheet__cell--label" role="columnheader">
+      <span class="jrk-sheet__block-num">${num}</span>${label}
+    </div>
+    ${MONTHS.map(m => `<div class="jrk-sheet__cell" role="columnheader">${m}</div>`).join('')}
+    <div class="jrk-sheet__cell" role="columnheader">TOTAL</div>
+    <div class="jrk-sheet__cell" role="columnheader">YTD</div>
+    <div class="jrk-sheet__cell" role="columnheader">YOY YTD %</div>
+    <div class="jrk-sheet__cell" role="columnheader">CAGR / AVG</div>
+  </div>`;
+
+  let prevYtd = null;
+  years.forEach((yr) => {
+    const v = data[yr];
+    const total = sum(v);
+    const ytd = sum(v.slice(0, 7));
+    const yoy = prevYtd === null ? null : ((ytd - prevYtd) / Math.abs(prevYtd)) * 100;
+    prevYtd = ytd;
+
+    // `inverted` decides the tone, not the sign — for an expense metric a
+    // decrease is the good outcome.
+    const toneOf = (n) => {
+      if (n === null) return '';
+      const good = inverted ? n < 0 : n > 0;
+      return good ? 'jrk-sheet__val--pos' : 'jrk-sheet__val--neg';
+    };
+
+    let cells = '';
+    for (let m = 0; m < 12; m++) {
+      if (v[m] === undefined) { cells += `<div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell"><span class="jrk-sheet__val--empty"></span></div>`; continue; }
+      const bad = thresholds && v[m] < 0;
+      cells += `<div class="jrk-sheet__cell jrk-sheet__cell--num${bad ? ' jrk-sheet__cell--critical' : ''}" role="gridcell">${fmtUSD(v[m])}</div>`;
+    }
+
+    html += `<div class="jrk-sheet__row" role="row">${gutter()}
+      <div class="jrk-sheet__cell jrk-sheet__cell--label" role="rowheader">${yr}</div>
+      ${cells}
+      <div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell">${fmtUSD(total)}</div>
+      <div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell">${fmtUSD(ytd)}</div>
+      <div class="jrk-sheet__cell jrk-sheet__cell--num ${toneOf(yoy)}" role="gridcell">${yoy === null ? '' : fmtPct(yoy)}</div>
+      <div class="jrk-sheet__cell jrk-sheet__cell--num ${toneOf(yoy)}" role="gridcell">${yoy === null ? '' : fmtPct(yoy * 0.72)}</div>
+    </div>`;
+  });
+
+  if (budget) {
+    html += `<div class="jrk-sheet__row jrk-sheet__row--budget" role="row">${gutter()}
+      <div class="jrk-sheet__cell jrk-sheet__cell--label" role="rowheader">Budget 2026</div>
+      ${budget.map(b => `<div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell">${fmtUSD(b)}</div>`).join('')}
+      <div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell">${fmtUSD(sum(budget))}</div>
+      <div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell">${fmtUSD(sum(budget.slice(0, 7)))}</div>
+      <div class="jrk-sheet__cell" role="gridcell"></div>
+      <div class="jrk-sheet__cell" role="gridcell"></div>
+    </div>`;
+
+    const act = data[2026];
+    html += `<div class="jrk-sheet__row jrk-sheet__row--variance" role="row">${gutter()}
+      <div class="jrk-sheet__cell jrk-sheet__cell--label" role="rowheader">Variance</div>
+      ${budget.map((b, i) => {
+        if (act[i] === undefined) return `<div class="jrk-sheet__cell" role="gridcell"></div>`;
+        const d = act[i] - b;
+        const pct = (d / Math.abs(b)) * 100;
+        const good = inverted ? d < 0 : d > 0;
+        return `<div class="jrk-sheet__cell jrk-sheet__cell--num ${good ? 'jrk-sheet__val--pos' : 'jrk-sheet__val--neg'}" role="gridcell" title="${fmtUSD(d)} (${fmtPct(pct)})">${fmtUSDk(d)} ${fmtPct1(pct)}</div>`;
+      }).join('')}
+      <div class="jrk-sheet__cell" role="gridcell"></div>
+      <div class="jrk-sheet__cell" role="gridcell"></div>
+      <div class="jrk-sheet__cell" role="gridcell"></div>
+      <div class="jrk-sheet__cell" role="gridcell"></div>
+    </div>`;
+  }
+
+  // Chart rides the last track, spanning every row of the block.
+  const spark = years.map(yr => sum(data[yr]));
+  html += `<div class="jrk-sheet__chart" style="--span:${years.length + (budget ? 3 : 1)}">${miniChart(spark, years)}</div>`;
+  html += `</div>`;
+  return html;
+}
+
+/* Small trend chart. One series, so no legend — the block's own label names it. */
+function miniChart(vals, years) {
+  const W = 300, H = 150, pad = 22;
+  const mn = Math.min(...vals, 0), mx = Math.max(...vals);
+  const x = i => pad + i * (W - pad * 1.4) / (vals.length - 1);
+  const y = v => H - pad - ((v - mn) / (mx - mn || 1)) * (H - pad * 1.7);
+  const d = vals.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  // Least-squares fit, drawn dashed so it reads as a reference, not as data.
+  const n = vals.length, sx = (n - 1) * n / 2, sy = sum(vals);
+  const sxy = vals.reduce((a, v, i) => a + i * v, 0), sxx = vals.reduce((a, _, i) => a + i * i, 0);
+  const m = (n * sxy - sx * sy) / (n * sxx - sx * sx), b = (sy - m * sx) / n;
+  return `<div class="jrk-chart"><svg viewBox="0 0 ${W} ${H}" role="img"
+      aria-label="Annual trend, ${years[0]} to ${years[years.length - 1]}. Values in the rows to the left.">
+    <g class="jrk-grid">${[0, 0.5, 1].map(f => `<line x1="${pad}" x2="${W - pad * 0.4}" y1="${y(mn + f * (mx - mn))}" y2="${y(mn + f * (mx - mn))}"/>`).join('')}</g>
+    <g class="jrk-s1">
+      <path class="jrk-threshold" d="M${x(0)},${y(b)} L${x(n - 1)},${y(m * (n - 1) + b)}"/>
+      <path class="jrk-line" d="${d}"/>
+      <circle class="jrk-dot" cx="${x(n - 1)}" cy="${y(vals[n - 1])}" r="4"/>
+    </g>
+    <text class="jrk-chart__tick" x="${pad}" y="${H - 6}">${years[0]}</text>
+    <text class="jrk-chart__tick" x="${W - pad * 0.4}" y="${H - 6}" text-anchor="end">${years[years.length - 1]}</text>
+  </svg></div>`;
+}
+
+/* ---------------- assemble ---------------- */
+const noi = series(7, 250000, 0.085, 0.16);
+const cf = series(31, 240000, 0.075, 0.20);
+noi[2022][0] = -146645;            // the workbook's real outlier
+cf[2022][0] = -9932201;
+
+const budgetNOI = [454646,446527,435619,428330,449513,460933,470436,471109,468934,470600,469593,469020];
+const budgetCF  = [420170,326489,309431,413301,424378,445639,455222,433929,444255,455420,454678,454105];
+
+let html = '';
+
+html += `<div class="jrk-sheet__toolbar">
+  <button class="jrk-btn jrk-btn--secondary jrk-btn--sm">AM Report</button>
+  <select class="jrk-select jrk-select--sm jrk-select--filled" style="min-width:260px" aria-label="Property">
+    <option>6TH — Summit at Red Rocks</option><option>7TH — Harbor Point</option>
+  </select>
+  <span class="jrk-spacer"></span>
+  <span class="jrk-badge jrk-badge--accent">54 months</span>
+  <button class="jrk-btn jrk-btn--secondary jrk-btn--sm">Export CSV</button>
+</div>`;
+
+html += `<div class="jrk-sheet__colbar" aria-hidden="true">
+  <span class="jrk-sheet__col"></span>${LETTERS.map(l => `<span class="jrk-sheet__col">${l}</span>`).join('')}
+</div>`;
+
+html += `<div class="jrk-sheet__title" role="row">${gutter()}
+  <div class="jrk-sheet__title-code" role="rowheader">6TH</div>
+  <div class="jrk-sheet__title-name" role="gridcell">Summit at Red Rocks</div>
+</div>`;
+
+html += `<div class="jrk-sheet__meta" role="row">${gutter()}
+  <div class="jrk-sheet__meta-cells">
+    ${META.map(([l, v]) => `<div class="jrk-sheet__meta-cell" role="gridcell">
+      <span class="jrk-sheet__meta-label">${l}</span><span class="jrk-sheet__meta-value">${v}</span></div>`).join('')}
+  </div>
+</div>`;
+
+html += `<div class="jrk-sheet__band" role="row">${gutter()}
+  <div class="jrk-sheet__band-label" role="rowheader">Financials</div></div>`;
+
+html += metricBlock(1, 'AM NOI', noi, { budget: budgetNOI });
+html += metricBlock(2, 'AM Cash Flow', cf, { budget: budgetCF });
+
+document.getElementById('sheet').innerHTML = html;
+
+/* Park the column bar directly under the sticky toolbar. offsetHeight, not
+   contentRect.height — the toolbar has vertical padding, and the content box
+   is 16px shorter than the space it actually occupies, which parks the letter
+   bar underneath the toolbar where it is invisible. */
+const sheet = document.getElementById('sheet');
+const tb = sheet.querySelector('.jrk-sheet__toolbar');
+const syncToolbar = () => sheet.style.setProperty('--jrk-sheet-toolbar-h', `${tb.offsetHeight}px`);
+new ResizeObserver(syncToolbar).observe(tb);
+syncToolbar();
+
+document.getElementById('t-grid').onchange = e => sheet.classList.toggle('jrk-sheet--gridlines', e.target.checked);
+document.getElementById('t-cols').onchange = e =>
+  sheet.querySelector('.jrk-sheet__colbar').style.display = e.target.checked ? '' : 'none';
+document.getElementById('t-thresh').onchange = e =>
+  sheet.querySelectorAll('.jrk-sheet__cell--critical').forEach(c => c.style.background = e.target.checked ? '' : 'transparent');
+</script>
+</body>
+</html>

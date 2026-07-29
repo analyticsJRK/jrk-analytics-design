@@ -79,6 +79,7 @@ scripts/build-tokens.mjs    -> dist/ (CSS vars, Tailwind @theme, typed TS)
 scripts/validate-colors.mjs the color gate — six checks + WCAG, both themes
 scripts/check-css.mjs       brace balance, token typos, raw-hex discipline
 css/                        plain-CSS library, works with no build step
+css/components/sheet.css    workbook-style report grid (the AM Report shape)
 react/src/                  React wrappers over the same class names
 preview/                    static gallery — no build step
 dist/                       GENERATED — never hand-edit
@@ -158,6 +159,29 @@ dark were tuned independently because their bands differ (light 0.43–0.77 is
 much wider than dark 0.48–0.67). Pushing further fails: light hits the adjacent
 CVD floor, dark runs out of lightness band.
 
+### Dense reports use the sheet layer, not the table
+
+`.jrk-table` is for ordinary tables. `.jrk-sheet` is for workbook-style reports —
+a year of months across, many years down, totals and growth on the right, and a
+chart spanning the block. The AM Report is the reference case.
+
+It is a **CSS grid, not a `<table>`**, and that is deliberate: the Excel-style
+column bar and the row-number gutter span the whole report across many stacked
+metric blocks, and a per-block `<table>` cannot align with one global column bar
+without duplicating track widths in a `<colgroup>`. One shared track list
+(`--jrk-sheet-cols`) makes the alignment structural.
+
+The cost is that semantics must be declared — `role="grid"`, `role="row"`,
+`role="rowheader"`, `role="gridcell"`. The letter bar and the number gutter are
+`aria-hidden`: they are a coordinate system, not data.
+
+Override `--jrk-sheet-cols` on `.jrk-sheet` to change the report's shape. Never
+per row, or the letter bar stops lining up with the data under it.
+
+Sheet density is deliberately tighter than the rest of the library (26px rows,
+11px type). A financial report's job is to get a year of months on one screen,
+and the app's normal row heights make that impossible.
+
 ### The series palette is never cycled
 
 Eight slots in a fixed order. The **order** is the colorblind-safety
@@ -201,6 +225,166 @@ A fixed viewBox stretched by `width: 100%` scales the text and strokes with it �
 12px axis labels land near 18px on a wide card and hairlines stop being
 hairlines. `<LineChart>` measures with a `ResizeObserver` so user units stay 1:1
 with CSS pixels. Hand-written chart SVGs must do the same.
+
+---
+
+## Using this with Claude
+
+A design system fails the same way whether a person or a model is building
+against it: someone reaches for a hex that "looks about right." What makes this
+library work with Claude is that most of its rules are **machine-checkable** —
+`npm test` either passes or it doesn't, so an agent gets a correction signal
+instead of a vibe.
+
+### The loop that actually works
+
+Give Claude the rules, then give it the feedback:
+
+```
+1. Claude writes UI                    -> jrk-* classes / React components
+2. npm test                            -> tokens, hex discipline, color gate, types
+3. npm run preview + screenshot        -> layout, both themes
+4. Claude fixes what it sees, repeat
+```
+
+Step 3 is not optional. The gates check color and structure and **never check
+layout** — every layout bug found while building this library (a bar fill
+collapsing to zero height, chart text rendering 50% oversized, a grid stretching
+to 3× its content) was invisible to `npm test` and obvious in a screenshot.
+
+Headless capture, no dependencies:
+
+```bash
+npm run preview   # http://localhost:4321/preview/index.html
+chrome --headless --disable-gpu --virtual-time-budget=4000 \
+  --window-size=1200,1500 --screenshot=out.png \
+  http://localhost:4321/preview/dashboard.html
+```
+
+Capture at roughly the page's real width. A downscaled screenshot makes correct
+2px marks and 1px hairlines look broken, which sends the agent chasing bugs that
+aren't there.
+
+### Option 1 — CLAUDE.md in the consuming app
+
+Cheapest path. In the app repo's `CLAUDE.md`:
+
+```markdown
+## UI
+
+Use @jrk/design. Never write a raw hex, a raw px radius, or a one-off gray —
+every value comes from a `--jrk-*` token. Components are `jrk-*` classes or the
+React exports. Full rules: ../jrk-analytics-design/CLAUDE.md
+```
+
+The catch: CLAUDE.md loads into context on **every** turn, so it has to stay
+short, and a short version drops the reasoning that stops the failure modes.
+
+### Option 2 — a skill (recommended)
+
+A skill's body loads **only when it's used**, so the full rules and reference
+material cost almost nothing until Claude is actually building UI. That is the
+whole reason to prefer it over CLAUDE.md for something this long.
+
+```
+.claude/skills/jrk-design/
+├── SKILL.md              # the rules — loaded when relevant
+└── references/
+    ├── components.md     # class/prop reference per component
+    ├── charts.md         # form choice, the two color sets, mark specs
+    └── tokens.md         # the token namespaces and when to use each
+```
+
+`SKILL.md`:
+
+```yaml
+---
+name: jrk-design
+description: >
+  JRK analytics design library — design tokens, jrk-* CSS classes, React
+  components, and the automated color gate. Use when building or restyling any
+  UI in a JRK app (dashboard, table, chart, form, app shell), or when choosing
+  any color, spacing, radius, or chart palette value.
+paths: "**/*.tsx,**/*.jsx,**/*.css,**/templates/**/*.html"
+---
+
+## Non-negotiables
+
+- Never write a raw hex, rgb(), or one-off gray. Every value is a `--jrk-*`
+  token. `npm run check:css` fails on a raw hex in a component file.
+- Changing a design value means editing `tokens/tokens.json` and running
+  `npm run build`. `dist/` is generated — never hand-edit it.
+- `--jrk-chart-1..8` carry series identity and are colorblind-validated.
+  `--jrk-chart-tint-1..8` are pastel fills for marks that are ALREADY labelled.
+  They are not interchangeable.
+- The palette is never cycled. A 9th series folds into "Other" or facets.
+- Color is never the only signal: status needs icon + label, deltas state
+  direction in text, every chart has a table view.
+- No dual-axis charts.
+
+## Before finishing
+
+Run `npm test`. Then screenshot the result in BOTH themes — the gates do not
+check layout.
+
+See `references/` for the component and chart specifics.
+```
+
+Put it at `.claude/skills/` in the repo (shared with the team, and picked up by
+cloud sessions) rather than `~/.claude/skills/` (your machine only, and not read
+by Cowork or scheduled runs). Claude Code hot-reloads skill changes without a
+restart.
+
+The `paths` field means Claude loads it automatically when touching a component
+or stylesheet, and leaves it out of context entirely when you're editing a
+Lambda handler.
+
+### Option 3 — `--add-dir`
+
+When you want Claude to change the library *and* the app in one session:
+
+```bash
+claude --add-dir ../jrk-analytics-design
+```
+
+It reads this repo's `CLAUDE.md`, and can run the gates directly after a token
+change.
+
+### Sharing the library visually
+
+`/design-sync` pushes the preview pages to a claude.ai Design System project, so
+teammates can browse the components in the Design System pane and Claude can
+read them back as a reference. The gallery pages are already the right shape for
+this — self-contained HTML per component group. Nothing has been pushed yet.
+
+### Prompting that works
+
+Anchor on the component and the constraint, not on the appearance:
+
+| Instead of | Ask for |
+|---|---|
+| "make a dashboard with blue cards" | "build a portfolio overview using `StatRow`, a `ChartCard` with `LineChart`, and a `DataTable`" |
+| "make the chart colors softer" | "soften the categorical palette as far as `npm run validate` allows, then show me what the binding constraint was" |
+| "add a status column" | "add a status column using `Badge` — status tones, so it renders the icon" |
+| "check it looks right" | "screenshot `/preview/dashboard.html` in both themes and fix what's wrong" |
+
+### Failure modes to watch for
+
+These are the ones that slip past a quick read of the diff:
+
+- **A tint used for identity.** `--jrk-chart-tint-*` on an unlabelled
+  multi-series line or a scatter. Legal-looking, quietly unreadable, and **no
+  gate catches it** — the tints are deliberately exempt from the CVD check.
+- **A 9th series.** `seriesColor(8)` throws, but hand-written CSS can just
+  invent a hue. Check that a chart with many series folded or facetted.
+- **Inline `style={{ color: '#...' }}` in a React file.** `check:css` only scans
+  `css/` — it will not catch a hex in a `.tsx`.
+- **"Fixing" a WARN.** The four standing warnings are documented relief cases,
+  not bugs. An agent told to "make the validator clean" may re-step a correct
+  color to chase them.
+- **Softening by flattening lightness.** The categorical palette is already at
+  the softest passing setting. Making the slots uniformly pale collapses
+  colorblind separation, because that separation comes mostly from lightness.
 
 ---
 

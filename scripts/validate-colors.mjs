@@ -93,6 +93,18 @@ for (const mode of ['light', 'dark']) {
             : fail(`accent.washText on accent.wash ${mode} ${cw.toFixed(2)}:1 — needs 4.5:1`);
 }
 
+// The sheet banner is a filled band carrying text, so both its ink steps are
+// measured against the band itself, not against the page.
+for (const mode of ['light', 'dark']) {
+  const band = T.color.surface.banner[mode];
+  for (const key of ['onBanner', 'onBannerMuted']) {
+    const c = contrast(T.color.text[key][mode], band);
+    const need = key === 'onBanner' ? 4.5 : 4.5;
+    c >= need ? pass(`text.${key} on surface.banner ${mode} ${c.toFixed(2)}:1`)
+              : fail(`text.${key} on surface.banner ${mode} ${c.toFixed(2)}:1 — needs ${need}:1`);
+  }
+}
+
 // Focus ring is a non-text UI indicator: 3:1 against every surface it lands on.
 for (const mode of ['light', 'dark']) {
   for (const [n, bg] of [['surface', SURFACE[mode]], ['canvas', CANVAS[mode]], ['subtle', T.color.surface.subtle[mode]]]) {

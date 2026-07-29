@@ -92,6 +92,7 @@ addFlat('icon', T.size.icon);
 addFlat('sidebar', T.size.sidebar);
 addFlat('topbar', T.size.topbar);
 addFlat('container', T.size.container);
+addFlat('sheet', T.size.sheet);
 add('min-touch', T.size.minTouch);
 addFlat('duration', T.motion.duration);
 addFlat('ease', T.motion.easing);
