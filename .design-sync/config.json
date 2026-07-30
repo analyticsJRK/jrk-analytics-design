@@ -15,8 +15,10 @@
   "overrides": {
     "BarList": { "cardMode": "column" },
     "Tag": { "cardMode": "column" },
-    "Card": { "cardMode": "column" }
+    "Card": { "cardMode": "column" },
+    "ChartCard": { "cardMode": "column" }
   },
+  "runtimeFontPrefixes": ["SF Pro", "SF Mono"],
   "extraFonts": [
     ".ds-sync/node_modules/@fontsource/inter/latin-400.css",
     ".ds-sync/node_modules/@fontsource/inter/latin-500.css",

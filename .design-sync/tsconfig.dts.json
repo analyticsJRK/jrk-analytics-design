@@ -6,7 +6,12 @@
     "emitDeclarationOnly": true,
     "declarationMap": false,
     "outDir": "../dist/types",
-    "rootDir": "../react/src",
+    // Repo root, not react/src: Icon.tsx imports the generated `dist/icons.ts`,
+    // which tsc pulls into the program as a source file. A rootDir of react/src
+    // puts it outside the tree and fails the emit with TS6059. Widening keeps
+    // the emit structural — declarations land at dist/types/react/src/* and
+    // dist/types/dist/*, which is why the index shim resolves the deeper path.
+    "rootDir": "..",
     "skipLibCheck": true
   },
   "include": ["../react/src/**/*"]

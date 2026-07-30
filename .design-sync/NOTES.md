@@ -32,6 +32,26 @@ converter needs three things this repo doesn't naturally produce, so
 All four outputs are gitignored and regenerated. Nothing in prepare.mjs mutates
 the library's committed files.
 
+## The declaration emit needs a repo-root `rootDir`
+
+`.design-sync/tsconfig.dts.json` used `rootDir: ../react/src`. When `Icon` landed
+it imported the generated `../../dist/icons`, tsc pulled that `.ts` into the
+program as a source file, and the emit died with **TS6059** (`not under rootDir`)
+— while the repo's own `npm run typecheck` stayed green, because it sets
+`noEmit` and no `rootDir`. So the library looks healthy and only the sync breaks.
+
+`rootDir` is now the repo root, which makes the emit structural:
+`dist/types/react/src/*.d.ts` + `dist/types/dist/*.d.ts`. The `index.d.ts` shim
+prepare.mjs writes therefore points at **`./dist/types/react/src/index`**, not
+`./dist/types/index` — the two must be changed together.
+
+prepare.mjs also `rmSync`s `dist/types/` before the emit. tsc only overwrites
+what it emits, so the pre-change flat tree (`dist/types/Badge.d.ts`, …) survived
+alongside the new nested one and left a second resolvable `index.d.ts`.
+
+**Any future component importing from `dist/` is fine now**, but a component
+importing from outside the repo root would fail the same way.
+
 ## Fresh-clone setup
 
 `react` is an **optional peer dep and is not installed** by `npm ci` (the repo
@@ -66,7 +86,22 @@ node .ds-sync/package-validate.mjs ./ds-bundle
 
 ## Fonts
 
-Tokens name `Inter` and `JetBrains Mono`; the repo ships **no `@font-face`**.
+**`SF Pro` / `SF Mono` in the stack are deliberate and unshippable.**
+`tokens.json` now leads both stacks with the Apple system families
+(`-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Inter, …`),
+with its own `$comment` explaining why: Apple hardware gets the real face, and
+Inter is the closest widely-available analogue for everyone else. Apple publishes
+no SF webfont and the outlines are theirs — the same reason this library ships no
+SF Symbols — so they can never go in `fonts/`.
+
+That made validate print `[FONT_MISSING] "SF Pro Text", "SF Pro Display"`. The
+resolution is **`cfg.runtimeFontPrefixes: ["SF Pro", "SF Mono"]`**, which is the
+honest one: the families resolve from the OS at runtime, and the shipped Inter /
+JetBrains Mono webfonts are the real fallback, not a substitute anyone chose
+under duress. **This is not a substitution to re-litigate** — do not try to
+"fix" it by sourcing an SF lookalike.
+
+Tokens also name `Inter` and `JetBrains Mono`; the repo ships **no `@font-face`**.
 Both are SIL OFL, so weights 400/500/600/700 (Inter) and 400/500 (mono) are
 bundled from `@fontsource` via `cfg.extraFonts`. Only the weights the CSS
 actually uses are wired — check `grep -r font-weight css/` before adding more.
@@ -78,6 +113,10 @@ from the src path — which is `react/src` for every component, and both segment
 are on the converter's generic-dir list, so **all 34 would land in one `general`
 group**. `.design-sync/docs/<Name>.md` holds a frontmatter-only stub per
 component (`category` + `keywords`) purely to set the group.
+
+Groups in use: `Actions`, `Charts`, `Feedback`, `Forms`, `Metrics`, `Shell`,
+`Status`, `Surfaces`, `Tables`, plus **`Foundations`** (Icon) and **`Layout`**
+(List, ListRow), added Jul 2026.
 
 Keep them frontmatter-only. A stub with a **body** replaces the synthesized
 `.prompt.md` body, which would discard the `## Examples` section (the authored
@@ -115,6 +154,24 @@ here** — `css/` and `react/src/` were left untouched.
   nests `.jrk-chart > .jrk-bars`, so the requirement is real but undocumented.
   Suggested fix: `.jrk-bars { --series: var(--jrk-chart-1) }`. All `BarList`
   preview cells wrap explicitly.
+- **Every `.jrk-icon` is a block box, so a bare `<Icon/>` in flowing text takes
+  its own line.** `css/base.css:41` includes `svg` in the media reset
+  (`display: block; max-width: 100%`), and `css/components/icon.css` never sets
+  `display` — so `.jrk-icon`'s `vertical-align: -0.14em` (icon.css:42), which
+  exists precisely to seat the glyph on the text baseline, is **inert**. The
+  file's own header comment claims icons "inherit font-size and sit on the text
+  baseline"; half of that is not true as shipped. Measured in the `Icon`
+  preview: `<Icon name="checkFill" /> Caption text, 12px` renders the glyph on a
+  separate line above the label. The `em` sizing itself works correctly.
+  It hides everywhere the DS composes icons itself — `.jrk-btn`,
+  `.jrk-nav-item`, `.jrk-list__row`, `.jrk-badge` are all flex containers, so a
+  block child still sits in the row — which is why it survived to here.
+  Suggested fix: `.jrk-icon { display: inline-block }` (one line, no JS change),
+  or scope the base reset to `svg:not(.jrk-icon)`, matching the
+  `svg:not(.jrk-icon)` idiom the component CSS already uses for sizing.
+  **Consequence for previews: pair an icon with its label inside `jrk-row`.**
+  `previews/Icon.tsx` `ScalesWithText` does this, and `conventions.md` carries it
+  as a live trap so the design agent does too.
 - **`data-collapsed="false"` is unreachable from React.** `shell.css` collapses
   `.jrk-sidebar:not([data-collapsed='false'])` under 1024px, but `Shell.tsx`
   renders `data-collapsed={collapsed || undefined}` — never the string `"false"`.
@@ -198,13 +255,36 @@ here** — `css/` and `react/src/` were left untouched.
 
 ## Known render warns (expected — not new)
 
-None outstanding. The four warns from the pre-authoring build
-(`[RENDER_THIN]` on ChartCard/Stat/Sidebar, `[RENDER_BLANK]` on Sparkline) were
-all floor-card artifacts and cleared once previews were authored. A warn not
-listed here is new — investigate it, then fix or record it.
+**None outstanding — the final build prints `✓ bundle is complete` with no
+warning count at all.** A warn of any kind is new; investigate, then fix or
+record it here.
+
+Two warns appeared in the Jul 2026 sync and were **resolved by config**, so they
+should not return. Do not re-diagnose them from scratch if they do:
+
+- `[FONT_MISSING] "SF Pro Text", "SF Pro Display"` → `cfg.runtimeFontPrefixes`.
+  See **Fonts** above; this is deliberate, not a gap.
+- `[GRID_OVERFLOW] ChartCard (WithActions)` → `cfg.overrides.ChartCard.cardMode
+  = "column"`. That export puts a 30d/QTD/YTD ButtonGroup **and** the "Show
+  table" toggle in the header, which is wider than a multi-column grid cell, so
+  the product card cropped it. Column mode gives each export the full card
+  width. `BarList`, `Tag` and `Card` were already column for the same reason —
+  **any new export that puts controls beside a title will need it too.**
+
+The four original pre-authoring warns (`[RENDER_THIN]` on ChartCard/Stat/Sidebar,
+`[RENDER_BLANK]` on Sparkline) were floor-card artifacts and cleared once
+previews were authored.
 
 ## Re-sync risks — what can silently go stale
 
+- **A new component that imports from outside `react/src/` can break the
+  declaration emit** — see the `rootDir` section at the top. The failure is
+  TS6059 from prepare.mjs while `npm test` stays green, so it looks like a
+  design-sync bug rather than a repo one. `dist/` imports are covered now.
+- **`.design-sync/tsconfig.dts.json` and the `index.d.ts` shim string in
+  prepare.mjs are coupled.** Changing `rootDir` moves where `index.d.ts` is
+  emitted; both must move together or the converter reports `[ZERO_MATCH]` while
+  exiting 0.
 - **The prep step is not part of the driver.** `resync.mjs` does not run
   `prepare.mjs` for you. Skip it after editing `tokens.json`, a component, or
   `css/`, and the sync ships a stale bundle, stale `.d.ts`, or stale flattened
@@ -228,6 +308,12 @@ listed here is new — investigate it, then fix or record it.
   workflow. **Reconcile these before the next sync** or the two will fight over
   which project is canonical. There is also an older project literally named
   "Design System" holding a raw source dump.
+- **Authored previews are not gated on placeholder content.** Two of the three
+  previews added Jul 2026 shipped literal `t3_pct` / `value` in their trailing
+  value column (`List.WithDetail`, `ListRow.Variants`). Every mechanical check
+  passed — the cells render, are styled, are the right height — because no gate
+  reads the *words*. Only reading the sheet catches it. **Read every new
+  preview's sheet before grading it `good`.**
 - Only Inter/mono **latin** subsets ship. A non-latin glyph falls back silently.
 - The `preview/*.html` gallery and `.design-sync/previews/*.tsx` are now two
   parallel sets of examples. A component API change needs both updated; nothing
