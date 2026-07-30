@@ -3,14 +3,13 @@
   "globalName": "JrkDesign",
   "projectId": "6ae6f5da-9e47-47eb-9e46-7d3cc6aa361a",
   "shape": "package",
-  "buildCmd": "npm run build",
+  "buildCmd": "node .design-sync/prepare.mjs",
   "srcDir": "react/src",
   "tsconfig": "tsconfig.json",
-  "cssEntry": "css/index.css",
-  "tokensGlob": "dist/jrk-tokens.css",
+  "cssEntry": ".design-sync/.cache/jrk-flat.css",
+  "docsDir": ".design-sync/docs",
   "guidelinesGlob": [
-    ".claude/skills/jrk-design/SKILL.md",
-    ".claude/skills/jrk-design/references/*.md"
+    "guides/*.md"
   ],
   "extraFonts": [
     ".ds-sync/node_modules/@fontsource/inter/latin-400.css",

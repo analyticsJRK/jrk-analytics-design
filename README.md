@@ -350,12 +350,61 @@ claude --add-dir ../jrk-analytics-design
 It reads this repo's `CLAUDE.md`, and can run the gates directly after a token
 change.
 
-### Sharing the library visually
+### Keeping the claude.ai Design System project in sync
 
-`/design-sync` pushes the preview pages to a claude.ai Design System project, so
-teammates can browse the components in the Design System pane and Claude can
-read them back as a reference. The gallery pages are already the right shape for
-this — self-contained HTML per component group. Nothing has been pushed yet.
+The library is mirrored to a claude.ai **Design System** project so teammates can
+browse the gallery and Claude can read it back as a reference.
+
+**The sync is one-way and manual: repo → claude.ai. This repo is the source of
+truth.** There is no watcher, no hook, and no automatic push. Anything edited in
+the Design System pane is overwritten by the next sync, so don't edit there.
+
+To publish an update:
+
+```bash
+npm run sync:check     # verifies the tree is publishable, prints the path list
+```
+
+Then, in a Claude session in this repo, ask it to sync the design system and
+approve the plan. Claude runs `list_files` → `finalize_plan` → `write_files`; the
+plan shows you the exact paths and the source directory before anything uploads.
+
+`sync:check` guards the failure modes that are otherwise silent:
+
+| Check | Why it matters |
+|---|---|
+| `dist/` is current | It's generated. Push preview pages against a stale `dist/jrk-tokens.css` and the hosted gallery renders **old colors** while the repo is correct — nothing anywhere reports it. |
+| `check:css` + `validate` pass | Don't publish a failing palette as the reference. |
+| working tree clean | Publishing uncommitted work means git and claude.ai disagree, and git is what people diff. |
+| every preview page has a `@dsCard` marker | The pane builds its card index from that first-line comment. A page without one uploads fine and then never appears as a card. |
+
+#### What to re-push after a change
+
+| You changed | Re-push |
+|---|---|
+| a token | `npm run build` first, then `dist/*` + `tokens/tokens.json` (+ any CSS you touched) |
+| a component's CSS | that file, and `css/index.css` if you added an import |
+| a new component | its CSS, `css/index.css`, its React file, `react/src/index.ts`, and the preview page |
+| a gallery page | just that page |
+| the `jrk-design` skill | **nothing** — see below |
+
+Simplest correct habit: run `sync:check` and push the whole list. It's 43 files
+and the upload reads them straight from disk, so a full push costs nothing and
+can't leave a half-updated project.
+
+#### Things that will surprise you
+
+- **`.claude/**` and `CLAUDE.md` are refused**, by design — they carry
+  instructions to the design agent. The skill reaches teammates through **git
+  only**, which is the correct home for it anyway.
+- **Deletions need to be in the plan.** Removing a component from the repo does
+  not remove it from the project; the path has to be listed in the plan's
+  `deletes`. Say so when you ask for the sync.
+- **This can't be a cron job.** The push authenticates through your interactive
+  claude.ai login, which isn't available in headless or scheduled runs. Treat it
+  as a release step, not automation.
+- **A renamed preview page leaves the old card behind** until the old path is
+  deleted.
 
 ### Prompting that works
 

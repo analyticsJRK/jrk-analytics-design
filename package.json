@@ -24,15 +24,20 @@
     "check:css": "node scripts/check-css.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "preview": "node scripts/serve-preview.mjs",
-    "test": "npm run build && npm run check:css && npm run validate && npm run typecheck"
+    "test": "npm run build && npm run check:css && npm run validate && npm run typecheck",
+    "sync:check": "node scripts/sync-manifest.mjs"
   },
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
   },
   "peerDependenciesMeta": {
-    "react": { "optional": true },
-    "react-dom": { "optional": true }
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
