@@ -16,9 +16,21 @@ const { AppShell, Sidebar, Card, Button } = window.JrkDesign;
 
 **Theme.** Light is the default. Switch with `window.JrkDesign.setTheme('dark')`
 (`'light' | 'dark' | 'system'`), which stamps `data-theme` on `<html>`. An
-explicit stamp beats the OS preference in both directions. The two modes are
-**not the same palette**: light is a white page with gray-purple (`#f5f5fa`)
-cards; dark is a true black page with neutral shadow-grey (`#1a1a1a`) tiles.
+explicit stamp beats the OS preference in both directions.
+
+The look is **Apple** — macOS/iOS grouped surfaces, Apple system greys,
+systemIndigo accent, compact non-touch density for 1920x1080 desktop. The two
+modes are **not the same palette** and dark is selected, never computed:
+
+| | Light | Dark |
+|---|---|---|
+| page plane | `#f2f2f7` | `#000000` |
+| card | `#ffffff` | `#1c1c1e` |
+| popover / input | `#ffffff` | `#2c2c2e` |
+
+The page is tinted and the **cards are white** — Apple grouped style, the
+reverse of a conventional dashboard. Because of that, **the card is the chart
+surface**, so marks are measured against `#ffffff` / `#1c1c1e`, never the page.
 Never hand-pick a color for one mode.
 
 ## The styling idiom — classes and tokens, NOT utilities or style props
@@ -44,7 +56,7 @@ Classes follow `jrk-block__element--modifier`. Tokens follow `--jrk-<group>-<nam
 `jrk-table-wrap` `jrk-num` `jrk-cell-bar` `jrk-app` `jrk-sidebar` `jrk-main`
 `jrk-topbar` `jrk-content` `jrk-nav-item` `jrk-page-header` `jrk-tabs` `jrk-tab`
 `jrk-alert` `jrk-empty` `jrk-spinner` `jrk-chart` `jrk-chart-card` `jrk-bars`
-`jrk-legend` `jrk-sheet`
+`jrk-legend` `jrk-sheet` `jrk-icon` `jrk-list`
 
 **Tokens you will reach for most** — never a raw hex, never a ramp step:
 surfaces `--jrk-surface-canvas|default|tinted|subtle|raised` · text
@@ -70,7 +82,7 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
 - **Every data surface needs an `Empty`** — say what would appear and give the
   action that produces it.
 
-## Two live traps
+## Three live traps
 
 - **Do not put an SVG inside a `jrk-grid` container.** `chart.css` scopes
   `.jrk-grid line, .jrk-grid path` to the chart gridline group, and the layout
@@ -81,6 +93,13 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
   `background: var(--series)`, declared only on `.jrk-chart`; without it the bars
   compute to `transparent` and vanish with no error. `ChartCard` alone does not
   supply it — wrap in `<div className="jrk-chart">`.
+- **Pair `Icon` with its label in a flex row, not in flowing text.** The base
+  reset makes every `svg` a block box, so `<Icon /> Label` dropped straight into
+  a paragraph puts the glyph on its own line. `jrk-btn`, `jrk-nav-item` and
+  `jrk-list__row` are already flex, so icons inside them are fine; anywhere else
+  wrap the pair in `jrk-row`. Icons are sized in `em` — they take the size and
+  weight of the text beside them, so set `font-size` on the container, not the
+  icon.
 
 ## Where the truth is
 
