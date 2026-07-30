@@ -20,7 +20,10 @@
       "Bash(gh pr create --title 'Sync Icon, List and ListRow to the Design System project' --body ' *)",
       "Bash(awk '{print \" anchor built:\",$6}')",
       "Bash(grep -vE 'css-syntax-error|jrk-tokens.css:|│|╵|\\\\^|WARNING|^\\\\s*$')",
-      "Bash(gh pr *)"
+      "Bash(gh pr *)",
+      "PowerShell($c = Get-NetTCPConnection -LocalPort 4321 -State Listen -ErrorAction SilentlyContinue; if \\($c\\) { $c | ForEach-Object { $p = Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue; \"PORT 4321 held by PID $\\($_.OwningProcess\\) : $\\($p.ProcessName\\) : $\\($p.Path\\)\" } } else { \"Port 4321 is free - nothing listening\" })",
+      "PowerShell($ids = @\\(34368\\); $seen = @\\(\\); while \\($ids.Count -gt 0\\) { $next = @\\(\\); foreach \\($id in $ids\\) { if \\($seen -contains $id\\) { continue }; $seen += $id; $p = Get-CimInstance Win32_Process -Filter \"ProcessId = $id\" -ErrorAction SilentlyContinue; if \\($p\\) { \"PID $\\($p.ProcessId\\)  PPID $\\($p.ParentProcessId\\)  started $\\($p.CreationDate\\)\"; \"  name: $\\($p.Name\\)\"; \"  cmd : $\\($p.CommandLine\\)\"; \"\"; $next += $p.ParentProcessId } }; $ids = $next })",
+      "PowerShell(Get-CimInstance *)"
     ]
   }
 }

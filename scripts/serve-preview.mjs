@@ -38,35 +38,34 @@ const server = createServer(async (req, res) => {
   }
 });
 
-/* A busy port is the normal case, not an exception — a preview server from an
-   earlier session, or one a headless screenshot run left behind. Walk up to the
-   next free port instead of dying on an unhandled 'error' event.
+/* A busy port is a real error, not something to route around. This server used
+   to walk up to the next free port, which reads as friendly but hid the actual
+   problem. A headless screenshot run backgrounds this script with its output
+   discarded, so when the session ended the server stayed up. The next run found
+   4321 busy, took 4322 without anyone seeing the warning, and so on - seven
+   abandoned servers across 4321-4327 before it was noticed. The port was never
+   the problem; the fallback just made the leak invisible.
 
-   The success handler is registered ONCE, outside the retry, and reads the port
-   back off the server. Passing a callback to listen() per attempt leaves the
-   un-fired callback from the failed attempt still registered, so a retry prints
-   a line for every port it tried. Console text stays ASCII: the Windows console
-   is not UTF-8 by default and turns an em-dash into mojibake. */
-let attempts = 0;
+   Failing here surfaces a stale server on the first collision instead of the
+   seventh. A second server is still available, but you have to ask for it:
+   PORT=5000 npm run preview.
+
+   Console text stays ASCII: the Windows console is not UTF-8 by default and
+   turns an em-dash into mojibake. */
 
 server.on('listening', () => {
-  const actual = server.address().port;
-  console.log(`preview  http://localhost:${actual}/preview/index.html`);
-  if (actual !== port) {
-    console.log(`(port ${port} was busy - something else is still serving there)`);
-  }
+  console.log(`preview  http://localhost:${server.address().port}/preview/index.html`);
 });
 
 server.on('error', (err) => {
   if (err.code !== 'EADDRINUSE') throw err;
-  if (++attempts > 10) {
-    console.error(`\nPorts ${port}-${port + 10} are all in use.`);
-    console.error(`Free one, or choose your own:  PORT=5000 npm run preview\n`);
-    process.exit(1);
-  }
-  const next = port + attempts;
-  console.warn(`port ${next - 1} is in use, trying ${next}`);
-  server.listen(next);
+  console.error(`\nPort ${port} is already in use.`);
+  console.error(`Most likely a preview server from an earlier session is still running.`);
+  console.error(`\nFind it:`);
+  console.error(`  Windows    Get-NetTCPConnection -LocalPort ${port} -State Listen | Select-Object OwningProcess`);
+  console.error(`  macOS/Lnx  lsof -iTCP:${port} -sTCP:LISTEN`);
+  console.error(`\nStop it, or pick another port:  PORT=5000 npm run preview\n`);
+  process.exit(1);
 });
 
 server.listen(port);
