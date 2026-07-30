@@ -24,9 +24,15 @@ modes are **not the same palette** and dark is selected, never computed:
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#f2f2f7` | `#000000` |
+| page plane | `#f2f2f7` | `#141416` |
 | card | `#ffffff` | `#1c1c1e` |
 | popover / input | `#ffffff` | `#2c2c2e` |
+
+The dark page is **not** true black: at 1920x1080 it halates against near-white
+text, so `--jrk-text-primary` in dark is `#ebebf0` rather than `#ffffff` for the
+same reason. One consequence you must design around: the dark card is only a
+1.08:1 fill step off the page, so **in dark the hairline is what makes a card
+read as a card** — never remove a card's border in dark.
 
 The page is tinted and the **cards are white** — Apple grouped style, the
 reverse of a conventional dashboard. Because of that, **the card is the chart
@@ -74,8 +80,11 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
 - **`Delta` requires `vs`** (a percentage with no comparison window is
   meaningless), and `good`/`bad` mean *interpretation*, not sign — pass
   `upIsGood={false}` for delinquency, churn, turnover, error rate.
-- **Cards are borderless** and separate by fill. Elevation (`raised`) is opt-in;
-  a dashboard of many tiles reads calmer flat.
+- **Cards carry a fill AND a hairline.** iOS would let the fill do everything; at
+  desktop viewing distance it is too faint, so `.jrk-card` ships a
+  `--jrk-border-subtle` edge (`--seamless` opts out, `--outlined` goes heavier for
+  a card on a tinted surface). Elevation (`raised`) stays opt-in — a dashboard of
+  many tiles reads calmer flat.
 - **Right-align money and counts** with `jrk-num` on the cell **and** its header.
 - **Never cycle the 8-slot chart palette** — the fixed order is the
   colorblind-safety mechanism. A 9th series folds into "Other" or facets.

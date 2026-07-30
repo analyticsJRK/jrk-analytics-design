@@ -1,0 +1,34 @@
+# Line endings are load-bearing in this repo, so they are pinned rather than left
+# to each machine's core.autocrlf.
+#
+# Two things hash raw file bytes:
+#   1. design-sync's verification anchor. `sourceKeyFor` in its lib/sync-hashes.mjs
+#      hashes .design-sync/previews/*.tsx byte-for-byte, and the generated
+#      <Name>.prompt.md inherits whatever line endings the preview had. A CRLF
+#      checkout therefore invalidates a component's verified state and forces a
+#      re-grade with no semantic change — on a fresh Windows clone, all 37 at
+#      once. Diagnosed Jul 2026; see .design-sync/NOTES.md.
+#   2. dist/ is generated AND committed (the Jinja apps have no Node toolchain).
+#      The build writes LF; without this file every regeneration shows the whole
+#      tree as modified with an empty content diff.
+#
+# eol=lf, not text=auto: the working copy must be LF on every platform, because
+# that is what the hashes were recorded from.
+
+*.tsx  text eol=lf
+*.ts   text eol=lf
+*.mjs  text eol=lf
+*.js   text eol=lf
+*.json text eol=lf
+*.css  text eol=lf
+*.md   text eol=lf
+*.html text eol=lf
+
+# Fonts and images must never be touched.
+*.woff2 binary
+*.woff  binary
+*.ttf   binary
+*.otf   binary
+*.png   binary
+*.jpg   binary
+*.ico   binary

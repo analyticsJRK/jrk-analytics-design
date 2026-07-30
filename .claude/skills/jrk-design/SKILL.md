@@ -66,12 +66,12 @@ multiples, or values indexed to a common base.
 
 ## The look is Apple
 
-macOS/iOS grouped surfaces, Apple system greys, systemIndigo accent, SF-first
-type, macOS-compact density for non-touch 1920x1080.
+macOS/iOS grouped surfaces, Apple system greys, systemIndigo accent, Inter as
+the SF stand-in, macOS-compact density for non-touch 1920x1080.
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#f2f2f7` systemGroupedBackground | `#000000` |
+| page plane | `#f2f2f7` systemGroupedBackground | `#141416` |
 | card | `#ffffff` | `#1c1c1e` |
 | popover / input | `#ffffff` | `#2c2c2e` |
 
@@ -83,8 +83,24 @@ white-on-`#f2f2f7` edge is too faint to hold a dense layout together.
 Two consequences that bite:
 - **The card, not the page, is the chart surface.** Marks are validated against
   `#ffffff` / `#1c1c1e`, never against white or black.
-- **In dark mode the lightened tile is the elevation cue.** A shadow is
-  invisible against a true black page.
+- **In dark mode the hairline is the elevation cue, not the fill.** The card is
+  only a 1.08:1 fill step off the `#141416` page, so `border.subtle` is what
+  makes a tile read as a tile. Never drop the card hairline in dark.
+
+**The dark page is `#141416`, not `#000000`.** iOS grouped dark is true black; on
+a 1920x1080 desktop it halates against near-white text and reads as a void, so
+the page follows macOS instead. For the same reason `text.primary` in dark is
+`#ebebf0` (14.3:1 on the card), not `#ffffff` (15.9:1) — the excess contrast
+showed up as glare on large semibold figures, not as legibility. Both deviations
+are noted on their tokens; do not "restore" them.
+
+**Type is Inter, delivered by `css/fonts.css`.** SF Pro cannot be shipped, so
+Inter is the stand-in on every platform — the tracking tokens are tuned for one
+face rather than half-tuned for two. `css/index.css` imports it from Google
+Fonts, so a strict-CSP app needs `style-src fonts.googleapis.com` and
+`font-src fonts.gstatic.com`; self-host and `next/font` alternatives are
+documented in the file. `font.feature.sans` turns on Inter's tailed lowercase
+`l` so `l` / `I` / `1` are distinguishable in property codes.
 
 **Adopt Apple values only where they pass.** Apple's palette is not
 accessibility-clean: `systemGray` is 2.92:1 as body text and `systemIndigo` is
@@ -139,6 +155,7 @@ Load only what the task needs.
 
 | File | Covers |
 |---|---|
+| `references/philosophy.md` | **The doctrine behind the other four.** The five-layer decision order (scope → structure → behavior → rendering → epistemics), and the settled answer wherever two principles disagree. Read this when a judgement call is not covered by a rule below, or when someone proposes relaxing one |
 | `references/tokens.md` | Every token namespace and when to use each |
 | `references/components.md` | Class names, React props, markup contracts |
 | `references/charts.md` | Form choice, the two color sets, mark specs, interaction |

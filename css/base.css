@@ -24,9 +24,13 @@ body {
   font-family: var(--jrk-font-sans);
   font-size: var(--jrk-text-md);
   line-height: var(--jrk-leading-normal);
-  /* SF carries slight negative tracking at text sizes; matching it is most of
-     what makes the type read as Apple rather than as default Inter. */
+  /* Apple's UI type carries slight negative tracking at text sizes; matching it
+     is most of what makes the type read as Apple rather than as stock Inter. */
   letter-spacing: var(--jrk-tracking-normal);
+  /* Inter's SF-ish alternates — chiefly a tailed lowercase l, so l / I / 1 are
+     distinguishable in property codes and unit numbers. See font.feature in
+     tokens.json; ignored by any fallback face that lacks the features. */
+  font-feature-settings: var(--jrk-font-feature-sans);
   color: var(--jrk-text-primary);
   background: var(--jrk-surface-canvas);
   -webkit-font-smoothing: antialiased;

@@ -86,25 +86,71 @@ node .ds-sync/package-validate.mjs ./ds-bundle
 
 ## Fonts
 
-**`SF Pro` / `SF Mono` in the stack are deliberate and unshippable.**
-`tokens.json` now leads both stacks with the Apple system families
-(`-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Inter, …`),
-with its own `$comment` explaining why: Apple hardware gets the real face, and
-Inter is the closest widely-available analogue for everyone else. Apple publishes
-no SF webfont and the outlines are theirs — the same reason this library ships no
-SF Symbols — so they can never go in `fonts/`.
+**The sans stack leads with Inter, and the bundle is now the honest case.**
+`tokens.json` `font.family.sans` is `Inter, 'Inter var', -apple-system, …`. SF Pro
+was dropped from it: Apple publishes no SF webfont and the outlines are theirs —
+the same reason this library ships no SF Symbols — so an SF-first stack meant
+Apple hardware and everything else rendered in different faces, and the tracking
+tokens could only be right for one of them. `@fontsource/inter` via
+`cfg.extraFonts` therefore ships the face the library is actually designed
+against, not a fallback.
 
-That made validate print `[FONT_MISSING] "SF Pro Text", "SF Pro Display"`. The
-resolution is **`cfg.runtimeFontPrefixes: ["SF Pro", "SF Mono"]`**, which is the
-honest one: the families resolve from the OS at runtime, and the shipped Inter /
-JetBrains Mono webfonts are the real fallback, not a substitute anyone chose
-under duress. **This is not a substitution to re-litigate** — do not try to
-"fix" it by sourcing an SF lookalike.
+**`SF Mono` in the mono stack is still deliberate and still unshippable**, and it
+is the only remaining reason for `cfg.runtimeFontPrefixes`. The prefix list is
+`["SF Pro", "SF Mono"]`; `"SF Pro"` is now dead weight, kept only because it
+costs nothing and removing it is one more thing to get wrong if the sans stack
+ever changes again. Do not "fix" either entry by sourcing a lookalike — the
+families resolve from the OS at runtime and the bundled webfonts are the real
+fallback.
 
-Tokens also name `Inter` and `JetBrains Mono`; the repo ships **no `@font-face`**.
-Both are SIL OFL, so weights 400/500/600/700 (Inter) and 400/500 (mono) are
+Tokens name `Inter` and `JetBrains Mono`; the repo itself ships **no
+`@font-face`** — `css/fonts.css` reaches Google Fonts instead, see below. Both
+faces are SIL OFL, so weights 400/500/600/700 (Inter) and 400/500 (mono) are
 bundled from `@fontsource` via `cfg.extraFonts`. Only the weights the CSS
 actually uses are wired — check `grep -r font-weight css/` before adding more.
+
+**Two Inter delivery paths now exist, and the bundle gets both.** `css/index.css`
+imports `css/fonts.css`, which is a remote `@import` of the Google Fonts variable
+Inter; esbuild treats a URL import as external and hoists it to the top of
+`.cache/jrk-flat.css` rather than inlining it. So the uploaded bundle carries
+that `@import` *and* the `@fontsource` static faces. That is not a build error:
+- The CDN import is blocked by the Design System pane's CSP, so the bundled
+  `@fontsource` faces are what actually render there. Correct outcome.
+- It does mean the pane renders **static** Inter with no `opsz` axis, while a
+  consuming app gets the variable font. Display-size letterforms will be very
+  slightly looser in the pane than in production. Not worth fixing by bundling
+  the variable file — `extraFonts` wires static weight files.
+- `font.feature.sans` (`'cv05' 1, 'ss03' 1`) applies in both paths; the
+  `@fontsource` latin files carry the character variants.
+
+**Two variable Inter TTFs sit in the project unreferenced** (found Jul 30 2026 in
+`list_files`, not produced by any build):
+
+```
+fonts/Inter-VariableFont_opsz_wght.ttf
+fonts/Inter-Italic-VariableFont_opsz_wght.ttf
+```
+
+Those filenames are exactly what a Google Fonts ZIP download produces, so they
+were added by hand — plausibly to fix the missing-`opsz` limitation noted above.
+**They are inert today**: the generated `fonts/fonts.css` `@font-face`s only the
+four static `inter-latin-*` weights from `@fontsource`, and nothing references the
+TTFs. The sync does **not** delete them (they are not in the anchor, so
+`upload.deletePaths` never names them) — but every re-sync overwrites
+`fonts/fonts.css`, so hand-editing that file to use them **will be reverted**.
+
+To actually wire the variable font, do it through config so it survives:
+1. Commit the `.ttf` (or better, a `woff2` conversion — a TTF is ~3x the bytes)
+   inside the repo; `cfg.extraFonts` is bounded to the git root, so a path
+   outside it is silently skipped.
+2. Author a small `@font-face` CSS with `font-weight: 100 900` and the `opsz`
+   axis, and add **that CSS file** to `cfg.extraFonts` — a bare font file listed
+   in `extraFonts` is copied as-is and gets **no** `@font-face`, so it would stay
+   inert exactly as these two are.
+3. Decide whether the static weights stay as a fallback or come out; shipping
+   both means the pane downloads both.
+
+Until then, leave them — they cost project storage and nothing else.
 
 ## Grouping
 
@@ -192,11 +238,14 @@ here** — `css/` and `react/src/` were left untouched.
 - On the light surface, **`Alert` `critical` and `serious` fills are nearly the
   same pink-red**, separated only by a small shade delta. `Badge` escapes this
   because the tone icon disambiguates.
-- **Two `$comment` keys leak into generated CSS.** `scripts/build-tokens.mjs`
-  emits `--jrk-neutral-$comment` and `--jrk-indigo-$comment` as malformed custom
-  properties (unquoted values containing `:`), lines 26 and 36 of
-  `dist/jrk-tokens.css`. Browsers drop them and `check:css` doesn't catch it
-  (it only looks for raw hex). Harmless, but it's generated garbage.
+- ~~**Two `$comment` keys leak into generated CSS.**~~ **FIXED Jul 30 2026** in
+  `scripts/build-tokens.mjs` — the ramp loop now applies the same `$meta` guard to
+  the step key that it already applied to the hue key, so
+  `--jrk-neutral-$comment` / `--jrk-indigo-$comment` are no longer emitted.
+  `check:css` never caught it (its `declared()` regex does not match a `$` in the
+  ident); what surfaced it was esbuild warning `Expected ":"` while flattening
+  `jrk-flat.css`. Token count dropped 214 → 212 as a result — that is the fix,
+  not a loss.
 - `react/src/Stat.tsx` comments that a flat series renders as a "centered line";
   the maths (`y = h - pad - 0`) puts it on the baseline. Comment is wrong.
 
@@ -255,14 +304,24 @@ here** — `css/` and `react/src/` were left untouched.
 
 ## Known render warns (expected — not new)
 
-**None outstanding — the final build prints `✓ bundle is complete` with no
-warning count at all.** A warn of any kind is new; investigate, then fix or
-record it here.
+**One outstanding**, added Jul 30 2026:
+
+- `[FONT_REMOTE] "Inter var"` → expected and correct. `css/index.css` imports
+  `css/fonts.css`, whose Google Fonts `@import` esbuild hoists into
+  `jrk-flat.css` as an external URL import. Validate sees a remote font-host
+  `@import` and says so. It is informational, non-blocking, and the **bundled
+  `@fontsource` faces are what actually render** in the pane (its CSP blocks the
+  CDN). See **Fonts**. Do not try to remove the `@import` to silence it — that
+  would break Inter for every consuming app.
+
+Anything else is new; investigate, then fix or record it here.
 
 Two warns appeared in the Jul 2026 sync and were **resolved by config**, so they
 should not return. Do not re-diagnose them from scratch if they do:
 
-- `[FONT_MISSING] "SF Pro Text", "SF Pro Display"` → `cfg.runtimeFontPrefixes`.
+- `[FONT_MISSING] "SF Mono"` → `cfg.runtimeFontPrefixes`. (The `"SF Pro Text"` /
+  `"SF Pro Display"` pair that used to appear here is gone — those families were
+  dropped from `font.family.sans` when the sans stack moved to Inter-first.)
   See **Fonts** above; this is deliberate, not a gap.
 - `[GRID_OVERFLOW] ChartCard (WithActions)` → `cfg.overrides.ChartCard.cardMode
   = "column"`. That export puts a 30d/QTD/YTD ButtonGroup **and** the "Show
@@ -274,6 +333,42 @@ should not return. Do not re-diagnose them from scratch if they do:
 The four original pre-authoring warns (`[RENDER_THIN]` on ChartCard/Stat/Sidebar,
 `[RENDER_BLANK]` on Sparkline) were floor-card artifacts and cleared once
 previews were authored.
+
+## CRLF silently invalidates preview verification — READ THIS FIRST
+
+**Diagnosed Jul 30 2026. This one costs a full re-verify if it recurs.**
+
+`core.autocrlf=true` is set on this machine and the repo has **no
+`.gitattributes`**. `sourceKeyFor` in `lib/sync-hashes.mjs` hashes
+`.design-sync/previews/<Name>.tsx` **raw bytes**, so a CRLF working copy produces
+a different key than the LF copy the anchor was recorded from — and the component
+re-verifies and re-grades for no semantic reason. The generated `.prompt.md`
+inherits the CRLFs too, so its `sourceHash` moves and it re-uploads.
+
+Symptom this run: `Icon`, `List` and `ListRow` came back `changed` with the note
+`contract changed`, while their `.d.ts` and `.jsx` hashes were **identical** —
+only `.prompt.md` moved. Those were exactly the three previews whose working copy
+had CRLF (53 and 44 CR lines in the generated prompt.md; every other component: 0).
+Converting the three files to LF flipped the verdict from `3 changed` to
+**37 verified-by-upload, 0 changed** — proof the anchor was recorded from LF.
+
+Diagnose in one command:
+
+```sh
+for f in .design-sync/previews/*.tsx; do grep -qU $'\r' "$f" && echo "CRLF: $f"; done
+```
+
+Fix: convert to LF (`perl -pi -e 's/\r\n/\n/g' <files>`) and re-run the driver
+**before** grading anything — otherwise you hand subagents re-grade work that
+does not exist.
+
+**The durable fix is `.gitattributes`, and this repo now has one** pinning
+`eol=lf` for the text types whose bytes are load-bearing. Without it the fix is
+temporary: `git status` reports the LF files as modified with **no content diff**
+(`git diff -w --ignore-cr-at-eol` is empty) and warns "LF will be replaced by
+CRLF the next time Git touches it" — i.e. the next checkout re-breaks it. If
+`.gitattributes` is ever removed, this returns, and on a fresh Windows clone it
+would hit **all 37** previews at once, not three.
 
 ## Re-sync risks — what can silently go stale
 
@@ -290,6 +385,28 @@ previews were authored.
   byte was never isolated. **If this recurs, don't spend time on it** — confirm
   `bundle`/`styling`/`components` are all false in the verdict, re-upload, and
   move on. Only investigate if `styleSha` or a `sourceKey` also moved.
+- **`conventions.md` goes stale the moment a token value changes, and nothing
+  gates it.** The Jul 30 2026 run found **two** false statements in the header the
+  design agent is given: the dark page plane was still documented as `#000000`
+  (it is `#141416`), and "Cards are borderless and separate by fill" — which was
+  never true, since `.jrk-card` has always shipped a `--jrk-border-subtle`
+  hairline and `Card.tsx` renders the bare class. A wrong value here is worse than
+  no value: the agent trusts it and emits off-brand output that no gate catches.
+  **When `tokens.json` surfaces or a component's default classes change,
+  re-read `conventions.md` against the fresh build** — the token/class/name
+  greps in the base skill's validation pass catch names that vanish, but NOT a
+  name that still exists with a different value. Those need reading.
+- **The toolchain can disappear from under a run.** Mid-run on Jul 30 2026,
+  `node_modules/`, `.ds-sync/`, `ds-bundle/`, `guides/` and the `index.d.ts` shim
+  all vanished between two commands — every gitignored path, while every
+  untracked *source* file (`css/fonts.css`, a new skill reference) survived, so it
+  was **not** `git clean -fdx`. Cause never identified. Recovery is just the
+  fresh-clone block above and it is cheap (~10s): `npm ci`, `npm i --no-save
+  react react-dom`, re-stage `.ds-sync/`, install its deps, re-run
+  `prepare.mjs`. The playwright **browser** cache lives outside the repo
+  (`%LOCALAPPDATA%/ms-playwright`) and survived, so no 200MB re-download — but
+  check the pin still matches (`playwright-core/browsers.json`; 1.62.1 ↔ chromium
+  build 1234 at the time of writing).
 - **A new component that imports from outside `react/src/` can break the
   declaration emit** — see the `rootDir` section at the top. The failure is
   TS6059 from prepare.mjs while `npm test` stays green, so it looks like a

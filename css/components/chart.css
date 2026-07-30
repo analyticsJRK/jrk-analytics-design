@@ -469,6 +469,23 @@ button.jrk-legend__item:hover {
   --jrk-hatch-135: repeating-linear-gradient(135deg, transparent 0 3px, rgba(0, 0, 0, 0.28) 3px 5px);
 }
 
+/* Black hatching over a dark-mode bar is invisible — the texture channel simply
+   stopped existing in dark, which defeats the point of having a backup for
+   full-severity CVD. Inverted to white at the same weight. Declared under both
+   scopes for the same reason the token layer is: OS setting and explicit stamp
+   both work, and the stamp wins either way. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) {
+    --jrk-hatch-45: repeating-linear-gradient(45deg, transparent 0 3px, rgba(255, 255, 255, 0.3) 3px 5px);
+    --jrk-hatch-135: repeating-linear-gradient(135deg, transparent 0 3px, rgba(255, 255, 255, 0.3) 3px 5px);
+  }
+}
+
+:root[data-theme='dark'] {
+  --jrk-hatch-45: repeating-linear-gradient(45deg, transparent 0 3px, rgba(255, 255, 255, 0.3) 3px 5px);
+  --jrk-hatch-135: repeating-linear-gradient(135deg, transparent 0 3px, rgba(255, 255, 255, 0.3) 3px 5px);
+}
+
 /* Odd slots take 45deg, even slots the 135deg mirror, so neighbors differ by
    texture as well as hue. */
 .jrk-chart[data-texture='on'] .jrk-bars__fill,
