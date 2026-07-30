@@ -171,7 +171,7 @@
   cursor: pointer;
 }
 
-.jrk-menu__item svg {
+.jrk-menu__item svg:not(.jrk-icon) {
   width: var(--jrk-icon-md);
   height: var(--jrk-icon-md);
   color: var(--jrk-text-muted);
@@ -190,7 +190,7 @@
   color: var(--jrk-status-critical-text);
 }
 
-.jrk-menu__item--danger svg {
+.jrk-menu__item--danger svg:not(.jrk-icon) {
   color: currentColor;
 }
 

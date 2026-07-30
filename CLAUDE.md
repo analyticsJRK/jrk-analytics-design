@@ -1,9 +1,12 @@
 # CLAUDE.md — jrk-analytics-design
 
-Design library for JRK analytics dashboards: one token layer, a plain-CSS
+Design library for JRK analytics dashboards. One token layer, a plain-CSS
 component library, and React wrappers over the same class names. Consumed by
 `jrk_agents` (Next.js / Tailwind v4) and by `jrk-audit-platform` / `JRK_FORMS`
 (Python + Jinja).
+
+**This file loads every turn, so it holds only what you cannot derive from the
+code.** Detail lives in the `jrk-design` skill, which loads on demand.
 
 ## Before you change anything
 
@@ -11,121 +14,125 @@ component library, and React wrappers over the same class names. Consumed by
 npm test    # build + check:css + validate + typecheck
 ```
 
-`npm test` is the gate. It is fast; run it after every change.
+That is the gate. It is fast; run it after every change.
+
+## Where things live — one source per fact
+
+| Fact | Single source | Generated, never edit |
+|---|---|---|
+| design values (color, space, type, radius) | `tokens/tokens.json` | `dist/jrk-tokens.css`, `dist/tokens.ts`, `dist/jrk-theme.tailwind.css` |
+| icon glyph paths | `tokens/icons.json` | `dist/icons.ts`, `dist/icons.js` |
+| component behaviour | `css/components/*.css` + `react/src/*.tsx` | — |
+| detailed rules and API reference | `.claude/skills/jrk-design/references/*.md` | — |
+| per-component docs and demos for the Design System pane | `.design-sync/{docs,previews}/` | `.design-sync/.cache/` |
+| the local zero-build gallery | `preview/*.html` | — |
+
+`dist/` is generated **and committed** — the Jinja apps have no Node toolchain.
+`.ds-sync/`, `ds-bundle/`, `guides/` are sync tooling and build output: all
+gitignored, none of it authored here, do not read them for reference.
+
+Need more than the rules below? Load the **`jrk-design` skill** rather than
+re-reading the CSS.
 
 ## Hard rules
 
-**`tokens/tokens.json` is the only source of truth for design values.**
-`dist/` is generated — never hand-edit it. Adding or changing a color means
-editing `tokens.json` and running `npm run build`. `check:css` fails on a raw
-hex in a component file, so there is no way around this.
+**`tokens/tokens.json` is the only source of truth for design values.** Changing
+a color means editing it and running `npm run build`. `check:css` fails on a raw
+hex in a component file, so there is no way around it.
 
-**Never hand-pick a color.** `npm run validate` is the arbiter: a lightness
-band, chroma floor, colorblind separation (protanopia + deuteranopia), a
-normal-vision floor, and WCAG contrast, in both themes against the real
-surfaces. If you add a color and it fails, re-step it — do not lower the gate.
+**Never hand-pick a color.** `npm run validate` is the arbiter: lightness band,
+chroma floor, colorblind separation, normal-vision floor, WCAG contrast — both
+themes, real surfaces. If a color fails, re-step it; do not lower the gate. The
+full run needs the `dataviz` skill's validator:
+`JRK_DATAVIZ=/path/to/skills/dataviz npm run validate`.
 
-The full six-checks run needs the `dataviz` skill's validator. Point at it:
-```bash
-JRK_DATAVIZ=/path/to/skills/dataviz npm run validate
-```
-Without it the WCAG half still runs and the six-checks half warns rather than
-silently passing.
+**The look is Apple.** macOS/iOS grouped surfaces. Light: `#f2f2f7` page,
+**white** cards. Dark: `#000000` page, `#1c1c1e` cards. The page is tinted and
+the cards are white — the reverse of a conventional dashboard, and not a bug.
+Because the card is the chart surface, marks are validated against
+`#ffffff` / `#1c1c1e`, never the page. In dark, the lightened tile is the
+elevation cue; a shadow does not read on black.
 
-**The chart series palette is never cycled.** Eight slots, fixed order; the
-order is the colorblind-safety mechanism. A ninth series folds into "Other",
-facets, or takes a second encoding. Do not add a slot 9. `seriesColor(8)` throws
-on purpose. Scatter/bubble/choropleth/small-multiples cap at three series.
+**Adopt Apple values only where they pass.** Apple's palette is not
+accessibility-clean — `systemGray` is 2.92:1 as body text, `systemIndigo` is
+3.36:1 as dark link text. Both are rejected here. Measure before reaching for an
+Apple hex; the deviations are noted on each token.
+
+**The chart series palette is never cycled.** Eight slots, fixed order — the
+order is the colorblind-safety mechanism, derived by search across both modes
+jointly. A ninth series folds into "Other" or facets. `seriesColor(8)` throws on
+purpose. Scatter/bubble/choropleth/small-multiples cap at three.
 
 **Color is never the only signal.** Status needs icon + label. Deltas state
-direction in text. Charts have a table view. If you write a component where a
-color alone conveys meaning, it is wrong.
-
-**Surfaces are inverted, and the two modes are not the same family.** Light:
-white page, gray-purple (`#f5f5fa`) cards, white popovers and inputs. Dark:
-true black page (`#000000`), neutral shadow-grey tiles (`#1a1a1a`), neutral grey
-ink — achromatic on purpose, so the indigo accent and the chart hues are the
-only color. Do not reintroduce a violet cast into the dark surfaces or ink.
-
-Cards are borderless in both modes — they separate by fill, and chrome (sidebar,
-topbar) sits on the page plane so the cards read as the raised thing. Because
-the card is the chart surface, marks are validated against `#f5f5fa` / `#1a1a1a`,
-never against white or black. In dark mode the grey tile is the elevation cue:
-a shadow does not read against a black page.
+direction in text. Charts have a table view.
 
 **`--jrk-chart-*` and `--jrk-chart-tint-*` are not interchangeable.** The
-categorical set carries identity and is CVD-validated. The tint set is pastel
-fills for large marks that are *already* labelled — axis category, direct value,
-or a number in the legend. Tints are deliberately outside the lightness band and
-under the chroma floor, so the validator skips them. Reaching for a tint where
-color is the identity channel is a bug no gate will catch.
+categorical set carries identity and is CVD-validated. Tints are pastel fills
+for marks that are *already* labelled; the validator deliberately skips them, so
+using one where color is the identity channel is a bug no gate will catch.
 
-**Do not "soften" the categorical palette by flattening its lightness.** It is
-already at the softest setting that passes. Protan/deutan separation comes
-mostly from lightness differences, so making every slot uniformly pale collapses
-CVD separation — the spread has to survive; only the mean can move.
+**Icons are `em`-sized and inherit text weight.** That is what makes them feel
+native rather than bolted on. Status glyphs are filled with the inner mark
+punched out, so they work on any badge wash. SF Symbols cannot be shipped — no
+webfont, and the outlines are Apple's; use Phosphor (MIT) with
+`className="jrk-icon"` beyond the built-in set.
+
+**`accent.onSolid` is not `text.inverse`.** The label on the solid accent stays
+white in both modes; `text.inverse` in dark is the dark ink for the light
+inverse surface. Do not collapse them.
 
 **Dark values are selected, not flipped.** Every themed token has an explicit
-`light` and `dark` entry chosen for that surface. Do not compute one from the
-other.
+`light` and `dark` entry chosen for that surface.
 
-**`.jrk-sheet` is a grid, not a table, and that is on purpose.** One shared
-`--jrk-sheet-cols` track list is the only way a single Excel-style column bar can
-align with many stacked metric blocks. Do not "fix" it into a `<table>`, and do
-not set the track list per row. Because it is a grid, ARIA roles are mandatory:
-`role="grid"` / `row` / `rowheader` / `gridcell`, with the letter bar and number
-gutter `aria-hidden` (they are a coordinate system, not data).
+**Non-touch, 1920x1080.** Controls are 24/28/32 and `minTouch` is 24px — the
+WCAG 2.2 AA floor (2.5.8). Height is the real constraint. Never go below 24px.
 
-In a sheet, tone comes from the metric's `inverted` flag, never from the sign of
-the number — for delinquency or an expense variance, down is the good outcome.
+**`.jrk-sheet` is a grid, not a table.** One shared `--jrk-sheet-cols` track list
+is the only way a single Excel-style column bar can align with stacked metric
+blocks, so ARIA roles are mandatory. In a sheet, tone comes from the metric's
+`inverted` flag, never the sign of the number.
 
 ## Layout gotchas that have already bitten
 
-- **`display: block` on bar fills is load-bearing.** `.jrk-cell-bar__fill` and
-  friends are `<span>`s; an inline box ignores width and height, so the bar
-  renders as an empty track. This shipped broken once.
-- **`flex-wrap: wrap` on a COLUMN flex container** makes it multi-line, and
-  `align-content: stretch` then inflates each line. It silently tripled a grid's
-  height in the gallery CSS.
+- **`display: block` on bar fills is load-bearing.** They are `<span>`s; an
+  inline box ignores width and height, so the bar renders as an empty track.
+- **`flex-wrap: wrap` on a COLUMN flex container** goes multi-line, and
+  `align-content: stretch` then inflates each line. It tripled a grid's height.
 - **Chart SVG viewBoxes must be measured from the container.** A fixed viewBox
-  stretched by `width: 100%` scales the text and strokes too — 12px axis labels
-  render near 18px on a wide card. `<LineChart>` uses a `ResizeObserver`; hand-
-  written chart SVGs must do the same.
+  stretched by `width: 100%` scales the text and strokes too.
+- **Component CSS sizes bare `svg` with `svg:not(.jrk-icon)`.** A plain
+  `.jrk-btn svg` rule out-specifies `.jrk-icon` and kills the `em` contract.
 
 ## Verifying visually
 
-The automated checks do not check layout. After a UI change:
+The gates do not check layout. After a UI change:
 
 ```bash
 npm run preview     # http://localhost:4321/preview/index.html
 ```
 
-Toggle light/dark in the nav — both must be checked, they are different
-palettes. To capture headlessly:
-
-```bash
-"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless --disable-gpu \
-  --virtual-time-budget=4000 --window-size=1200,1500 \
-  --screenshot=out.png http://localhost:4321/preview/dashboard.html
-```
-
-Screenshot at roughly the page's real width — a downscaled capture makes 2px
-marks and hairlines look broken when they are correct.
+Check **both themes** — they are different palettes. Screenshot near the page's
+real width (1920x1080 is the target display); a downscaled capture makes correct
+2px marks and hairlines look broken. For sticky-heavy layouts, measure element
+positions rather than trusting a mid-scroll capture — headless compositing
+produces convincing artifacts.
 
 ## Adding a component
 
 1. `css/components/<name>.css`, imported from `css/index.css`. Tokens only.
 2. `react/src/<Name>.tsx` emitting the same class names, exported from
-   `react/src/index.ts`. No Tailwind dependency in the React layer.
-3. Add it to `preview/components.html` so it is visible in both themes.
-4. `npm test`, then look at the gallery.
+   `react/src/index.ts`. No Tailwind dependency.
+3. `preview/components.html`, so it is visible in both themes.
+4. `.design-sync/docs/<Name>.md` + `.design-sync/previews/<Name>.tsx`, so it
+   reaches the Design System pane.
+5. `npm test`, then look at the gallery.
 
 ## Conventions
 
-- CSS classes are `jrk-block__element--modifier`.
-- CSS custom properties are `--jrk-<category>-<name>`, generated from
-  `tokens.json` (camelCase keys are kebab-cased, `.` becomes `_`).
+- Classes are `jrk-block__element--modifier`.
+- Custom properties are `--jrk-<category>-<name>`, generated from `tokens.json`
+  (camelCase kebab-cased, `.` becomes `_`).
 - Components reference semantic tokens (`--jrk-surface-default`), never ramp
-  steps (`--jrk-neutral-100`) and never raw hex.
-- Transitions use `var(--jrk-transition)`, which the reduced-motion guard in
-  `base.css` zeroes globally — do not hand-roll durations.
+  steps (`--jrk-neutral-100`), never raw hex.
+- Transitions use `var(--jrk-transition)`; the reduced-motion guard in
+  `base.css` zeroes it globally — do not hand-roll durations.

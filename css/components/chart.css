@@ -36,7 +36,7 @@
    hairline. Measure with a ResizeObserver and rewrite the viewBox; the React
    <LineChart> does this already. Where a stroke must stay put regardless,
    use vector-effect: non-scaling-stroke. */
-.jrk-chart svg {
+.jrk-chart svg:not(.jrk-icon) {
   display: block;
   width: 100%;
   overflow: visible;
@@ -514,8 +514,8 @@ button.jrk-legend__item:hover {
   display: flex;
   flex-direction: column;
   background: var(--jrk-surface-default);
-  border: 1px solid transparent;
-  border-radius: var(--jrk-radius-2xl);
+  border: 1px solid var(--jrk-border-subtle);
+  border-radius: var(--jrk-radius-xl);
 }
 
 .jrk-chart-card__header {

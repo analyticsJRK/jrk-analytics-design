@@ -92,18 +92,20 @@ dist/                       GENERATED — never hand-edit
 
 ## The rules this library enforces
 
-These are gates, not conventions. They fail `npm test`, not a review comment.
+These are gates, not conventions — they fail `npm test`, not a review comment.
 
-### Color is computed, not chosen
+| Rule | Enforced by |
+|---|---|
+| No raw hex outside `tokens/tokens.json` | `check:css` |
+| Every color clears the six checks + WCAG, both themes | `validate` |
+| The 8-slot series palette is never cycled | `seriesColor()` throws past slot 8 |
+| Color is never the only signal | `<Badge>` renders its icon; `<Delta>` states direction in text; every chart has a table view |
+| Tints never carry identity | *nothing* — see below |
+| React layer typechecks | `typecheck` |
 
-`npm run validate` runs the categorical palette through a lightness band, a
-chroma floor, colorblind separation under simulated protanopia and deuteranopia,
-a normal-vision floor, and contrast against the real surface — in both themes,
-on both pairlists. Then it WCAG-checks every text, status, accent, and focus
-token against each surface it actually renders on.
-
-It has already caught real near-misses: `blue-450` as the button fill measured
-4.42:1 with white text, so the fill is `blue-500`.
+**The one nothing catches:** `--jrk-chart-tint-*` is exempt from the colorblind
+gate by design, so using a tint where color *is* the identity channel looks fine
+and passes everything. That is the failure mode to review by eye.
 
 The full six-checks run needs the `dataviz` skill's validator:
 
@@ -113,120 +115,31 @@ JRK_DATAVIZ=/path/to/dataviz npm run validate
 
 Without it the WCAG half still runs and the six-checks half warns.
 
-### Surfaces are inverted, on purpose
+`npm run validate` exits 0 with five warnings. They are documented relief cases —
+sub-3:1 marks that ship with visible labels or a table view, and status colors
+paired with an icon + label. Do not re-step a correct color to silence them.
 
-In **light** mode the page plane is white and the **cards carry a soft
-gray-purple tint** (`surface.default` = `#f5f5fa`). Popovers, modals, and inputs
-then go white so they still lift off the cards. Cards have no border — they
-separate from the page by their fill, and the transparent border exists only to
-hold the box model steady and to let the forced-colors rule put a real one back.
+### The detail lives in the skill, not here
 
-In **dark** mode the same layering goes achromatic: a true black page
-(`#000000`) with neutral shadow-grey tiles (`#1a1a1a`), stepping up through
-`#212121` and `#262626` for wells and popovers. Ink is neutral grey too — a
-violet-tinted ink on neutral tiles reads as a color cast rather than a choice.
-The indigo accent and the chart hues are the only color in the dark UI.
+The full reference — every token namespace, every component's markup contract,
+the chart method, the sheet grid — is in
+`.claude/skills/jrk-design/references/`. It loads on demand in a Claude session
+and is the single source; this README deliberately does not restate it.
 
-Two practical consequences:
+| File | Covers |
+|---|---|
+| `tokens.md` | every token namespace and when to use each |
+| `components.md` | class names, React props, markup contracts |
+| `charts.md` | form choice, the two color sets, mark specs, anti-patterns |
+| `sheet.md` | the workbook-style report grid |
 
-- **The card, not the page, is the chart surface.** Marks are validated against
-  `#f5f5fa` / `#1a1a1a`, not against white or black.
-- **In dark mode the grey tile *is* the elevation cue.** A drop shadow is
-  invisible against a true black page, so the surface step does that work and
-  the dark shadow tokens only tighten the edge.
+### The look, in one paragraph
 
-### Two chart color sets, for two different jobs
-
-| Set | Tokens | For |
-|---|---|---|
-| **Categorical** | `--jrk-chart-1..8` | Series identity. Fixed order, validated for colorblind separation. |
-| **Tint** | `--jrk-chart-tint-1..8` | Pastel fills for large marks whose identity is already carried elsewhere. |
-
-The tints are what produce the soft look. They sit **above** the lightness band
-and **below** the chroma floor, so they physically cannot do identity work, and
-the validator does not check them for CVD separation — that is not their job.
-
-A tint is legal when the mark is **axis-labelled, direct-labelled, or has its
-value printed in the legend**. Using one where color *is* the identity channel —
-an unlabelled multi-series line chart, a scatter plot — is a bug, and no gate
-will catch it for you.
-
-The categorical set was softened as far as the gates allow: lightness lifted,
-chroma cut about a quarter, hue held. The **lightness spread was preserved** —
-protan and deutan viewers separate colors mostly by lightness, so making
-everything uniformly pale is exactly what collapses CVD separation. Light and
-dark were tuned independently because their bands differ (light 0.43–0.77 is
-much wider than dark 0.48–0.67). Pushing further fails: light hits the adjacent
-CVD floor, dark runs out of lightness band.
-
-### Dense reports use the sheet layer, not the table
-
-`.jrk-table` is for ordinary tables. `.jrk-sheet` is for workbook-style reports —
-a year of months across, many years down, totals and growth on the right, and a
-chart spanning the block. The AM Report is the reference case.
-
-It is a **CSS grid, not a `<table>`**, and that is deliberate: the Excel-style
-column bar and the row-number gutter span the whole report across many stacked
-metric blocks, and a per-block `<table>` cannot align with one global column bar
-without duplicating track widths in a `<colgroup>`. One shared track list
-(`--jrk-sheet-cols`) makes the alignment structural.
-
-The cost is that semantics must be declared — `role="grid"`, `role="row"`,
-`role="rowheader"`, `role="gridcell"`. The letter bar and the number gutter are
-`aria-hidden`: they are a coordinate system, not data.
-
-Override `--jrk-sheet-cols` on `.jrk-sheet` to change the report's shape. Never
-per row, or the letter bar stops lining up with the data under it.
-
-Sheet density is deliberately tighter than the rest of the library (26px rows,
-11px type). A financial report's job is to get a year of months on one screen,
-and the app's normal row heights make that impossible.
-
-### The series palette is never cycled
-
-Eight slots in a fixed order. The **order** is the colorblind-safety
-mechanism — neighbors are what touch in a stack or a line chart, so adjacent
-pairs are what the gate measures. A ninth series is never a generated hue: it
-folds into "Other", facets into small multiples, or takes a second encoding.
-`seriesColor(8)` throws rather than wrapping around.
-
-Scatter, bubble, choropleth, and small multiples cap at **three** series — there
-any two marks can sit side by side, so the harder all-pairs test applies. That is
-a series cap, not a palette change; no ordering of eight can pass it.
-
-### Color is never the only signal
-
-- Status badges ship an icon and a label. `<Badge tone="warning">` renders the
-  icon automatically — on the light surface `warning` and `serious` sit below
-  3:1 by design, and the pairing is the documented mitigation.
-- Deltas state direction in text for screen readers, and take direction and
-  interpretation as **separate** inputs. Falling delinquency is good; the
-  library never assumes up means good.
-- Every chart has a table view. It is the relief channel for the three
-  light-mode series hues below 3:1, and the answer for screen readers.
-- `tokens.json` lists those three hues in `reliefRequired.light`, and the
-  validator fails if the list goes stale.
-
-### Chart marks
-
-Bars cap at 24px with a 4px data-end, square at the baseline. Lines are 2px.
-Markers are ≥ 8px with a 2px surface ring. Grid and axes are hairline and
-**solid** — a dashed line reads as data, so dashes are reserved for threshold
-lines. Touching fills are separated by a **2px gap in the surface color**, never
-by a stroke; a stroke adds ink that is not data.
-
-**No dual-axis charts.** Two y-scales let the author pick the correlation by
-picking the scales. Two measures of different magnitude become two charts, small
-multiples, or values indexed to a common base.
-
-### Chart SVGs size their viewBox from the container
-
-A fixed viewBox stretched by `width: 100%` scales the text and strokes with it —
-12px axis labels land near 18px on a wide card and hairlines stop being
-hairlines. `<LineChart>` measures with a `ResizeObserver` so user units stay 1:1
-with CSS pixels. Hand-written chart SVGs must do the same.
-
----
+Apple: macOS/iOS grouped surfaces (`#f2f2f7` page with **white** cards in light;
+`#000000` with `#1c1c1e` tiles in dark), Apple system greys, systemIndigo
+accent, SF-first type, and macOS-compact density for non-touch 1920x1080.
+Apple's values are adopted only where they clear WCAG — `systemGray` as body
+text is 2.92:1 and is rejected. The card, not the page, is the chart surface.
 
 ## Using this with Claude
 

@@ -83,10 +83,17 @@ for (const [name, parts] of Object.entries(T.color.status)) {
 }
 
 // Solid accent button: the label sits on the fill, so check that pair.
+// accent.onSolid is its own token rather than reusing text.inverse — the label
+// on the dark indigo has to stay white, while text.inverse in dark mode is the
+// dark ink that goes on the light inverse surface. One token cannot be both.
 for (const mode of ['light', 'dark']) {
-  const c = contrast(T.color.text.inverse[mode], T.color.accent.solid[mode]);
-  c >= 4.5 ? pass(`accent.solid + text.inverse ${mode} ${c.toFixed(2)}:1`)
-           : fail(`accent.solid + text.inverse ${mode} ${c.toFixed(2)}:1 — needs 4.5:1`);
+  const c = contrast(T.color.accent.onSolid[mode], T.color.accent.solid[mode]);
+  c >= 4.5 ? pass(`accent.solid + accent.onSolid ${mode} ${c.toFixed(2)}:1`)
+           : fail(`accent.solid + accent.onSolid ${mode} ${c.toFixed(2)}:1 — needs 4.5:1`);
+
+  const ci = contrast(T.color.text.inverse[mode], T.color.surface.inverse[mode]);
+  ci >= 4.5 ? pass(`text.inverse on surface.inverse ${mode} ${ci.toFixed(2)}:1`)
+            : fail(`text.inverse on surface.inverse ${mode} ${ci.toFixed(2)}:1 — needs 4.5:1`);
 
   const cw = contrast(T.color.accent.washText[mode], T.color.accent.wash[mode]);
   cw >= 4.5 ? pass(`accent.washText on accent.wash ${mode} ${cw.toFixed(2)}:1`)

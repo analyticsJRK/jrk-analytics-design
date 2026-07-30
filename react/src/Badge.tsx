@@ -1,18 +1,14 @@
 import type { ReactNode } from 'react';
+import { Icon, STATUS_ICON } from './Icon';
 import { cx } from './utils';
 
 export type StatusTone = 'good' | 'warning' | 'serious' | 'critical' | 'neutral';
 
 /* Status icons are part of the contract, not decoration: on the light surface
    `warning` and `serious` sit below 3:1, and the icon + label pairing is the
-   documented mitigation. A Badge with a tone always renders one. */
-const ICONS: Record<StatusTone, ReactNode> = {
-  good: <path d="M2.5 6.5L5 9l4.5-5" />,
-  warning: <path d="M6 1.5L11 10.5H1L6 1.5zM6 5v2.5M6 9h.01" />,
-  serious: <path d="M6 1.5v6M6 9.5h.01M6 1a5 5 0 100 10A5 5 0 006 1z" />,
-  critical: <path d="M3 3l6 6M9 3l-6 6" />,
-  neutral: <path d="M6 5.5V9M6 3.5h.01" />,
-};
+   documented mitigation. Badge renders the FILLED glyph — SF uses filled
+   symbols for status, and the punched-out mark lets it sit on the badge wash
+   without knowing the wash colour. */
 
 export interface BadgeProps {
   children: ReactNode;
@@ -45,11 +41,7 @@ export function Badge({
         className,
       )}
     >
-      {showIcon && (
-        <svg viewBox="0 0 12 12" aria-hidden="true" strokeLinecap="round" strokeLinejoin="round">
-          {ICONS[tone as StatusTone]}
-        </svg>
-      )}
+      {showIcon && <Icon name={STATUS_ICON[tone as StatusTone]} />}
       {children}
     </span>
   );
@@ -96,9 +88,7 @@ export function Tag({ children, onRemove, removeLabel, className }: TagProps) {
           onClick={onRemove}
           aria-label={removeLabel ?? `Remove ${typeof children === 'string' ? children : 'tag'}`}
         >
-          <svg viewBox="0 0 10 10" aria-hidden="true" strokeLinecap="round">
-            <path d="M2 2l6 6M8 2l-6 6" />
-          </svg>
+          <Icon name="close" weight="semibold" />
         </button>
       )}
     </span>

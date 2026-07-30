@@ -7,8 +7,8 @@
   gap: var(--jrk-space-1);
   padding: var(--jrk-space-4) var(--jrk-space-5);
   background: var(--jrk-surface-default);
-  border: 1px solid transparent;
-  border-radius: var(--jrk-radius-2xl);
+  border: 1px solid var(--jrk-border-subtle);
+  border-radius: var(--jrk-radius-xl);
 }
 
 /* Periwinkle KPI tile — the band across the top of a dashboard. */
@@ -72,7 +72,7 @@
   color: var(--jrk-text-secondary);
 }
 
-.jrk-delta svg {
+.jrk-delta svg:not(.jrk-icon) {
   width: 12px;
   height: 12px;
   stroke-width: 2.5;
@@ -132,8 +132,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   background: var(--jrk-surface-default);
-  border: 1px solid transparent;
-  border-radius: var(--jrk-radius-2xl);
+  border: 1px solid var(--jrk-border-subtle);
+  border-radius: var(--jrk-radius-xl);
   overflow: hidden;
 }
 
@@ -166,8 +166,11 @@
   overflow: visible;
 }
 
+/* Split tiles are standalone cards again, so they take their hairline back —
+   the joined-band rule above zeroes the border, and without this they would be
+   the only card on the page without an edge. */
 .jrk-stat-row--split > .jrk-stat {
   background: var(--jrk-surface-tinted);
-  border-radius: var(--jrk-radius-2xl);
-  border-inline-start: 0;
+  border: 1px solid var(--jrk-border-subtle);
+  border-radius: var(--jrk-radius-xl);
 }

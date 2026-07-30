@@ -20,8 +20,9 @@
   height: 100vh;
   position: sticky;
   top: 0;
-  /* Chrome stays on the white page plane so the tinted cards in the content
-     area are the things that read as raised. */
+  /* Chrome sits on the page plane; the white cards in the content area are the
+     things that read as raised. Apple grouped style, so the plane is the tinted
+     one and the cards are white — the reverse of a conventional dashboard. */
   background: var(--jrk-surface-canvas);
   border-inline-end: 1px solid var(--jrk-border-subtle);
   transition: width var(--jrk-duration-base) var(--jrk-ease-standard);
@@ -54,10 +55,10 @@
 
 .jrk-sidebar__group {
   padding: var(--jrk-space-4) var(--jrk-space-3) var(--jrk-space-1);
-  font-size: var(--jrk-text-2xs);
+  font-size: var(--jrk-text-xs);
   font-weight: var(--jrk-weight-semibold);
-  letter-spacing: var(--jrk-tracking-caps);
-  text-transform: uppercase;
+  /* Sentence case — Apple sidebars label their sections plainly. */
+  letter-spacing: var(--jrk-tracking-normal);
   color: var(--jrk-text-muted);
   white-space: nowrap;
 }
@@ -66,12 +67,15 @@
   opacity: 0;
 }
 
+/* Apple sidebar row: a rounded pill, tight, with the icon in the accent when
+   selected. macOS rows sit around 28px — the previous 40px was a touch
+   ergonomic on a mouse-driven 1080px-tall display. */
 .jrk-nav-item {
   display: flex;
   align-items: center;
-  gap: var(--jrk-space-2_5);
-  height: var(--jrk-control-lg);
-  padding-inline: var(--jrk-space-3);
+  gap: var(--jrk-space-2);
+  height: var(--jrk-control-md);
+  padding-inline: var(--jrk-space-2);
   font-size: var(--jrk-text-md);
   font-weight: var(--jrk-weight-medium);
   color: var(--jrk-text-secondary);
@@ -83,9 +87,9 @@
     color var(--jrk-transition);
 }
 
-.jrk-nav-item svg {
-  width: var(--jrk-icon-lg);
-  height: var(--jrk-icon-lg);
+.jrk-nav-item svg:not(.jrk-icon) {
+  width: var(--jrk-icon-md);
+  height: var(--jrk-icon-md);
   stroke-width: 1.75;
   flex-shrink: 0;
 }
@@ -97,9 +101,16 @@
 
 /* Current page. Set aria-current="page" on the anchor — the styling keys off
    the same attribute assistive tech reads, so the two can never disagree. */
+/* Apple marks the selected sidebar row with a filled accent pill and a white
+   label, not a soft tint. The icon inherits currentColor, so it comes along. */
 .jrk-nav-item[aria-current='page'] {
-  background: var(--jrk-accent-wash);
-  color: var(--jrk-accent-wash-text);
+  background: var(--jrk-accent-solid);
+  color: var(--jrk-accent-on-solid);
+}
+
+.jrk-nav-item[aria-current='page']:hover {
+  background: var(--jrk-accent-solid-hover);
+  color: var(--jrk-accent-on-solid);
 }
 
 .jrk-nav-item__badge {
@@ -148,7 +159,19 @@
   top: 0;
   z-index: var(--jrk-z-sticky);
   background: var(--jrk-surface-canvas);
-  border-bottom: 1px solid var(--jrk-border-subtle);
+  border-bottom: 1px solid var(--jrk-border-default);
+}
+
+/* Vibrancy. The topbar is the one piece of chrome that content actually scrolls
+   beneath, so it is the only place a material reads — a translucent sidebar
+   sitting BESIDE the content has nothing to blur and just looks washed out.
+   Behind @supports so the opaque fill stays the fallback. */
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .jrk-topbar {
+    background: color-mix(in srgb, var(--jrk-surface-canvas) 72%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+  }
 }
 
 .jrk-topbar__search {
@@ -297,28 +320,63 @@
   border-radius: var(--jrk-radius-full);
 }
 
-/* Pill variant — for switching a view mode rather than a page section. */
+/* Segmented control — Apple's, not a button group.
+ *
+ * The anatomy is specific and it is what makes it recognisable: an INSET grey
+ * track, and a floating white thumb on the selected segment carrying a hairline
+ * and a soft shadow. Segments are separated by thin dividers that disappear
+ * either side of the thumb. Joined bordered boxes are the Bootstrap shape and
+ * read as web, not Apple. */
 .jrk-tabs--pills {
-  gap: 2px;
-  padding: 3px;
+  display: inline-flex;
+  gap: 0;
+  padding: 2px;
   border-bottom: 0;
   background: var(--jrk-surface-subtle);
-  border-radius: var(--jrk-radius-lg);
-  display: inline-flex;
-}
-
-.jrk-tabs--pills .jrk-tab {
-  padding: var(--jrk-space-1_5) var(--jrk-space-3);
-  font-size: var(--jrk-text-sm);
-  border-bottom: 0;
-  margin-bottom: 0;
   border-radius: var(--jrk-radius-md);
 }
 
-.jrk-tabs--pills .jrk-tab[aria-selected='true'] {
-  background: var(--jrk-surface-default);
+.jrk-tabs--pills .jrk-tab {
+  position: relative;
+  padding: 0 var(--jrk-space-3);
+  height: 22px;
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-medium);
   color: var(--jrk-text-primary);
-  box-shadow: var(--jrk-shadow-sm);
+  border-bottom: 0;
+  margin-bottom: 0;
+  border-radius: calc(var(--jrk-radius-md) - 2px);
+  transition: background-color var(--jrk-transition), box-shadow var(--jrk-transition);
+}
+
+/* Hairline divider between unselected neighbours. */
+.jrk-tabs--pills .jrk-tab + .jrk-tab::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: var(--jrk-border-default);
+}
+
+/* The divider is suppressed on both sides of the thumb. */
+.jrk-tabs--pills .jrk-tab[aria-selected='true']::before,
+.jrk-tabs--pills .jrk-tab[aria-selected='true'] + .jrk-tab::before {
+  background: transparent;
+}
+
+.jrk-tabs--pills .jrk-tab:hover {
+  color: var(--jrk-text-primary);
+}
+
+/* The thumb. */
+.jrk-tabs--pills .jrk-tab[aria-selected='true'] {
+  background: var(--jrk-surface-thumb);
+  color: var(--jrk-text-primary);
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.12);
 }
 
 /* ============================== responsive ============================== */

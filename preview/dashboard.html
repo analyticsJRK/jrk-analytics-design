@@ -33,32 +33,32 @@
         <span class="jrk-nav-item__label">Overview</span>
       </a>
       <a class="jrk-nav-item" href="#">
-        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M3 16V9M8 16V4M13 16v-5M18 16V7"/></svg>
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chartBar"></svg>
         <span class="jrk-nav-item__label">Performance</span>
       </a>
       <a class="jrk-nav-item" href="#">
-        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/></svg>
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="clock"></svg>
         <span class="jrk-nav-item__label">Delinquency</span>
         <span class="jrk-nav-item__badge"><span class="jrk-badge jrk-badge--critical jrk-badge--sm">12</span></span>
       </a>
 
       <div class="jrk-sidebar__group">Portfolio</div>
       <a class="jrk-nav-item" href="#">
-        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17V8l7-5 7 5v9"/><path d="M8 17v-5h4v5"/></svg>
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="house"></svg>
         <span class="jrk-nav-item__label">Properties</span>
       </a>
       <a class="jrk-nav-item" href="#">
-        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="13" rx="2"/><path d="M3 8h14M7 2v4M13 2v4"/></svg>
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="calendar"></svg>
         <span class="jrk-nav-item__label">Renewals</span>
       </a>
       <a class="jrk-nav-item" href="#">
-        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12v12H4z"/><path d="M7 8h6M7 12h4"/></svg>
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="doc"></svg>
         <span class="jrk-nav-item__label">GL quality</span>
       </a>
     </div>
     <div class="jrk-sidebar__footer">
       <a class="jrk-nav-item" href="#">
-        <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="10" r="2.5"/><path d="M10 2.5v2M10 15.5v2M17.5 10h-2M4.5 10h-2M15.3 4.7l-1.4 1.4M6.1 13.9l-1.4 1.4M15.3 15.3l-1.4-1.4M6.1 6.1L4.7 4.7"/></svg>
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="gear"></svg>
         <span class="jrk-nav-item__label">Settings</span>
       </a>
     </div>
@@ -68,14 +68,14 @@
     <header class="jrk-topbar">
       <span class="jrk-input-group jrk-topbar__search">
         <span class="jrk-input-group__icon">
-          <svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+          <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="search"></svg>
         </span>
         <input class="jrk-input jrk-input--sm jrk-input--filled" placeholder="Search properties, units, tenants" aria-label="Search">
       </span>
       <span class="jrk-spacer"></span>
       <span class="jrk-status"><span class="jrk-dot jrk-dot--good jrk-dot--pulse" aria-hidden="true"></span><span class="jrk-caption">Synced 4m ago</span></span>
       <button class="jrk-btn jrk-btn--ghost jrk-btn--icon jrk-btn--sm" aria-label="Notifications">
-        <svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2a4 4 0 00-4 4v3l-1 2h10l-1-2V6a4 4 0 00-4-4zM6.5 13a1.5 1.5 0 003 0"/></svg>
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="bell"></svg>
       </button>
       <button class="jrk-btn jrk-btn--secondary jrk-btn--sm">Export</button>
     </header>
@@ -107,7 +107,7 @@
         </div>
 
         <div class="jrk-alert jrk-alert--warning" role="status">
-          <svg class="jrk-alert__icon" viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2.5L18.5 17h-17L10 2.5zM10 8v4M10 14.5h.01"/></svg>
+          <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warningFill"></svg>
           <div class="jrk-alert__body">
             <p class="jrk-alert__title">3 properties missing July close</p>
             <p class="jrk-alert__text">Riverside Flats, Cedar Grove, and Old Mill Yard have not posted. Portfolio totals exclude them.</p>
@@ -119,17 +119,17 @@
           <div class="jrk-stat">
             <span class="jrk-stat__label">Collected rent</span>
             <span class="jrk-stat__value">$4.21<span class="jrk-stat__unit">M</span></span>
-            <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--good"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5V2.5M3 5.5L6 2.5l3 3"/></svg><span class="jrk-sr-only">up</span>+3.1% <span class="jrk-text-muted">vs last quarter</span></span></span>
+            <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--good"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="arrowUp"></svg><span class="jrk-sr-only">up</span>+3.1% <span class="jrk-text-muted">vs last quarter</span></span></span>
           </div>
           <div class="jrk-stat">
             <span class="jrk-stat__label">Occupancy</span>
             <span class="jrk-stat__value">93.8<span class="jrk-stat__unit">%</span></span>
-            <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--bad"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5v7M3 6.5l3 3 3-3"/></svg><span class="jrk-sr-only">down</span>−0.6pt <span class="jrk-text-muted">vs last quarter</span></span></span>
+            <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--bad"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="arrowDown"></svg><span class="jrk-sr-only">down</span>−0.6pt <span class="jrk-text-muted">vs last quarter</span></span></span>
           </div>
           <div class="jrk-stat">
             <span class="jrk-stat__label">Delinquency rate</span>
             <span class="jrk-stat__value">4.7<span class="jrk-stat__unit">%</span></span>
-            <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--good"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2.5v7M3 6.5l3 3 3-3"/></svg><span class="jrk-sr-only">down</span>−1.2pt <span class="jrk-text-muted">vs last quarter</span></span></span>
+            <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--good"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="arrowDown"></svg><span class="jrk-sr-only">down</span>−1.2pt <span class="jrk-text-muted">vs last quarter</span></span></span>
           </div>
           <div class="jrk-stat jrk-stat--with-spark">
             <span class="jrk-stat__label">Avg days to turn</span>
@@ -188,7 +188,7 @@
                   <th scope="col" class="jrk-num">Balance</th>
                   <th scope="col" aria-sort="descending" class="jrk-num">
                     <button class="jrk-table__sort" type="button">Delinquency
-                      <svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5V2.5M3 5.5L6 2.5l3 3"/></svg>
+                      <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="arrowUp"></svg>
                     </button>
                   </th>
                 </tr>
@@ -296,7 +296,8 @@ $('bar-list').innerHTML=BARS.map(([l,v])=>`<div class="jrk-bars__row">
 }
 
 /* ---------------- table rows ---------------- */
-const ICON={good:'<path d="M2.5 6.5L5 9l4.5-5"/>',warning:'<path d="M6 1.5L11 10.5H1L6 1.5zM6 5v2.5M6 9h.01"/>',critical:'<path d="M3 3l6 6M9 3l-6 6"/>'};
+// Status glyph names; preview.js hydrates them from dist/icons.js.
+const ICON={good:'checkFill',warning:'warningFill',critical:'criticalFill'};
 const LABEL={good:'Current',warning:'Review',critical:'Escalated'};
 const ROWS=[
   ['Riverside Flats','Southeast','critical',156,84.0,612470,9.2],
@@ -311,7 +312,7 @@ $('rows').innerHTML=ROWS.map(([name,region,tone,units,occ,bal,del])=>`
   <tr>
     <td>${name}</td>
     <td class="jrk-text-muted">${region}</td>
-    <td><span class="jrk-badge jrk-badge--${tone}"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round">${ICON[tone]}</svg>${LABEL[tone]}</span></td>
+    <td><span class="jrk-badge jrk-badge--${tone}"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="${ICON[tone]}"></svg>${LABEL[tone]}</span></td>
     <td class="jrk-num">${units}</td>
     <td class="jrk-num">${occ.toFixed(1)}%</td>
     <td class="jrk-num">$${bal.toLocaleString()}</td>

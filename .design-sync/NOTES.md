@@ -277,6 +277,19 @@ previews were authored.
 
 ## Re-sync risks — what can silently go stale
 
+- **A re-sync can report `upload: docs` with nothing else changed.** Seen once
+  (Jul 2026, the run immediately after the Icon/List/ListRow sync): every
+  component `sourceKey`, `styleSha` and `bundleSha12` matched the anchor exactly,
+  but `auxSha` differed, so `upload.any` was true for the docs surface alone.
+  `auxSha` covers only `guidelines/` + `README.md` (see `auxShaFor` in
+  `lib/sync-hashes.mjs`) — **it has no rendering or verification impact.**
+  Checked at the time: two consecutive builds produced byte-identical README and
+  guidelines (so the build is deterministic), the README's generated body matched
+  the uploaded one line for line, `guidelines/index.md` was byte-identical
+  remotely, and the guide files matched their unchanged sources. The differing
+  byte was never isolated. **If this recurs, don't spend time on it** — confirm
+  `bundle`/`styling`/`components` are all false in the verdict, re-upload, and
+  move on. Only investigate if `styleSha` or a `sourceKey` also moved.
 - **A new component that imports from outside `react/src/` can break the
   declaration emit** — see the `rootDir` section at the top. The failure is
   TS6059 from prepare.mjs while `npm test` stays green, so it looks like a

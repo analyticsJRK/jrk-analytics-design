@@ -16,5 +16,5 @@
     // No "types" entry, so nothing pulls in @types/node.
     "types": []
   },
-  "include": ["react/src/**/*", "dist/tokens.ts"]
+  "include": ["react/src/**/*", "dist/tokens.ts", "dist/icons.ts"]
 }

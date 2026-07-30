@@ -136,10 +136,8 @@
 
 .gal-label {
   width: 100%;
-  font-size: var(--jrk-text-2xs);
+  font-size: var(--jrk-text-xs);
   font-weight: var(--jrk-weight-semibold);
-  letter-spacing: var(--jrk-tracking-caps);
-  text-transform: uppercase;
   color: var(--jrk-text-muted);
 }
 

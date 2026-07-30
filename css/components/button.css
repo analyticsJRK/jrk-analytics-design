@@ -26,7 +26,7 @@
     color var(--jrk-transition);
 }
 
-.jrk-btn svg {
+.jrk-btn svg:not(.jrk-icon) {
   width: var(--jrk-icon-md);
   height: var(--jrk-icon-md);
   stroke-width: 2;
@@ -46,7 +46,7 @@
   --btn-fs: var(--jrk-text-sm);
 }
 
-.jrk-btn--sm svg {
+.jrk-btn--sm svg:not(.jrk-icon) {
   width: var(--jrk-icon-sm);
   height: var(--jrk-icon-sm);
 }
@@ -57,7 +57,7 @@
   --btn-fs: var(--jrk-text-lg);
 }
 
-.jrk-btn--lg svg {
+.jrk-btn--lg svg:not(.jrk-icon) {
   width: var(--jrk-icon-lg);
   height: var(--jrk-icon-lg);
 }
@@ -76,9 +76,14 @@
 
 /* ---------- variants ---------- */
 
+/* macOS push button. The anatomy: a hairline bezel, a very soft drop shadow,
+   and a small radius. Flat borderless rectangles read as Material; the bezel is
+   what makes it a Mac control. */
+
 .jrk-btn--primary {
   background: var(--jrk-accent-solid);
-  color: var(--jrk-text-inverse);
+  color: var(--jrk-accent-on-solid);
+  box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.16);
 }
 
 .jrk-btn--primary:hover:not(:disabled) {
@@ -87,21 +92,24 @@
 
 .jrk-btn--primary:active:not(:disabled) {
   background: var(--jrk-accent-solid-active);
+  box-shadow: none;
 }
 
+/* The default macOS control: white, hairline bezel, faint shadow. */
 .jrk-btn--secondary {
-  background: var(--jrk-surface-default);
+  background: var(--jrk-surface-raised);
   color: var(--jrk-text-primary);
   border-color: var(--jrk-border-default);
+  box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.08);
 }
 
 .jrk-btn--secondary:hover:not(:disabled) {
   background: var(--jrk-surface-hover);
-  border-color: var(--jrk-border-strong);
 }
 
 .jrk-btn--secondary:active:not(:disabled) {
   background: var(--jrk-surface-active);
+  box-shadow: none;
 }
 
 .jrk-btn--ghost {
@@ -118,13 +126,30 @@
   background: var(--jrk-surface-active);
 }
 
-/* Destructive. Reserved for actions that lose data — never as an accent. */
+/* Destructive, macOS style: a normal push button wearing red TEXT. A saturated
+   red rectangle sitting in a toolbar is an iOS-alert shape and looks wrong
+   beside other desktop controls. */
 .jrk-btn--danger {
-  background: var(--jrk-status-critical-mark);
-  color: #ffffff;
+  background: var(--jrk-surface-raised);
+  color: var(--jrk-status-critical-text);
+  border-color: var(--jrk-border-default);
+  box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.08);
 }
 
 .jrk-btn--danger:hover:not(:disabled) {
+  background: var(--jrk-status-critical-wash);
+  border-color: var(--jrk-status-critical-mark);
+}
+
+/* Filled red, for the confirming button in a destructive alert — the one place
+   Apple does fill it. Not for toolbars. */
+.jrk-btn--danger-solid {
+  background: var(--jrk-status-critical-mark);
+  color: var(--jrk-accent-on-solid);
+  box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.16);
+}
+
+.jrk-btn--danger-solid:hover:not(:disabled) {
   background: var(--jrk-status-critical-text);
 }
 
@@ -143,6 +168,10 @@
   padding: 0;
   background: none;
   color: var(--jrk-text-link);
+  text-decoration: none;
+}
+
+.jrk-btn--link:hover {
   text-decoration: underline;
   text-underline-offset: 2px;
 }
@@ -168,7 +197,7 @@
   border: 2px solid currentColor;
   border-top-color: transparent;
   border-radius: var(--jrk-radius-full);
-  color: var(--jrk-text-inverse);
+  color: var(--jrk-accent-on-solid);
   animation: jrk-spin var(--jrk-duration-slow) linear infinite;
 }
 
@@ -183,41 +212,67 @@
   }
 }
 
-/* ---------- group ---------- */
+/* ---------- segmented control ---------- */
 
-/* Segmented control / toolbar cluster. Buttons share borders, so only the
-   outer corners round. */
+/* Same anatomy as .jrk-tabs--pills: an inset track with a floating thumb. A
+   run of joined bordered boxes is the Bootstrap shape, not Apple's. */
 .jrk-btn-group {
   display: inline-flex;
+  gap: 0;
+  padding: 2px;
+  background: var(--jrk-surface-subtle);
+  border-radius: var(--jrk-radius-md);
   isolation: isolate;
 }
 
 .jrk-btn-group > .jrk-btn {
-  border-radius: 0;
-  margin-inline-start: -1px;
-}
-
-.jrk-btn-group > .jrk-btn:first-child {
-  border-start-start-radius: var(--jrk-radius-md);
-  border-end-start-radius: var(--jrk-radius-md);
+  position: relative;
+  height: 22px;
+  padding-inline: var(--jrk-space-3);
+  font-size: var(--jrk-text-sm);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--jrk-text-primary);
+  border-radius: calc(var(--jrk-radius-md) - 2px);
   margin-inline-start: 0;
 }
 
-.jrk-btn-group > .jrk-btn:last-child {
-  border-start-end-radius: var(--jrk-radius-md);
-  border-end-end-radius: var(--jrk-radius-md);
+.jrk-btn-group > .jrk-btn:hover:not(:disabled) {
+  background: transparent;
 }
 
-/* Raise the focused and selected buttons so their border wins over neighbors. */
-.jrk-btn-group > .jrk-btn:focus-visible,
-.jrk-btn-group > .jrk-btn[aria-pressed='true'],
-.jrk-btn-group > .jrk-btn[aria-selected='true'] {
+/* Hairline divider between unselected neighbours, suppressed either side of
+   the thumb. */
+.jrk-btn-group > .jrk-btn + .jrk-btn::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: var(--jrk-border-default);
+}
+
+.jrk-btn-group > .jrk-btn[aria-pressed='true']::before,
+.jrk-btn-group > .jrk-btn[aria-selected='true']::before,
+.jrk-btn-group > .jrk-btn[aria-pressed='true'] + .jrk-btn::before,
+.jrk-btn-group > .jrk-btn[aria-selected='true'] + .jrk-btn::before {
+  background: transparent;
+}
+
+.jrk-btn-group > .jrk-btn:focus-visible {
   z-index: 1;
 }
 
+/* The thumb. */
 .jrk-btn-group > .jrk-btn[aria-pressed='true'],
 .jrk-btn-group > .jrk-btn[aria-selected='true'] {
-  background: var(--jrk-accent-wash);
-  color: var(--jrk-accent-wash-text);
-  border-color: var(--jrk-border-accent);
+  background: var(--jrk-surface-thumb);
+  color: var(--jrk-text-primary);
+  border-color: transparent;
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.08),
+    0 1px 2px rgba(0, 0, 0, 0.12);
+  z-index: 1;
 }

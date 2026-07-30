@@ -1,0 +1,88 @@
+/* Icons — the SF Symbols contract.
+ *
+ * We cannot ship SF Symbols: Apple does not publish them as a webfont, and the
+ * glyph outlines are theirs. What we CAN do is reproduce the properties that
+ * make an icon read as SF rather than as Feather/Lucide, because those are
+ * behaviours, not artwork:
+ *
+ *   1. Icons scale with TEXT, not with a fixed pixel size. SF Symbols are a
+ *      font — they inherit font-size and sit on the text baseline. This is the
+ *      single biggest difference and the one nobody implements.
+ *   2. Stroke weight tracks the text weight. A semibold label gets a semibold
+ *      icon beside it.
+ *   3. Round caps and joins everywhere.
+ *   4. Compact geometry. Feather-family icons leave a lot of padding inside
+ *      their box; SF glyphs fill it, so they read heavier at the same size.
+ *   5. Filled variants are the norm for status and selected states, not the
+ *      exception.
+ *
+ * Ship icons on a 16 grid with `fill="none" stroke="currentColor"` for outline,
+ * or `fill="currentColor"` for filled. Do not set stroke-width on the element —
+ * this layer owns it.
+ */
+
+.jrk-icon {
+  /* 1em, so the icon is the size of the text it sits beside and moves with it.
+     A hard px size decouples the two and is why fixed-size icons always look
+     slightly wrong next to a heading. */
+  width: 1em;
+  height: 1em;
+  /* SF glyphs are optically a little larger than the cap height. */
+  font-size: 1.15em;
+  flex-shrink: 0;
+
+  fill: none;
+  stroke: currentColor;
+  stroke-width: var(--jrk-icon-stroke, 1.75);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+
+  /* Sit on the text baseline rather than the line box, so an icon inline with
+     a label does not ride high. */
+  vertical-align: -0.14em;
+}
+
+/* Weight pairing. SF Symbols ship in weights matched to the font's; these are
+   the three that matter in a dense UI. */
+.jrk-icon--light    { --jrk-icon-stroke: 1.4; }
+.jrk-icon--medium   { --jrk-icon-stroke: 1.75; }
+.jrk-icon--semibold { --jrk-icon-stroke: 2.1; }
+.jrk-icon--bold     { --jrk-icon-stroke: 2.5; }
+
+/* Filled — the `.fill` variant. The inner glyph is punched out with
+   fill-rule="evenodd" so whatever is behind shows through, exactly as SF's
+   filled symbols do. That is why these work on a coloured badge wash without
+   knowing the background colour. */
+.jrk-icon--fill {
+  fill: currentColor;
+  stroke: none;
+}
+
+/* Hierarchical rendering: a secondary element inside the glyph at reduced
+   opacity. SF calls this the hierarchical variant. */
+.jrk-icon .jrk-icon__secondary {
+  opacity: 0.4;
+}
+
+/* Explicit sizes, for the cases that genuinely are not text-relative —
+   an empty-state illustration, a standalone toolbar glyph. */
+.jrk-icon--sm { font-size: var(--jrk-icon-sm); vertical-align: middle; }
+.jrk-icon--md { font-size: var(--jrk-icon-md); vertical-align: middle; }
+.jrk-icon--lg { font-size: var(--jrk-icon-lg); vertical-align: middle; }
+.jrk-icon--xl { font-size: 28px; vertical-align: middle; }
+
+/* Icons inside a control inherit that control's weight, which is what keeps a
+   button's glyph and its label looking like one object. */
+.jrk-btn .jrk-icon,
+.jrk-nav-item .jrk-icon,
+.jrk-list__row .jrk-icon {
+  --jrk-icon-stroke: 2;
+}
+
+/* The base reset in base.css sets `svg { fill: none; stroke: currentColor }`
+   for every SVG. A filled icon has to win that, and it also has to win when the
+   author forgot .jrk-icon and used a bare <svg data-fill>. */
+svg[data-fill='true'] {
+  fill: currentColor;
+  stroke: none;
+}

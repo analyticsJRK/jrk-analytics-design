@@ -8,8 +8,8 @@
   overflow: auto;
   max-width: 100%;
   background: var(--jrk-surface-default);
-  border: 1px solid transparent;
-  border-radius: var(--jrk-radius-2xl);
+  border: 1px solid var(--jrk-border-subtle);
+  border-radius: var(--jrk-radius-xl);
 }
 
 .jrk-table {
@@ -35,8 +35,10 @@
   padding: var(--jrk-space-2_5) var(--jrk-space-4);
   font-size: var(--jrk-text-xs);
   font-weight: var(--jrk-weight-semibold);
-  letter-spacing: var(--jrk-tracking-wide);
-  text-transform: uppercase;
+  /* Sentence case, not uppercase-tracked. An UPPERCASE LETTER-SPACED header row
+     is a Material convention and one of the loudest non-Apple tells; macOS
+     table headers are small, grey and plainly cased. */
+  letter-spacing: var(--jrk-tracking-normal);
   text-align: start;
   white-space: nowrap;
   color: var(--jrk-text-muted);
@@ -64,7 +66,7 @@
   color: var(--jrk-text-primary);
 }
 
-.jrk-table__sort svg {
+.jrk-table__sort svg:not(.jrk-icon) {
   width: 12px;
   height: 12px;
   stroke-width: 2.5;
