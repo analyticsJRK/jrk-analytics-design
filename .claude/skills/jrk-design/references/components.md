@@ -149,6 +149,38 @@ For workbook-style financial reports use the **sheet** layer instead — see
   toast, or nothing is announced
 - `.jrk-progress` + `__fill`
 
+## Icons
+
+SF Symbols cannot be shipped: Apple does not publish them as a webfont, and the
+outlines are theirs. `<Icon>` provides original glyphs drawn to SF's
+*behaviour*, and `.jrk-icon` is the contract any icon set can inherit.
+
+```tsx
+<Icon name="checkFill" />
+<Icon name="chevronRight" weight="semibold" />
+```
+
+What makes an icon read as SF rather than as Feather/Lucide:
+
+- **Sized in `em`, not px.** Icons scale with the text beside them and sit on
+  the baseline. This is the single biggest difference and almost nobody does it.
+  Use `size="sm|md|lg|xl"` only where the icon genuinely is not text-relative.
+- **Weight tracks the text weight** — `light | medium | semibold | bold`.
+- Round caps and joins; compact geometry that fills the 16 grid.
+- **Filled variants for status and selected states.** The inner mark is punched
+  out with `fill-rule="evenodd"`, so the badge wash behind shows through and the
+  glyph never needs to know its background colour.
+
+`<Badge>` renders the filled status glyph automatically via `STATUS_ICON`.
+
+**For app iconography beyond this set, use Phosphor (MIT)** — the closest open
+family to SF: multiple weights, round terminals, a real fill variant. Give it
+`className="jrk-icon"` and it inherits the sizing, weight and baseline rules.
+
+Component CSS sizes bare `svg` elements with `svg:not(.jrk-icon)`, so a legacy
+inline SVG keeps its fixed size while anything carrying `.jrk-icon` gets the
+text-relative contract.
+
 ## Layout & a11y primitives
 
 `.jrk-stack` `.jrk-row` `.jrk-row-between` `.jrk-spacer` `.jrk-grid`

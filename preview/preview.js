@@ -1,4 +1,6 @@
-/* Gallery chrome: theme toggle + shared nav. Not part of the library. */
+/* Gallery chrome: theme toggle, shared nav, icon hydration. Not part of the library. */
+
+import { OUTLINE, FILLED } from '../dist/icons.js';
 
 const PAGES = [
   ['index.html', 'Overview'],
@@ -83,4 +85,27 @@ export function tokenValue(name) {
   return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 }
 
+/* Fill in every <svg data-icon="name"> from the generated glyph source, so the
+   preview pages carry a name instead of a duplicated path. A MutationObserver
+   covers the pages that build their markup with JS after load. */
+export function hydrateIcons(root = document) {
+  for (const el of root.querySelectorAll('svg[data-icon]:empty')) {
+    const n = el.dataset.icon;
+    const fill = FILLED[n];
+    const d = fill ?? OUTLINE[n];
+    if (!d) { console.warn(`[preview] unknown icon "${n}"`); continue; }
+    if (fill) {
+      el.classList.add('jrk-icon--fill');
+      el.setAttribute('data-fill', 'true');
+    }
+    el.innerHTML = `<path d="${d}"${fill ? ' fill-rule="evenodd"' : ''}/>`;
+  }
+}
+
+new MutationObserver(() => hydrateIcons()).observe(document.documentElement, {
+  childList: true,
+  subtree: true,
+});
+
 initChrome();
+hydrateIcons();

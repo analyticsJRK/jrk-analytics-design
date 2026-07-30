@@ -1,0 +1,201 @@
+/* Inset grouped list — the Apple pattern.
+ *
+ * This is the shape iOS Settings and macOS System Settings are built from, and
+ * it is what most makes an interface read as Apple. A rounded container, rows
+ * of `Label ........ value ›`, and separators that INSET from the leading text
+ * edge rather than spanning the full width.
+ *
+ * It replaces the label-above-input web form for anything that is a settings
+ * surface, a detail panel, or a summary of key/value facts. Use the ordinary
+ * .jrk-field layout only for genuine data-entry forms with many free-text
+ * inputs.
+ *
+ *   <div class="jrk-list">
+ *     <div class="jrk-list__header">Report</div>
+ *     <ul class="jrk-list__group">
+ *       <li class="jrk-list__row">
+ *         <span class="jrk-list__label">Property</span>
+ *         <span class="jrk-list__value">All properties</span>
+ *       </li>
+ *     </ul>
+ *     <p class="jrk-list__footer">Applies to every metric below.</p>
+ *   </div>
+ */
+
+.jrk-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sentence case, secondary ink. NOT an uppercase tracked overline — that is a
+   Material convention and it is one of the loudest non-Apple tells. */
+.jrk-list__header {
+  padding: 0 var(--jrk-space-4) var(--jrk-space-1_5);
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-list__footer {
+  padding: var(--jrk-space-1_5) var(--jrk-space-4) 0;
+  font-size: var(--jrk-text-xs);
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-muted);
+}
+
+.jrk-list__group {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--jrk-surface-default);
+  border: 1px solid var(--jrk-border-subtle);
+  border-radius: var(--jrk-radius-lg);
+  overflow: hidden;
+}
+
+/* ============================== rows ============================== */
+
+.jrk-list__row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-3);
+  min-height: 32px;
+  padding: var(--jrk-space-1_5) var(--jrk-space-4);
+  font-size: var(--jrk-text-md);
+}
+
+/* The inset separator. Drawn as a pseudo-element rather than a border so it can
+   start after the leading padding — a full-bleed rule is the giveaway that a
+   list was built as a generic table. */
+.jrk-list__row + .jrk-list__row::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  inset-inline-start: var(--jrk-space-4);
+  inset-inline-end: 0;
+  height: 1px;
+  background: var(--jrk-border-subtle);
+}
+
+/* A row with a leading icon insets its separator further, so the rule lines up
+   with the label rather than the icon. */
+.jrk-list__row--icon + .jrk-list__row--icon::before {
+  inset-inline-start: calc(var(--jrk-space-4) * 2 + var(--jrk-icon-md));
+}
+
+.jrk-list__label {
+  flex: 1;
+  min-width: 0;
+  color: var(--jrk-text-primary);
+}
+
+/* The trailing value is recessive — the label is what you scan. */
+.jrk-list__value {
+  color: var(--jrk-text-muted);
+  text-align: end;
+  white-space: nowrap;
+}
+
+.jrk-list__icon {
+  display: grid;
+  place-items: center;
+  width: var(--jrk-icon-md);
+  height: var(--jrk-icon-md);
+  flex-shrink: 0;
+  color: var(--jrk-accent-text);
+}
+
+/* Secondary line under the label, for a row that needs explaining. */
+.jrk-list__detail {
+  display: block;
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+}
+
+/* ============================== interactive rows ============================== */
+
+/* A row that navigates. The chevron is the affordance — Apple never uses a
+   button here. */
+.jrk-list__row--link {
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  width: 100%;
+  background: none;
+  border: 0;
+  text-align: start;
+  font: inherit;
+}
+
+.jrk-list__row--link:hover {
+  background: var(--jrk-surface-hover);
+}
+
+.jrk-list__row--link::after {
+  content: '';
+  width: 7px;
+  height: 7px;
+  flex-shrink: 0;
+  border-inline-end: 1.5px solid var(--jrk-text-disabled);
+  border-block-start: 1.5px solid var(--jrk-text-disabled);
+  transform: rotate(45deg);
+  margin-inline-start: calc(var(--jrk-space-1) * -1);
+}
+
+/* The chevron sits inside the row, so a hovered row must not lose its
+   separator to the hover fill. */
+.jrk-list__row--link:hover + .jrk-list__row::before {
+  background: transparent;
+}
+
+/* Selected row — Apple fills the whole row with the accent. */
+.jrk-list__row[aria-selected='true'] {
+  background: var(--jrk-accent-solid);
+  color: var(--jrk-accent-on-solid);
+}
+
+.jrk-list__row[aria-selected='true'] .jrk-list__label,
+.jrk-list__row[aria-selected='true'] .jrk-list__value,
+.jrk-list__row[aria-selected='true'] .jrk-list__icon {
+  color: var(--jrk-accent-on-solid);
+}
+
+/* ============================== control rows ============================== */
+
+/* A row whose trailing element is a control rather than a value. The control
+   keeps its own styling; the row supplies the label and the geometry. */
+.jrk-list__row--control {
+  padding-block: var(--jrk-space-1);
+}
+
+.jrk-list__row--control .jrk-input,
+.jrk-list__row--control .jrk-select {
+  width: auto;
+  min-width: 160px;
+  max-width: 320px;
+  text-align: end;
+}
+
+/* Inside a grouped list Apple's fields have no chrome at all — the row IS the
+   field. The border returns on focus. */
+.jrk-list__row--control .jrk-input,
+.jrk-list__row--control .jrk-select {
+  background: transparent;
+  border-color: transparent;
+  color: var(--jrk-text-muted);
+}
+
+.jrk-list__row--control .jrk-input:focus-visible,
+.jrk-list__row--control .jrk-select:focus-visible {
+  background: var(--jrk-surface-default);
+  color: var(--jrk-text-primary);
+}
+
+/* ============================== density ============================== */
+
+/* Roomier rows, for a settings surface rather than a dense data panel. */
+.jrk-list--comfortable .jrk-list__row {
+  min-height: 38px;
+  padding-block: var(--jrk-space-2);
+}

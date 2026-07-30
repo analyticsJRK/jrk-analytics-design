@@ -35,10 +35,20 @@ is a bug no gate will catch.
 
 Set a series color via `--series` on the mark's container, or the helper classes.
 
-**Never cycle the palette.** Eight slots, fixed order — the order is the
-colorblind-safety mechanism, because neighbors are what touch in a stack or a
-line chart. A ninth series folds into "Other", facets into small multiples, or
-takes a second encoding.
+**Never cycle the palette.** Eight slots — `blue, orange, mint, yellow, purple,
+pink, teal, brown` — seeded from Apple's system colours and then ORDERED BY
+SEARCH to maximise the worst adjacent pair across both modes jointly. The order
+is the colorblind-safety mechanism, because neighbours are what touch in a stack
+or a line chart. Apple publishes no CVD-safe sequence, so this order is derived,
+not adopted; worst adjacent ΔE is 16.3 light / 15.1 dark.
+
+Blue is slot 1 deliberately — it is the default single-series colour. systemGreen
+and systemRed are held out of the series entirely (they are status good/critical,
+and a green or red series in a financial chart reads as a verdict), and
+systemIndigo is held out as the UI accent.
+
+A ninth series folds into "Other", facets into small multiples, or takes a second
+encoding.
 
 **Scatter, bubble, choropleth, and small multiples cap at 3 series.** There any
 two marks can sit side by side, so the harder all-pairs test applies and only the

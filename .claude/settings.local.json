@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cp -r /c/Users/npayumo/AppData/Local/Temp/claude/bundled-skills/2.1.220/0c963d6800992d2976aab0779d475b44/design-sync/package-build.mjs /c/Users/npayumo/AppData/Local/Temp/claude/bundled-skills/2.1.220/0c963d6800992d2976aab0779d475b44/design-sync/package-validate.mjs /c/Users/npayumo/AppData/Local/Temp/claude/bundled-skills/2.1.220/0c963d6800992d2976aab0779d475b44/design-sync/package-capture.mjs /c/Users/npayumo/AppData/Local/Temp/claude/bundled-skills/2.1.220/0c963d6800992d2976aab0779d475b44/design-sync/resync.mjs /c/Users/npayumo/AppData/Local/Temp/claude/bundled-skills/2.1.220/0c963d6800992d2976aab0779d475b44/design-sync/lib /c/Users/npayumo/AppData/Local/Temp/claude/bundled-skills/2.1.220/0c963d6800992d2976aab0779d475b44/design-sync/storybook .ds-sync/)",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/react/package.json'\\).version\\)\")",
+      "Bash(node -e \"console.log\\(require\\('./node_modules/react-dom/package.json'\\).version\\)\")",
+      "Read(//c/Users/npayumo/AppData/Local/ms-playwright/**)",
+      "Read(//c/Users/npayumo/.cache/**)",
+      "Bash(node *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(grep -vE '^\\\\s*$|css-syntax-error|jrk-tokens.css:|│|╵|\\\\^|WARNING')",
+      "Bash(echo \"DRIVER_EXIT=$?\")",
+      "Bash(git diff *)",
+      "Bash(git check-ignore *)",
+      "Bash(grep -n \"jrk-icon\\\\`\\\\|jrk-list\\\\`\" ds-bundle/README.md)",
+      "Bash(git checkout *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(gh pr create --title 'Sync Icon, List and ListRow to the Design System project' --body ' *)",
+      "Bash(awk '{print \" anchor built:\",$6}')",
+      "Bash(grep -vE 'css-syntax-error|jrk-tokens.css:|│|╵|\\\\^|WARNING|^\\\\s*$')",
+      "Bash(gh pr *)"
+    ]
+  }
+}

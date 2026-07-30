@@ -5,11 +5,11 @@ export type Mode = 'light' | 'dark';
 /** Categorical series colors. Assign slots in order, never cycle.
  *  A 9th series folds into "Other" or facets — it is never a generated hue. */
 export const chartSeries = {
-  light: ['#327ebf', '#d87a49', '#49ab87', '#dfa850', '#db87a2', '#1f813b', '#454595', '#d16052'],
-  dark: ['#338cd4', '#cc662f', '#339b79', '#c08932', '#cc5c7f', '#0d8136', '#8b8ade', '#db7168'],
+  light: ['#007aff', '#fa9418', '#00c7be', '#d5ab19', '#af52de', '#ff2d55', '#30b0c7', '#b27e34'],
+  dark: ['#0a84ff', '#cb7d00', '#15a7a2', '#ac8f00', '#bf5af2', '#ff375f', '#0aa3ba', '#ba863d'],
 } as const;
 
-export const chartSeriesHues = ['blue', 'orange', 'aqua', 'yellow', 'magenta', 'green', 'violet', 'red'] as const;
+export const chartSeriesHues = ['blue', 'orange', 'mint', 'yellow', 'purple', 'pink', 'teal', 'brown'] as const;
 
 /** Scatter / bubble / choropleth / small-multiples cap: any two marks can sit
  *  side by side, so only the first N slots clear the all-pairs CVD floor. */
@@ -17,117 +17,117 @@ export const SERIES_CAP_ALL_PAIRS = 3;
 
 /** Sub-3:1 on the light surface — using these as fills obligates visible direct
  *  labels or a table view. Not dismissable. */
-export const reliefRequiredLight: readonly string[] = ['#d87a49', '#49ab87', '#dfa850', '#db87a2'];
+export const reliefRequiredLight: readonly string[] = ['#fa9418', '#00c7be', '#d5ab19', '#30b0c7'];
 
-export const chartSequential = ['#eceefc', '#dee1fa', '#d3d7f7', '#c1c6f3', '#b3b9f0', '#9fa6eb', '#8d95e6', '#7d84e0', '#6f74d9', '#5b5fca', '#4c4fb5', '#41439c', '#353781'] as const;
+export const chartSequential = ['#eeeefc', '#e2e2fa', '#dcdcfa', '#c3c2f5', '#b4b3f2', '#a5a4ef', '#9190ec', '#7d7be8', '#6e6ce4', '#5e5ce6', '#5856d6', '#4a49b3', '#3f3e96'] as const;
 
 export const chartDiverging = {
-  negative: '#d16052',
-  positive: '#4c4fb5',
-  midpoint: { light: '#eaeaf2', dark: '#303030' },
+  negative: '#ff3b30',
+  positive: '#007aff',
+  midpoint: { light: '#e5e5ea', dark: '#3a3a3c' },
 } as const;
 
 export const chartChrome = {
   $comment: 'surface is the CARD, not the page — that is what chart marks sit on and what the validator measures against.',
   surface: {
-    light: '#f5f5fa',
-    dark: '#1a1a1a'
+    light: '#ffffff',
+    dark: '#1c1c1e'
   },
   grid: {
-    light: '#e7e7f0',
-    dark: '#262626'
+    light: '#f2f2f7',
+    dark: '#2c2c2e'
   },
   axis: {
-    light: '#cbcbdb',
-    dark: '#454545'
+    light: '#d1d1d6',
+    dark: '#48484a'
   },
   tick: {
-    light: '#5f5f73',
-    dark: '#8f8f8f'
+    light: '#6e6e73',
+    dark: '#98989d'
   },
   label: {
-    light: '#474759',
-    dark: '#b4b4b4'
+    light: '#3c3c43',
+    dark: '#b4b4ba'
   },
   deltaUp: {
-    light: '#0a7d0a',
-    dark: '#3ec93e'
+    light: '#1e7a34',
+    dark: '#4cd964'
   },
   deltaDown: {
-    light: '#b52d2d',
-    dark: '#f08585'
+    light: '#c00011',
+    dark: '#ff6961'
   }
 } as const;
 
 export const status = {
   good: {
     mark: {
-      light: '#0ca30c',
-      dark: '#0ca30c'
+      light: '#34c759',
+      dark: '#30d158'
     },
     text: {
-      light: '#0a7d0a',
-      dark: '#3ec93e'
+      light: '#1e7a34',
+      dark: '#4cd964'
     },
     wash: {
-      light: '#e3f6e3',
-      dark: '#123a12'
+      light: '#e3f7e8',
+      dark: '#0e3a1b'
     }
   },
   warning: {
     mark: {
-      light: '#fab219',
-      dark: '#fab219'
+      light: '#ff9500',
+      dark: '#ff9f0a'
     },
     text: {
-      light: '#8a5a00',
-      dark: '#fab219'
+      light: '#9a4400',
+      dark: '#ffb340'
     },
     wash: {
-      light: '#fdf1d6',
-      dark: '#3d2f08'
+      light: '#fff1e0',
+      dark: '#402a06'
     }
   },
   serious: {
     mark: {
-      light: '#ec835a',
-      dark: '#ec835a'
+      light: '#ff6b22',
+      dark: '#ff7a3d'
     },
     text: {
-      light: '#a04a22',
-      dark: '#f2a785'
+      light: '#b02d00',
+      dark: '#ff9f70'
     },
     wash: {
-      light: '#fceee7',
-      dark: '#3f2317'
+      light: '#ffeae0',
+      dark: '#42200e'
     }
   },
   critical: {
     mark: {
-      light: '#d03b3b',
-      dark: '#d03b3b'
+      light: '#ff3b30',
+      dark: '#ff453a'
     },
     text: {
-      light: '#b52d2d',
-      dark: '#f08585'
+      light: '#c00011',
+      dark: '#ff6961'
     },
     wash: {
-      light: '#fbe6e6',
-      dark: '#401616'
+      light: '#ffe8e6',
+      dark: '#42110e'
     }
   },
   neutral: {
     mark: {
-      light: '#7d7d94',
-      dark: '#8f8f8f'
+      light: '#8e8e93',
+      dark: '#8e8e93'
     },
     text: {
-      light: '#4a4a5e',
-      dark: '#b4b4b4'
+      light: '#545456',
+      dark: '#b4b4ba'
     },
     wash: {
-      light: '#eeeef5',
-      dark: '#2b2b2b'
+      light: '#f2f2f7',
+      dark: '#2c2c2e'
     }
   }
 } as const;

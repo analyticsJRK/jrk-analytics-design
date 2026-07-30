@@ -25,8 +25,10 @@
 @import url('./components/form.css');
 @import url('./components/card.css');
 @import url('./components/badge.css');
+@import url('./components/icon.css');
 @import url('./components/stat.css');
 @import url('./components/table.css');
+@import url('./components/list.css');
 @import url('./components/sheet.css');
 @import url('./components/shell.css');
 @import url('./components/feedback.css');

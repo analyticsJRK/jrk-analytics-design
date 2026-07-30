@@ -39,7 +39,7 @@
   color: var(--jrk-status-critical-text);
 }
 
-.jrk-field__error svg {
+.jrk-field__error svg:not(.jrk-icon) {
   width: var(--jrk-icon-sm);
   height: var(--jrk-icon-sm);
 }
@@ -292,17 +292,21 @@
   cursor: pointer;
 }
 
+/* Apple proportions: a 30x18 pill with a shadowed knob, and systemGreen when
+   on — not the accent. On Apple platforms the switch is always green
+   regardless of tint, and that is the single most recognisable control in the
+   whole system. */
 .jrk-switch input {
   appearance: none;
   position: relative;
   flex-shrink: 0;
-  width: 34px;
-  height: 20px;
+  width: 30px;
+  height: 18px;
   margin: 0;
   background: var(--jrk-border-strong);
   border-radius: var(--jrk-radius-full);
   cursor: pointer;
-  transition: background-color var(--jrk-transition);
+  transition: background-color var(--jrk-duration-base) var(--jrk-ease-standard);
 }
 
 .jrk-switch input::after {
@@ -310,20 +314,21 @@
   position: absolute;
   top: 2px;
   left: 2px;
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
   background: #ffffff;
   border-radius: var(--jrk-radius-full);
-  box-shadow: var(--jrk-shadow-sm);
-  transition: transform var(--jrk-transition);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+  /* Slight overshoot on the knob — Apple's toggle has a spring to it. */
+  transition: transform var(--jrk-duration-base) var(--jrk-ease-spring);
 }
 
 .jrk-switch input:checked {
-  background: var(--jrk-accent-solid);
+  background: var(--jrk-status-good-mark);
 }
 
 .jrk-switch input:checked::after {
-  transform: translateX(14px);
+  transform: translateX(12px);
 }
 
 .jrk-switch input:disabled {

@@ -22,16 +22,17 @@ dark theme a swap rather than a rewrite.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--jrk-surface-canvas` | `#ffffff` | `#000000` | page plane, sidebar, topbar |
-| `--jrk-surface-default` | `#f5f5fa` | `#1a1a1a` | cards, panels, **chart surface** |
-| `--jrk-surface-tinted` | `#eceefc` | `#242424` | KPI band, highlighted tiles |
-| `--jrk-surface-subtle` | `#eeeef5` | `#212121` | table header, inset wells |
-| `--jrk-surface-raised` | `#ffffff` | `#262626` | popovers, menus, modals, inputs |
-| `--jrk-surface-banner` | `#353781` | `#2e2e2e` | sheet title bar |
+| `--jrk-surface-canvas` | `#f2f2f7` | `#000000` | page plane, sidebar, topbar — systemGroupedBackground |
+| `--jrk-surface-default` | `#ffffff` | `#1c1c1e` | cards, panels, **chart surface** |
+| `--jrk-surface-tinted` | `#eeeefc` | `#25253a` | KPI band, highlighted tiles |
+| `--jrk-surface-subtle` | `#f2f2f7` | `#2c2c2e` | table header, inset wells |
+| `--jrk-surface-raised` | `#ffffff` | `#2c2c2e` | popovers, menus, modals, inputs |
+| `--jrk-surface-banner` | `#5856d6` | `#2c2c2e` | sheet title bar |
 | `--jrk-surface-hover` / `-active` / `-disabled` / `-inverse` | | | states |
 
-The card is the surface everything is measured against. Chrome sits on the
-canvas so the cards read as the raised thing.
+Apple GROUPED style: the page is tinted and the cards are white — the reverse of
+a conventional dashboard. The card is the surface everything is measured
+against; chrome sits on the canvas so the cards read as the raised thing.
 
 ## Text
 
@@ -41,7 +42,8 @@ canvas so the cards read as the raised thing.
 | `--jrk-text-secondary` | supporting copy, labels |
 | `--jrk-text-muted` | axis ticks, captions, placeholders |
 | `--jrk-text-disabled` | decorative only — never load-bearing |
-| `--jrk-text-inverse` | on inverse surface / solid accent |
+| `--jrk-text-inverse` | on `surface-inverse` ONLY — not the solid accent |
+| `--jrk-accent-on-solid` | the label ON the solid accent; white in both modes |
 | `--jrk-text-link` | inline links, accent text |
 | `--jrk-text-on-banner`, `--jrk-text-on-banner-muted` | on `surface-banner` |
 
@@ -55,17 +57,22 @@ fail on the plane behind it.
 card footers) · `--jrk-border-strong` (axis, baselines, form controls) ·
 `--jrk-border-accent` (active tab, selected input).
 
-Deliberately near-invisible: cards separate by fill, not by a rule. Form
-controls use `border-strong` plus a contrasting fill — an input must show where
-it ends even though a card need not.
+Apple separators. Cards carry a fill *and* a `border-subtle` hairline — iOS uses
+fill alone, but at desktop viewing distance a white-on-`#f2f2f7` edge is too
+faint to hold a dense layout together, so this is the macOS treatment. Form
+controls use `border-strong` plus a contrasting fill.
 
-## Accent (periwinkle indigo)
+## Accent (systemIndigo)
 
-`--jrk-accent-solid` (button fill) · `-solid-hover` · `-solid-active` · `-text` ·
-`-wash` (selected row, soft badge) · `-wash-text`.
+`--jrk-accent-solid` (button fill) · `-solid-hover` · `-solid-active` ·
+`-on-solid` · `-text` · `-wash` (selected row, soft badge) · `-wash-text`.
 
-The solid fill is `indigo-600`, not `indigo-500` — 500 measures only 4.0:1 with
-white text, under AA. This is the class of near-miss the gate exists for.
+systemIndigo `#5856d6` is Apple verbatim — white on it measures 5.65:1, so it
+needs no darkening (systemBlue would).
+
+**`--jrk-accent-on-solid` is the label ON the fill, and it is white in both
+modes.** Do not use `--jrk-text-inverse` there: in dark mode that is the dark ink
+for the light inverse surface, and black on the dark indigo is only 4.15:1.
 
 ## Status — reserved, never a chart series
 
@@ -93,24 +100,26 @@ Apply a series color by setting `--series` on the mark's container, or use the
 
 ## Scale
 
-- **Type** `--jrk-text-2xs|xs|sm|md|lg|xl|2xl|3xl|4xl|5xl` (11px → 48px; `md` is body)
+- **Type** `--jrk-text-2xs|xs|sm|md|lg|xl|2xl|3xl|4xl|5xl` (11px → 42px; `md` = 14px is body)
 - **Weight** `--jrk-weight-regular|medium|semibold|bold`
 - **Leading** `--jrk-leading-tight|snug|normal|relaxed`
 - **Tracking** `--jrk-tracking-tight|normal|wide|caps`
 - **Space** `--jrk-space-0_5` … `--jrk-space-24` on a 4px grid
-- **Radius** `--jrk-radius-sm|md|lg|xl|2xl|full` (6/10/14/18/24px) plus
-  `--jrk-radius-data-end` (6px, bar tips)
+- **Radius** `--jrk-radius-sm|md|lg|xl|2xl|full` (4/6/10/12/16px) plus
+  `--jrk-radius-data-end` (4px, bar tips). Apple corners are TIGHTER than most
+  web systems — macOS controls sit near 6px and cards near 10-12px.
 - **Shadow** `--jrk-shadow-sm|md|lg|xl|focus`
-- **Controls** `--jrk-control-sm|md|lg` (28/34/40px), `--jrk-icon-sm|md|lg`
+- **Controls** `--jrk-control-sm|md|lg` (24/28/32px, macOS-compact non-touch), `--jrk-icon-sm|md|lg` (13/15/18px). `--jrk-min-touch` is 24px — the WCAG 2.2 AA floor. Never lower.
 - **Layout** `--jrk-sidebar-collapsed|expanded`, `--jrk-topbar-default`,
   `--jrk-container-sm|md|lg|xl`
 - **Sheet** `--jrk-sheet-row|row-banner|row-meta|gutter|label|cell|total|wide|chart`
 - **Motion** `--jrk-duration-*`, `--jrk-ease-*`, and `--jrk-transition`
 - **Z** `--jrk-z-base|raised|sticky|overlay|modal|popover|toast|tooltip`
 
-Radii are generous by design — that is the main lever for the soft look.
-`radius-data-end` is the exception and stays small: a heavily rounded bar tip
-makes the endpoint ambiguous, and reading the bar against the axis is its job.
+Radii are deliberately TIGHT — Apple corners are smaller than most web systems,
+and an over-rounded card is the fastest way to stop reading as Apple.
+`radius-data-end` stays smallest: a heavily rounded bar tip makes the endpoint
+ambiguous, and reading the bar against the axis is its job.
 
 ## Motion
 

@@ -24,6 +24,9 @@ body {
   font-family: var(--jrk-font-sans);
   font-size: var(--jrk-text-md);
   line-height: var(--jrk-leading-normal);
+  /* SF carries slight negative tracking at text sizes; matching it is most of
+     what makes the type read as Apple rather than as default Inter. */
+  letter-spacing: var(--jrk-tracking-normal);
   color: var(--jrk-text-primary);
   background: var(--jrk-surface-canvas);
   -webkit-font-smoothing: antialiased;
@@ -156,21 +159,28 @@ a:hover,
 /* ============================== focus ============================== */
 
 /* One ring for the whole system. :focus-visible only, so a mouse click never
-   paints a ring but every keyboard path does. The offset color matches the
-   surface so the ring stays readable on cards, wells, and the canvas alike. */
+   paints a ring but every keyboard path does.
+
+   Apple's ring is a soft accent halo rather than a hard outline: a thin solid
+   core carries the contrast requirement, and the translucent bloom underneath
+   is decoration and is allowed to be low-contrast. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible,
 .jrk-focus-ring:focus-visible {
-  outline: 2px solid var(--jrk-focus-ring);
-  outline-offset: 2px;
+  outline: 1.5px solid var(--jrk-focus-ring);
+  outline-offset: 1px;
+  box-shadow: var(--jrk-shadow-focus);
+  border-radius: var(--jrk-radius-sm);
 }
 
-/* Inputs draw the ring tight to the border instead of floating outside it. */
+/* Inputs take the bloom, where Apple's focus treatment is most recognisable.
+   The ring sits tight to the border rather than floating outside it. */
 .jrk-input:focus-visible,
 .jrk-select:focus-visible,
 .jrk-textarea:focus-visible {
   outline: 2px solid var(--jrk-focus-ring);
   outline-offset: -1px;
   border-color: var(--jrk-focus-ring);
+  box-shadow: var(--jrk-shadow-focus);
 }
 
 /* ============================== a11y helpers ============================== */

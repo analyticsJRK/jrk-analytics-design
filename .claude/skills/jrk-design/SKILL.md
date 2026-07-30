@@ -64,20 +64,40 @@ small multiples, or takes a second encoding. `seriesColor(8)` throws deliberatel
 picking the scales. Two measures of different magnitude become two charts, small
 multiples, or values indexed to a common base.
 
-## Surfaces are inverted, and the two modes differ
+## The look is Apple
 
-- **Light:** white page plane, gray-purple `#f5f5fa` cards, white popovers and
-  inputs. Cards are borderless — they separate by fill.
-- **Dark:** true black `#000000` page, neutral shadow-grey `#1a1a1a` tiles,
-  neutral grey ink. Achromatic on purpose, so the indigo accent and the chart
-  hues are the only color. **Do not reintroduce a violet cast** into dark
-  surfaces or ink.
+macOS/iOS grouped surfaces, Apple system greys, systemIndigo accent, SF-first
+type, macOS-compact density for non-touch 1920x1080.
+
+| | Light | Dark |
+|---|---|---|
+| page plane | `#f2f2f7` systemGroupedBackground | `#000000` |
+| card | `#ffffff` | `#1c1c1e` |
+| popover / input | `#ffffff` | `#2c2c2e` |
+
+The page is tinted and the **cards are white** — the reverse of a conventional
+dashboard, and the thing that most makes it read as Apple. Cards carry a fill
+*and* a hairline: iOS uses fill alone, but at desktop viewing distance a
+white-on-`#f2f2f7` edge is too faint to hold a dense layout together.
 
 Two consequences that bite:
-- **The card, not the page, is the chart surface.** Marks are measured against
-  `#f5f5fa` / `#1a1a1a`, never against white or black.
-- **In dark mode the grey tile is the elevation cue.** A shadow is invisible
-  against a black page, so do not "fix" dark elevation by raising shadow opacity.
+- **The card, not the page, is the chart surface.** Marks are validated against
+  `#ffffff` / `#1c1c1e`, never against white or black.
+- **In dark mode the lightened tile is the elevation cue.** A shadow is
+  invisible against a true black page.
+
+**Adopt Apple values only where they pass.** Apple's palette is not
+accessibility-clean: `systemGray` is 2.92:1 as body text and `systemIndigo` is
+3.36:1 as dark link text — both rejected here. Measure before reaching for an
+Apple hex; deviations are noted on each token.
+
+**Icons are `em`-sized and inherit text weight**, with filled status glyphs whose
+inner mark is punched out so they work on any badge wash. SF Symbols cannot be
+shipped (no webfont, outlines are Apple's) — use Phosphor (MIT) with
+`className="jrk-icon"` beyond the built-in set.
+
+**Non-touch density.** Controls are 24/28/32 and `minTouch` is 24px, the WCAG 2.2
+AA floor (2.5.8). Height is the real constraint on a 1080px display.
 
 ## Before you finish
 
@@ -101,13 +121,14 @@ For sticky-heavy layouts (the sheet), **measure element positions** rather than
 trusting a mid-scroll capture — headless compositing produces convincing
 artifacts there.
 
-## The four standing warnings are correct
+## The standing warnings are correct
 
-`npm run validate` exits 0 with four warnings. They are documented relief cases,
+`npm run validate` exits 0 with five warnings. They are documented relief cases,
 not bugs:
-- Three light-mode series hues and one more sit below 3:1 on the card. Legal
-  because those charts ship visible value labels or a table view.
-- `status.warning` and `status.serious` marks sit below 3:1 on light by design;
+- Four light-mode series hues sit below 3:1 on the white card — Apple's system
+  colours are bright and white is the least forgiving surface. Legal because
+  those charts ship visible value labels or a table view.
+- `status.good`, `warning` and `serious` marks sit below 3:1 on light by design;
   the mandatory icon + label pairing is the mitigation.
 
 Do not re-step a correct color to make the output look clean.

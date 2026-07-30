@@ -24,6 +24,7 @@
       <button class="jrk-btn jrk-btn--secondary">Export</button>
       <button class="jrk-btn jrk-btn--ghost">Cancel</button>
       <button class="jrk-btn jrk-btn--danger">Delete</button>
+      <button class="jrk-btn jrk-btn--danger-solid">Delete (alert)</button>
       <button class="jrk-btn jrk-btn--danger-quiet">Remove</button>
       <button class="jrk-btn jrk-btn--link">View details</button>
       <button class="jrk-btn jrk-btn--primary" disabled>Disabled</button>
@@ -36,11 +37,11 @@
       <button class="jrk-btn jrk-btn--secondary">Medium</button>
       <button class="jrk-btn jrk-btn--secondary jrk-btn--lg">Large</button>
       <button class="jrk-btn jrk-btn--primary">
-        <svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3v10M3 8h10"/></svg>
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="plus"></svg>
         <span>New view</span>
       </button>
       <button class="jrk-btn jrk-btn--secondary jrk-btn--icon" aria-label="Filter">
-        <svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h12M4.5 8h7M7 12h2"/></svg>
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="filter"></svg>
       </button>
     </div>
 
@@ -76,7 +77,7 @@
           <label class="jrk-field__label" for="f-search">Search</label>
           <span class="jrk-input-group">
             <span class="jrk-input-group__icon">
-              <svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg>
+              <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="search"></svg>
             </span>
             <input class="jrk-input" id="f-search" placeholder="Unit or tenant">
           </span>
@@ -107,7 +108,7 @@
       <div class="jrk-filter-bar">
         <select class="jrk-select jrk-select--sm" aria-label="Period"><option>Last 30 days</option><option>Quarter to date</option></select>
         <select class="jrk-select jrk-select--sm" aria-label="Region"><option>All regions</option><option>Southeast</option></select>
-        <span class="jrk-tag">Occupancy &gt; 90%<button class="jrk-tag__remove" aria-label="Remove filter"><svg viewBox="0 0 10 10" aria-hidden="true" stroke-linecap="round"><path d="M2 2l6 6M8 2l-6 6"/></svg></button></span>
+        <span class="jrk-tag">Occupancy &gt; 90%<button class="jrk-tag__remove" aria-label="Remove filter"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="close"></svg></button></span>
         <span class="jrk-spacer"></span>
         <button class="jrk-btn jrk-btn--ghost jrk-btn--sm">Reset</button>
       </div>
@@ -119,13 +120,95 @@
     </div>
   </section>
 
+  <!-- ============================ icons ============================ -->
+  <section class="gal-sec">
+    <h2>Icons</h2>
+    <p class="gal-sec__note">
+      SF Symbols cannot be shipped — Apple does not publish them as a webfont and the
+      outlines are theirs. These are original glyphs drawn to SF's <em>behaviour</em>:
+      a compact 16 grid, round terminals, weight that tracks the text, and filled
+      variants whose inner mark is punched out so the badge wash shows through.
+    </p>
+
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">Icons scale with the text beside them</span>
+      <div style="display:flex;flex-direction:column;gap:var(--jrk-space-2)">
+        <span style="font-size:var(--jrk-text-xs)"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="checkFill"></svg> Caption text, 12px</span>
+        <span style="font-size:var(--jrk-text-md)"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="checkFill"></svg> Body text, 14px</span>
+        <span style="font-size:var(--jrk-text-2xl);font-weight:600"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="checkFill"></svg> Heading, 20px</span>
+      </div>
+    </div>
+
+    <div class="gal-demo">
+      <span class="gal-label">Weights — paired to the text weight, as SF does</span>
+      <span class="jrk-icon jrk-icon--light jrk-icon--lg"><svg class="jrk-icon jrk-icon--light jrk-icon--lg" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5"/></svg></span>
+      <svg class="jrk-icon jrk-icon--medium jrk-icon--lg" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5"/></svg>
+      <svg class="jrk-icon jrk-icon--semibold jrk-icon--lg" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5"/></svg>
+      <svg class="jrk-icon jrk-icon--bold jrk-icon--lg" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5 6.5 11.5 12.5 4.5"/></svg>
+      <span class="jrk-caption">light · medium · semibold · bold</span>
+    </div>
+
+    <div class="gal-rule">
+      <strong>For app iconography beyond this set, use Phosphor</strong> (MIT). It is the
+      closest open family to SF Symbols — multiple weights, round terminals, a real fill
+      variant. Give it <code class="jrk-mono">className="jrk-icon"</code> and it inherits
+      the sizing, weight and baseline rules automatically.
+    </div>
+  </section>
+
+  <!-- ============================ grouped list ============================ -->
+  <section class="gal-sec">
+    <h2>Grouped list</h2>
+    <p class="gal-sec__note">
+      The Apple pattern — what iOS Settings and macOS System Settings are built from.
+      A rounded container, <code class="jrk-mono">Label ······ value ›</code> rows, and
+      separators that <strong>inset from the leading text edge</strong> instead of spanning
+      the full width. Use this for settings, detail panels, and key/value summaries; keep
+      the stacked-label form above only for real data entry.
+    </p>
+
+    <div class="jrk-grid jrk-grid-2">
+      <div class="jrk-list">
+        <div class="jrk-list__header">Report</div>
+        <ul class="jrk-list__group">
+          <li class="jrk-list__row"><span class="jrk-list__label">Property</span><span class="jrk-list__value">All properties</span></li>
+          <li class="jrk-list__row"><span class="jrk-list__label">Period</span><span class="jrk-list__value">Quarter to date</span></li>
+          <li class="jrk-list__row"><span class="jrk-list__label">Basis</span><span class="jrk-list__value">Accrual</span></li>
+          <li class="jrk-list__row jrk-list__row--control">
+            <span class="jrk-list__label">Auto-refresh</span>
+            <label class="jrk-switch"><input type="checkbox" role="switch" checked><span class="jrk-sr-only">Auto-refresh</span></label>
+          </li>
+        </ul>
+        <p class="jrk-list__footer">Applies to every metric in this report.</p>
+      </div>
+
+      <div class="jrk-list">
+        <div class="jrk-list__header">Portfolio</div>
+        <ul class="jrk-list__group">
+          <li><a class="jrk-list__row jrk-list__row--link" href="#"><span class="jrk-list__label">Properties</span><span class="jrk-list__value">47</span></a></li>
+          <li><a class="jrk-list__row jrk-list__row--link" href="#"><span class="jrk-list__label">Units</span><span class="jrk-list__value">8,412</span></a></li>
+          <li><a class="jrk-list__row jrk-list__row--link" href="#"><span class="jrk-list__label">Delinquent accounts</span><span class="jrk-list__value">12</span></a></li>
+          <li class="jrk-list__row" aria-selected="true"><span class="jrk-list__label">Selected row</span><span class="jrk-list__value">Accent fill</span></li>
+        </ul>
+        <p class="jrk-list__footer">A row that navigates shows a chevron — never a button.</p>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      The <strong>inset separator</strong> is the detail that sells it. A full-bleed rule
+      is the giveaway that a list was built as a generic table, so the rule is a
+      pseudo-element that starts after the leading padding — and insets further again on
+      rows that carry an icon, so it lines up with the label rather than the glyph.
+    </div>
+  </section>
+
   <!-- ============================ badges ============================ -->
   <section class="gal-sec">
     <h2>Badges, status, tags</h2>
     <div class="gal-demo">
-      <span class="jrk-badge jrk-badge--good"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5L5 9l4.5-5"/></svg>Paid</span>
-      <span class="jrk-badge jrk-badge--warning"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1.5L11 10.5H1L6 1.5zM6 5v2.5M6 9h.01"/></svg>Partial</span>
-      <span class="jrk-badge jrk-badge--critical"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>Delinquent</span>
+      <span class="jrk-badge jrk-badge--good"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="checkFill"></svg>Paid</span>
+      <span class="jrk-badge jrk-badge--warning"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warningFill"></svg>Partial</span>
+      <span class="jrk-badge jrk-badge--critical"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="criticalFill"></svg>Delinquent</span>
       <span class="jrk-badge jrk-badge--accent">Beta</span>
       <span class="jrk-badge jrk-badge--outline jrk-badge--good">Outline</span>
       <span class="jrk-badge jrk-badge--square jrk-badge--sm">v2.1</span>
@@ -144,7 +227,7 @@
           <tr>
             <th scope="col" aria-sort="descending">
               <button class="jrk-table__sort" type="button">Property
-                <svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9.5V2.5M3 5.5L6 2.5l3 3"/></svg>
+                <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="arrowUp"></svg>
               </button>
             </th>
             <th scope="col">Status</th>
@@ -157,7 +240,7 @@
         <tbody>
           <tr>
             <td>Bellevue Commons</td>
-            <td><span class="jrk-badge jrk-badge--good"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 6.5L5 9l4.5-5"/></svg>Current</span></td>
+            <td><span class="jrk-badge jrk-badge--good"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="checkFill"></svg>Current</span></td>
             <td class="jrk-num">248</td>
             <td class="jrk-num">96.4%</td>
             <td class="jrk-num">$1,284,900</td>
@@ -165,7 +248,7 @@
           </tr>
           <tr aria-selected="true">
             <td>Harbor Point</td>
-            <td><span class="jrk-badge jrk-badge--warning"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><path d="M6 1.5L11 10.5H1L6 1.5zM6 5v2.5M6 9h.01"/></svg>Review</span></td>
+            <td><span class="jrk-badge jrk-badge--warning"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warningFill"></svg>Review</span></td>
             <td class="jrk-num">412</td>
             <td class="jrk-num">91.2%</td>
             <td class="jrk-num">$2,041,330</td>
@@ -173,7 +256,7 @@
           </tr>
           <tr>
             <td>Riverside Flats</td>
-            <td><span class="jrk-badge jrk-badge--critical"><svg viewBox="0 0 12 12" aria-hidden="true" stroke-linecap="round"><path d="M3 3l6 6M9 3l-6 6"/></svg>Escalated</span></td>
+            <td><span class="jrk-badge jrk-badge--critical"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="criticalFill"></svg>Escalated</span></td>
             <td class="jrk-num">156</td>
             <td class="jrk-num">84.0%</td>
             <td class="jrk-num">$612,470</td>
@@ -252,10 +335,10 @@
       <div style="display:flex;gap:var(--jrk-space-5);flex-wrap:wrap;align-items:flex-start">
         <div class="jrk-menu" style="position:static">
           <div class="jrk-menu__label">Export</div>
-          <button class="jrk-menu__item"><svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round"><path d="M8 2v8M5 7l3 3 3-3M3 13h10"/></svg>Download CSV</button>
-          <button class="jrk-menu__item"><svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round"><rect x="3" y="2" width="10" height="12" rx="2"/><path d="M6 6h4M6 9h4"/></svg>Download XLSX</button>
+          <button class="jrk-menu__item"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="download"></svg>Download CSV</button>
+          <button class="jrk-menu__item"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="sheet"></svg>Download XLSX</button>
           <hr class="jrk-menu__separator">
-          <button class="jrk-menu__item jrk-menu__item--danger"><svg viewBox="0 0 16 16" aria-hidden="true" stroke-linecap="round"><path d="M3 4h10M6 4V2.5h4V4M5 4l.5 9h5L11 4"/></svg>Delete view</button>
+          <button class="jrk-menu__item jrk-menu__item--danger"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="trash"></svg>Delete view</button>
         </div>
 
         <div class="jrk-toast" style="max-width:340px">
@@ -279,7 +362,7 @@
         </div>
         <div class="jrk-modal__footer">
           <button class="jrk-btn jrk-btn--ghost" data-close>Cancel</button>
-          <button class="jrk-btn jrk-btn--danger" data-close>Escalate</button>
+          <button class="jrk-btn jrk-btn--danger-solid" data-close>Escalate</button>
         </div>
       </dialog>
     </div>

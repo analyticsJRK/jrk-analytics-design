@@ -19,7 +19,7 @@ const TYPES = {
   '.svg': 'image/svg+xml',
 };
 
-createServer(async (req, res) => {
+const server = createServer(async (req, res) => {
   let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
   if (path === '/') path = '/preview/index.html';
 
@@ -36,6 +36,37 @@ createServer(async (req, res) => {
   } catch {
     res.writeHead(404).end('not found');
   }
-}).listen(port, () => {
-  console.log(`preview  http://localhost:${port}/preview/index.html`);
 });
+
+/* A busy port is the normal case, not an exception — a preview server from an
+   earlier session, or one a headless screenshot run left behind. Walk up to the
+   next free port instead of dying on an unhandled 'error' event.
+
+   The success handler is registered ONCE, outside the retry, and reads the port
+   back off the server. Passing a callback to listen() per attempt leaves the
+   un-fired callback from the failed attempt still registered, so a retry prints
+   a line for every port it tried. Console text stays ASCII: the Windows console
+   is not UTF-8 by default and turns an em-dash into mojibake. */
+let attempts = 0;
+
+server.on('listening', () => {
+  const actual = server.address().port;
+  console.log(`preview  http://localhost:${actual}/preview/index.html`);
+  if (actual !== port) {
+    console.log(`(port ${port} was busy - something else is still serving there)`);
+  }
+});
+
+server.on('error', (err) => {
+  if (err.code !== 'EADDRINUSE') throw err;
+  if (++attempts > 10) {
+    console.error(`\nPorts ${port}-${port + 10} are all in use.`);
+    console.error(`Free one, or choose your own:  PORT=5000 npm run preview\n`);
+    process.exit(1);
+  }
+  const next = port + attempts;
+  console.warn(`port ${next - 1} is in use, trying ${next}`);
+  server.listen(next);
+});
+
+server.listen(port);

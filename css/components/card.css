@@ -1,15 +1,21 @@
 /* Card / panel — the container every dashboard tile and chart sits in. */
 
-/* The card separates from the white page by its FILL, not by a rule — that is
-   what produces the soft, borderless look. The transparent border is kept so
-   the box model does not shift and so the forced-colors rule in base.css can
-   put a real border back when the fill is unavailable. */
+/* Apple grouped card: white, on the tinted page. iOS would draw no border at
+   all and let the fill do everything; on a 1920x1080 monitor at desktop viewing
+   distance a #ffffff-on-#f2f2f7 edge is too faint to hold a dense layout
+   together, so this takes the macOS treatment instead — fill plus a hairline. */
 .jrk-card {
   display: flex;
   flex-direction: column;
   background: var(--jrk-surface-default);
-  border: 1px solid transparent;
-  border-radius: var(--jrk-radius-2xl);
+  border: 1px solid var(--jrk-border-subtle);
+  border-radius: var(--jrk-radius-xl);
+}
+
+/* Truly borderless, for a card sitting alone on the page where the fill is
+   separation enough. */
+.jrk-card--seamless {
+  border-color: transparent;
 }
 
 /* Periwinkle wash, for tiles that lead a page. */

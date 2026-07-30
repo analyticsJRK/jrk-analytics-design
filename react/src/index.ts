@@ -11,11 +11,17 @@
 
 export { cx, variantClass } from './utils';
 
+export { Icon, STATUS_ICON } from './Icon';
+export type { IconName, IconProps } from './Icon';
+
 export { Button, ButtonGroup } from './Button';
 export type { ButtonProps, ButtonVariant, ButtonSize, ButtonGroupProps } from './Button';
 
 export { Input, Select, Textarea, Checkbox, Switch } from './Field';
 export type { InputProps, SelectProps, TextareaProps, CheckboxProps, SwitchProps } from './Field';
+
+export { List, ListRow } from './List';
+export type { ListProps, ListRowProps } from './List';
 
 export { Card, Empty, Alert, Spinner } from './Card';
 export type { CardProps, EmptyProps, AlertProps } from './Card';
