@@ -352,59 +352,73 @@ change.
 
 ### Keeping the claude.ai Design System project in sync
 
-The library is mirrored to a claude.ai **Design System** project so teammates can
-browse the gallery and Claude can read it back as a reference.
+The library is mirrored to the **JRK Analytics Design** project on claude.ai, so
+the design agent there builds screens out of *these* components — every design it
+produces is on-brand and maps 1:1 onto code we can ship — and teammates can
+browse the components in the Design System pane.
 
 **The sync is one-way and manual: repo → claude.ai. This repo is the source of
 truth.** There is no watcher, no hook, and no automatic push. Anything edited in
 the Design System pane is overwritten by the next sync, so don't edit there.
 
-To publish an update:
+#### What actually gets uploaded
+
+Not the repo's source. The sync uploads a **converted bundle** built from it:
+
+| Uploaded | What it is |
+|---|---|
+| `_ds_bundle.js` | every export compiled to one IIFE on `window.JrkDesign` — what the design agent imports |
+| `styles.css` + `_ds_bundle.css` + `fonts/` | the flattened token layer and component CSS, plus the bundled Inter / JetBrains Mono faces |
+| `components/<group>/<Name>/` | per component: `.html` preview card, `.d.ts` API contract, `.prompt.md` usage reference |
+| `guidelines/guides/*.md` | copies of the `jrk-design` skill references (doctrine the agent reads) |
+| `_ds_sync.json` | content-hash anchor, so the next sync only re-verifies what changed |
+
+`.design-sync/` holds the inputs: `config.json` (pins the project id),
+`previews/*.tsx` (the authored preview cards), `conventions.md` (prepended to the
+uploaded README and inlined into the design agent's prompt), and `NOTES.md`.
+
+#### Publishing an update
+
+Ask Claude in this repo to run **`/design-sync`**. It rebuilds, re-verifies, and
+uploads, and you approve one plan that lists the exact paths and source
+directory before anything is written.
+
+To drive it by hand:
 
 ```bash
-npm run sync:check     # verifies the tree is publishable, prints the path list
+node .design-sync/prepare.mjs            # REQUIRED first — see below
+node .ds-sync/resync.mjs --config .design-sync/config.json \
+  --node-modules ./node_modules --entry ./react/src/index.ts \
+  --out ./ds-bundle --remote .design-sync/.cache/remote-sync.json
 ```
 
-Then, in a Claude session in this repo, ask it to sync the design system and
-approve the plan. Claude runs `list_files` → `finalize_plan` → `write_files`; the
-plan shows you the exact paths and the source directory before anything uploads.
+**`prepare.mjs` is not optional and the driver does not run it for you.** This
+package ships TS source rather than a compiled dist, so prepare.mjs generates the
+`.d.ts` tree the component list and API contracts come from, flattens
+`css/index.css` (it's a pure `@import` manifest — copied verbatim, *every
+component renders unstyled*), rebuilds `dist/`, and stages `guides/`. Skip it
+after changing a token, a component, or any CSS and the sync ships a stale bundle
+while the repo looks correct.
 
-`sync:check` guards the failure modes that are otherwise silent:
-
-| Check | Why it matters |
-|---|---|
-| `dist/` is current | It's generated. Push preview pages against a stale `dist/jrk-tokens.css` and the hosted gallery renders **old colors** while the repo is correct — nothing anywhere reports it. |
-| `check:css` + `validate` pass | Don't publish a failing palette as the reference. |
-| working tree clean | Publishing uncommitted work means git and claude.ai disagree, and git is what people diff. |
-| every preview page has a `@dsCard` marker | The pane builds its card index from that first-line comment. A page without one uploads fine and then never appears as a card. |
-
-#### What to re-push after a change
-
-| You changed | Re-push |
-|---|---|
-| a token | `npm run build` first, then `dist/*` + `tokens/tokens.json` (+ any CSS you touched) |
-| a component's CSS | that file, and `css/index.css` if you added an import |
-| a new component | its CSS, `css/index.css`, its React file, `react/src/index.ts`, and the preview page |
-| a gallery page | just that page |
-| the `jrk-design` skill | **nothing** — see below |
-
-Simplest correct habit: run `sync:check` and push the whole list. It's 43 files
-and the upload reads them straight from disk, so a full push costs nothing and
-can't leave a half-updated project.
+A fresh clone also needs `react` and the converter deps installed first —
+`.design-sync/NOTES.md` has the exact commands, and skipping the `@fontsource`
+install silently ships a bundle with no brand fonts.
 
 #### Things that will surprise you
 
 - **`.claude/**` and `CLAUDE.md` are refused**, by design — they carry
-  instructions to the design agent. The skill reaches teammates through **git
-  only**, which is the correct home for it anyway.
-- **Deletions need to be in the plan.** Removing a component from the repo does
-  not remove it from the project; the path has to be listed in the plan's
-  `deletes`. Say so when you ask for the sync.
+  instructions to the design agent. That's why prepare.mjs copies the skill
+  references into `guides/` before the sync; the skill itself reaches teammates
+  through **git only**, which is the correct home for it anyway.
+- **Deletions come from the anchor.** The driver diffs `_ds_sync.json` and emits
+  the exact `deletePaths` for removed or regrouped components — pass them
+  verbatim. With no anchor (a fresh project, or one that's never been synced) the
+  diff can't see history and deletions have to be named explicitly.
 - **This can't be a cron job.** The push authenticates through your interactive
   claude.ai login, which isn't available in headless or scheduled runs. Treat it
   as a release step, not automation.
-- **A renamed preview page leaves the old card behind** until the old path is
-  deleted.
+- **Grouping depends on `.design-sync/docs/`.** Add a component without adding
+  its frontmatter stub and it silently lands in a `general` group.
 
 ### Prompting that works
 
