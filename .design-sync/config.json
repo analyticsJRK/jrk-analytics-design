@@ -8,9 +8,15 @@
   "tsconfig": "tsconfig.json",
   "cssEntry": ".design-sync/.cache/jrk-flat.css",
   "docsDir": ".design-sync/docs",
+  "readmeHeader": ".design-sync/conventions.md",
   "guidelinesGlob": [
     "guides/*.md"
   ],
+  "overrides": {
+    "BarList": { "cardMode": "column" },
+    "Tag": { "cardMode": "column" },
+    "Card": { "cardMode": "column" }
+  },
   "extraFonts": [
     ".ds-sync/node_modules/@fontsource/inter/latin-400.css",
     ".ds-sync/node_modules/@fontsource/inter/latin-500.css",

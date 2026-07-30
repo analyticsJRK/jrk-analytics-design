@@ -53,9 +53,12 @@ export const WithFootnote = () => (
   </div>
 );
 
-/* A KPI band — the shape a dashboard header actually uses. */
+/* A KPI band — the shape a dashboard header actually uses.
+   NB: laid out with an inline grid, not `.jrk-grid`. chart.css scopes
+   `.jrk-grid line, .jrk-grid path` to the SVG gridline group, which collides
+   with the layout primitive of the same name and hairlines the delta arrows. */
 export const Band = () => (
-  <div className="jrk-grid jrk-grid-3">
+  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 'var(--jrk-space-4)' }}>
     <Stat label="Occupancy" value="94.2" unit="%" delta={{ value: 0.8, vs: 'vs last month' }} />
     <Stat label="Avg. rent" value="$1,842" delta={{ value: 2.2, vs: 'vs last year' }} />
     <Stat label="Turnover" value="18.6" unit="%" delta={{ value: 1.1, upIsGood: false, vs: 'vs last year' }} />
