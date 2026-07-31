@@ -17,6 +17,10 @@
  * a Jinja template render identically and follow the same theme toggle.
  */
 
+/* Typeface first — see the file for the CSP note, the preconnect pair, and how
+   to self-host or hand the job to next/font instead. */
+@import url('./fonts.css');
+
 @import url('../dist/jrk-tokens.css');
 
 @import url('./base.css');

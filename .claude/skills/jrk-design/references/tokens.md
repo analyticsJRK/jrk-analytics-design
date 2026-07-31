@@ -22,7 +22,7 @@ dark theme a swap rather than a rewrite.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--jrk-surface-canvas` | `#f2f2f7` | `#000000` | page plane, sidebar, topbar — systemGroupedBackground |
+| `--jrk-surface-canvas` | `#f2f2f7` | `#141416` | page plane, sidebar, topbar — systemGroupedBackground |
 | `--jrk-surface-default` | `#ffffff` | `#1c1c1e` | cards, panels, **chart surface** |
 | `--jrk-surface-tinted` | `#eeeefc` | `#25253a` | KPI band, highlighted tiles |
 | `--jrk-surface-subtle` | `#f2f2f7` | `#2c2c2e` | table header, inset wells |
@@ -33,6 +33,13 @@ dark theme a swap rather than a rewrite.
 Apple GROUPED style: the page is tinted and the cards are white — the reverse of
 a conventional dashboard. The card is the surface everything is measured
 against; chrome sits on the canvas so the cards read as the raised thing.
+
+**In dark the fill step barely exists — the hairline is the elevation cue.**
+`#1c1c1e` on `#141416` is 1.08:1, so a dark card that drops its
+`--jrk-border-subtle` edge stops reading as a card. The canvas is not `#000000`
+on purpose (halation against near-white text at 1920x1080); `--jrk-text-primary`
+in dark is `#ebebf0` rather than `#ffffff` for the same reason. Both are noted on
+the tokens in `tokens.json` — do not restore either.
 
 ## Text
 

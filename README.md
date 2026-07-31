@@ -136,10 +136,12 @@ and is the single source; this README deliberately does not restate it.
 ### The look, in one paragraph
 
 Apple: macOS/iOS grouped surfaces (`#f2f2f7` page with **white** cards in light;
-`#000000` with `#1c1c1e` tiles in dark), Apple system greys, systemIndigo
-accent, SF-first type, and macOS-compact density for non-touch 1920x1080.
-Apple's values are adopted only where they clear WCAG — `systemGray` as body
-text is 2.92:1 and is rejected. The card, not the page, is the chart surface.
+`#141416` with `#1c1c1e` tiles in dark), Apple system greys, systemIndigo
+accent, Inter standing in for SF, and macOS-compact density for non-touch
+1920x1080. Apple's values are adopted only where they clear WCAG — `systemGray`
+as body text is 2.92:1 and is rejected, and iOS's true-black dark page is
+rejected too because it halates against near-white text at desktop size. The
+card, not the page, is the chart surface.
 
 ## Using this with Claude
 

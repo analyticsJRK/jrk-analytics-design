@@ -56,7 +56,14 @@ function addThemed(ns, obj) {
 // ---- ramps (mode-invariant: the raw scale is available but components use semantics)
 for (const [hue, steps] of Object.entries(T.ramp)) {
   if (isMeta(hue)) continue;
-  for (const [step, hex] of Object.entries(steps)) add(`${hue}-${step}`, hex);
+  // The step key needs the same $meta guard as the hue key: without it each
+  // ramp's own $comment was emitted as `--jrk-neutral-$comment: <prose>;`,
+  // which is invalid CSS in the shipped token layer. check-css missed it
+  // because its declared() regex does not match a `$` in the ident.
+  for (const [step, hex] of Object.entries(steps)) {
+    if (isMeta(step)) continue;
+    add(`${hue}-${step}`, hex);
+  }
 }
 
 // ---- semantic color
@@ -81,6 +88,7 @@ addThemed('chart', T.chart.chrome); // -> --jrk-chart-grid / -axis / -tick / -la
 
 // ---- scalars
 addFlat('font', T.font.family);
+addFlat('font-feature', T.font.feature); // --jrk-font-feature-sans
 addFlat('text', T.font.size);       // --jrk-text-md (size)
 addFlat('weight', T.font.weight);
 addFlat('leading', T.font.lineHeight);

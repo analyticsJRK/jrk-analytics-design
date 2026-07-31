@@ -1,0 +1,53 @@
+/* Inter — the typeface named first in tokens/tokens.json font.family.sans.
+ *
+ * SF Pro cannot be shipped (no webfont, and the outlines are Apple's), so Inter
+ * is the SF stand-in and the face the type tokens are tuned against. This file
+ * is imported FIRST by css/index.css, so a Jinja template that links only
+ * index.css gets the typeface with no extra step and no Node toolchain.
+ *
+ * Variable axes requested: opsz 14..32 and wght 100..900.
+ *   - opsz is the reason to use the variable font rather than static weights.
+ *     It is what tightens Inter's letterforms at the 32-42px hero-figure sizes,
+ *     the same optical behaviour the tracking tokens were originally written
+ *     against in SF. Leave font-optical-sizing at its `auto` default.
+ *   - wght 100..900 covers all four weight tokens (400/500/600/700) from one
+ *     file, so no weight is ever synthesised — base.css sets
+ *     font-synthesis-weight: none, which would otherwise leave 600 rendering
+ *     as 400.
+ * Italic is included for <em>; Inter's italic is a true italic, not a slant.
+ *
+ * TWO THINGS TO KNOW
+ *
+ * 1. This is a runtime request to fonts.googleapis.com. An app with a strict
+ *    CSP needs `style-src https://fonts.googleapis.com` and
+ *    `font-src https://fonts.gstatic.com`. If yours does not allow that, take
+ *    the self-host route below.
+ *
+ * 2. An @import cannot open the connection early enough to matter, so add the
+ *    preconnect pair to the document head as well:
+ *
+ *      <link rel="preconnect" href="https://fonts.googleapis.com">
+ *      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+ *
+ * TO SELF-HOST INSTEAD (offline, no third-party request, no CSP change)
+ *
+ * Put the Inter variable woff2 files where your app serves static assets and
+ * replace the @import below with the matching @font-face blocks:
+ *
+ *   @font-face {
+ *     font-family: 'Inter';
+ *     font-style: normal;
+ *     font-weight: 100 900;
+ *     font-display: swap;
+ *     src: url('/static/fonts/inter-latin-var.woff2') format('woff2-variations');
+ *   }
+ *
+ * Nothing else changes — the font stack lives in tokens/tokens.json and already
+ * names Inter first.
+ *
+ * NEXT.JS APPS that would rather use next/font/google can skip this file
+ * entirely: import css/base.css and the component files directly instead of
+ * css/index.css, and point --jrk-font-sans at the family next/font generates.
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');

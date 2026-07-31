@@ -23,6 +23,7 @@ That is the gate. It is fast; run it after every change.
 | design values (color, space, type, radius) | `tokens/tokens.json` | `dist/jrk-tokens.css`, `dist/tokens.ts`, `dist/jrk-theme.tailwind.css` |
 | icon glyph paths | `tokens/icons.json` | `dist/icons.ts`, `dist/icons.js` |
 | component behaviour | `css/components/*.css` + `react/src/*.tsx` | — |
+| design doctrine and the conflict register | `.claude/skills/jrk-design/references/philosophy.md` | — |
 | detailed rules and API reference | `.claude/skills/jrk-design/references/*.md` | — |
 | per-component docs and demos for the Design System pane | `.design-sync/{docs,previews}/` | `.design-sync/.cache/` |
 | the local zero-build gallery | `preview/*.html` | — |
@@ -33,6 +34,20 @@ gitignored, none of it authored here, do not read them for reference.
 
 Need more than the rules below? Load the **`jrk-design` skill** rather than
 re-reading the CSS.
+
+## The decision order
+
+When a judgement call is not covered by a rule below, work these layers **in
+order**, and let each spend only the budget the one above granted it:
+
+**1 scope** (should this exist? default no) → **2 structure** (what pattern is
+this an instance of?) → **3 behavior** (how is it operated and recovered?) →
+**4 rendering** (how densely and quietly is it drawn?) → **5 epistemics** (can
+the reader interrogate it?).
+
+You cannot render your way out of a scope problem. Restraint applies to
+decoration, never to signifiers or capability. Full doctrine and the conflict
+register: `references/philosophy.md` in the `jrk-design` skill.
 
 ## Hard rules
 
@@ -47,11 +62,18 @@ full run needs the `dataviz` skill's validator:
 `JRK_DATAVIZ=/path/to/skills/dataviz npm run validate`.
 
 **The look is Apple.** macOS/iOS grouped surfaces. Light: `#f2f2f7` page,
-**white** cards. Dark: `#000000` page, `#1c1c1e` cards. The page is tinted and
+**white** cards. Dark: `#141416` page, `#1c1c1e` cards. The page is tinted and
 the cards are white — the reverse of a conventional dashboard, and not a bug.
 Because the card is the chart surface, marks are validated against
-`#ffffff` / `#1c1c1e`, never the page. In dark, the lightened tile is the
-elevation cue; a shadow does not read on black.
+`#ffffff` / `#1c1c1e`, never the page.
+
+**The dark page is not `#000000`, and that is deliberate.** iOS grouped dark is
+true black; at 1920x1080 it halates against near-white text and reads as a void.
+The page follows macOS instead. Two consequences: the card is only a 1.08:1 fill
+step off the page, so **`border.subtle` carries the card edge in dark** — never
+drop the hairline there; and `text.primary` in dark is `#ebebf0`, not `#ffffff`,
+because pure white on a near-black page is the glare. Both deviations are noted
+on their tokens.
 
 **Adopt Apple values only where they pass.** Apple's palette is not
 accessibility-clean — `systemGray` is 2.92:1 as body text, `systemIndigo` is
@@ -70,6 +92,14 @@ direction in text. Charts have a table view.
 categorical set carries identity and is CVD-validated. Tints are pastel fills
 for marks that are *already* labelled; the validator deliberately skips them, so
 using one where color is the identity channel is a bug no gate will catch.
+
+**The typeface is Inter, loaded by `css/fonts.css`.** SF Pro cannot be shipped,
+so Inter is the stand-in everywhere — including on Apple hardware, so that the
+tracking tokens are right for one face instead of half-right for two.
+`css/index.css` imports it from Google Fonts, which means a consuming app needs
+`style-src fonts.googleapis.com` + `font-src fonts.gstatic.com` in its CSP and
+should add the preconnect pair to its `<head>`. The self-host and `next/font`
+escape hatches are both documented in `css/fonts.css`.
 
 **Icons are `em`-sized and inherit text weight.** That is what makes them feel
 native rather than bolted on. Status glyphs are filled with the inner mark

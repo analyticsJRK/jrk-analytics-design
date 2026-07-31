@@ -23,7 +23,6 @@
   --jrk-neutral-925: #141416;
   --jrk-neutral-950: #0a0a0a;
   --jrk-neutral-975: #000000;
-  --jrk-neutral-$comment: systemGray6 -> systemGray, then the dark-mode greys. Light half is Apple's light system greys; 700 and below are Apple's dark system greys.;
   --jrk-indigo-100: #eeeefc;
   --jrk-indigo-200: #dcdcfa;
   --jrk-indigo-300: #c3c2f5;
@@ -35,7 +34,6 @@
   --jrk-indigo-650: #5856d6;
   --jrk-indigo-700: #4a49b3;
   --jrk-indigo-750: #3f3e96;
-  --jrk-indigo-$comment: systemIndigo #5856d6 (light) / #5e5ce6 (dark) sit at 650 and 600.;
   --jrk-surface-canvas: #f2f2f7;
   --jrk-surface-default: #ffffff;
   --jrk-surface-tinted: #eeeefc;
@@ -123,8 +121,9 @@
   --jrk-chart-label: #3c3c43;
   --jrk-chart-delta-up: #1e7a34;
   --jrk-chart-delta-down: #c00011;
-  --jrk-font-sans: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', Inter, 'Segoe UI', Roboto, sans-serif;
+  --jrk-font-sans: Inter, 'Inter var', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --jrk-font-mono: ui-monospace, 'SF Mono', SFMono-Regular, Menlo, 'JetBrains Mono', Consolas, monospace;
+  --jrk-font-feature-sans: 'cv05' 1, 'ss03' 1;
   --jrk-text-2xs: 0.6875rem;
   --jrk-text-xs: 0.75rem;
   --jrk-text-sm: 0.8125rem;
@@ -224,7 +223,7 @@
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) {
     color-scheme: dark;
-    --jrk-surface-canvas: #000000;
+    --jrk-surface-canvas: #141416;
     --jrk-surface-default: #1c1c1e;
     --jrk-surface-tinted: #25253a;
     --jrk-surface-subtle: #2c2c2e;
@@ -234,8 +233,8 @@
     --jrk-surface-banner: #2c2c2e;
     --jrk-surface-hover: #2c2c2e;
     --jrk-surface-active: #3a3a3c;
-    --jrk-surface-disabled: #1c1c1e;
-    --jrk-text-primary: #ffffff;
+    --jrk-surface-disabled: #242426;
+    --jrk-text-primary: #ebebf0;
     --jrk-text-secondary: #b4b4ba;
     --jrk-text-muted: #98989d;
     --jrk-text-disabled: #545456;
@@ -243,8 +242,8 @@
     --jrk-text-link: #9a99f0;
     --jrk-text-on-banner: #ffffff;
     --jrk-text-on-banner-muted: #a1a1a6;
-    --jrk-border-subtle: #2c2c2e;
-    --jrk-border-default: #38383a;
+    --jrk-border-subtle: #333336;
+    --jrk-border-default: #414144;
     --jrk-border-strong: #48484a;
     --jrk-border-accent: #5e5ce6;
     --jrk-accent-solid: #5e5ce6;
@@ -307,7 +306,7 @@
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-    --jrk-surface-canvas: #000000;
+    --jrk-surface-canvas: #141416;
     --jrk-surface-default: #1c1c1e;
     --jrk-surface-tinted: #25253a;
     --jrk-surface-subtle: #2c2c2e;
@@ -317,8 +316,8 @@
     --jrk-surface-banner: #2c2c2e;
     --jrk-surface-hover: #2c2c2e;
     --jrk-surface-active: #3a3a3c;
-    --jrk-surface-disabled: #1c1c1e;
-    --jrk-text-primary: #ffffff;
+    --jrk-surface-disabled: #242426;
+    --jrk-text-primary: #ebebf0;
     --jrk-text-secondary: #b4b4ba;
     --jrk-text-muted: #98989d;
     --jrk-text-disabled: #545456;
@@ -326,8 +325,8 @@
     --jrk-text-link: #9a99f0;
     --jrk-text-on-banner: #ffffff;
     --jrk-text-on-banner-muted: #a1a1a6;
-    --jrk-border-subtle: #2c2c2e;
-    --jrk-border-default: #38383a;
+    --jrk-border-subtle: #333336;
+    --jrk-border-default: #414144;
     --jrk-border-strong: #48484a;
     --jrk-border-accent: #5e5ce6;
     --jrk-accent-solid: #5e5ce6;
