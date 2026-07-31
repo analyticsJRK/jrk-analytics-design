@@ -43,6 +43,56 @@
     </div>
   </section>
 
+  <!-- ======================= cvd ======================= -->
+  <section class="gal-sec">
+    <h2>Colorblind separation</h2>
+    <p class="gal-sec__note">
+      The same eight slots under simulated dichromacy — Machado 2009 severity 1.0, the
+      same matrices <code class="jrk-mono">npm run validate</code> gates against, applied
+      here as an SVG <code class="jrk-mono">feColorMatrix</code> in linear RGB. This is
+      not an approximation of the gate; it is the gate's arithmetic, rendered.
+    </p>
+
+    <!-- linearRGB is the SVG default for filters and is also the space the Machado
+         matrices are defined in, so this is stated rather than relied on. -->
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+      <filter id="sim-protanopia" color-interpolation-filters="linearRGB">
+        <feColorMatrix type="matrix" values="0.152286 1.052583 -0.204868 0 0
+                                             0.114503 0.786281  0.099216 0 0
+                                            -0.003882 -0.048116 1.051998 0 0
+                                             0 0 0 1 0"/>
+      </filter>
+      <filter id="sim-deuteranopia" color-interpolation-filters="linearRGB">
+        <feColorMatrix type="matrix" values="0.367322 0.860646 -0.227968 0 0
+                                             0.280085 0.672501  0.047413 0 0
+                                            -0.011820 0.042940 0.968881 0 0
+                                             0 0 0 1 0"/>
+      </filter>
+      <filter id="sim-tritanopia" color-interpolation-filters="linearRGB">
+        <feColorMatrix type="matrix" values=" 1.255528 -0.076749 -0.178779 0 0
+                                             -0.078411  0.930809  0.147602 0 0
+                                              0.004733  0.691367  0.303900 0 0
+                                              0 0 0 1 0"/>
+      </filter>
+    </svg>
+
+    <div id="cvd-grid"></div>
+
+    <div class="gal-rule">
+      <strong>Read the deuteranopia row.</strong> Slots 2 and 4 land on the same colour —
+      ΔE 0.8, against a floor of 10. So do 3 and 7 (ΔE 1.8 in dark). Every collapsing pair
+      is (n, n+4), and that is arithmetic, not bad luck: the order was <em>searched</em> to
+      maximise the worst adjacent pair, which necessarily pushes the similar hues four
+      apart. Optimising adjacency buys the stack and pays for it in the scatter.
+    </div>
+    <div class="gal-rule">
+      <strong>No palette fixes this.</strong> Eight hues that all clear the all-pairs floor
+      under three kinds of dichromacy do not exist in sRGB — which is why the answer is a
+      cap of three for colour-only marks, and a second channel above that. The dash and
+      shape columns are what stay legible in every row.
+    </div>
+  </section>
+
   <!-- ======================= line ======================= -->
   <section class="gal-sec">
     <h2>Line chart</h2>
@@ -55,11 +105,12 @@
           <p class="jrk-chart-card__subtitle">Monthly, $ thousands · Jan–Dec 2025</p>
         </div>
         <div class="jrk-card__actions">
+          <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" id="toggle-encoding" aria-pressed="true">Hue only</button>
           <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" id="toggle-table" aria-expanded="false">Show table</button>
         </div>
       </div>
       <div class="jrk-chart-card__body">
-        <div class="jrk-chart" id="line-chart"></div>
+        <div class="jrk-chart" id="line-chart" data-encoding="redundant"></div>
         <div id="line-table" hidden></div>
       </div>
     </div>
@@ -68,6 +119,24 @@
       Lines are 2px with round joins; the hover dot is 8px with a 2px ring in the surface
       color so it stays legible where lines cross. Gridlines are hairline and solid —
       never dashed, because a dashed line reads as data.
+    </div>
+
+    <div class="gal-rule">
+      <strong>Why these lines are dashed.</strong> The eight-slot order was searched to
+      maximise the worst <em>adjacent</em> CVD pair, which is the right objective for
+      stacks and neighbouring lines — it measures ΔE 22.3 light / 16.5 dark. The side
+      effect is that similar hues get pushed four slots apart, so every pair that
+      collapses is (n, n+4): slot 2 orange against slot 4 yellow is <strong>ΔE 0.8 under
+      deuteranopia</strong>, which is not "close", it is the same colour. A line chart
+      compares non-adjacent series constantly, so from two series up the dash is
+      load-bearing rather than decorative. Hit <em>Hue only</em> to compare.
+      (This chart uses slots 1–3, which are the three that <em>do</em> clear the
+      all-pairs test — see <em>Colorblind separation</em> above for where eight collapse.)
+      <br><br>
+      It is opt-in (<code>data-encoding="redundant"</code>, default on for 2+ series in
+      <code>&lt;LineChart&gt;</code>) because a dashed stroke otherwise means
+      <code>.jrk-threshold</code> — a reference value, not data. Spending that signifier
+      on every chart would cost more than it buys, so single-series charts stay solid.
     </div>
   </section>
 
@@ -255,7 +324,13 @@
 <script type="module">
 import { tokenValue, contrast } from './preview.js';
 
-const HUES = ['blue','orange','aqua','yellow','magenta','green','violet','red'];
+/* Must match chart.categorical.order in tokens/tokens.json. This list had drifted
+   — it still said aqua/magenta/green/violet/red from before the palette was
+   re-derived, which mislabelled slot 6 (pink #ff2d55) as "green" and slot 8
+   (brown) as "red". Both readings are actively wrong: systemGreen and systemRed
+   are held OUT of the series precisely so a chart series never reads as a
+   good/bad verdict. */
+const HUES = ['blue','orange','mint','yellow','purple','pink','teal','brown'];
 const $ = (id) => document.getElementById(id);
 
 /* ------------------------- palette swatches ------------------------- */
@@ -271,6 +346,61 @@ function renderSwatches() {
       <div class="gal-swatch__meta">${hex} · ${c.toFixed(2)}:1${relief}</div>
     </div>`;
   }).join('');
+}
+
+/* ------------------------- cvd simulation grid ------------------------- */
+
+/* Shapes match seriesShape() in dist/tokens.ts. Drawn in a 16x16 box so the
+   marks sit on one baseline regardless of outline. */
+const SHAPE_PATH = {
+  circle:       'M8,2.6A5.4,5.4 0 1,1 7.99,2.6Z',
+  square:       'M3,3H13V13H3Z',
+  diamond:      'M8,2 14,8 8,14 2,8Z',
+  triangle:     'M8,2.2 14,13 2,13Z',
+  cross:        'M4.4,2.9 8,6.5 11.6,2.9 13.1,4.4 9.5,8 13.1,11.6 11.6,13.1 8,9.5 4.4,13.1 2.9,11.6 6.5,8 2.9,4.4Z',
+  triangleDown: 'M2,3 14,3 8,13.8Z',
+  hexagon:      'M8,2 13.2,5 13.2,11 8,14 2.8,11 2.8,5Z',
+  plus:         'M6.6,2.4H9.4V6.6H13.6V9.4H9.4V13.6H6.6V9.4H2.4V6.6H6.6Z',
+};
+
+/* Kept in the same order as tokens.json chart.categorical.slots. The preview has
+   no build step, so the colours and dashes are read off the live cascade and
+   only the shape names are duplicated here. */
+const SHAPES = ['circle','square','diamond','triangle','cross','triangleDown','hexagon','plus'];
+const SIMS = [
+  ['none', 'normal vision'],
+  ['url(#sim-protanopia)', 'protanopia'],
+  ['url(#sim-deuteranopia)', 'deuteranopia'],
+  ['url(#sim-tritanopia)', 'tritanopia'],
+];
+
+function renderCvd() {
+  const rows = SIMS.map(([filter, label]) => {
+    const chips = HUES.map((hue, i) => {
+      const hex = tokenValue(`--jrk-chart-${i + 1}`);
+      const dash = tokenValue(`--jrk-chart-dash-${i + 1}`);
+      return `<div class="gal-cvd__cell">
+        <div class="gal-cvd__chip" style="background:${hex}" title="slot ${i+1} · ${hue}"></div>
+        <svg class="gal-cvd__mark" viewBox="0 0 16 16" aria-hidden="true">
+          <path d="${SHAPE_PATH[SHAPES[i]]}" fill="${hex}"/>
+        </svg>
+        <svg class="gal-cvd__line" viewBox="0 0 44 8" aria-hidden="true">
+          <line x1="1" y1="4" x2="43" y2="4" stroke="${hex}" stroke-width="2"
+                stroke-linecap="round" stroke-dasharray="${dash}"/>
+        </svg>
+      </div>`;
+    }).join('');
+    return `<div class="gal-cvd__row">
+      <div class="gal-cvd__label">${label}</div>
+      <div class="gal-cvd__strip" style="filter:${filter}">${chips}</div>
+    </div>`;
+  }).join('');
+
+  $('cvd-grid').innerHTML =
+    `<div class="gal-cvd__row gal-cvd__row--head">
+       <div class="gal-cvd__label"></div>
+       <div class="gal-cvd__strip">${HUES.map((h, i) => `<div class="gal-cvd__cell gal-cvd__cell--head">${i + 1}<br>${h}</div>`).join('')}</div>
+     </div>${rows}`;
 }
 
 /* ------------------------- line chart ------------------------- */
@@ -375,6 +505,17 @@ btn.onclick = () => {
   btn.setAttribute('aria-expanded', String(showing));
 };
 
+/* Flip the redundancy channel off, so the gallery can show what the palette
+   alone is actually carrying. Slots 2 and 4 are the pair to watch. */
+const encBtn = $('toggle-encoding');
+encBtn.onclick = () => {
+  const on = $('line-chart').dataset.encoding === 'redundant';
+  if (on) delete $('line-chart').dataset.encoding;
+  else $('line-chart').dataset.encoding = 'redundant';
+  encBtn.textContent = on ? 'Hue + dash' : 'Hue only';
+  encBtn.setAttribute('aria-pressed', String(!on));
+};
+
 /* ------------------------- bar list ------------------------- */
 const BARS = [
   ['Riverside Flats', 612470], ['Harbor Point', 481200], ['Bellevue Commons', 344900],
@@ -439,9 +580,13 @@ const SPARK = [42,48,44,52,58,55,63,61,68,72,70,78];
   $('spark').innerHTML = `<path class="jrk-spark-area" d="${d} L${sx(SPARK.length-1)},${h} L${sx(0)},${h} Z"/><path d="${d}"/>`;
 }
 
-renderSwatches();
-new MutationObserver(renderSwatches).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderSwatches);
+/* Both read hexes off the live cascade, so both have to re-run when the theme
+   changes — dark is a different palette, not a filter over the light one. */
+function renderTokenDependent() { renderSwatches(); renderCvd(); }
+
+renderTokenDependent();
+new MutationObserver(renderTokenDependent).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', renderTokenDependent);
 </script>
 </body>
 </html>

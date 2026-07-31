@@ -270,14 +270,21 @@
    series folds into "Other", facets into small multiples, or takes a second
    encoding. Generating a hue would break the CVD guarantee the eight-slot
    order exists to provide. */
-.jrk-s1 { --series: var(--jrk-chart-1); }
-.jrk-s2 { --series: var(--jrk-chart-2); }
-.jrk-s3 { --series: var(--jrk-chart-3); }
-.jrk-s4 { --series: var(--jrk-chart-4); }
-.jrk-s5 { --series: var(--jrk-chart-5); }
-.jrk-s6 { --series: var(--jrk-chart-6); }
-.jrk-s7 { --series: var(--jrk-chart-7); }
-.jrk-s8 { --series: var(--jrk-chart-8); }
+/* Each slot also carries a dash. Hue separates ADJACENT slots well (worst
+   adjacent CVD dE 22.3 light / 16.5 dark) but the order was searched for
+   exactly that, which pushes similar hues four apart — so every pair that
+   collapses is (n, n+4): orange|yellow is dE 0.8 under deuteranopia, i.e. the
+   same colour. --series-dash is the channel that survives it. Setting it here
+   only declares it; .jrk-chart[data-encoding='redundant'] is what applies it,
+   because charts.md reserves the dashed stroke for .jrk-threshold. */
+.jrk-s1 { --series: var(--jrk-chart-1); --series-dash: var(--jrk-chart-dash-1); }
+.jrk-s2 { --series: var(--jrk-chart-2); --series-dash: var(--jrk-chart-dash-2); }
+.jrk-s3 { --series: var(--jrk-chart-3); --series-dash: var(--jrk-chart-dash-3); }
+.jrk-s4 { --series: var(--jrk-chart-4); --series-dash: var(--jrk-chart-dash-4); }
+.jrk-s5 { --series: var(--jrk-chart-5); --series-dash: var(--jrk-chart-dash-5); }
+.jrk-s6 { --series: var(--jrk-chart-6); --series-dash: var(--jrk-chart-dash-6); }
+.jrk-s7 { --series: var(--jrk-chart-7); --series-dash: var(--jrk-chart-dash-7); }
+.jrk-s8 { --series: var(--jrk-chart-8); --series-dash: var(--jrk-chart-dash-8); }
 
 /* ---------- pastel tints ---------- */
 
@@ -457,6 +464,60 @@ button.jrk-legend__item:hover {
 
 .jrk-chart__table[hidden] {
   display: none;
+}
+
+/* ============================== redundant encoding ============================== */
+
+/* The non-color identity channel for LINE marks, and the legend keys that have
+   to match them.
+
+   Why this exists: the eight-slot order maximises the worst ADJACENT CVD pair,
+   which is the right objective for stacks and neighbouring lines but pushes
+   similar hues four slots apart as a side effect. Every collapsing pair is
+   therefore (n, n+4) — orange|yellow measures dE 0.8 under deuteranopia, which
+   is not "close", it is the same colour. A multi-series line chart compares
+   non-adjacent series constantly, so hue alone is not an identity channel
+   there.
+
+   Why it is opt-in rather than default: charts.md reserves the dashed stroke
+   for .jrk-threshold, where the dash is what says "reference value, not data".
+   Turning dashes on for every series would spend that signifier. Under this
+   switch the threshold stays distinguishable by colour (recessive tick grey vs
+   a series hue) and weight (1.5 vs 2), and the author has explicitly accepted
+   the trade. Logged in the conflict register in philosophy.md.
+
+   Scatter and line markers use the SHAPE channel instead — see seriesShape()
+   in dist/tokens.ts. Shape is the only channel that survives a full hue
+   collapse on an isolated point, which is why the all-pairs colour cap of 3
+   does not apply once marks are shaped. */
+.jrk-chart[data-encoding='redundant'] .jrk-line {
+  stroke-dasharray: var(--series-dash, none);
+}
+
+/* The key must carry the same dash, or the legend stops being a lookup table.
+   A 14px key can only show a couple of periods, so this is a repeating
+   gradient rather than a real dash — same rhythm, readable at that width. */
+.jrk-chart[data-encoding='redundant'] .jrk-legend__swatch--line {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--series) 0 var(--series-key-on, 14px),
+    transparent var(--series-key-on, 14px) var(--series-key-period, 14px)
+  );
+}
+
+.jrk-chart[data-encoding='redundant'] .jrk-s2 .jrk-legend__swatch--line { --series-key-on: 4px; --series-key-period: 6px; }
+.jrk-chart[data-encoding='redundant'] .jrk-s3 .jrk-legend__swatch--line { --series-key-on: 1px; --series-key-period: 4px; }
+.jrk-chart[data-encoding='redundant'] .jrk-s4 .jrk-legend__swatch--line { --series-key-on: 7px; --series-key-period: 10px; }
+.jrk-chart[data-encoding='redundant'] .jrk-s5 .jrk-legend__swatch--line { --series-key-on: 4px; --series-key-period: 7px; }
+.jrk-chart[data-encoding='redundant'] .jrk-s6 .jrk-legend__swatch--line { --series-key-on: 2px; --series-key-period: 4px; }
+.jrk-chart[data-encoding='redundant'] .jrk-s7 .jrk-legend__swatch--line { --series-key-on: 8px; --series-key-period: 11px; }
+.jrk-chart[data-encoding='redundant'] .jrk-s8 .jrk-legend__swatch--line { --series-key-on: 3px; --series-key-period: 5px; }
+
+/* Print has no colour to lose, so redundancy is not optional there. */
+@media print {
+  .jrk-line {
+    stroke-dasharray: var(--series-dash, none);
+  }
 }
 
 /* ============================== texture ============================== */

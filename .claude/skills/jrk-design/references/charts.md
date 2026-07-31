@@ -82,7 +82,53 @@ Never draw a border around a mark to separate it — a stroke adds data-weight i
 that is not data.
 
 Dashed is reserved for `.jrk-threshold` (a reference value). A dashed gridline
-reads as data.
+reads as data. **One exception:** under `data-encoding="redundant"` series lines
+take their per-slot dash — see §3a. The threshold stays distinguishable there by
+color (recessive tick grey, never a series hue) and weight (1.5 vs 2).
+
+## 3a. The second identity channel
+
+Hue is only an identity channel for **adjacent** marks. The eight-slot order was
+searched to maximise the worst adjacent pair, and the arithmetic consequence is
+that similar hues get pushed four slots apart — so every pair that collapses
+under simulated dichromacy is `(n, n+4)`:
+
+| pair | worst ΔE | type |
+|---|---|---|
+| orange \| yellow (2,4) | **0.8** | deuteranopia |
+| mint \| teal (3,7) | 1.8 (dark) | tritanopia |
+| pink \| brown (6,8) | 3.9 | deuteranopia |
+| blue \| purple (1,5) | 4.4 | deuteranopia / protanopia |
+
+The floor is 10. ΔE 0.8 is not "close" — it is the same color. Optimising
+adjacency buys the stack and pays for it in the scatter, which is exactly why
+the all-pairs cap is 3.
+
+So every slot carries **three** channels, all keyed to the same slot number:
+
+| channel | token / API | applies to |
+|---|---|---|
+| hue | `--jrk-chart-N`, `.jrk-sN` | everything |
+| dash | `--jrk-chart-dash-N`, `seriesDash(i)` | line marks |
+| shape | `seriesShape(i)` | scatter, line markers, legend keys |
+
+**Dash is opt-in** via `data-encoding="redundant"` on `.jrk-chart`, because a
+dashed stroke otherwise means *reference value*. `<LineChart>` defaults it on
+for 2+ series and off for 1: a lone dashed line would read as a threshold, and
+with one series there is nothing to confuse it with anyway.
+
+**Shape is not optional on a scatter.** It is the only channel that survives a
+full hue collapse on an isolated point.
+
+Bars deliberately have no per-slot channel: `.jrk-bars` is single-series and
+`.jrk-stack-bar` segments are adjacent by construction, so hue alone holds. The
+`data-texture` hatch alternates 45°/135° for neighbours, which is the right
+shape for that job — but note it can never separate `(n, n+4)`, since those
+always share parity. **A grouped bar chart would need direct labels or shape.**
+
+`npm run validate` gates all of this: it fails if a collapsing pair ever shares
+both dash and shape, if either channel has a duplicate, or if the measured
+all-pairs cap stops matching the declared `seriesCapAllPairs`.
 
 ## 4. Labels, legend, text
 

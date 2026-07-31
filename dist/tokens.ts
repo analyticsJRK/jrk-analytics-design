@@ -11,6 +11,18 @@ export const chartSeries = {
 
 export const chartSeriesHues = ['blue', 'orange', 'mint', 'yellow', 'purple', 'pink', 'teal', 'brown'] as const;
 
+/** Non-color redundancy channel, parallel to chartSeries and indexed the same.
+ *  Hue only separates ADJACENT slots — every pair that collapses under CVD is
+ *  (n, n+4) — so anything comparing non-adjacent series (grouped bars, a
+ *  multi-series line, a scatter, a legend read out of order) must also carry
+ *  dash or shape. Slot 1 is solid: a single-series chart must not look
+ *  provisional. */
+export const chartSeriesDash = ['none', '6 3', '1 3', '10 4', '6 3 1 3', '2 2', '12 3 2 3', '4 2 1 2 1 2'] as const;
+
+export const chartSeriesShape = ['circle', 'square', 'diamond', 'triangle', 'cross', 'triangleDown', 'hexagon', 'plus'] as const;
+
+export type SeriesShape = typeof chartSeriesShape[number];
+
 /** Scatter / bubble / choropleth / small-multiples cap: any two marks can sit
  *  side by side, so only the first N slots clear the all-pairs CVD floor. */
 export const SERIES_CAP_ALL_PAIRS = 3;
@@ -151,6 +163,26 @@ export function seriesColor(i: number, mode: Mode = 'light'): string {
     );
   }
   return p[i];
+}
+
+/** Dash pattern for slot i (0-based) as an SVG stroke-dasharray. 'none' for
+ *  slot 1. Only legal on a series line when the chart has opted into redundant
+ *  encoding — charts.md reserves the dashed stroke for .jrk-threshold. */
+export function seriesDash(i: number): string {
+  if (i < 0 || i >= chartSeriesDash.length) {
+    throw new RangeError(`No categorical slot ${i}. The palette has ${chartSeriesDash.length} slots and is never cycled.`);
+  }
+  return chartSeriesDash[i];
+}
+
+/** Mark shape for slot i (0-based). The only channel that survives when two
+ *  non-adjacent hues collapse under CVD, so scatter and line markers should
+ *  always set it — see SERIES_CAP_ALL_PAIRS for the colour-only limit. */
+export function seriesShape(i: number): SeriesShape {
+  if (i < 0 || i >= chartSeriesShape.length) {
+    throw new RangeError(`No categorical slot ${i}. The palette has ${chartSeriesShape.length} slots and is never cycled.`);
+  }
+  return chartSeriesShape[i];
 }
 
 /** Current mode from the cascade (explicit stamp wins over the OS setting). */

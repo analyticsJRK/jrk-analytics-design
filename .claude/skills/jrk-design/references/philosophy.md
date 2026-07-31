@@ -226,6 +226,8 @@ decisions most likely to be re-litigated, so they are written down.
 | Density vs 1080px height | Scroll | Disclosure. A reader who scrolls to compare cannot compare. |
 | "Expert power" vs "first-timer simplicity" | Two products, or one dumbed down | One spine, two speeds. Accelerators layer over structure; they never replace it. |
 | Kelley process vs the other nine | Treat as a design rule | It is a process. It belongs in how the team works, not in the library. |
+| "Dashed means reference value" vs colorblind series separation | Pick one — either dashes mean threshold or they mean series | Both, scoped. Solid is the default and the dash keeps meaning *reference*. Under an explicit `data-encoding="redundant"` the author trades that signifier for an identity channel, and the threshold still reads by colour and weight. The alternative was worse: hue alone leaves `(n, n+4)` pairs at ΔE 0.8, and a reader who cannot tell two series apart has lost more than a signifier. |
+| "Add a colorblind palette" | Ship a second palette behind a toggle | There is no second palette to ship. The default **is** the CVD-derived one, and no eight hues in sRGB clear the all-pairs floor under three dichromacies — so a swap cannot fix what breaks. The fix is a second *channel* (dash, shape), not a second palette, plus the cap of 3 for colour-only marks. A toggle would also fork the token source and require the reader to self-identify. |
 
 ---
 
@@ -236,8 +238,17 @@ Honesty about the boundary matters, because doctrine that pretends to be
 enforceable is worse than doctrine that admits it is not.
 
 **Gated today:** raw hex, undefined tokens, brace balance (`check:css`);
-contrast, CVD separation, lightness band, chroma floor, ordinal floor
-(`validate`); the series cap (`seriesColor` throws); types (`typecheck`).
+contrast, CVD separation, the redundancy channels, lightness band, chroma floor,
+ordinal floor (`validate`); the series cap (`seriesColor` throws); types
+(`typecheck`).
+
+CVD separation is vendored in `scripts/cvd.mjs` rather than reached through
+`JRK_DATAVIZ`. It used to live only in the external skill, which meant a fresh
+clone printed two warnings and exited 0 — `npm test` passed green without ever
+checking the property the palette exists to have. **A gate that is off by
+default is not a gate**, and an optional one reads as enforcement to everyone
+who never sets the variable. Band, chroma and the normal-vision floor are still
+external; they degrade to a stated gap rather than a silent pass.
 
 **Gateable, not yet built:** every data component declaring all four states;
 every computed figure carrying a derivation or an explicit opt-out; every chart
