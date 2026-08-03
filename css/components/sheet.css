@@ -52,6 +52,18 @@
   max-width: 100%;
   max-height: var(--jrk-sheet-height, 82vh);
   background: var(--jrk-surface-default);
+  /* The sheet used to read purely by fill step against the tinted page, with no
+     edge of its own. That worked only on the tinted plane and only in light: in
+     dark the sheet is #1c1c1e on a #141416 page, a 1.08:1 step, which is exactly
+     the case the doctrine says border.subtle has to carry. On a white page
+     (.jrk-content--document) the light-mode step goes to zero and the sheet
+     dissolves entirely. The hairline makes it hold its edge on any plane.
+
+     border.default rather than the card's border.subtle: a card can use the
+     lighter hairline because it ALSO has a fill step under it. This has none on
+     a white plane (1.0:1) and almost none in dark (1.08:1), so the line is the
+     entire edge and subtle would only be 1.26:1 against white. */
+  border: 1px solid var(--jrk-border-default);
   border-radius: var(--jrk-radius-xl);
   /* Dense reports want crisp edges, not the app's soft type. */
   font-size: var(--jrk-text-2xs);
