@@ -169,6 +169,18 @@ Keep them frontmatter-only. A stub with a **body** replaces the synthesized
 preview JSX the design agent imitates) and `## Related`. Frontmatter-only keeps
 both and still sets the group.
 
+**`LineChart.md` is the one deliberate exception, and it now carries its own
+`## Examples`.** Commit 829ebab gave it a body — the `encoding` / ΔE-0.8
+rationale, which is far better than anything the synthesizer produces — and the
+predicted cost landed exactly as written above: LineChart became the only
+component whose `.prompt.md` had no `## Examples` and no `## Related`. Confirmed
+in `lib/emit.mjs:412`: when `docBody` is set, `prompt = head + docBody`, and only
+`## Props` is back-filled when the body lacks it. **`## Examples` is never
+re-appended, so there is no config knob for this** — the section was hand-written
+into the stub on 2026-07-31 and is now maintenance-coupled to
+`previews/LineChart.tsx`. If you change that preview's composition, update the
+stub's Examples too; nothing cross-checks them (see **Re-sync risks**).
+
 ## Library bugs found while making previews render
 
 These are real defects in the library, found via the previews and **not fixed
@@ -316,6 +328,38 @@ here** — `css/` and `react/src/` were left untouched.
 
 Anything else is new; investigate, then fix or record it here.
 
+Confirmed still the only warn on the 2026-07-31 re-sync: validate exited 0 with
+`[FONT_REMOTE] "Inter var"` and nothing else. `[FONT_MISSING] "SF Mono"` and
+`[GRID_OVERFLOW] ChartCard` both stayed suppressed by their config fixes, as
+expected. Token count is now **220** in `jrk-tokens.css` (244 defined across the
+whole shipped closure), up from 212 — the colorblind dash set in 829ebab, not a
+regression.
+
+## conventions.md validation log
+
+The base skill requires re-validating the header against every fresh build rather
+than rewriting it. Result on **2026-07-31**: all 40 enumerated classes, all 41
+enumerated tokens, `setTheme`, the `guidelines/guides/*.md` paths, and every prop
+in the idiomatic example (`Card.title/subtitle/actions/raised`, `Delta.vs`
+required, `Delta.upIsGood`, `Stat.delta: DeltaProps`, `Badge tone="serious"`,
+`Button variant="secondary" size="sm"`) verified against the built artifacts.
+**Zero stale names.** The four surface/text values in its light/dark table were
+read, not grepped, and all four still match (`#f2f2f7`/`#141416`,
+`#ffffff`/`#1c1c1e`, `#ffffff`/`#2c2c2e`, `text.primary` dark `#ebebf0`).
+
+All three "live traps" were re-confirmed present in the build, i.e. still real
+library bugs and still worth documenting: the `.jrk-grid` double-book
+(`_ds_bundle.css` still carries the unscoped `.jrk-grid line, .jrk-grid path`),
+`BarList`'s missing `--series` default (no `.jrk-bars { --series: … }` rule
+exists), and `svg { display: block }` in the base reset with `.jrk-icon` setting
+no `display`, which leaves its `vertical-align: -0.14em` inert.
+
+Added this run: the **dash-channel** rule, so the agent is told hue alone fails
+at `(n, n+4)` and how to opt into the redundant encoding. Deliberately **not**
+added: `.jrk-content--document`, which is still uncommitted branch work — add it
+once `design/inter-dark-mode-and-doctrine` merges (it has a real "never on a
+dashboard" trap and belongs in the traps list).
+
 Two warns appeared in the Jul 2026 sync and were **resolved by config**, so they
 should not return. Do not re-diagnose them from scratch if they do:
 
@@ -362,13 +406,54 @@ Fix: convert to LF (`perl -pi -e 's/\r\n/\n/g' <files>`) and re-run the driver
 **before** grading anything — otherwise you hand subagents re-grade work that
 does not exist.
 
-**The durable fix is `.gitattributes`, and this repo now has one** pinning
-`eol=lf` for the text types whose bytes are load-bearing. Without it the fix is
+**`.gitattributes` did not retroactively fix the blobs, and that was cleaned up
+on 2026-07-31.** The file pins `eol=lf`, but eight tracked files under
+`.design-sync/` predated it and had **CRLF baked into their git blobs**:
+`NOTES.md`, `config.json`, `conventions.md`, `prepare.mjs`, `tsconfig.dts.json`
+and the `docs/{Icon,List,ListRow}.md` stubs. `git status` warned "CRLF will be
+replaced by LF the next time Git touches it" on each. They are all LF now
+(`perl -pi -e 's/\r\n/\n/g'`), and the scan below should stay empty:
+
+```sh
+for f in $(git ls-files .design-sync); do grep -qU $'\r' "$f" && echo "CRLF: $f"; done
+```
+
+Two findings from doing it, because the cost was **not** where it looked:
+
+- **A frontmatter-only docs stub is immune.** Normalizing
+  `docs/{Icon,List,ListRow}.md` changed **no** output: only the parsed `category`
+  and `keywords` values are consumed, never the stub's bytes, so all three stayed
+  `unchanged` in the diff and needed no re-grade. The CRLF hazard is specific to
+  files whose **content** reaches an artifact — `previews/*.tsx` (embedded into
+  `## Examples`) and `conventions.md` (embedded verbatim into `README.md`).
+- **`conventions.md` was the one that mattered, via `auxSha` — and this is the
+  most likely explanation for the "differing byte never isolated" mystery
+  recorded under Re-sync risks.** Normalizing it changed `README.md` and nothing
+  else, moving `auxSha` (`2d2ad86b…` → `ec3890ee…`) with `bundleSha12`, `styleSha`
+  and every `sourceKey` untouched — i.e. **exactly** the reported symptom
+  (`upload: docs` alone, no rendering impact, no visible content diff). An
+  invisible whitespace flip is precisely the kind of byte that a line-by-line
+  README comparison would miss. If `upload: docs` ever recurs on a no-change run,
+  check line endings **first**. Without it the fix is
 temporary: `git status` reports the LF files as modified with **no content diff**
 (`git diff -w --ignore-cr-at-eol` is empty) and warns "LF will be replaced by
 CRLF the next time Git touches it" — i.e. the next checkout re-breaks it. If
 `.gitattributes` is ever removed, this returns, and on a fresh Windows clone it
 would hit **all 37** previews at once, not three.
+
+## `seriesColor` / `seriesShape` are NOT in the uploaded bundle
+
+`CLAUDE.md` names both (`seriesColor(8)` throws on purpose; `seriesShape(i)` is
+"mandatory on scatter"), so it is natural to reach for them when writing
+agent-facing docs. **Do not.** Grepping `_ds_bundle.js` for
+`seriesColor|seriesShape|seriesDash` on 2026-07-31 returned nothing —
+`window.JrkDesign` exposes 43 exports (37 components + `setTheme` and friends)
+and neither helper is among them. They are internal to `Chart.tsx` and/or live
+only in the `dataviz` skill, so a design agent given those names would write code
+that does not resolve. The dash channel **is** reachable, but only through CSS:
+`--jrk-chart-dash-1…8`, surfaced by `.jrk-s1…8` as `--series-dash` and consumed
+under `.jrk-chart[data-encoding=redundant]`. That is what `conventions.md`
+documents, and it is why it documents it that way.
 
 ## Re-sync risks — what can silently go stale
 
@@ -378,6 +463,11 @@ would hit **all 37** previews at once, not three.
   but `auxSha` differed, so `upload.any` was true for the docs surface alone.
   `auxSha` covers only `guidelines/` + `README.md` (see `auxShaFor` in
   `lib/sync-hashes.mjs`) — **it has no rendering or verification impact.**
+  **Probable cause found 2026-07-31 — see the CRLF section: `conventions.md` is
+  embedded verbatim into `README.md`, and its blob was CRLF while
+  `.gitattributes` wanted LF, so a line-ending flip moved `auxSha` and nothing
+  else. That matches this symptom exactly. Check line endings before re-opening
+  this investigation.**
   Checked at the time: two consecutive builds produced byte-identical README and
   guidelines (so the build is deterministic), the README's generated body matched
   the uploaded one line for line, `guidelines/index.md` was byte-identical
@@ -385,6 +475,24 @@ would hit **all 37** previews at once, not three.
   byte was never isolated. **If this recurs, don't spend time on it** — confirm
   `bundle`/`styling`/`components` are all false in the verdict, re-upload, and
   move on. Only investigate if `styleSha` or a `sourceKey` also moved.
+- **`docs/LineChart.md`'s hand-written `## Examples` can drift from
+  `previews/LineChart.tsx`.** Added 2026-07-31 to recover the section the doc
+  body suppresses (see **Grouping**). It duplicates the ChartCard-wrap and
+  single-series-area compositions by hand, so a change to the preview's props or
+  a rename does **not** propagate, and no gate reads it. The mechanical checks
+  all pass either way — this needs eyes. Same failure class as the
+  `preview/*.html` vs `previews/*.tsx` split at the bottom of this list, now with
+  a third copy of the same examples.
+- **Styling churn never re-verifies components, which is right until the CSS
+  change is a big one.** This run is the worked example: commit 829ebab added 77
+  lines to `css/components/chart.css` plus the colorblind token set, and the
+  diff still reported **36 verified-by-upload, 1 changed** — because the
+  verification partition keys on `sourceKeys` (the authored `.tsx` + preview
+  config), and `styleSha` moving does not invalidate a grade. That is the
+  designed behaviour and you should not `--force` around it. What you **should**
+  do after a large CSS or token change is Read the three
+  `_screenshots/contact-sheet-N.png` sheets, which cover all 37 cards for the
+  cost of three images. Done 2026-07-31: all clean.
 - **`conventions.md` goes stale the moment a token value changes, and nothing
   gates it.** The Jul 30 2026 run found **two** false statements in the header the
   design agent is given: the dark page plane was still documented as `#000000`
@@ -396,6 +504,19 @@ would hit **all 37** previews at once, not three.
   re-read `conventions.md` against the fresh build** — the token/class/name
   greps in the base skill's validation pass catch names that vanish, but NOT a
   name that still exists with a different value. Those need reading.
+- **Always invoke the driver from the repo root, and never leave a shell cwd
+  inside `ds-bundle/`.** `resync.mjs` resolves `--out ./ds-bundle` against the
+  cwd, and `DesignSync(finalize_plan)`'s `localDir` does too — a shell parked in
+  `ds-bundle/` produced `lstat 'ds-bundle\ds-bundle'` on finalize_plan and a
+  `Cannot find module` on the driver. Worse, on 2026-07-31 one driver run failed
+  with `build.ok: false` and a nonsense `"shape": "storybook"` in the verdict
+  envelope purely because a prior shell still held `ds-bundle/` as its cwd while
+  the build tried to delete and recreate it (Windows keeps the directory locked).
+  Re-running from the root fixed it with no other change. **A `shape` of
+  `storybook` in a failure verdict for this repo is that symptom, not a real
+  detection flip** — `cfg.shape` is pinned to `package` and the log line
+  `[DETECT] … → shape=package` proves it. Pass `localDir` as an absolute path if
+  in doubt.
 - **The toolchain can disappear from under a run.** Mid-run on Jul 30 2026,
   `node_modules/`, `.ds-sync/`, `ds-bundle/`, `guides/` and the `index.d.ts` shim
   all vanished between two commands — every gitignored path, while every

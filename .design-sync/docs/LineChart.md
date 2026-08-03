@@ -43,3 +43,41 @@ would read as a threshold. Pass `encoding="hue"` to force it off.
 <LineChart series={[total]} labels={months} area />         {/* solid */}
 <LineChart series={regions} labels={months} encoding="hue" />
 ```
+
+## Examples
+
+A chart is almost always composed inside a `ChartCard`, which supplies the
+title, the subtitle that carries the unit, and the "Show table" affordance —
+`LineChart` itself renders only the plot.
+
+```tsx
+const months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan',
+                'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul'];
+
+const properties = [
+  { name: 'Parkside Commons', values: [1420, 1465, 1390, 1510, 1580, 1620, 1595, 1660, 1710, 1690, 1745, 1802] },
+  { name: 'Vista Ridge',      values: [980, 1010, 995, 1040, 1075, 1030, 1088, 1120, 1095, 1160, 1185, 1210] },
+  { name: 'Harbor Point',     values: [640, 620, 705, 688, 730, 762, 744, 790, 815, 802, 848, 872] },
+];
+
+<ChartCard
+  title="Collected rent by property"
+  subtitle="Monthly, $ thousands · Aug 2025 – Jul 2026"
+>
+  <LineChart series={properties} labels={months} format={(n) => `$${n.toLocaleString()}K`} />
+</ChartCard>
+```
+
+The Y axis always formats through an internal compact scale (`1.5K`), and
+`format` reaches only the tooltip — so the unit belongs in the subtitle, as
+above. Single series takes the area wash and stays solid:
+
+```tsx
+<ChartCard title="Work orders closed" subtitle="Monthly count · Aug 2025 – Jul 2026">
+  <LineChart series={[closed]} labels={months} area />
+</ChartCard>
+```
+
+Pick data that peaks just under a round number — the axis ceiling is coarse near
+a decade boundary, and a series topping out at 1,402 gets a 2,000 axis, leaving
+the area sitting in the bottom half of the plot.
