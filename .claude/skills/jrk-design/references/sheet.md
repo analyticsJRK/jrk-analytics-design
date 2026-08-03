@@ -143,6 +143,29 @@ normal row heights make that impossible.
 workbook. Off by default: the row hairline already separates rows, and a full
 grid of rules is most of what makes a spreadsheet feel like one.
 
+## The plane a report sits on
+
+`.jrk-content--document` gives the content plane the **card** fill instead of
+the page fill — white in light, `#1c1c1e` in dark. Use it for a full-bleed
+report view.
+
+It is a departure from the grouped look, and it is scoped to the view rather
+than applied to `surface.canvas`, because the tinted plane exists to separate a
+grid of cards. A report is *one full-width object*, so there is no grid and the
+plane is doing no work; the white then reads as paper. **Do not use it on a
+dashboard** — with tiles on it the cards lose their edge and the hierarchy goes
+flat.
+
+It is not "white in both themes". Dark ink on a forced-white surface is 1.19:1;
+a genuinely paper-white report would have to light-lock its entire ink set, not
+just its background. That is a different, larger change.
+
+Anything on this plane must carry its own hairline, because the fill step that
+normally separates it is gone. `.jrk-sheet` uses `border.default` rather than
+the card's `border.subtle` for exactly this: on a white plane the step is 1.0:1
+and in dark it is 1.08:1, so the line is the whole edge, and `subtle` would be
+only 1.26:1 against white.
+
 ## Frozen panes
 
 The gutter, the label column, and the column bar are all sticky. Rows carry an

@@ -13,6 +13,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { execFileSync } from 'node:child_process';
+import { CVD_FLOOR, worstAdjacent, worstSeparation, allPairsSafeCap } from './cvd.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const T = JSON.parse(readFileSync(join(root, 'tokens/tokens.json'), 'utf8'));
@@ -121,11 +122,80 @@ for (const mode of ['light', 'dark']) {
   }
 }
 
+// ---------- CVD separation (vendored — always runs) ----------
+// Kept in-repo rather than behind JRK_DATAVIZ. This is the property the eight
+// slot order exists to provide, and it used to be checked only when an external
+// skill directory happened to be present, which meant a fresh clone ran
+// `npm test` green without ever testing it.
+console.log('\n== CVD separation (Machado 2009 + CIEDE2000) ==');
+{
+  const slots = T.chart.categorical.slots;
+  const cap = T.chart.categorical.seriesCapAllPairs;
+
+  for (const mode of ['light', 'dark']) {
+    const hexes = slots.map((s) => s[mode]);
+
+    // Adjacent is the contract for stacks and neighbouring lines.
+    const adj = worstAdjacent(hexes);
+    const label = `${slots[adj.i].hue}|${slots[adj.j].hue}`;
+    const msg = `${mode} worst adjacent dE ${adj.deltaE.toFixed(1)} (${label}, ${adj.kind})`;
+    adj.deltaE >= CVD_FLOOR ? pass(msg) : fail(`${msg} — needs ${CVD_FLOOR}`);
+
+    // The declared scatter cap must be the measured one. If a color edit ever
+    // widens or narrows it, seriesCapAllPairs has to move with it or the docs
+    // and the throw in seriesColor() start lying.
+    const measuredCap = allPairsSafeCap(hexes);
+    const capMsg = `${mode} all-pairs safe cap = ${measuredCap} (declared ${cap})`;
+    measuredCap === cap ? pass(capMsg)
+                        : fail(`${capMsg} — update chart.categorical.seriesCapAllPairs`);
+  }
+
+  // Every pair that collapses is (n, n+4) — the side effect of optimising the
+  // adjacent objective. Those pairs are exactly the ones the dash and shape
+  // channels have to separate, so assert the channels are actually distinct
+  // rather than trusting the table to stay hand-maintained.
+  const collapsing = [];
+  for (let i = 0; i < slots.length; i++) {
+    for (let j = i + 1; j < slots.length; j++) {
+      const worst = Math.min(
+        worstSeparation(slots[i].light, slots[j].light).deltaE,
+        worstSeparation(slots[i].dark, slots[j].dark).deltaE,
+      );
+      if (worst < CVD_FLOOR) collapsing.push([slots[i], slots[j], worst]);
+    }
+  }
+  for (const [a, b, dE] of collapsing) {
+    const where = `${a.hue}|${b.hue} (dE ${dE.toFixed(1)})`;
+    if (a.dash === b.dash && a.shape === b.shape) {
+      fail(`${where} collapses under CVD and shares BOTH dash and shape — no channel separates it`);
+    } else if (a.dash === b.dash) {
+      warn(`${where} collapses and shares dash '${a.dash}' — separated by shape only`);
+    } else if (a.shape === b.shape) {
+      warn(`${where} collapses and shares shape '${a.shape}' — separated by dash only`);
+    } else {
+      pass(`${where} collapses on hue, separated by dash AND shape`);
+    }
+  }
+
+  // A duplicate anywhere in either channel is a silent identity collision.
+  for (const ch of ['dash', 'shape']) {
+    const seen = new Map();
+    let dupes = 0;
+    for (const s of slots) {
+      if (seen.has(s[ch])) { fail(`${ch} '${s[ch]}' used by both slot ${seen.get(s[ch])} and slot ${s.slot}`); dupes++; }
+      seen.set(s[ch], s.slot);
+    }
+    if (!dupes) pass(`all ${slots.length} ${ch} values distinct`);
+  }
+}
+
 // ---------- dataviz six-checks ----------
+// Band, chroma and the normal-vision floor still come from the skill. CVD is
+// covered above regardless, so a missing skill is a gap, not a hole.
 console.log('\n== categorical palette (dataviz six-checks) ==');
 if (!hasValidator) {
   warn(`validator not found at ${validator}`);
-  warn('set JRK_DATAVIZ=<dataviz skill dir> to run the full six-checks (band, chroma, CVD, normal-vision floor, contrast)');
+  warn('set JRK_DATAVIZ=<dataviz skill dir> for band / chroma / normal-vision floor (CVD is gated above)');
 } else {
   const slots = T.chart.categorical.slots;
   const cap = T.chart.categorical.seriesCapAllPairs;

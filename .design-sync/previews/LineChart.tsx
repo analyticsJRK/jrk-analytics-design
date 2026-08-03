@@ -80,3 +80,28 @@ export const MaxSeries = () => (
     </ChartCard>
   </div>
 );
+
+/* The same eight series with the dash channel forced off, which is what hue
+   alone is actually carrying.
+
+   The slot order was searched to maximise the worst ADJACENT pair — the right
+   objective for stacks and neighbouring lines, and it measures dE 22.3 light /
+   16.5 dark. The arithmetic side effect is that similar hues get pushed four
+   slots apart, so every pair that collapses under simulated dichromacy is
+   (n, n+4). Slot 2 against slot 4 is dE 0.8 under deuteranopia: not "close",
+   the same colour. Compare this against MaxSeries above — that is the whole
+   argument for the second channel.
+
+   Kept as a documented counter-example rather than a usable variant. Do not
+   copy it: encoding="hue" past one series is only correct when something else
+   in the chart already carries identity. */
+export const HueOnlyEightSeries = () => (
+  <div style={{ maxWidth: 720 }}>
+    <ChartCard
+      title="Collected rent — all regions (hue only)"
+      subtitle="What a red-green colourblind reader gets without the dash channel"
+    >
+      <LineChart series={ALL_EIGHT} labels={MONTHS} format={usdK} height={260} encoding="hue" />
+    </ChartCard>
+  </div>
+);

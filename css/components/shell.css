@@ -185,6 +185,26 @@
   min-width: 0;
 }
 
+/* Document view: the content plane takes the CARD fill instead of the page
+   fill, so a full-bleed report sits on white rather than on the tinted plane.
+
+   This is a deliberate departure from the grouped look, which is normally the
+   tinted-page/white-card inversion, and it is scoped to the view rather than
+   applied to the token — surface.canvas stays tinted everywhere else, because
+   flattening it globally would erase the plane separation every other screen
+   depends on.
+
+   It is legal here for the same reason the look exists: a report is ONE
+   full-width object, not a set of tiles. There is no card grid for the tinted
+   plane to separate, so the plane is doing no work and the white reads as paper.
+   Do not reach for this on a dashboard — with tiles on it, the cards lose their
+   edge and the hierarchy goes flat.
+
+   Anything placed on this plane must carry its own hairline; .jrk-sheet does. */
+.jrk-content--document {
+  background: var(--jrk-surface-default);
+}
+
 .jrk-content__inner {
   max-width: var(--jrk-container-xl);
   margin-inline: auto;

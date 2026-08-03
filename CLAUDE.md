@@ -88,6 +88,14 @@ purpose. Scatter/bubble/choropleth/small-multiples cap at three.
 **Color is never the only signal.** Status needs icon + label. Deltas state
 direction in text. Charts have a table view.
 
+**Hue only separates ADJACENT slots.** The order was searched to maximise the
+worst adjacent pair, which pushes similar hues four apart — so every pair that
+collapses under CVD is `(n, n+4)`, and orange/yellow is ΔE 0.8, i.e. the same
+color. Each slot therefore also carries a **dash** (`--jrk-chart-dash-N`, lines,
+opt-in via `data-encoding="redundant"` because a dash otherwise means
+threshold) and a **shape** (`seriesShape(i)`, mandatory on scatter). `validate`
+fails if a collapsing pair ever shares both.
+
 **`--jrk-chart-*` and `--jrk-chart-tint-*` are not interchangeable.** The
 categorical set carries identity and is CVD-validated. Tints are pastel fills
 for marks that are *already* labelled; the validator deliberately skips them, so

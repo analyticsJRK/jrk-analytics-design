@@ -190,14 +190,28 @@ export interface LineChartProps {
   /** Fill under the line at ~10% opacity. Single series only — stacked washes
    *  become unreadable past one. */
   area?: boolean;
+  /** Add the per-slot dash so series stay separable when their hues collapse
+   *  under CVD. Defaults to on for 2+ series and off for 1.
+   *
+   *  Why the default is conditional rather than always-on: the slot order was
+   *  searched to maximise the worst ADJACENT pair, so hue alone is strong
+   *  between neighbours but every collapsing pair lands at (n, n+4) —
+   *  orange|yellow measures dE 0.8 under deuteranopia. A line chart compares
+   *  non-adjacent series freely, so from two series up the second channel is
+   *  load-bearing. At one series there is nothing to confuse it with, and
+   *  charts.md reserves the dashed stroke for .jrk-threshold — a lone dashed
+   *  line would read as a reference value. */
+  encoding?: 'hue' | 'redundant';
   className?: string;
 }
 
 /** Line chart with the crosshair + tooltip hover layer, which ships by
  *  default: an SVG chart IS interactive, and values the eye cannot read off
  *  the axis have to be reachable somehow. */
-export function LineChart({ series, labels, format, height = 220, area, className }: LineChartProps) {
+export function LineChart({ series, labels, format, height = 220, area, encoding, className }: LineChartProps) {
   assertSeriesCount(series.length);
+
+  const redundant = (encoding ?? (series.length > 1 ? 'redundant' : 'hue')) === 'redundant';
 
   const [active, setActive] = useState<number | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -234,7 +248,7 @@ export function LineChart({ series, labels, format, height = 220, area, classNam
   }
 
   return (
-    <div className={cx('jrk-chart', className)}>
+    <div className={cx('jrk-chart', className)} data-encoding={redundant ? 'redundant' : undefined}>
       <div
         className="jrk-chart__plot"
         ref={wrapRef}

@@ -76,6 +76,10 @@ addThemed('focus', T.color.focus);
 
 // ---- chart
 T.chart.categorical.slots.forEach((s) => add(`chart-${s.slot}`, s.light, s.dark));
+// Non-color redundancy channel. Hue alone only separates ADJACENT slots; the
+// pairs that collapse under CVD are all (n, n+4). Emitted unthemed — a dash
+// pattern is geometry, identical in both modes.
+T.chart.categorical.slots.forEach((s) => add(`chart-dash-${s.slot}`, s.dash));
 // Pastel fills for large, already-labelled marks. Separate namespace from the
 // categorical slots so the two can never be confused at the call site.
 T.chart.tint.slots.forEach((s) => add(`chart-tint-${s.slot}`, s.light, s.dark));
@@ -187,6 +191,18 @@ export const chartSeries = {
 
 export const chartSeriesHues = [${T.chart.categorical.slots.map((s) => `'${s.hue}'`).join(', ')}] as const;
 
+/** Non-color redundancy channel, parallel to chartSeries and indexed the same.
+ *  Hue only separates ADJACENT slots — every pair that collapses under CVD is
+ *  (n, n+4) — so anything comparing non-adjacent series (grouped bars, a
+ *  multi-series line, a scatter, a legend read out of order) must also carry
+ *  dash or shape. Slot 1 is solid: a single-series chart must not look
+ *  provisional. */
+export const chartSeriesDash = [${T.chart.categorical.slots.map((s) => `'${s.dash}'`).join(', ')}] as const;
+
+export const chartSeriesShape = [${T.chart.categorical.slots.map((s) => `'${s.shape}'`).join(', ')}] as const;
+
+export type SeriesShape = typeof chartSeriesShape[number];
+
 /** Scatter / bubble / choropleth / small-multiples cap: any two marks can sit
  *  side by side, so only the first N slots clear the all-pairs CVD floor. */
 export const SERIES_CAP_ALL_PAIRS = ${T.chart.categorical.seriesCapAllPairs};
@@ -226,6 +242,26 @@ export function seriesColor(i: number, mode: Mode = 'light'): string {
     );
   }
   return p[i];
+}
+
+/** Dash pattern for slot i (0-based) as an SVG stroke-dasharray. 'none' for
+ *  slot 1. Only legal on a series line when the chart has opted into redundant
+ *  encoding — charts.md reserves the dashed stroke for .jrk-threshold. */
+export function seriesDash(i: number): string {
+  if (i < 0 || i >= chartSeriesDash.length) {
+    throw new RangeError(\`No categorical slot \${i}. The palette has \${chartSeriesDash.length} slots and is never cycled.\`);
+  }
+  return chartSeriesDash[i];
+}
+
+/** Mark shape for slot i (0-based). The only channel that survives when two
+ *  non-adjacent hues collapse under CVD, so scatter and line markers should
+ *  always set it — see SERIES_CAP_ALL_PAIRS for the colour-only limit. */
+export function seriesShape(i: number): SeriesShape {
+  if (i < 0 || i >= chartSeriesShape.length) {
+    throw new RangeError(\`No categorical slot \${i}. The palette has \${chartSeriesShape.length} slots and is never cycled.\`);
+  }
+  return chartSeriesShape[i];
 }
 
 /** Current mode from the cascade (explicit stamp wins over the OS setting). */

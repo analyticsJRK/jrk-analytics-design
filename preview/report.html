@@ -25,9 +25,38 @@
     <label class="jrk-switch"><input type="checkbox" role="switch" id="t-grid"><span class="jrk-check__label">Workbook gridlines</span></label>
     <label class="jrk-switch"><input type="checkbox" role="switch" id="t-cols" checked><span class="jrk-check__label">Column letters</span></label>
     <label class="jrk-switch"><input type="checkbox" role="switch" id="t-thresh" checked><span class="jrk-check__label">Threshold shading</span></label>
+    <label class="jrk-switch"><input type="checkbox" role="switch" id="t-plane" checked><span class="jrk-check__label">Document plane</span></label>
   </div>
 
-  <div class="jrk-sheet" id="sheet" role="grid" aria-label="AM Report — Summit at Red Rocks"></div>
+  <!-- .jrk-content--document takes the CARD fill for the plane instead of the
+       page fill. Legal for a report because a report is one full-width object,
+       so the tinted plane has no card grid to separate and is doing no work.
+       The sheet keeps its own hairline, which is what stops it dissolving once
+       the plane underneath it is the same colour. -->
+  <div class="jrk-content jrk-content--document" id="sheet-plane">
+    <div class="jrk-sheet" id="sheet" role="grid" aria-label="AM Report — Summit at Red Rocks"></div>
+  </div>
+
+  <div class="gal-rule">
+    <strong>Document plane.</strong> <code class="jrk-mono">.jrk-content--document</code>
+    gives the content plane the <em>card</em> fill instead of the page fill — white in
+    light, <code class="jrk-mono">#1c1c1e</code> in dark. Not literally white in both
+    themes: dark ink on a forced-white surface measures 1.19:1, so a genuinely
+    paper-white report would have to light-lock its whole ink set, not just its
+    background.
+    <br><br>
+    It is legal here because a report is <em>one full-width object</em>. The tinted
+    plane exists to separate a grid of cards, and there is no grid — so the plane is
+    doing no work and the white reads as paper. On a dashboard the same class flattens
+    the tile hierarchy, which is why it is a view modifier and not a token change.
+    <br><br>
+    The trade is that the sheet loses its fill step and the hairline becomes the entire
+    edge. That is why <code class="jrk-mono">.jrk-sheet</code> now carries
+    <code class="jrk-mono">border.default</code> rather than the card's
+    <code class="jrk-mono">border.subtle</code> — it had no border at all before, which
+    also left it nearly edgeless in dark, where the fill step is only 1.08:1. Toggle the
+    switch in both themes to see what the line is holding up.
+  </div>
 
   <section class="gal-sec">
     <h2>What was modernised</h2>
@@ -306,6 +335,11 @@ document.getElementById('t-cols').onchange = e =>
   sheet.querySelector('.jrk-sheet__colbar').style.display = e.target.checked ? '' : 'none';
 document.getElementById('t-thresh').onchange = e =>
   sheet.querySelectorAll('.jrk-sheet__cell--critical').forEach(c => c.style.background = e.target.checked ? '' : 'transparent');
+/* Off = the tinted page plane the rest of the app uses. Worth flipping in both
+   themes: the two planes are 1.08:1 apart in dark, so the sheet's hairline is
+   carrying almost the whole edge there either way. */
+document.getElementById('t-plane').onchange = e =>
+  document.getElementById('sheet-plane').classList.toggle('jrk-content--document', e.target.checked);
 </script>
 </body>
 </html>

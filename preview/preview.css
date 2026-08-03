@@ -269,3 +269,64 @@
   font-size: var(--jrk-text-sm);
   color: var(--jrk-text-muted);
 }
+
+/* ---------------------------- CVD simulation grid ----------------------------
+   Gallery chrome, not library surface. The chips sit on the CARD, because that
+   is the surface the palette is validated against — putting them on the tinted
+   page would measure a contrast nobody ships. */
+
+.gal-cvd__row {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-3);
+  padding: var(--jrk-space-1) 0;
+}
+
+.gal-cvd__label {
+  flex: 0 0 108px;
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+  text-align: right;
+}
+
+.gal-cvd__strip {
+  display: flex;
+  gap: var(--jrk-space-2);
+  padding: var(--jrk-space-2);
+  background: var(--jrk-surface-default);
+  border: 1px solid var(--jrk-border-subtle);
+  border-radius: var(--jrk-radius-lg);
+  /* Wide content scrolls in its own box rather than pushing the page sideways. */
+  overflow-x: auto;
+}
+
+.gal-cvd__cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 0 0 46px;
+}
+
+.gal-cvd__cell--head {
+  font-size: var(--jrk-text-2xs);
+  line-height: var(--jrk-leading-tight);
+  color: var(--jrk-text-muted);
+  text-align: center;
+}
+
+.gal-cvd__chip {
+  width: 100%;
+  height: 22px;
+  border-radius: var(--jrk-radius-sm);
+}
+
+.gal-cvd__mark {
+  width: 14px;
+  height: 14px;
+}
+
+.gal-cvd__line {
+  width: 44px;
+  height: 8px;
+}

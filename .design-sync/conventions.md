@@ -88,6 +88,18 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
 - **Right-align money and counts** with `jrk-num` on the cell **and** its header.
 - **Never cycle the 8-slot chart palette** — the fixed order is the
   colorblind-safety mechanism. A 9th series folds into "Other" or facets.
+- **Hue only separates ADJACENT slots, so charts need a second channel.** The
+  order was searched to maximise the worst *adjacent* pair, and the arithmetic
+  consequence is that similar hues get pushed four apart — every pair that
+  collapses under simulated dichromacy is `(n, n+4)`. Slot 2 orange against slot
+  4 yellow is ΔE 0.8: the same colour. So each slot also carries a dash,
+  `--jrk-chart-dash-1…8`, which `.jrk-s1…8` expose as `--series-dash` alongside
+  `--series`. It is **opt-in** — set `data-encoding="redundant"` on the
+  `.jrk-chart` root and the line strokes and legend keys pick it up. Opt-in
+  because a dashed stroke otherwise reads as `.jrk-threshold`, a reference
+  value rather than data, so a lone series stays solid. `LineChart` handles
+  this for you (`encoding`, defaulting to `redundant` at 2+ series); hand-rolled
+  SVG on the palette does not.
 - **Every data surface needs an `Empty`** — say what would appear and give the
   action that produces it.
 
