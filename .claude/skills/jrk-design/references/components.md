@@ -56,10 +56,16 @@ An error is never signalled by the red border alone. `<Input error="...">` sets
 
 ## Card / Section
 
-`.jrk-card` (borderless, separates by fill) with `__header` `__title` `__subtitle`
-`__actions` `__body` `__footer`. Modifiers: `--raised` (elevation is opt-in — a
-dashboard of many tiles reads calmer flat), `--tinted`, `--outlined` (a hairline,
-for a card sitting on a tinted surface), `--interactive`, `--flush`.
+`.jrk-card` (white fill + a 2px `border-card` brand edge) with `__header`
+`__title` `__subtitle` `__actions` `__body` `__footer`. Modifiers: `--raised`
+(elevation is opt-in — a dashboard of many tiles reads calmer flat), `--tinted`,
+`--outlined` (**neutral** edge instead of the brand edge — for a card nested in a
+card or sitting on a tinted plane, where a second blue rectangle reads as a bug),
+`--seamless` (transparent edge, no reflow), `--interactive`, `--flush`.
+
+`--interactive:hover` raises the edge *to* `border-card` and washes the fill; on a
+default card the edge is already there and the wash is the whole cue. There is no
+darker-blue hover step on purpose — see the `border.card` note in `tokens.md`.
 
 `.jrk-section` + `__header` + `__title` groups several cards under one heading.
 
@@ -70,8 +76,10 @@ When the data is a single headline number, a tile beats a one-bar chart.
 `.jrk-stat` + `__label` `__value` (`--sm`) `__unit` `__meta` `__spark`.
 `--tinted`, `--with-spark`.
 
-Bands: `.jrk-stat-row` (joined, hairline-divided) or `.jrk-stat-row--split`
-(discrete rounded tiles with a gap) and `--tinted`.
+Bands: `.jrk-stat-row` (joined — the **band** carries the brand edge, the tiles
+inside it are divided by neutral hairlines) or `.jrk-stat-row--split` (discrete
+rounded tiles with a gap, each its own enclosure and so each with its own brand
+edge, white by default) and `--tinted`.
 
 `.jrk-delta` + `--good` `--bad` `--flat`. **`good`/`bad` mean interpretation, not
 direction** — pick from the metric, not the sign. `<Delta upIsGood={false}>` for

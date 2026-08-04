@@ -217,6 +217,101 @@
     </div>
   </section>
 
+  <!-- ============================ surfaces ============================ -->
+  <section class="gal-sec">
+    <h2>Surfaces — the tile edge</h2>
+    <p class="gal-sec__note">
+      Every outermost tile carries the same edge: <code class="jrk-mono">2px solid
+      var(--jrk-border-card)</code>, <code class="jrk-mono">#48a9df</code> in both themes.
+      Two rules keep it from becoming noise — <strong>one brand edge per enclosure</strong>,
+      and <strong>never on an internal rule</strong>. The two themes lean on it differently:
+      in <strong>light</strong> the page and the card are both
+      <code class="jrk-mono">#ffffff</code>, so the edge is the <em>entire</em> tile boundary;
+      in <strong>dark</strong> it reinforces a real fill step
+      (<code class="jrk-mono">#1c1c1e</code> on <code class="jrk-mono">#141416</code>). Being one
+      value in both, it measures quieter in light (2.62:1 on the card) than in dark (6.5:1) —
+      which is the wrong way round for the theme that depends on it more.
+    </p>
+
+    <div class="jrk-grid jrk-grid-3">
+      <div class="jrk-card">
+        <div class="jrk-card__body">
+          <p class="gal-label">default</p>
+          <p class="jrk-card__subtitle">Card fill, 2px brand edge. What every tile looks like.</p>
+        </div>
+      </div>
+
+      <div class="jrk-card jrk-card--interactive">
+        <div class="jrk-card__body">
+          <p class="gal-label">--interactive</p>
+          <p class="jrk-card__subtitle">Hover washes the fill. The edge is already the brand line, so it has nowhere louder to go.</p>
+        </div>
+      </div>
+
+      <div class="jrk-card jrk-card--seamless">
+        <div class="jrk-card__body">
+          <p class="gal-label">--seamless</p>
+          <p class="jrk-card__subtitle">Transparent edge, same 2px, so nothing reflows when a card toggles between the two.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="jrk-card" style="margin-top:var(--jrk-space-4)">
+      <div class="jrk-card__header">
+        <div>
+          <h3 class="jrk-card__title">One brand edge per enclosure</h3>
+          <p class="jrk-card__subtitle">Panels nested in this card take <code class="jrk-mono">--outlined</code> — a neutral edge. A second blue rectangle just inside the first reads as a rendering bug, not as structure.</p>
+        </div>
+      </div>
+      <div class="jrk-card__body">
+        <div class="jrk-grid jrk-grid-2">
+          <div class="jrk-card jrk-card--outlined jrk-card--tinted">
+            <div class="jrk-card__body"><p class="gal-label">--outlined --tinted</p></div>
+          </div>
+          <div class="jrk-card jrk-card--outlined">
+            <div class="jrk-card__body"><p class="gal-label">--outlined</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="gal-sec__note" style="margin-top:var(--jrk-space-5)">
+      A joined KPI band is <em>one</em> enclosure, so the band takes the edge and the tiles
+      inside it are divided by neutral hairlines. Split tiles are each their own enclosure,
+      so each takes its own.
+    </p>
+
+    <div class="jrk-stat-row">
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Collected rent</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">$4.21<span class="jrk-stat__unit">M</span></span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Occupancy</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">93.8<span class="jrk-stat__unit">%</span></span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Delinquency rate</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">4.7<span class="jrk-stat__unit">%</span></span>
+      </div>
+    </div>
+
+    <div class="jrk-stat-row jrk-stat-row--split" style="margin-top:var(--jrk-space-4)">
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Collected rent</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">$4.21<span class="jrk-stat__unit">M</span></span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Occupancy</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">93.8<span class="jrk-stat__unit">%</span></span>
+      </div>
+      <div class="jrk-stat jrk-stat--tinted">
+        <span class="jrk-stat__label">Delinquency rate</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">4.7<span class="jrk-stat__unit">%</span></span>
+      </div>
+    </div>
+  </section>
+
   <!-- ============================ table ============================ -->
   <section class="gal-sec">
     <h2>Data table</h2>

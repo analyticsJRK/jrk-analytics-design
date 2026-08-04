@@ -335,9 +335,11 @@ document.getElementById('t-cols').onchange = e =>
   sheet.querySelector('.jrk-sheet__colbar').style.display = e.target.checked ? '' : 'none';
 document.getElementById('t-thresh').onchange = e =>
   sheet.querySelectorAll('.jrk-sheet__cell--critical').forEach(c => c.style.background = e.target.checked ? '' : 'transparent');
-/* Off = the tinted page plane the rest of the app uses. Worth flipping in both
-   themes: the two planes are 1.08:1 apart in dark, so the sheet's hairline is
-   carrying almost the whole edge there either way. */
+/* Off = the page plane the rest of the app uses. This toggle now does NOTHING in
+   light — the page is #ffffff and so is the card, so both positions are the same
+   surface. Flip it in DARK to see it work (#1c1c1e content on a #141416 page),
+   and note that even there the two planes are only 1.08:1 apart, so the sheet's
+   own 2px edge is carrying the boundary in both themes. */
 document.getElementById('t-plane').onchange = e =>
   document.getElementById('sheet-plane').classList.toggle('jrk-content--document', e.target.checked);
 </script>

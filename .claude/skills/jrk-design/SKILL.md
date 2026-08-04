@@ -64,28 +64,53 @@ small multiples, or takes a second encoding. `seriesColor(8)` throws deliberatel
 picking the scales. Two measures of different magnitude become two charts, small
 multiples, or values indexed to a common base.
 
-## The look is Apple
+## Apple underneath, a brand edge on top
 
-macOS/iOS grouped surfaces, Apple system greys, systemIndigo accent, Inter as
-the SF stand-in, macOS-compact density for non-touch 1920x1080.
+Apple system greys, systemIndigo accent, Inter as the SF stand-in, macOS-compact
+density for non-touch 1920x1080 — and, in dark, Apple's grouped surface
+hierarchy. Light no longer uses that hierarchy.
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#f2f2f7` systemGroupedBackground | `#141416` |
+| page plane | `#ffffff` | `#141416` |
 | card | `#ffffff` | `#1c1c1e` |
 | popover / input | `#ffffff` | `#2c2c2e` |
 
-The page is tinted and the **cards are white** — the reverse of a conventional
-dashboard, and the thing that most makes it read as Apple. Cards carry a fill
-*and* a hairline: iOS uses fill alone, but at desktop viewing distance a
-white-on-`#f2f2f7` edge is too faint to hold a dense layout together.
+**The two themes separate their planes by different mechanisms.** Dark is Apple
+grouped: `#1c1c1e` cards lift off a `#141416` page by fill, with the edge
+reinforcing. Light is flat: page and card are both `#ffffff`, a 1.0:1 step, so the
+edge is the *entire* tile boundary. A change that reads correctly in dark can
+therefore be invisible in light — check both, every time.
+
+In light, `surface.subtle` (`#f2f2f7`) is the only tint left. Table headers, inset
+wells and the sheet toolbar carry the recession the page used to share, so
+anything that needs to read as recessed there has to ask for it by name.
+
+**The edge is the one deliberate break from Apple: 2px `#48a9df`, the brand
+line.** `border: var(--jrk-card-edge) solid var(--jrk-border-card)`, identical in
+both themes, on every outermost tile — `.jrk-card`, `.jrk-stat`, `.jrk-stat-row`,
+`.jrk-chart-card`, `.jrk-sheet`. Apple would draw a neutral hairline there; this
+system states the brand on the enclosure instead, and pays for it by keeping
+everything *inside* the tile strictly neutral. Two rules make that hold: **one
+brand edge per enclosure** (a nested card takes `.jrk-card--outlined`), and
+**never on an internal rule** (gridlines, table rows, footers, sheet column and
+total rules, chart axes stay neutral 1px). See `tokens.md` for the measurements
+and for why no gate catches a misuse.
 
 Two consequences that bite:
 - **The card, not the page, is the chart surface.** Marks are validated against
-  `#ffffff` / `#1c1c1e`, never against white or black.
-- **In dark mode the hairline is the elevation cue, not the fill.** The card is
-  only a 1.08:1 fill step off the `#141416` page, so `border.subtle` is what
-  makes a tile read as a tile. Never drop the card hairline in dark.
+  `#ffffff` / `#1c1c1e`. In light those two values now coincide, but it is still
+  the card being measured — do not start measuring against the page.
+- **The edge is the elevation cue in both themes.** Dark has a 1.08:1 fill step
+  under it; light has none. **Never drop the card edge**, and treat
+  `.jrk-card--seamless` as dark-mode-or-nested only — on the light page plane it
+  leaves a card with no boundary whatsoever.
+
+The light page went white *after* the edge got heavier, and that order is the
+justification. A flat white page was ruled out while tiles carried a 1px hairline
+— `.jrk-content--document` existed to do it for one full-bleed report view and
+warned against doing it globally. It is now a no-op in light and still
+load-bearing in dark.
 
 **The dark page is `#141416`, not `#000000`.** iOS grouped dark is true black; on
 a 1920x1080 desktop it halates against near-white text and reads as a void, so

@@ -25,7 +25,11 @@
     <p class="gal-sec__note">
       Dark values are selected for the dark surface, not flipped from light. Body text
       clears 4.5:1 on both the card surface and the page plane — the validator checks
-      both, because a token that passes on white can fail on the canvas behind it.
+      both, because the two are different surfaces in dark. In light they are now the same
+      value: <code class="jrk-mono">surface-canvas</code> and
+      <code class="jrk-mono">surface-default</code> are both <code class="jrk-mono">#ffffff</code>,
+      so a light tile is bounded by <code class="jrk-mono">border-card</code> alone and
+      <code class="jrk-mono">surface-subtle</code> is the only tint left to recess with.
     </p>
     <div class="gal-swatches" id="sw-core"></div>
   </section>
@@ -162,6 +166,9 @@ function render() {
   ]) {
     core.append(swatch(n, contrast(tokenValue(n), bg).toFixed(2) + ':1'));
   }
+  // border-card carries its measurement on the swatch: it is the one color in
+  // the file the validator never sees, so the gallery is where the number shows.
+  core.append(swatch('--jrk-border-card', contrast(tokenValue('--jrk-border-card'), surface()).toFixed(2) + ':1 on card'));
   for (const n of ['--jrk-border-subtle', '--jrk-border-default', '--jrk-border-strong']) {
     core.append(swatch(n));
   }

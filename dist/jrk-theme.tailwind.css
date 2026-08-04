@@ -26,6 +26,7 @@
   --color-ink-link: var(--jrk-text-link);
   --color-ink-on-banner: var(--jrk-text-onBanner);
   --color-ink-on-banner-muted: var(--jrk-text-onBannerMuted);
+  --color-border-card: var(--jrk-border-card);
   --color-border-subtle: var(--jrk-border-subtle);
   --color-border-default: var(--jrk-border-default);
   --color-border-strong: var(--jrk-border-strong);

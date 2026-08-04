@@ -106,6 +106,7 @@ addFlat('topbar', T.size.topbar);
 addFlat('container', T.size.container);
 addFlat('sheet', T.size.sheet);
 add('min-touch', T.size.minTouch);
+add('card-edge', T.size.cardEdge);
 addFlat('duration', T.motion.duration);
 addFlat('ease', T.motion.easing);
 addFlat('z', T.z);

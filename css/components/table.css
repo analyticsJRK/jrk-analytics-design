@@ -4,12 +4,24 @@
    scroll so a wide table never scrolls the page body. Use <th scope="col">,
    and put aria-sort on the sorted header. */
 
+/* A bare table panel on the page IS a tile, so it carries the same brand edge as
+   a card — on a dashboard it sits beside cards and stat tiles, and it was the one
+   container that looked unfinished without it. */
 .jrk-table-wrap {
   overflow: auto;
   max-width: 100%;
   background: var(--jrk-surface-default);
-  border: 1px solid var(--jrk-border-subtle);
+  border: var(--jrk-card-edge) solid var(--jrk-border-card);
   border-radius: var(--jrk-radius-xl);
+}
+
+/* One brand edge per enclosure. A table inside a card — the "show table" view of
+   a chart, most often — is already bounded by that card, and a second blue
+   rectangle just inside the first reads as a rendering bug. Drops to the internal
+   hairline instead. */
+.jrk-card .jrk-table-wrap,
+.jrk-chart-card .jrk-table-wrap {
+  border: 1px solid var(--jrk-border-subtle);
 }
 
 .jrk-table {

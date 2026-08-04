@@ -1,19 +1,26 @@
 /* Card / panel — the container every dashboard tile and chart sits in. */
 
-/* Apple grouped card: white, on the tinted page. iOS would draw no border at
-   all and let the fill do everything; on a 1920x1080 monitor at desktop viewing
-   distance a #ffffff-on-#f2f2f7 edge is too faint to hold a dense layout
-   together, so this takes the macOS treatment instead — fill plus a hairline. */
+/* The card is white in light and #1c1c1e in dark, and the two themes bound it
+   differently. Dark still has the Apple grouped fill step under it. LIGHT HAS
+   NONE — the page is white too, so this border is the entire boundary of the
+   tile and there is no fallback if it is removed. It is drawn as the 2px brand
+   line rather than a neutral hairline, which is what makes a flat white page
+   hold a dense layout at desktop viewing distance. Weight and color both live in
+   tokens: size.cardEdge, color.border.card. */
 .jrk-card {
   display: flex;
   flex-direction: column;
   background: var(--jrk-surface-default);
-  border: 1px solid var(--jrk-border-subtle);
+  border: var(--jrk-card-edge) solid var(--jrk-border-card);
   border-radius: var(--jrk-radius-xl);
 }
 
-/* Truly borderless, for a card sitting alone on the page where the fill is
-   separation enough. */
+/* Truly borderless, for a card whose surroundings already bound it — a card
+   nested in a padded parent, or a dark-mode card leaning on its fill step. In
+   LIGHT there is no fill step left to lean on (page and card are both white), so
+   a seamless card on the page plane has no boundary at all. That is legal only
+   where something else supplies the edge. Keeps the 2px so nothing reflows when a
+   card toggles between this and the default. */
 .jrk-card--seamless {
   border-color: transparent;
 }
@@ -23,8 +30,12 @@
   background: var(--jrk-surface-tinted);
 }
 
-/* Opt back in to a hairline where a card sits ON a tinted surface and the
-   fill alone no longer separates it. */
+/* Neutral edge instead of the brand edge. This modifier used to mean "opt back
+   in to a hairline"; now that the base card carries a 2px brand line, the thing
+   that actually needs an escape hatch is the opposite case — a card nested
+   inside a card, or a card on a tinted plane, where a second blue rectangle
+   inside the first reads as a rendering bug rather than as structure. One brand
+   edge per enclosure. */
 .jrk-card--outlined {
   border-color: var(--jrk-border-default);
 }
@@ -101,8 +112,13 @@
     background-color var(--jrk-transition);
 }
 
+/* Hover raises the edge TO the brand line rather than past it. On a default card
+   that is a no-op and the fill wash carries the state; on --seamless and
+   --outlined the edge appearing is the cue. Deliberately no darker-blue hover
+   step: a second brand value would have to be hand-picked, and the border
+   namespace is outside the validator. */
 .jrk-card--interactive:hover {
-  border-color: var(--jrk-border-strong);
+  border-color: var(--jrk-border-card);
   background: var(--jrk-surface-hover);
 }
 

@@ -59,11 +59,13 @@
      (.jrk-content--document) the light-mode step goes to zero and the sheet
      dissolves entirely. The hairline makes it hold its edge on any plane.
 
-     border.default rather than the card's border.subtle: a card can use the
-     lighter hairline because it ALSO has a fill step under it. This has none on
-     a white plane (1.0:1) and almost none in dark (1.08:1), so the line is the
-     entire edge and subtle would only be 1.26:1 against white. */
-  border: 1px solid var(--jrk-border-default);
+     It is now the same 2px brand edge every other tile carries. That resolves
+     the old worry in this comment — the line was the sheet's entire edge on a
+     white plane, and a 1.26:1 hairline was thin cover for it; 2px of #48a9df is
+     not. The sheet's INTERNAL rules stay neutral 1px: a workbook's column and
+     total rules are structure the reader parses, and running the brand color
+     through them would turn navigation furniture into decoration. */
+  border: var(--jrk-card-edge) solid var(--jrk-border-card);
   border-radius: var(--jrk-radius-xl);
   /* Dense reports want crisp edges, not the app's soft type. */
   font-size: var(--jrk-text-2xs);
@@ -83,7 +85,13 @@
   align-items: center;
   gap: var(--jrk-space-2);
   padding: var(--jrk-space-2) var(--jrk-space-3);
-  background: var(--jrk-surface-canvas);
+  /* subtle, not canvas. The toolbar used to borrow the page tint to sit apart
+     from the grid below it; with a white page in light that borrowed fill went
+     to 1.0:1 and the strip merged into the first data row. surface.subtle is the
+     same class of thing (table headers, inset wells) and steps in both
+     directions — #f2f2f7 recesses off the white sheet in light, #2c2c2e lifts off
+     #1c1c1e in dark, which is how the topbar reads too. */
+  background: var(--jrk-surface-subtle);
   border-bottom: 1px solid var(--jrk-border-default);
 }
 

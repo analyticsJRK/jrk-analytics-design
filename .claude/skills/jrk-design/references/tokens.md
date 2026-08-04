@@ -22,21 +22,33 @@ dark theme a swap rather than a rewrite.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--jrk-surface-canvas` | `#f2f2f7` | `#141416` | page plane, sidebar, topbar — systemGroupedBackground |
+| `--jrk-surface-canvas` | `#ffffff` | `#141416` | page plane, sidebar, topbar |
 | `--jrk-surface-default` | `#ffffff` | `#1c1c1e` | cards, panels, **chart surface** |
 | `--jrk-surface-tinted` | `#eeeefc` | `#25253a` | KPI band, highlighted tiles |
-| `--jrk-surface-subtle` | `#f2f2f7` | `#2c2c2e` | table header, inset wells |
+| `--jrk-surface-subtle` | `#f2f2f7` | `#2c2c2e` | table header, inset wells, sheet toolbar |
 | `--jrk-surface-raised` | `#ffffff` | `#2c2c2e` | popovers, menus, modals, inputs |
 | `--jrk-surface-banner` | `#5856d6` | `#2c2c2e` | sheet title bar |
 | `--jrk-surface-hover` / `-active` / `-disabled` / `-inverse` | | | states |
 
-Apple GROUPED style: the page is tinted and the cards are white — the reverse of
-a conventional dashboard. The card is the surface everything is measured
-against; chrome sits on the canvas so the cards read as the raised thing.
+**The two themes separate their planes differently, and this is the trap in the
+whole file.** Dark is Apple grouped: `#1c1c1e` cards lift off a `#141416` page by
+fill. Light is flat: canvas and default are both `#ffffff`, a 1.0:1 step, so
+`--jrk-border-card` is the only thing making a tile a tile. Chrome (sidebar,
+topbar) shares the canvas, so in light it is divided from the content by its
+hairline alone.
 
-**In dark the fill step barely exists — the hairline is the elevation cue.**
+Three things follow, and none of them are caught by a gate:
+- **`--jrk-surface-subtle` is light's only tint.** If something needs to recess in
+  light, it must name `subtle` — the page will not do it for free.
+- **`.jrk-card--seamless` has no boundary in light.** Dark-mode-or-nested only.
+- **`.jrk-content--document` is a no-op in light**, still load-bearing in dark.
+
+The card is what everything is measured against — in light that value now equals
+the page, but they remain different facts and the card is the one to measure.
+
+**In dark the fill step barely exists — the edge is the elevation cue.**
 `#1c1c1e` on `#141416` is 1.08:1, so a dark card that drops its
-`--jrk-border-subtle` edge stops reading as a card. The canvas is not `#000000`
+`--jrk-border-card` edge stops reading as a card. The canvas is not `#000000`
 on purpose (halation against near-white text at 1920x1080); `--jrk-text-primary`
 in dark is `#ebebf0` rather than `#ffffff` for the same reason. Both are noted on
 the tokens in `tokens.json` — do not restore either.
@@ -60,14 +72,35 @@ fail on the plane behind it.
 
 ## Borders
 
+`--jrk-border-card` (**the outer edge of a card-like tile — 2px, brand blue**) ·
 `--jrk-border-subtle` (gridlines, table rules) · `--jrk-border-default` (inputs,
-card footers) · `--jrk-border-strong` (axis, baselines, form controls) ·
-`--jrk-border-accent` (active tab, selected input).
+card footers, the neutral-edge escape hatch) · `--jrk-border-strong` (axis,
+baselines, form controls) · `--jrk-border-accent` (active tab, selected input).
 
-Apple separators. Cards carry a fill *and* a `border-subtle` hairline — iOS uses
-fill alone, but at desktop viewing distance a white-on-`#f2f2f7` edge is too
-faint to hold a dense layout together, so this is the macOS treatment. Form
-controls use `border-strong` plus a contrasting fill.
+Apple separators for everything internal; a brand edge on the outside. In dark a
+card has a fill step *and* an edge; in light it has only the edge, which is why
+the edge is unconditional. That edge is `2px solid var(--jrk-border-card)`
+(`#48a9df`, both modes), drawn with
+`var(--jrk-card-edge)` for the weight, and every outermost tile uses the same
+pair: `.jrk-card`, `.jrk-stat`, `.jrk-stat-row`, `.jrk-chart-card`, `.jrk-sheet`.
+Form controls use `border-strong` plus a contrasting fill.
+
+Two rules keep the brand edge from turning into noise:
+
+- **One brand edge per enclosure.** A card inside a card, or a tile inside
+  `.jrk-stat-row`, takes `--jrk-border-default` (`.jrk-card--outlined`) or no
+  edge at all. Nested blue rectangles read as a rendering bug.
+- **Never on an internal rule.** Gridlines, table rows, card footers, sheet
+  column and total rules, chart axes — all stay neutral 1px. The blue line means
+  "this is one tile"; if it also meant "this is a row boundary" it would mean
+  nothing.
+
+`border.card` is the one color in `tokens.json` that was specified rather than
+stepped, and **no gate measures it** — the validator does not touch the border
+namespace. Light: 2.62:1 on the white card, 2.35:1 against the page. Dark: 6.5:1
+and 7.0:1. The light figures are under WCAG 1.4.11's 3:1, legal only because the
+edge is decorative separation — the tile is also carried by its fill step, radius
+and padding. Do not make it a signifier, and do not put state on it.
 
 ## Accent (systemIndigo)
 

@@ -61,19 +61,47 @@ themes, real surfaces. If a color fails, re-step it; do not lower the gate. The
 full run needs the `dataviz` skill's validator:
 `JRK_DATAVIZ=/path/to/skills/dataviz npm run validate`.
 
-**The look is Apple.** macOS/iOS grouped surfaces. Light: `#f2f2f7` page,
-**white** cards. Dark: `#141416` page, `#1c1c1e` cards. The page is tinted and
-the cards are white — the reverse of a conventional dashboard, and not a bug.
-Because the card is the chart surface, marks are validated against
-`#ffffff` / `#1c1c1e`, never the page.
+**The two themes separate their planes by different mechanisms, and that is the
+single most important thing to know here.** Light: `#ffffff` page, `#ffffff`
+cards — **no fill step at all**, so the 2px brand edge below is the entire tile
+boundary. Dark: `#141416` page, `#1c1c1e` cards — the Apple grouped fill
+hierarchy, plus the same edge. Never assume a change that reads correctly in one
+theme reads correctly in the other; the light theme has no fill hierarchy left to
+lean on. Because the card is the chart surface, marks are validated against
+`#ffffff` / `#1c1c1e` — in light that now equals the page value, but it is still
+the card that is being measured.
+
+**In light, `surface.subtle` (`#f2f2f7`) is the only remaining tint.** Table
+headers, inset wells, and the sheet toolbar carry the recession the page used to
+share. Anything that needs to read as recessed in light must ask for it.
+
+**The tile edge is the brand line, and it is the one break from Apple.**
+`border: var(--jrk-card-edge) solid var(--jrk-border-card)` — 2px `#48a9df`, same
+value in both themes — on every OUTERMOST tile: `.jrk-card`, `.jrk-stat`,
+`.jrk-stat-row`, `.jrk-chart-card`, `.jrk-sheet`. It buys that loudness by
+keeping the inside of the tile strictly neutral, so two rules are load-bearing:
+**one brand edge per enclosure** (a nested card or a tile inside `.jrk-stat-row`
+takes `border.default` via `.jrk-card--outlined`, or no edge), and **never on an
+internal rule** (gridlines, table rows, card footers, sheet column/total rules,
+chart axes stay neutral 1px). `border.card` is the one specified-not-stepped
+color in the file and the validator does not measure the border namespace, so
+nothing will catch a misuse — the numbers live on the token.
 
 **The dark page is not `#000000`, and that is deliberate.** iOS grouped dark is
 true black; at 1920x1080 it halates against near-white text and reads as a void.
 The page follows macOS instead. Two consequences: the card is only a 1.08:1 fill
-step off the page, so **`border.subtle` carries the card edge in dark** — never
-drop the hairline there; and `text.primary` in dark is `#ebebf0`, not `#ffffff`,
-because pure white on a near-black page is the glare. Both deviations are noted
-on their tokens.
+step off the page, so the edge does most of the tile-boundary work in dark and
+all of it in light — **never drop `border.card` in either theme**; and
+`text.primary` in dark is `#ebebf0`, not `#ffffff`, because pure white on a
+near-black page is the glare. Both deviations are noted on their tokens.
+
+**The light page went white AFTER the tile edge got heavier, and that order is
+the whole justification.** A flat white page was explicitly ruled out while tiles
+carried a 1px hairline — `.jrk-content--document` in `shell.css` existed to do it
+for one full-bleed view and warned against doing it globally. The 2px brand edge
+is what made it survivable. Two follow-on facts: `.jrk-content--document` is now
+a **no-op in light** (kept because it is still load-bearing in dark), and
+`.jrk-card--seamless` has nothing to separate it in light at all.
 
 **Adopt Apple values only where they pass.** Apple's palette is not
 accessibility-clean — `systemGray` is 2.92:1 as body text, `systemIndigo` is

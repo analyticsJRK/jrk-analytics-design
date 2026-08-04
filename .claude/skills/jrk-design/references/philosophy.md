@@ -142,7 +142,10 @@ agree here: both want ink removed until only meaning is left.
 
 - **Ink must be data or structure. Never decoration.** Hairline solid gridlines,
   no chart borders, no drop shadows doing a hairline's job, 2px surface gaps
-  instead of strokes between marks.
+  instead of strokes between marks. The 2px brand edge on a tile passes this test
+  on the *structure* clause and only because of it: in light it is the sole
+  boundary of the tile. Put the same line on an internal rule and it is
+  decoration, which is why that is banned.
 - **Density is a virtue, and height is the binding constraint.** 1920x1080,
   non-touch, 24/28/32 controls. Tufte's density argument and a 1080px viewport
   point the same way: earn every vertical pixel. **Resolve overflow by
@@ -227,6 +230,9 @@ decisions most likely to be re-litigated, so they are written down.
 | "Expert power" vs "first-timer simplicity" | Two products, or one dumbed down | One spine, two speeds. Accelerators layer over structure; they never replace it. |
 | Kelley process vs the other nine | Treat as a design rule | It is a process. It belongs in how the team works, not in the library. |
 | "Dashed means reference value" vs colorblind series separation | Pick one — either dashes mean threshold or they mean series | Both, scoped. Solid is the default and the dash keeps meaning *reference*. Under an explicit `data-encoding="redundant"` the author trades that signifier for an identity channel, and the threshold still reads by colour and weight. The alternative was worse: hue alone leaves `(n, n+4)` pairs at ΔE 0.8, and a reader who cannot tell two series apart has lost more than a signifier. |
+| Ive/Tufte restraint vs a 2px brand edge on every tile | It is decoration, so strip it | It is **structure**, and only because the fill hierarchy it replaced is gone. Light's page and card are both `#ffffff`, so nothing else bounds a tile; the ink was moved, not added. The test that keeps it honest is placement, not weight: on an enclosure it is structure, on an internal rule (gridline, table row, footer, axis) it would be decoration, and there it is banned. Two supporting limits: one brand edge per enclosure, and no state ever rides on it. |
+| A brand color that the gate never measures | Treat it like any other token — the validator will catch it | It will not. The validator has no border checks at all, so `border.card` is the one color in the file whose numbers are recorded by hand: 2.62:1 on the light card, 2.35:1 vs the light page, 6.5:1 and 7.0:1 in dark. Both light figures are under WCAG 1.4.11's 3:1 and are legal **only** as decorative separation. The moment anything depends on seeing that line — a state, a selection, a validity signal — the relief no longer applies and it needs a value that measures. |
+| Apple grouped surfaces vs a flat white light page | One of the two themes is wrong | Neither. The themes deliberately use **different mechanisms**: dark keeps Apple's fill hierarchy, light has none and leans entirely on the edge. This is the most expensive decision in the file to forget, because a change that reads correctly in dark can be invisible in light. It also cost two documented capabilities: `.jrk-card--seamless` has no boundary in light, and `.jrk-content--document` is a no-op there. The order mattered — the edge got heavier *first*, and a flat plane under a 1px hairline was correctly rejected before that. |
 | "Add a colorblind palette" | Ship a second palette behind a toggle | There is no second palette to ship. The default **is** the CVD-derived one, and no eight hues in sRGB clear the all-pairs floor under three dichromacies — so a swap cannot fix what breaks. The fix is a second *channel* (dash, shape), not a second palette, plus the cap of 3 for colour-only marks. A toggle would also fork the token source and require the reader to self-identify. |
 
 ---

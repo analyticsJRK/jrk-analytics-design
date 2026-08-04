@@ -146,25 +146,33 @@ grid of rules is most of what makes a spreadsheet feel like one.
 ## The plane a report sits on
 
 `.jrk-content--document` gives the content plane the **card** fill instead of
-the page fill — white in light, `#1c1c1e` in dark. Use it for a full-bleed
-report view.
+the page fill — `#1c1c1e` in dark, and in light **nothing, because the page is
+already white**. It is a no-op in light now. Keep using it for a full-bleed
+report view: it still does its job in dark, and it keeps the report plane pinned
+to the card rather than to the page, so it survives the page moving again.
 
-It is a departure from the grouped look, and it is scoped to the view rather
-than applied to `surface.canvas`, because the tinted plane exists to separate a
-grid of cards. A report is *one full-width object*, so there is no grid and the
-plane is doing no work; the white then reads as paper. **Do not use it on a
-dashboard** — with tiles on it the cards lose their edge and the hierarchy goes
-flat.
+The history is worth keeping, because it is the argument against reaching for a
+flat plane casually. This modifier was scoped to one view rather than applied to
+`surface.canvas` precisely because the tinted page existed to separate a grid of
+cards, and a report is *one full-width object* with no grid to separate — so the
+plane was doing no work there and the white read as paper. On a dashboard the
+same move would have flattened the hierarchy. The page went white globally anyway,
+and it works **only** because the tile edge became a 2px brand line first. Flat
+plane and heavy edge are a package; do not adopt one without the other.
 
 It is not "white in both themes". Dark ink on a forced-white surface is 1.19:1;
 a genuinely paper-white report would have to light-lock its entire ink set, not
 just its background. That is a different, larger change.
 
-Anything on this plane must carry its own hairline, because the fill step that
-normally separates it is gone. `.jrk-sheet` uses `border.default` rather than
-the card's `border.subtle` for exactly this: on a white plane the step is 1.0:1
-and in dark it is 1.08:1, so the line is the whole edge, and `subtle` would be
-only 1.26:1 against white.
+Anything on this plane must carry its own edge, because the fill step that
+normally separates it is gone. `.jrk-sheet` takes the same 2px `border.card`
+brand edge every other tile carries, which settles the old concern here: on a
+white plane the fill step is 1.0:1 and in dark it is 1.08:1, so the line is the
+whole edge — and a 1.26:1 hairline was thin cover for that job where 2px of
+`#48a9df` is not. The sheet's **internal** rules stay neutral 1px
+(`border.subtle` / `border.default` / `border.strong`): column, group and total
+rules are structure the reader parses, and running the brand color through them
+would turn navigation furniture into decoration.
 
 ## Frozen panes
 
