@@ -37,3 +37,8 @@
 @import url('./components/shell.css');
 @import url('./components/feedback.css');
 @import url('./components/chart.css');
+
+/* LAST, and it must stay last — the single home for the "one brand edge per
+   enclosure" rule, which resolves the edge treatment of a tile nested inside
+   another tile. */
+@import url('./components/nesting.css');

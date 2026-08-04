@@ -15,14 +15,8 @@
   border-radius: var(--jrk-radius-xl);
 }
 
-/* One brand edge per enclosure. A table inside a card — the "show table" view of
-   a chart, most often — is already bounded by that card, and a second blue
-   rectangle just inside the first reads as a rendering bug. Drops to the internal
-   hairline instead. */
-.jrk-card .jrk-table-wrap,
-.jrk-chart-card .jrk-table-wrap {
-  border: 1px solid var(--jrk-border-subtle);
-}
+/* A table nested inside a card drops to a neutral hairline — see
+   css/components/nesting.css, which owns that rule for every tile. */
 
 .jrk-table {
   width: 100%;

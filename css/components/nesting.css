@@ -1,0 +1,71 @@
+/* One brand edge per enclosure.
+   ==============================
+
+   The 2px border.card edge marks the OUTERMOST tile on a plane. A tile nested
+   inside another tile is already bounded by its parent, so a second brand
+   rectangle just inside the first reads as a rendering bug rather than as
+   structure — a Stat inside a Card, the "show table" view inside a ChartCard, a
+   KPI band inside a report card. Nested tiles take a 1px neutral edge instead.
+
+   This is the single home for that rule, and it is imported LAST in
+   css/index.css on purpose. Every selector here is a descendant pair, so it
+   out-specifies the component's own `border` shorthand (0-1-0) and does not
+   depend on file order — except against the other 0-2-0 nesting rules the
+   component files carry for their own internals (`.jrk-stat-row > .jrk-stat`,
+   `.jrk-stat-row--split > .jrk-stat`), which is exactly why those two cases are
+   spelled out below at a higher specificity rather than left to whichever file
+   happened to load later.
+
+   Only `border-width` and `border-color` are set. Never the shorthand: the
+   component owns its radius and its edge geometry, and this file is only
+   answering "which of the two edge treatments applies here".
+
+   `:is()` is deliberately not used. The selector lists are longer without it,
+   but the bundle that ships to the Design System pane goes through a CSS
+   flattener and a scraper, and a verbose selector cannot be misparsed. */
+
+.jrk-card .jrk-card,
+.jrk-card .jrk-chart-card,
+.jrk-card .jrk-stat,
+.jrk-card .jrk-stat-row,
+.jrk-card .jrk-table-wrap,
+.jrk-card .jrk-sheet,
+.jrk-chart-card .jrk-card,
+.jrk-chart-card .jrk-stat,
+.jrk-chart-card .jrk-stat-row,
+.jrk-chart-card .jrk-table-wrap,
+/* 0-3-0. stat.css gives split tiles their own brand edge at 0-2-0 from a file
+   that loads later, so the nested case has to out-specify it, not follow it. */
+.jrk-card .jrk-stat-row--split > .jrk-stat,
+.jrk-chart-card .jrk-stat-row--split > .jrk-stat {
+  border-width: 1px;
+  border-color: var(--jrk-border-default);
+}
+
+/* A JOINED band is one enclosure whose tiles are divided by internal hairlines,
+   so its tiles carry no edge at any depth. 0-4-0 with the :not(), which keeps
+   this from also catching the split tiles handled above — a split row matches
+   `.jrk-stat-row` too, so without the exclusion this rule would erase the edge
+   the block above just gave them. */
+.jrk-card .jrk-stat-row:not(.jrk-stat-row--split) > .jrk-stat,
+.jrk-chart-card .jrk-stat-row:not(.jrk-stat-row--split) > .jrk-stat {
+  border-width: 0;
+}
+
+/* Explicit modifiers still win over the nesting default. A card nested inside a
+   card is the most common place --seamless and --flush are actually correct, so
+   the neutral edge above must not out-specify them. */
+.jrk-card .jrk-card--seamless,
+.jrk-chart-card .jrk-card--seamless {
+  border-color: transparent;
+}
+
+.jrk-card .jrk-card--flush,
+.jrk-chart-card .jrk-card--flush {
+  border-width: 0;
+}
+
+/* And --outlined stays meaningful at depth: it is already the neutral edge, so
+   this is a no-op by value and a documented one by intent — the modifier is how
+   an author asks for the neutral edge at the TOP level, and nothing here should
+   make it look like it stopped working when nested. */
