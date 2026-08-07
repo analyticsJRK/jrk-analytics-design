@@ -16,7 +16,9 @@
     "BarList": { "cardMode": "column" },
     "Tag": { "cardMode": "column" },
     "Card": { "cardMode": "column" },
-    "ChartCard": { "cardMode": "column" }
+    "ChartCard": { "cardMode": "column" },
+    "CellBarSigned": { "cardMode": "column" },
+    "HeatLegend": { "cardMode": "column" }
   },
   "runtimeFontPrefixes": ["SF Pro", "SF Mono"],
   "extraFonts": [
