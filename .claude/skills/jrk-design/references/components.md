@@ -168,10 +168,14 @@ For workbook-style financial reports use the **sheet** layer instead — see
   - It is a **disclosure, not a `role="menu"`**. These are links to places; a
     labelled group of links that Tab walks and Escape dismisses is both less code
     and more correct than application-mode menu semantics
-  - The panel is `position: fixed`, and has to be — `.jrk-sidebar__nav` is
-    `overflow-y: auto` and CSS forces the other axis into a scroll container too,
-    so an in-flow panel gets sliced off at the rail's edge. Fixed escapes the clip
-    without a portal, which keeps it working in the Jinja apps
+  - The panel is `position: fixed`, and the clip it escapes is real —
+    `.jrk-sidebar__nav` is `overflow-y: auto` and CSS forces the other axis into a
+    scroll container too, so an in-flow panel gets sliced off at the rail's edge.
+    **Fixed-over-portal was chosen to keep it working in the Jinja apps, which are
+    no longer consumers.** The clip still has to be escaped, but a React portal is
+    now available and would avoid the measuring dance below and the
+    `[GRID_OVERFLOW]` warning the design-sync validator raises on this component.
+    Revisit before adding a second flyout
   - Therefore both offsets are viewport coordinates: **measure the rail** and
     write `--jrk-nav-flyout-top` / `--jrk-nav-flyout-inset`. Reading the width off
     a token assumes the rail starts at viewport x=0 — false the moment the shell

@@ -255,7 +255,10 @@
  * paired with a non-visible one computes to `auto`. So ANY descendant of the nav
  * is clipped horizontally, and an absolutely-positioned panel would be sliced
  * off at the rail's edge. Fixed escapes the clip without a portal, which keeps
- * this working in the Jinja apps that have no React tree to portal into.
+ * this working in the Jinja apps that have no React tree to portal into — and
+ * THOSE APPS ARE NO LONGER CONSUMERS, so that half of the reasoning is dead. The
+ * clip is still real and still has to be escaped, but a portal is available now
+ * and would drop the measuring below. See references/components.md.
  *
  * The cost is that fixed coordinates are VIEWPORT coordinates, so neither offset
  * can come from CSS alone — the controller measures the rail and writes

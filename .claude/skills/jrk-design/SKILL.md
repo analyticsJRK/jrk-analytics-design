@@ -9,15 +9,20 @@ description: >
 when_to_use: >
   Triggers: "build a dashboard", "add a chart", "style this table", "make a
   report", "pick a color", "what token", "AM report", "restyle", "dark mode",
-  anything touching a .tsx/.css file or a Jinja template in a JRK app.
+  anything touching a .tsx or .css file in a JRK app.
 paths: "**/*.tsx,**/*.jsx,**/*.css,**/templates/**/*.html,**/static/**/*.html"
 ---
 
 # JRK Analytics Design
 
-Tokens, plain-CSS components, and React wrappers over the same class names. One
-token layer serves both org stacks: `jrk_agents` (Next.js / Tailwind v4) and
-`jrk-audit-platform` / `JRK_FORMS` (Python + Jinja).
+Tokens, plain-CSS components, and React wrappers over the same class names.
+
+**One consumer: `jrk-analytics-web-app/apps/portal`** (Next.js 15 / React 19 /
+Tailwind v4), which VENDORS this library — a change here is not live there until
+someone re-runs `npm run sync:design`. `jrk_agents`, `jrk-audit-platform` and
+`JRK_FORMS` are not consumers; a rule justified by "the Jinja apps" is justified
+by nothing. The plain-CSS layer is still the primary interface, because the
+portal imports the component files directly and uses the React wrappers on top.
 
 Library root: `jrk-analytics-design/`. If it is not in the session, ask before
 guessing class names — this skill lists the contract, not every modifier.

@@ -71,7 +71,6 @@
   --color-tint-6: var(--jrk-chart-tint-6);
   --color-tint-7: var(--jrk-chart-tint-7);
   --color-tint-8: var(--jrk-chart-tint-8);
-  --text-$comment: Apple's type ladder adapted for a dense desktop dashboard. md (14px) is body.;
   --text-2xs: 0.6875rem;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;

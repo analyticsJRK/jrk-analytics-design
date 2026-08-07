@@ -164,7 +164,12 @@ for (const [s, parts] of Object.entries(T.color.status)) {
 }
 T.chart.categorical.slots.forEach((s) => twMap(`color-chart-${s.slot}`, `chart-${s.slot}`));
 T.chart.tint.slots.forEach((s) => twMap(`color-tint-${s.slot}`, `chart-tint-${s.slot}`));
-for (const [k, v] of Object.entries(T.font.size)) tw.push(`  --text-${kebab(k)}: ${v};`);
+// The isMeta guard here is not optional and its absence failed LOUDLY, one
+// consumer downstream: font.size carries a $comment, so this emitted
+// `--text-$comment: Apple's type ladder …;` into the Tailwind theme, and the
+// apostrophe made Tailwind's parser die with "Unterminated string" — the whole
+// app build, not just this rule. Every sibling line already had the guard.
+for (const [k, v] of Object.entries(T.font.size)) if (!isMeta(k)) tw.push(`  --text-${kebab(k)}: ${v};`);
 for (const [k, v] of Object.entries(T.space)) if (!isMeta(k)) tw.push(`  --spacing-${kebab(k)}: ${v};`);
 for (const [k, v] of Object.entries(T.radius)) if (!isMeta(k)) tw.push(`  --radius-${kebab(k)}: ${v};`);
 tw.push(`  --font-sans: ${T.font.family.sans};`);

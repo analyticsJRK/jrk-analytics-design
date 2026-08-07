@@ -2,7 +2,9 @@
 
 For dense financial reports that mirror a workbook: a year of months across, many
 years down, totals and growth on the right, a chart riding alongside. The AM
-Report (`jrk-audit-platform/app/am_report.py`) is the reference case.
+Report was the reference case, but it lived in `jrk-audit-platform`, which is no
+longer a consumer — treat the shape as described here and in `preview/report.html`
+rather than going looking for that file.
 
 Use `.jrk-table` for ordinary tables. Use `.jrk-sheet` when the output is a
 workbook.

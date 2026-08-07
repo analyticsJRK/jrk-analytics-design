@@ -1,9 +1,24 @@
 # CLAUDE.md — jrk-analytics-design
 
 Design library for JRK analytics dashboards. One token layer, a plain-CSS
-component library, and React wrappers over the same class names. Consumed by
-`jrk_agents` (Next.js / Tailwind v4) and by `jrk-audit-platform` / `JRK_FORMS`
-(Python + Jinja).
+component library, and React wrappers over the same class names.
+
+**There is exactly one consumer: `jrk-analytics-web-app`** — specifically
+`apps/portal`, Next.js 15 / React 19 / Tailwind v4. It **vendors** this library:
+`scripts/sync-design.mjs` there copies `package.json`, `LICENSE`, `dist`, `css`,
+`react/src`, `tokens` into `vendor/jrk-analytics-design`, wiping the directory
+first. So a change here is not live in the app until someone re-runs
+`npm run sync:design`, and anything edited in that vendored copy is destroyed on
+the next sync. Commit here before syncing — the script records the source SHA and
+warns when the tree is dirty.
+
+**`jrk_agents`, `jrk-audit-platform` and `JRK_FORMS` are NOT consumers**, and the
+list that used to say so cost real design decisions. `jrk_agents` hand-rolls its
+CSS and never wired the library at all; the two Jinja apps are out by decision.
+Nothing here needs to run without a Node toolchain, work behind a `<link>` tag,
+or avoid a React portal. If you find a constraint justified by "the Jinja apps",
+it is justified by nothing — but check what else leans on it before removing it,
+because some of those choices are still right for other reasons.
 
 **This file loads every turn, so it holds only what you cannot derive from the
 code.** Detail lives in the `jrk-design` skill, which loads on demand.
@@ -28,7 +43,10 @@ That is the gate. It is fast; run it after every change.
 | per-component docs and demos for the Design System pane | `.design-sync/{docs,previews}/` | `.design-sync/.cache/` |
 | the local zero-build gallery | `preview/*.html` | — |
 
-`dist/` is generated **and committed** — the Jinja apps have no Node toolchain.
+`dist/` is generated **and committed**. The reason changed but the requirement did
+not: it used to be that the Jinja apps had no Node toolchain; now it is that the
+web app vendors `dist/` as a build input and never runs this library's build. A
+stale committed `dist/` ships stale tokens to production.
 `.ds-sync/`, `ds-bundle/`, `guides/` are sync tooling and build output: all
 gitignored, none of it authored here, do not read them for reference.
 
