@@ -145,34 +145,39 @@ grid of rules is most of what makes a spreadsheet feel like one.
 
 ## The plane a report sits on
 
-`.jrk-content--document` gives the content plane the **card** fill instead of
-the page fill — `#1c1c1e` in dark, and in light **nothing, because the page is
-already white**. It is a no-op in light now. Keep using it for a full-bleed
-report view: it still does its job in dark, and it keeps the report plane pinned
-to the card rather than to the page, so it survives the page moving again.
+`.jrk-content--document` gives the content plane the **card** fill instead of the
+page fill — `#ffffff` on an `#f2f2f7` page in light, `#232326` on `#141416` in
+dark. It does real work in **both** themes again; for one period it was a no-op in
+light, because the page had been flattened to `#ffffff` and there was nothing left
+for it to change.
 
-The history is worth keeping, because it is the argument against reaching for a
-flat plane casually. This modifier was scoped to one view rather than applied to
-`surface.canvas` precisely because the tinted page existed to separate a grid of
-cards, and a report is *one full-width object* with no grid to separate — so the
-plane was doing no work there and the white read as paper. On a dashboard the
-same move would have flattened the hierarchy. The page went white globally anyway,
-and it works **only** because the tile edge became a 2px brand line first. Flat
-plane and heavy edge are a package; do not adopt one without the other.
+The history is worth keeping, because it is a full round trip and the argument
+against reaching for a flat plane casually. This modifier was scoped to one view
+rather than applied to `surface.canvas` precisely because the tinted page existed
+to separate a grid of cards, and a report is *one full-width object* with no grid
+to separate — so the plane was doing no work there and the white read as paper. On
+a dashboard the same move would flatten the hierarchy. The page then went white
+globally anyway, survivably, but **only** because the tile edge became a 2px brand
+line in the same change. Both halves have since been reverted together — which is
+the rule the round trip establishes: flat plane and heavy edge were each other's
+justification, so neither could be undone alone.
 
 It is not "white in both themes". Dark ink on a forced-white surface is 1.19:1;
 a genuinely paper-white report would have to light-lock its entire ink set, not
 just its background. That is a different, larger change.
 
 Anything on this plane must carry its own edge, because the fill step that
-normally separates it is gone. `.jrk-sheet` takes the same 2px `border.card`
-brand edge every other tile carries, which settles the old concern here: on a
-white plane the fill step is 1.0:1 and in dark it is 1.08:1, so the line is the
-whole edge — and a 1.26:1 hairline was thin cover for that job where 2px of
-`#48a9df` is not. The sheet's **internal** rules stay neutral 1px
-(`border.subtle` / `border.default` / `border.strong`): column, group and total
-rules are structure the reader parses, and running the brand color through them
-would turn navigation furniture into decoration.
+normally separates a tile is gone — the plane IS the card fill, so a tile's own
+`surface.default` matches it at 1.0:1. **`.jrk-sheet` is the one component in the
+library that draws a real hairline by default** (`1px solid border.default`) for
+exactly this reason, and it is the exception to "a tile has no border". Anything
+else placed here needs `.jrk-card--outlined`.
+
+The sheet's **internal** rules use the same neutral namespace (`border.subtle` /
+`border.default` / `border.strong`): column, group and total rules are structure
+the reader parses. One hairline value doing both the frame and the internals is
+now a feature rather than a compromise — nothing in a dense report is louder than
+the data, which is what the removed brand edge could not promise.
 
 ## Frozen panes
 

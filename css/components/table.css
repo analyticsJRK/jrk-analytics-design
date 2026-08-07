@@ -4,14 +4,14 @@
    scroll so a wide table never scrolls the page body. Use <th scope="col">,
    and put aria-sort on the sorted header. */
 
-/* A bare table panel on the page IS a tile, so it carries the same brand edge as
-   a card — on a dashboard it sits beside cards and stat tiles, and it was the one
-   container that looked unfinished without it. */
+/* A bare table panel on the page IS a tile, so it is bounded the same way a card
+   is — by its fill step off the page. The 1px transparent border is reserved for
+   the nesting hairline; see card.css. */
 .jrk-table-wrap {
   overflow: auto;
   max-width: 100%;
   background: var(--jrk-surface-default);
-  border: var(--jrk-card-edge) solid var(--jrk-border-card);
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-xl);
 }
 

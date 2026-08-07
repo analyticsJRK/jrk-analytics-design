@@ -69,7 +69,9 @@
           <select class="jrk-select" id="f-prop">
             <option>All properties</option>
             <option>Bellevue Commons</option>
-            <option>Harbor Point</option>
+            <option selected>Harbor Point</option>
+            <option>Sutter Yards</option>
+            <option disabled>Westgate (no data)</option>
           </select>
         </div>
 
@@ -219,39 +221,43 @@
 
   <!-- ============================ surfaces ============================ -->
   <section class="gal-sec">
-    <h2>Surfaces — the tile edge</h2>
+    <h2>Surfaces — the tile boundary</h2>
     <p class="gal-sec__note">
-      Every outermost tile carries the same edge: <code class="jrk-mono">2px solid
-      var(--jrk-border-card)</code>, <code class="jrk-mono">#48a9df</code> in both themes.
-      Two rules keep it from becoming noise — <strong>one brand edge per enclosure</strong>,
-      and <strong>never on an internal rule</strong>. The two themes lean on it differently:
-      in <strong>light</strong> the page and the card are both
-      <code class="jrk-mono">#ffffff</code>, so the edge is the <em>entire</em> tile boundary;
-      in <strong>dark</strong> it reinforces a real fill step
-      (<code class="jrk-mono">#1c1c1e</code> on <code class="jrk-mono">#141416</code>). Being one
-      value in both, it measures quieter in light (2.62:1 on the card) than in dark (6.5:1) —
-      which is the wrong way round for the theme that depends on it more.
+      A tile has <strong>no border</strong>. It is bounded by its <strong>fill step off the
+      page</strong>, and both themes now use the same Apple grouped mechanism:
+      <code class="jrk-mono">#ffffff</code> on <code class="jrk-mono">#f2f2f7</code> in light
+      (1.12:1), <code class="jrk-mono">#232326</code> on <code class="jrk-mono">#141416</code>
+      in dark (1.17:1). That symmetry is the point — for one period light was a flat
+      <code class="jrk-mono">#ffffff</code> page bounded by a 2px brand edge, so a change that
+      read correctly in dark could be invisible in light.
+    </p>
+    <p class="gal-sec__note">
+      Tiles still declare <code class="jrk-mono">border: 1px solid transparent</code>, never
+      <code class="jrk-mono">border: 0</code>: the reserved width means an edge appearing
+      changes only a colour and never reflows, and <code class="jrk-mono">border: 0</code> sets
+      <code class="jrk-mono">border-style: none</code>, after which
+      <code class="jrk-mono">border-color</code> paints nothing at all.
     </p>
 
     <div class="jrk-grid jrk-grid-3">
       <div class="jrk-card">
         <div class="jrk-card__body">
           <p class="gal-label">default</p>
-          <p class="jrk-card__subtitle">Card fill, 2px brand edge. What every tile looks like.</p>
+          <p class="jrk-card__subtitle">Card fill, no border. The step to the page behind it is the whole boundary.</p>
         </div>
       </div>
 
       <div class="jrk-card jrk-card--interactive">
         <div class="jrk-card__body">
           <p class="gal-label">--interactive</p>
-          <p class="jrk-card__subtitle">Hover washes the fill. The edge is already the brand line, so it has nowhere louder to go.</p>
+          <p class="jrk-card__subtitle">Hover lifts it: a shadow (which carries light) <em>and</em> a fill lift (which carries dark, where a black shadow is invisible). Neither channel works in both themes.</p>
         </div>
       </div>
 
       <div class="jrk-card jrk-card--seamless">
         <div class="jrk-card__body">
           <p class="gal-label">--seamless</p>
-          <p class="jrk-card__subtitle">Transparent edge, same 2px, so nothing reflows when a card toggles between the two.</p>
+          <p class="jrk-card__subtitle">A no-op at the top level now — and the only way to suppress the hairline a nested tile is given.</p>
         </div>
       </div>
     </div>
@@ -259,8 +265,8 @@
     <div class="jrk-card" style="margin-top:var(--jrk-space-4)">
       <div class="jrk-card__header">
         <div>
-          <h3 class="jrk-card__title">One brand edge per enclosure</h3>
-          <p class="jrk-card__subtitle">Panels nested in this card take <code class="jrk-mono">--outlined</code> — a neutral edge. A second blue rectangle just inside the first reads as a rendering bug, not as structure.</p>
+          <h3 class="jrk-card__title">A nested tile draws the edge its fill step cannot</h3>
+          <p class="jrk-card__subtitle">A fill step only works once. Panels nested in this card sit on the <em>card</em> plane, where their own fill matches what they sit on (1.0:1), so <code class="jrk-mono">nesting.css</code> gives them a 1px neutral hairline automatically — <code class="jrk-mono">--outlined</code> asks for the same thing at the top level.</p>
         </div>
       </div>
       <div class="jrk-card__body">
@@ -276,9 +282,9 @@
     </div>
 
     <p class="gal-sec__note" style="margin-top:var(--jrk-space-5)">
-      A joined KPI band is <em>one</em> enclosure, so the band takes the edge and the tiles
-      inside it are divided by neutral hairlines. Split tiles are each their own enclosure,
-      so each takes its own.
+      A joined KPI band is <em>one</em> enclosure, so the band takes the fill step and the
+      tiles inside it are divided by neutral hairlines. Split tiles each sit directly on the
+      page, so each is bounded by its own step.
     </p>
 
     <div class="jrk-stat-row">

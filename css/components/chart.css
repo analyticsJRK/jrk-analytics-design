@@ -592,11 +592,12 @@ button.jrk-legend__item:hover {
   display: flex;
   flex-direction: column;
   background: var(--jrk-surface-default);
-  /* Card edge, same tokens as .jrk-card — this is a card that happens to hold a
-     chart. The 2px edge stays clear of the plot: chart chrome (axis, gridlines)
-     is border.strong / chart.grid and never border.card, so the tile boundary
-     and the data's own rules cannot be confused. */
-  border: var(--jrk-card-edge) solid var(--jrk-border-card);
+  /* Same treatment as .jrk-card — this is a card that happens to hold a chart, so
+     the fill step bounds it and the 1px transparent border is reserved for the
+     nesting hairline. Chart chrome (axis, gridlines) is border.strong /
+     chart.grid, so the tile boundary and the data's own rules stay distinct
+     regardless of what the tile edge is doing. */
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-xl);
 }
 

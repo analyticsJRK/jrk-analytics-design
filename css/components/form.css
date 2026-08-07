@@ -201,6 +201,144 @@
   }
 }
 
+/* ---------- the open list ----------
+
+   Everything above styles the CLOSED control. The open list of a native
+   <select> is drawn by the browser, not by CSS, so for most of this library's
+   life it has been the one surface the design system could not reach: a
+   full-bleed OS highlight in the OS's own blue, in a square white box, in both
+   themes.
+
+   `appearance: base-select` hands that popup back to CSS. It has to be set on
+   BOTH the control and ::picker(select) — setting it on the control alone
+   leaves the popup native, which looks like the feature silently not working.
+
+   The whole block is behind @supports on purpose. Where it is unsupported the
+   native popup renders exactly as it does today, so this is additive: nothing
+   below can break a browser that does not implement it.
+
+   Geometry is the grouped list's (see list.css): rounded container, hairline,
+   32px rows, separators inset past the leading text edge. Selection follows
+   .jrk-daterange rather than .jrk-list__row[aria-selected] — a checkmark and a
+   semibold label, not an accent fill. Those two existing precedents disagree,
+   and this one is a POPUP, so it takes the popup's convention. It is also what
+   macOS does, and it is why the accent fill is free to mean "hovered" here
+   instead. A resting list with one large blue block in it is the thing this
+   rule set exists to get rid of. */
+@supports (appearance: base-select) {
+  .jrk-select,
+  .jrk-select::picker(select) {
+    appearance: base-select;
+  }
+
+  /* The control becomes a real button, so the inlined chevron is replaced by
+     ::picker-icon and the padding reserved for it is given back. */
+  .jrk-select {
+    display: inline-flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--jrk-space-2);
+    padding-inline-end: var(--jrk-space-2_5);
+    background-image: none;
+    text-align: start;
+  }
+
+  .jrk-select::picker-icon {
+    color: var(--jrk-text-muted);
+    transition: transform var(--jrk-transition);
+  }
+
+  .jrk-select:open::picker-icon {
+    transform: rotate(180deg);
+  }
+
+  .jrk-select::picker(select) {
+    padding: 0;
+    margin-block-start: var(--jrk-space-1);
+    background: var(--jrk-surface-raised);
+    border: 1px solid var(--jrk-border-default);
+    border-radius: var(--jrk-radius-lg);
+    box-shadow: var(--jrk-shadow-lg);
+    overflow: hidden;
+  }
+
+  .jrk-select option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--jrk-space-3);
+    min-height: 32px;
+    padding: var(--jrk-space-1_5) var(--jrk-space-4);
+    font-size: var(--jrk-text-md);
+    color: var(--jrk-text-primary);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  /* Inset separator, same pseudo-element mechanism as .jrk-list__row — a
+     full-bleed rule is the giveaway that a list was built as a generic table.
+     It clears the checkmark column so it lines up with the LABEL, which is the
+     .jrk-list__row--icon case. */
+  .jrk-select option + option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    inset-inline-start: calc(var(--jrk-space-4) + var(--jrk-icon-md) + var(--jrk-space-3));
+    inset-inline-end: 0;
+    height: 1px;
+    background: var(--jrk-border-subtle);
+  }
+
+  /* The checkmark column is always present, only hidden — so labels align
+     whether or not a row is the selected one. Same trick as .jrk-daterange. */
+  .jrk-select option::checkmark {
+    content: '✓';
+    width: var(--jrk-icon-md);
+    height: var(--jrk-icon-md);
+    flex-shrink: 0;
+    font-weight: var(--jrk-weight-semibold);
+    color: var(--jrk-accent-text);
+    visibility: hidden;
+  }
+
+  .jrk-select option:checked {
+    font-weight: var(--jrk-weight-semibold);
+  }
+
+  .jrk-select option:checked::checkmark {
+    visibility: visible;
+  }
+
+  /* Accent fill means HOVERED here, not selected. */
+  .jrk-select option:hover,
+  .jrk-select option:focus {
+    background: var(--jrk-accent-solid);
+    color: var(--jrk-accent-on-solid);
+    outline: none;
+  }
+
+  .jrk-select option:hover::checkmark,
+  .jrk-select option:focus::checkmark {
+    color: var(--jrk-accent-on-solid);
+  }
+
+  /* A filled row would otherwise be cut by the next row's separator. */
+  .jrk-select option:hover + option::before,
+  .jrk-select option:focus + option::before {
+    background: transparent;
+  }
+
+  .jrk-select option:disabled {
+    color: var(--jrk-text-disabled);
+    cursor: not-allowed;
+  }
+
+  .jrk-select option:disabled:hover {
+    background: transparent;
+    color: var(--jrk-text-disabled);
+  }
+}
+
 /* ============================== checkbox & radio ============================== */
 
 .jrk-check {

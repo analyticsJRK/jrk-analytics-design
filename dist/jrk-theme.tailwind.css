@@ -16,6 +16,7 @@
   --color-surface-inverse: var(--jrk-surface-inverse);
   --color-surface-banner: var(--jrk-surface-banner);
   --color-surface-hover: var(--jrk-surface-hover);
+  --color-surface-card-hover: var(--jrk-surface-cardHover);
   --color-surface-active: var(--jrk-surface-active);
   --color-surface-disabled: var(--jrk-surface-disabled);
   --color-ink-primary: var(--jrk-text-primary);
@@ -26,7 +27,6 @@
   --color-ink-link: var(--jrk-text-link);
   --color-ink-on-banner: var(--jrk-text-onBanner);
   --color-ink-on-banner-muted: var(--jrk-text-onBannerMuted);
-  --color-border-card: var(--jrk-border-card);
   --color-border-subtle: var(--jrk-border-subtle);
   --color-border-default: var(--jrk-border-default);
   --color-border-strong: var(--jrk-border-strong);
@@ -50,6 +50,8 @@
   --color-critical-mark: var(--jrk-status-critical-mark);
   --color-critical-text: var(--jrk-status-critical-text);
   --color-critical-wash: var(--jrk-status-critical-wash);
+  --color-critical-solid: var(--jrk-status-critical-solid);
+  --color-critical-onSolid: var(--jrk-status-critical-onSolid);
   --color-neutral-mark: var(--jrk-status-neutral-mark);
   --color-neutral-text: var(--jrk-status-neutral-text);
   --color-neutral-wash: var(--jrk-status-neutral-wash);

@@ -106,7 +106,13 @@ addFlat('topbar', T.size.topbar);
 addFlat('container', T.size.container);
 addFlat('sheet', T.size.sheet);
 add('min-touch', T.size.minTouch);
-add('card-edge', T.size.cardEdge);
+/* No card-edge: the brand tile edge was removed and a tile is bounded by its fill
+   step. This line used to read `add('card-edge', T.size.cardEdge)`, and deleting
+   the token without deleting the line emitted `--jrk-card-edge: undefined` — a
+   valid-looking declaration that check:css does not catch, because it scans
+   authored CSS for raw hex and undefined token REFERENCES, not for undefined
+   values in its own generated output. If you remove a token from tokens.json,
+   grep this file for its name. */
 addFlat('duration', T.motion.duration);
 addFlat('ease', T.motion.easing);
 addFlat('z', T.z);

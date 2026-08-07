@@ -7,10 +7,11 @@
   gap: var(--jrk-space-1);
   padding: var(--jrk-space-4) var(--jrk-space-5);
   background: var(--jrk-surface-default);
-  /* Same outer edge as a card — a standalone tile IS a card by another name, and
-     a KPI row that hairlined while the charts beside it carried the brand edge
-     would read as two systems on one page. */
-  border: var(--jrk-card-edge) solid var(--jrk-border-card);
+  /* Same treatment as a card — a standalone tile IS a card by another name, and a
+     KPI row bounded differently from the charts beside it would read as two
+     systems on one page. Bounded by the fill step; the 1px transparent border is
+     reserved so the nesting hairline never reflows it. See card.css. */
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-xl);
 }
 
@@ -135,9 +136,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   background: var(--jrk-surface-default);
-  /* The band is one enclosure, so the brand edge goes on the band and the tiles
-     inside it stay on internal hairlines — see the > .jrk-stat rule below. */
-  border: var(--jrk-card-edge) solid var(--jrk-border-card);
+  /* The band is one enclosure: its own fill step bounds it, and the tiles inside
+     stay on internal hairlines — see the > .jrk-stat rule below. */
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-xl);
   overflow: hidden;
 }
@@ -171,18 +172,18 @@
   overflow: visible;
 }
 
-/* Split tiles are standalone cards again, so they take their edge back — the
-   joined-band rule above zeroes the border, and without this they would be the
-   only card on the page without one. Each tile is now its own enclosure, so each
-   gets the brand edge.
+/* Split tiles are standalone cards again, so they take their own fill back — the
+   joined-band rule above zeroes the border and the fill, and each split tile is
+   its own enclosure sitting directly on the page. surface.default is what bounds
+   it, exactly as for .jrk-card.
 
-   White, not the periwinkle wash it used to default to: the wash was doing the
-   separating when the edge was a hairline, and periwinkle under a 2px #48a9df
-   line reads as a muddied blue-on-blue tile rather than a card. The wash is
-   still available per tile via .jrk-stat--tinted, below. */
+   White, not the brand wash: the wash is available per tile via .jrk-stat--tinted
+   below, but as a default it would put a tint where the page-to-card step is
+   supposed to do the separating, and a tinted tile on a tinted page has a weaker
+   boundary than a white one. */
 .jrk-stat-row--split > .jrk-stat {
   background: var(--jrk-surface-default);
-  border: var(--jrk-card-edge) solid var(--jrk-border-card);
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-xl);
 }
 

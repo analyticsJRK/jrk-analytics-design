@@ -1,24 +1,35 @@
-/* One brand edge per enclosure.
-   ==============================
+/* A nested tile draws the edge its fill step cannot.
+   ==================================================
 
-   The 2px border.card edge marks the OUTERMOST tile on a plane. A tile nested
-   inside another tile is already bounded by its parent, so a second brand
-   rectangle just inside the first reads as a rendering bug rather than as
-   structure — a Stat inside a Card, the "show table" view inside a ChartCard, a
-   KPI band inside a report card. Nested tiles take a 1px neutral edge instead.
+   Every tile in this system is bounded by its FILL STEP off the page — white on
+   #f2f2f7 in light, #232326 on #141416 in dark. That works exactly once. A tile
+   nested inside another tile sits on the CARD plane, where its own
+   surface.default fill is identical to what it sits on and the step is 1.0:1: a
+   Stat inside a Card, the "show table" view inside a ChartCard, a KPI band inside
+   a report card. Those get a 1px neutral hairline, because there is no fill
+   relationship left for them to use.
 
-   This is the single home for that rule, and it is imported LAST in
-   css/index.css on purpose. Every selector here is a descendant pair, so it
-   out-specifies the component's own `border` shorthand (0-1-0) and does not
-   depend on file order — except against the other 0-2-0 nesting rules the
-   component files carry for their own internals (`.jrk-stat-row > .jrk-stat`,
-   `.jrk-stat-row--split > .jrk-stat`), which is exactly why those two cases are
-   spelled out below at a higher specificity rather than left to whichever file
-   happened to load later.
+   This file used to enforce the opposite rule — "one brand edge per enclosure",
+   suppressing a 2px brand line on nested tiles so a second blue rectangle did not
+   appear just inside the first. The brand edge is gone and the SELECTORS did not
+   change at all, only their reason: they used to take an edge away, and now they
+   give one. Worth knowing, because the two readings imply opposite fixes if a
+   nested tile ever looks wrong.
+
+   It is the single home for that rule and is imported LAST in css/index.css on
+   purpose. Every selector here is a descendant pair, so it out-specifies the
+   component's own `border` shorthand (0-1-0) and does not depend on file order —
+   except against the other 0-2-0 nesting rules the component files carry for their
+   own internals (`.jrk-stat-row > .jrk-stat`, `.jrk-stat-row--split > .jrk-stat`),
+   which is exactly why those two cases are spelled out below at a higher
+   specificity rather than left to whichever file happened to load later.
 
    Only `border-width` and `border-color` are set. Never the shorthand: the
    component owns its radius and its edge geometry, and this file is only
-   answering "which of the two edge treatments applies here".
+   answering "which edge treatment applies here". The components all declare
+   `border: 1px solid transparent` so that this file only has to change a COLOR —
+   if one of them ever regresses to `border: 0`, border-style becomes `none` and
+   every rule below silently paints nothing.
 
    `:is()` is deliberately not used. The selector lists are longer without it,
    but the bundle that ships to the Design System pane goes through a CSS
@@ -34,7 +45,7 @@
 .jrk-chart-card .jrk-stat,
 .jrk-chart-card .jrk-stat-row,
 .jrk-chart-card .jrk-table-wrap,
-/* 0-3-0. stat.css gives split tiles their own brand edge at 0-2-0 from a file
+/* 0-3-0. stat.css gives split tiles their own tile treatment at 0-2-0 from a file
    that loads later, so the nested case has to out-specify it, not follow it. */
 .jrk-card .jrk-stat-row--split > .jrk-stat,
 .jrk-chart-card .jrk-stat-row--split > .jrk-stat {
@@ -54,7 +65,9 @@
 
 /* Explicit modifiers still win over the nesting default. A card nested inside a
    card is the most common place --seamless and --flush are actually correct, so
-   the neutral edge above must not out-specify them. */
+   the hairline above must not out-specify them. --seamless is now the ONLY way to
+   suppress a nested tile's hairline, which makes it more useful at depth than it
+   is at the top level, where it is a no-op. */
 .jrk-card .jrk-card--seamless,
 .jrk-chart-card .jrk-card--seamless {
   border-color: transparent;
@@ -62,10 +75,10 @@
 
 .jrk-card .jrk-card--flush,
 .jrk-chart-card .jrk-card--flush {
-  border-width: 0;
+  border-color: transparent;
 }
 
-/* And --outlined stays meaningful at depth: it is already the neutral edge, so
+/* And --outlined stays meaningful at depth: it is already the neutral hairline, so
    this is a no-op by value and a documented one by intent — the modifier is how
-   an author asks for the neutral edge at the TOP level, and nothing here should
-   make it look like it stopped working when nested. */
+   an author asks for the hairline at the TOP level, where a tile does have a fill
+   step and would otherwise not get one. */

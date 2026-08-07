@@ -31,17 +31,21 @@
   <!-- .jrk-content--document takes the CARD fill for the plane instead of the
        page fill. Legal for a report because a report is one full-width object,
        so the tinted plane has no card grid to separate and is doing no work.
-       The sheet keeps its own hairline, which is what stops it dissolving once
-       the plane underneath it is the same colour. -->
+       The sheet keeps its own real hairline, and this is the case that justifies
+       it: once the plane underneath is the card fill, the sheet's own fill matches
+       it at 1.0:1 and there is no step left to bound it with. -->
   <div class="jrk-content jrk-content--document" id="sheet-plane">
     <div class="jrk-sheet" id="sheet" role="grid" aria-label="AM Report — Summit at Red Rocks"></div>
   </div>
 
   <div class="gal-rule">
     <strong>Document plane.</strong> <code class="jrk-mono">.jrk-content--document</code>
-    gives the content plane the <em>card</em> fill instead of the page fill — white in
-    light, <code class="jrk-mono">#1c1c1e</code> in dark. Not literally white in both
-    themes: dark ink on a forced-white surface measures 1.19:1, so a genuinely
+    gives the content plane the <em>card</em> fill instead of the page fill —
+    <code class="jrk-mono">#ffffff</code> on an <code class="jrk-mono">#f2f2f7</code> page
+    in light, <code class="jrk-mono">#232326</code> on <code class="jrk-mono">#141416</code>
+    in dark. It does real work in <strong>both</strong> themes; for one period it was a
+    no-op in light, because the page had been flattened to white. Not literally white in
+    both themes: dark ink on a forced-white surface measures 1.19:1, so a genuinely
     paper-white report would have to light-lock its whole ink set, not just its
     background.
     <br><br>
@@ -335,11 +339,11 @@ document.getElementById('t-cols').onchange = e =>
   sheet.querySelector('.jrk-sheet__colbar').style.display = e.target.checked ? '' : 'none';
 document.getElementById('t-thresh').onchange = e =>
   sheet.querySelectorAll('.jrk-sheet__cell--critical').forEach(c => c.style.background = e.target.checked ? '' : 'transparent');
-/* Off = the page plane the rest of the app uses. This toggle now does NOTHING in
-   light — the page is #ffffff and so is the card, so both positions are the same
-   surface. Flip it in DARK to see it work (#1c1c1e content on a #141416 page),
-   and note that even there the two planes are only 1.08:1 apart, so the sheet's
-   own 2px edge is carrying the boundary in both themes. */
+/* Off = the page plane the rest of the app uses. The toggle does real work in BOTH
+   themes again (#ffffff on #f2f2f7, #232326 on #141416) — it was a no-op in light
+   during the period when the page itself was white. Either way the sheet's own 1px
+   neutral hairline is what bounds it: ON, the plane matches the sheet's fill exactly
+   and there is no step at all. */
 document.getElementById('t-plane').onchange = e =>
   document.getElementById('sheet-plane').classList.toggle('jrk-content--document', e.target.checked);
 </script>

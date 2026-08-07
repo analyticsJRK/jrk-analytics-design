@@ -126,6 +126,16 @@ export const status = {
     wash: {
       light: '#ffe8e6',
       dark: '#42110e'
+    },
+    solid: {
+      light: '#d81f14',
+      dark: '#d81f14',
+      use: 'fill of the ONE filled destructive button — .jrk-btn--danger-solid, never a status mark'
+    },
+    onSolid: {
+      light: '#ffffff',
+      dark: '#ffffff',
+      use: 'label ON status.critical.solid'
     }
   },
   neutral: {

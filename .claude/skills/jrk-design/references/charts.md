@@ -45,7 +45,7 @@ not adopted; worst adjacent ΔE is 16.3 light / 15.1 dark.
 Blue is slot 1 deliberately — it is the default single-series colour. systemGreen
 and systemRed are held out of the series entirely (they are status good/critical,
 and a green or red series in a financial chart reads as a verdict), and
-systemIndigo is held out as the UI accent.
+systemIndigo is held out as the UI accent. **That last reason is now stale** — the UI accent moved to a cyan at hue 197 degrees, which sits 7.6 degrees from slot 7 (teal), and indigo is reserved by nothing. The palette has NOT been re-derived; what separates accent from series in practice is lightness, not hue. See the note on `chart.categorical` in `tokens.json`.
 
 A ninth series folds into "Other", facets into small multiples, or takes a second
 encoding.

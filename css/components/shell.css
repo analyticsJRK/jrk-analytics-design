@@ -2,7 +2,11 @@
 
    Layout contract:
      .jrk-app > .jrk-sidebar + .jrk-main
-     .jrk-main > .jrk-topbar + .jrk-content */
+     .jrk-main > .jrk-topbar + .jrk-content
+
+   The rail carries two optional rows above the nav and a second nav level below
+   it. Full order, all four parts optional except __nav:
+     .jrk-sidebar > __brand + __actions + __nav + __footer */
 
 .jrk-app {
   display: grid;
@@ -20,13 +24,15 @@
   height: 100vh;
   position: sticky;
   top: 0;
-  /* Chrome sits on the page plane. In dark that plane is #141416 and the cards
-     read as raised off it; in light the plane is white and so are the cards, so
-     this hairline is the ONLY thing dividing the sidebar from the content —
-     #e5e5ea on white is 1.25:1, faint but the most visible it has ever been here
-     (on the old tinted plane the same line measured 1.12:1). If the sidebar ever
-     needs to read as chrome rather than as more page, give it surface.subtle
-     rather than thickening the rule. */
+  /* Chrome sits on the page plane in both themes, so this hairline divides the
+     sidebar from content of the SAME fill and is the only thing there. #e5e5ea on
+     the #f2f2f7 page is 1.12:1 — faint by design, because the cards floating on
+     the content side are what actually establish where content begins.
+
+     If the sidebar ever needs to read as chrome rather than as more page, give it
+     surface.DEFAULT, not surface.subtle: subtle is #f2f2f7 in light, which is now
+     the page value itself and would change nothing. Either way, do not thicken
+     this rule. */
   background: var(--jrk-surface-canvas);
   border-inline-end: 1px solid var(--jrk-border-subtle);
   transition: width var(--jrk-duration-base) var(--jrk-ease-standard);
@@ -46,6 +52,71 @@
   flex-shrink: 0;
   font-weight: var(--jrk-weight-semibold);
   white-space: nowrap;
+}
+
+/* Action row — the rail's verbs, above a hairline, separated from the rail's
+   nouns. Home / Create / Search are things you DO; everything in __nav is a
+   place you GO. Snowsight splits them this way and it is the reason its rail
+   stays short: the actions never compete with the destinations for a row.
+
+   These are icon-only by design, which puts them straight into the one rule
+   layer 3 will not bend on — never a bare icon button. Every child must carry
+   an aria-label AND a title, and <SidebarAction> makes `label` required so
+   there is no way to render one without both. */
+.jrk-sidebar__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: var(--jrk-space-1_5) var(--jrk-space-2);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--jrk-border-subtle);
+}
+
+/* Three 28px squares do not fit in a 52px rail, so they stack. This is a COLUMN
+   flex container and it must never gain flex-wrap — a wrapping column goes
+   multi-line and align-content:stretch then inflates every line. That bug
+   tripled a grid's height once already. */
+.jrk-sidebar[data-collapsed='true'] .jrk-sidebar__actions {
+  flex-direction: column;
+}
+
+.jrk-sidebar__action {
+  display: inline-grid;
+  place-items: center;
+  width: var(--jrk-control-md);
+  height: var(--jrk-control-md);
+  flex-shrink: 0;
+  color: var(--jrk-text-secondary);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: var(--jrk-radius-md);
+  cursor: pointer;
+  transition:
+    background-color var(--jrk-transition),
+    color var(--jrk-transition);
+}
+
+.jrk-sidebar__action svg:not(.jrk-icon) {
+  width: var(--jrk-icon-lg);
+  height: var(--jrk-icon-lg);
+  stroke-width: 1.75;
+}
+
+.jrk-sidebar__action:hover {
+  background: var(--jrk-surface-hover);
+  color: var(--jrk-text-primary);
+}
+
+/* Same accent pill the nav uses, for the same reason: it is the answer to
+   "where am I", and Home is a destination that happens to live in this row. */
+.jrk-sidebar__action[aria-current='page'] {
+  background: var(--jrk-accent-solid);
+  color: var(--jrk-accent-on-solid);
+}
+
+.jrk-sidebar__action[aria-current='page']:hover {
+  background: var(--jrk-accent-solid-hover);
 }
 
 .jrk-sidebar__nav {
@@ -73,19 +144,30 @@
 
 /* Apple sidebar row: a rounded pill, tight, with the icon in the accent when
    selected. macOS rows sit around 28px — the previous 40px was a touch
-   ergonomic on a mouse-driven 1080px-tall display. */
+   ergonomic on a mouse-driven 1080px-tall display.
+
+   This renders on an <a> for a destination and on a <button> for a row that
+   opens a flyout, so the button resets are part of the base rule rather than a
+   modifier — the two elements have to be pixel-identical or the rail reads as
+   two different row types. */
 .jrk-nav-item {
   display: flex;
   align-items: center;
   gap: var(--jrk-space-2);
+  width: 100%;
   height: var(--jrk-control-md);
   padding-inline: var(--jrk-space-2);
+  font-family: inherit;
   font-size: var(--jrk-text-md);
   font-weight: var(--jrk-weight-medium);
   color: var(--jrk-text-secondary);
+  text-align: start;
   text-decoration: none;
   white-space: nowrap;
+  background: none;
+  border: 0;
   border-radius: var(--jrk-radius-md);
+  cursor: pointer;
   transition:
     background-color var(--jrk-transition),
     color var(--jrk-transition);
@@ -100,6 +182,20 @@
 
 .jrk-nav-item:hover {
   background: var(--jrk-surface-hover);
+  color: var(--jrk-text-primary);
+}
+
+/* Open flyout. Snowsight marks both the current row and the open row with the
+   same quiet grey; here they are deliberately two different treatments, because
+   they are two different facts. "This menu is open" is transient and belongs to
+   the pointer; "this is the page you are on" is the answer to where-am-I and
+   gets the accent pill below.
+
+   ORDER IS LOAD-BEARING: this rule sits above the aria-current block at equal
+   specificity, so a row that is both current and open keeps the accent pill.
+   Moving it below silently turns the current page grey while its menu is open. */
+.jrk-nav-item[aria-expanded='true'] {
+  background: var(--jrk-surface-active);
   color: var(--jrk-text-primary);
 }
 
@@ -121,6 +217,90 @@
   margin-inline-start: auto;
 }
 
+/* ========================= second nav level (flyout) ========================= */
+
+/* Disclosure caret. Snowsight ships NO caret on these rows — you find the second
+   level by hovering and hoping. That is the discoverability-spent-on-cleanliness
+   failure layer 3 exists to refuse, so the caret is added back: restraint in
+   decoration, generosity in signifiers. It costs 13px of row width and it is the
+   only thing that distinguishes "goes somewhere" from "opens something". */
+/* It does not rotate on open, and that is deliberate — a chevron swinging down
+   is the accordion gesture and it promises the panel will appear BELOW the row.
+   This one appears beside it. The caret points at where the content lands and
+   stays there; the row's grey fill and the panel itself carry the open state. */
+.jrk-nav-item__caret {
+  margin-inline-start: auto;
+  color: var(--jrk-text-muted);
+  transition: color var(--jrk-transition);
+}
+
+/* A badge takes the trailing-edge slot when both are present, so the caret gives
+   up its auto margin and just trails the badge. */
+.jrk-nav-item__badge ~ .jrk-nav-item__caret {
+  margin-inline-start: 0;
+}
+
+.jrk-nav-item[aria-expanded='true'] .jrk-nav-item__caret {
+  color: inherit;
+}
+
+/* The panel. Composes on .jrk-menu — the second nav level is a menu surface and
+   the library already has one, so this adds placement only, never appearance.
+   Set no property .jrk-menu also sets: feedback.css is imported AFTER this file,
+   so at equal specificity it wins. That is why the width below is `width` and
+   not `min-width`.
+ *
+ * position: fixed, and it has to be. .jrk-sidebar__nav is `overflow-y: auto`,
+ * and CSS forces the other axis to a scroll container too — a `visible` axis
+ * paired with a non-visible one computes to `auto`. So ANY descendant of the nav
+ * is clipped horizontally, and an absolutely-positioned panel would be sliced
+ * off at the rail's edge. Fixed escapes the clip without a portal, which keeps
+ * this working in the Jinja apps that have no React tree to portal into.
+ *
+ * The cost is that fixed coordinates are VIEWPORT coordinates, so neither offset
+ * can come from CSS alone — the controller measures the rail and writes
+ * --jrk-nav-flyout-top and --jrk-nav-flyout-inset (see <NavMenu>, and the vanilla
+ * equivalent in preview/dashboard.html). Measuring the inset rather than reading
+ * the rail width from a token is the difference between working and nearly
+ * working: a token offset silently assumes the rail begins at viewport x=0, which
+ * is true in an app and false the moment the shell sits inside anything —
+ * preview/dashboard.html puts it in a 24px-margined frame and every panel would
+ * land 24px adrift. The fallbacks below cover that unmeasured case approximately.
+ *
+ * One caveat worth knowing: below 720px the rail takes `transform`, which makes
+ * it the containing block for fixed descendants and brings the clipping back.
+ * That is the mobile drawer, well outside this library's 1920x1080 target. */
+.jrk-nav-flyout {
+  position: fixed;
+  inset-inline-start: var(--jrk-nav-flyout-inset, var(--jrk-sidebar-expanded));
+  top: var(--jrk-nav-flyout-top, 0px);
+  width: 232px;
+  max-height: calc(100vh - var(--jrk-space-4));
+  overflow-y: auto;
+}
+
+.jrk-sidebar[data-collapsed='true'] .jrk-nav-flyout {
+  inset-inline-start: var(--jrk-nav-flyout-inset, var(--jrk-sidebar-collapsed));
+}
+
+/* The current sub-page. The parent row already carries the accent pill, and a
+   second pill inside the panel is two answers to one question — so this states
+   it in accent text plus weight instead. Weight is the second channel, which is
+   what keeps it off colour-as-the-only-signal. */
+.jrk-nav-flyout .jrk-menu__item[aria-current='page'] {
+  color: var(--jrk-accent-text);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+/* In the collapsed rail the label is the only thing naming the panel, so it is
+   painted rather than clipped away with the row labels. */
+.jrk-nav-flyout__title {
+  padding: var(--jrk-space-1_5) var(--jrk-space-2_5) var(--jrk-space-1);
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-primary);
+}
+
 /* Collapsed rail: the icon centers and the label is hidden but stays in the
    accessibility tree, so the nav still reads correctly to a screen reader. */
 .jrk-sidebar[data-collapsed='true'] .jrk-nav-item {
@@ -136,6 +316,13 @@
   height: 1px;
   overflow: hidden;
   clip-path: inset(50%);
+}
+
+/* The caret is aria-hidden decoration, so unlike the label and badge it is
+   removed outright rather than kept in the accessibility tree — the button's
+   aria-expanded is what announces the disclosure, and it survives the collapse. */
+.jrk-sidebar[data-collapsed='true'] .jrk-nav-item__caret {
+  display: none;
 }
 
 .jrk-sidebar__footer {
@@ -192,20 +379,22 @@
 /* Document view: the content plane takes the CARD fill instead of the page fill,
    so a full-bleed report sits on the card surface rather than on the page plane.
 
-   This modifier is now a NO-OP IN LIGHT — surface.canvas is #ffffff and so is
-   surface.default, so there is nothing left for it to change. It stays because it
-   is still load-bearing in dark (#1c1c1e content on a #141416 page) and because
-   the two tokens are different facts even where they hold the same value: the
-   report plane follows the card, and if the page ever moves off white this
-   modifier keeps working without being rewritten.
+   This is load-bearing in BOTH themes again — #ffffff content on an #f2f2f7 page,
+   #232326 on #141416. For one period it was a no-op in light, because the page had
+   been flattened to #ffffff and there was nothing left for it to change; the page
+   is tinted again and the modifier does real work in light as it originally did.
 
-   Worth recording rather than quietly deleting: this rule used to warn that
-   flattening the page globally "would erase the plane separation every other
-   screen depends on," and that was correct while tiles carried a 1px hairline.
-   The light page went white anyway, and it is survivable only because the tile
-   edge became a 2px brand line first. The two changes are a pair.
+   The history is worth keeping, because it is a full round trip. This rule
+   ORIGINALLY existed to give one full-bleed view a white plane locally, and warned
+   against doing it globally — "would erase the plane separation every other screen
+   depends on". That warning was then overridden globally, survivably, but only
+   because the tile edge became a 2px brand line in the same change. Both halves
+   have now been reverted together, which is the only safe way to undo a pair.
 
-   Anything placed on this plane must carry its own edge; .jrk-sheet does. */
+   Anything placed on this plane has no fill step to use, so it must carry its own
+   edge. .jrk-sheet is the one component designed for it and it draws a real 1px
+   neutral hairline for exactly this reason; anything else needs
+   .jrk-card--outlined. */
 .jrk-content--document {
   background: var(--jrk-surface-default);
 }

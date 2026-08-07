@@ -142,10 +142,16 @@
 }
 
 /* Filled red, for the confirming button in a destructive alert — the one place
-   Apple does fill it. Not for toolbars. */
+   Apple does fill it. Not for toolbars.
+
+   Fills with status.critical.SOLID, not .mark, and labels with the matching
+   onSolid. It used to fill with the mark and borrow --jrk-accent-on-solid,
+   which meant the red button's ink direction was decided by the accent and
+   moved silently every time the accent did. The mark cannot carry a white
+   label anyway: #ff3b30 gives white 3.55:1. See the note on the token. */
 .jrk-btn--danger-solid {
-  background: var(--jrk-status-critical-mark);
-  color: var(--jrk-accent-on-solid);
+  background: var(--jrk-status-critical-solid);
+  color: var(--jrk-status-critical-on-solid);
   box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.16);
 }
 

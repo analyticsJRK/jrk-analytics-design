@@ -61,57 +61,68 @@ themes, real surfaces. If a color fails, re-step it; do not lower the gate. The
 full run needs the `dataviz` skill's validator:
 `JRK_DATAVIZ=/path/to/skills/dataviz npm run validate`.
 
-**The two themes separate their planes by different mechanisms, and that is the
-single most important thing to know here.** Light: `#ffffff` page, `#ffffff`
-cards — **no fill step at all**, so the 2px brand edge below is the entire tile
-boundary. Dark: `#141416` page, `#1c1c1e` cards — the Apple grouped fill
-hierarchy, plus the same edge. Never assume a change that reads correctly in one
-theme reads correctly in the other; the light theme has no fill hierarchy left to
-lean on. Because the card is the chart surface, marks are validated against
-`#ffffff` / `#1c1c1e` — in light that now equals the page value, but it is still
-the card that is being measured.
+**A tile is bounded by its FILL STEP off the page, in both themes, with no
+border.** Light: `#f2f2f7` page, `#ffffff` cards (1.12:1). Dark: `#141416` page,
+`#232326` cards (1.17:1). Same Apple grouped mechanism on both sides, which is
+new — for one period light was a flat `#ffffff` page bounded by a 2px brand edge,
+and a change that read correctly in dark could be invisible in light. There is no
+longer a per-theme boundary mechanism to get wrong. Because the card is the chart
+surface, marks are validated against `#ffffff` / `#232326`.
 
-**In light, `surface.subtle` (`#f2f2f7`) is the only remaining tint.** Table
-headers, inset wells, and the sheet toolbar carry the recession the page used to
-share. Anything that needs to read as recessed in light must ask for it.
+**`.jrk-card` and friends carry `border: 1px solid transparent`, and that must not
+become `border: 0`.** The width is reserved so that the three things which give a
+tile an edge — `--outlined`, and the nesting rules — change only a COLOR and never
+reflow the layout. `border: 0` also sets `border-style: none`, after which a
+`border-color` on its own paints nothing. That is the quiet way this breaks.
 
-**The tile edge is the brand line, and it is the one break from Apple.**
-`border: var(--jrk-card-edge) solid var(--jrk-border-card)` — 2px `#48a9df`, same
-value in both themes — on every OUTERMOST tile: `.jrk-card`, `.jrk-stat`,
-`.jrk-stat-row`, `.jrk-chart-card`, `.jrk-sheet`. It buys that loudness by
-keeping the inside of the tile strictly neutral, so two rules are load-bearing:
-**one brand edge per enclosure** (a nested card or a tile inside `.jrk-stat-row`
-takes `border.default` via `.jrk-card--outlined`, or no edge), and **never on an
-internal rule** (gridlines, table rows, card footers, sheet column/total rules,
-chart axes stay neutral 1px). `border.card` is the one specified-not-stepped
-color in the file and the validator does not measure the border namespace, so
-nothing will catch a misuse — the numbers live on the token.
+**A NESTED tile gets a 1px neutral hairline, because a fill step only works
+once.** A tile inside another tile sits on the card plane, where its own
+`surface.default` equals what it sits on. `nesting.css` is the single home for
+that rule. It used to enforce the opposite — suppressing a brand edge on nested
+tiles — and the selectors did not change, only their reason.
+
+**`.jrk-sheet` is the one tile with a real hairline by default.** It is designed
+to sit on `.jrk-content--document`, which IS the card plane, so it has no fill
+step to inherit and draws `border.default` itself.
+
+**In light, `surface.subtle` equals the page** (`#f2f2f7` both). Table headers and
+inset wells no longer recede *from* the page — they match it. If something must
+read as recessed on a card in light, `subtle` still works; on the page it will
+not. `surface.hover` has the same trap and it is worse: washing a whole white card
+with it erases the step that bounds the tile, which is why interactive cards use
+`surface.cardHover` instead.
 
 **The dark page is not `#000000`, and that is deliberate.** iOS grouped dark is
 true black; at 1920x1080 it halates against near-white text and reads as a void.
-The page follows macOS instead. Two consequences: the card is only a 1.08:1 fill
-step off the page, so the edge does most of the tile-boundary work in dark and
-all of it in light — **never drop `border.card` in either theme**; and
-`text.primary` in dark is `#ebebf0`, not `#ffffff`, because pure white on a
-near-black page is the glare. Both deviations are noted on their tokens.
+The page follows macOS instead. When the brand edge was removed this value was
+deliberately left alone and the CARD was lifted (`#1c1c1e` → `#232326`) to widen
+the step, so the halation decision stayed settled. Same reason `text.primary` in
+dark is `#ebebf0`, not `#ffffff`. Both noted on their tokens. Lifting the card
+cost every dark chart mark ~8% contrast — worst case 4.30:1, all still passing.
 
-**The light page went white AFTER the tile edge got heavier, and that order is
-the whole justification.** A flat white page was explicitly ruled out while tiles
-carried a 1px hairline — `.jrk-content--document` in `shell.css` existed to do it
-for one full-bleed view and warned against doing it globally. The 2px brand edge
-is what made it survivable. Two follow-on facts: `.jrk-content--document` is now
-a **no-op in light** (kept because it is still load-bearing in dark), and
-`.jrk-card--seamless` has nothing to separate it in light at all.
+**An interactive card's hover needs BOTH a shadow and a fill, because each works
+in only one theme.** The shadow carries light and is invisible in dark (a black
+shadow on `#141416`); `surface.cardHover` lifts 1.125:1 in dark and is a deliberate
+no-op in light. Neither is redundant — which one does nothing depends on the theme.
 
 **Adopt Apple values only where they pass.** Apple's palette is not
 accessibility-clean — `systemGray` is 2.92:1 as body text, `systemIndigo` is
-3.36:1 as dark link text. Both are rejected here. Measure before reaching for an
-Apple hex; the deviations are noted on each token.
+3.36:1 as dark link text, and `systemBlue` gives a white button label only
+4.02:1. All three are rejected here. Measure before reaching for an Apple hex;
+the deviations are noted on each token.
 
 **The chart series palette is never cycled.** Eight slots, fixed order — the
 order is the colorblind-safety mechanism, derived by search across both modes
 jointly. A ninth series folds into "Other" or facets. `seriesColor(8)` throws on
-purpose. Scatter/bubble/choropleth/small-multiples cap at three.
+purpose. Scatter/bubble/choropleth/small-multiples cap at three. **Known debt,
+now accepted at its worst:** the derivation holds systemIndigo out "as the UI
+accent", which has been stale since the accent left indigo. The accent is now
+blue at hue 212° and slot 1 is systemBlue at 211° — the same hue, and slot 1 is
+the default single-series color for every bar list, cell bar and sparkline. The
+palette has NOT been re-derived; only lightness separates them (white on the
+accent is 5.22:1, on slot 1 it is 4.02:1). So: never put a chart on an accent
+wash, and never let a lone blue series sit beside a primary button in the same
+tile without a label between them.
 
 **Color is never the only signal.** Status needs icon + label. Deltas state
 direction in text. Charts have a table view.
@@ -143,9 +154,32 @@ punched out, so they work on any badge wash. SF Symbols cannot be shipped — no
 webfont, and the outlines are Apple's; use Phosphor (MIT) with
 `className="jrk-icon"` beyond the built-in set.
 
-**`accent.onSolid` is not `text.inverse`.** The label on the solid accent stays
-white in both modes; `text.inverse` in dark is the dark ink for the light
-inverse surface. Do not collapse them.
+**The accent is a saturated blue, and every role takes the anchor.** `#0069d9`
+(hue 212°) is the brand anchor and it measures everywhere it is used: 5.22:1 on
+the white card, 4.68:1 on the `#f2f2f7` page, white label at 5.22:1. So
+`accent.text`, `text.link`, `border.accent` and `focus.ring` are all the anchor
+itself. That is the *point* of this value — the previous accent was a pastel
+that could not be text or a signifier on a light surface, and each of those four
+roles needed its own bespoke step. **The PAGE is still the binding surface**, and
+it is what pins the anchor: a lighter blue that looks fine on the white card
+fails there.
+
+**It is not `systemBlue`.** `#007aff` gives a white label 4.02:1 and link text
+3.60:1 on the page. `#0069d9` is the shallowest step on the hue that clears
+4.5:1 in every light-mode role. Do not "correct" it back to the Apple hex.
+
+**`accent.onSolid` is `#ffffff` in both modes, and is still not `text.inverse`.**
+The rule is not "white" and not "dark ink" — this token has been white, then
+`#052f3b` for the pastel era, then white again. It is **whatever measures against
+`accent.solid`**, so re-measure it whenever the anchor moves. It stays distinct
+from `text.inverse`, which is `#ffffff` light / `#000000` dark for the inverse
+surface: the two now agree in light and disagree in dark. Do not collapse them,
+and **do not borrow `accent.onSolid` as a generic "label on a filled control"** —
+`.jrk-btn--danger-solid` did, so a red button's ink direction moved every time
+the accent did. That is what `status.critical.solid` / `.onSolid` are for.
+
+**Adopt Apple values only where they pass** — see above. The accent is not an
+Apple color; the neutrals, status colors and chart palette still are.
 
 **Dark values are selected, not flipped.** Every themed token has an explicit
 `light` and `dark` entry chosen for that surface.

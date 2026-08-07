@@ -22,36 +22,45 @@ dark theme a swap rather than a rewrite.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--jrk-surface-canvas` | `#ffffff` | `#141416` | page plane, sidebar, topbar |
-| `--jrk-surface-default` | `#ffffff` | `#1c1c1e` | cards, panels, **chart surface** |
-| `--jrk-surface-tinted` | `#eeeefc` | `#25253a` | KPI band, highlighted tiles |
+| `--jrk-surface-canvas` | `#f2f2f7` | `#141416` | page plane, sidebar, topbar |
+| `--jrk-surface-default` | `#ffffff` | `#232326` | cards, panels, **chart surface** |
+| `--jrk-surface-tinted` | `#e0f6ff` | `#0e3543` | KPI band, highlighted tiles |
 | `--jrk-surface-subtle` | `#f2f2f7` | `#2c2c2e` | table header, inset wells, sheet toolbar |
 | `--jrk-surface-raised` | `#ffffff` | `#2c2c2e` | popovers, menus, modals, inputs |
-| `--jrk-surface-banner` | `#5856d6` | `#2c2c2e` | sheet title bar |
+| `--jrk-surface-banner` | `#0069d9` | `#2c2c2e` | sheet title bar |
+| `--jrk-surface-card-hover` | `#ffffff` | `#2c2c2e` | fill of an INTERACTIVE card while hovered |
 | `--jrk-surface-hover` / `-active` / `-disabled` / `-inverse` | | | states |
 
-**The two themes separate their planes differently, and this is the trap in the
-whole file.** Dark is Apple grouped: `#1c1c1e` cards lift off a `#141416` page by
-fill. Light is flat: canvas and default are both `#ffffff`, a 1.0:1 step, so
-`--jrk-border-card` is the only thing making a tile a tile. Chrome (sidebar,
-topbar) shares the canvas, so in light it is divided from the content by its
-hairline alone.
+**A tile is bounded by its fill step off the page, in both themes, with no
+border.** 1.12:1 in light (`#ffffff` on `#f2f2f7`), 1.17:1 in dark (`#232326` on
+`#141416`) — the same Apple grouped mechanism on both sides. Chrome (sidebar,
+topbar) shares the canvas, so it is divided from the content by its hairline alone.
 
-Three things follow, and none of them are caught by a gate:
-- **`--jrk-surface-subtle` is light's only tint.** If something needs to recess in
-  light, it must name `subtle` — the page will not do it for free.
-- **`.jrk-card--seamless` has no boundary in light.** Dark-mode-or-nested only.
-- **`.jrk-content--document` is a no-op in light**, still load-bearing in dark.
+That symmetry is new, and the asymmetry it replaced is the thing to know about:
+light was briefly a flat `#ffffff` page bounded by a 2px brand edge, so a change
+that read correctly in dark could be invisible in light. `border.card` and
+`size.cardEdge` are gone. `.jrk-card--seamless` and `.jrk-content--document` both
+do real work in light again.
 
-The card is what everything is measured against — in light that value now equals
-the page, but they remain different facts and the card is the one to measure.
+Two traps remain, neither caught by a gate:
+- **`--jrk-surface-subtle` now EQUALS the page in light.** It still recesses on a
+  card; it does nothing on the page.
+- **Never use `--jrk-surface-hover` on a whole tile in light.** It is `#f2f2f7`,
+  the page value, so it erases the step that bounds the card — the tile dissolves
+  exactly when it should respond. `--jrk-surface-card-hover` exists for this and is
+  a deliberate no-op in light, because the hover *shadow* carries that theme.
 
-**In dark the fill step barely exists — the edge is the elevation cue.**
-`#1c1c1e` on `#141416` is 1.08:1, so a dark card that drops its
-`--jrk-border-card` edge stops reading as a card. The canvas is not `#000000`
-on purpose (halation against near-white text at 1920x1080); `--jrk-text-primary`
-in dark is `#ebebf0` rather than `#ffffff` for the same reason. Both are noted on
-the tokens in `tokens.json` — do not restore either.
+The card is what marks are measured against — `#ffffff` / `#232326`.
+
+**Lifting the dark card was the cost of dropping the edge.** `#1c1c1e` on
+`#141416` was only 1.08:1 and leaned on the edge to read as a tile at all, so the
+card moved to `#232326` (1.17:1). The page was deliberately left alone: darkening
+it would have re-opened the halation question that put it at `#141416` rather than
+`#000000` in the first place. Two tokens had to move with the card —
+`surface.disabled.dark` and `focus.offset.dark` — and every dark chart mark lost
+~8% contrast (worst case 4.30:1, all still passing). Do not lift it again without
+re-measuring those marks. `--jrk-text-primary` in dark stays `#ebebf0` rather than
+`#ffffff` for the same halation reason.
 
 ## Text
 
@@ -62,7 +71,7 @@ the tokens in `tokens.json` — do not restore either.
 | `--jrk-text-muted` | axis ticks, captions, placeholders |
 | `--jrk-text-disabled` | decorative only — never load-bearing |
 | `--jrk-text-inverse` | on `surface-inverse` ONLY — not the solid accent |
-| `--jrk-accent-on-solid` | the label ON the solid accent; white in both modes |
+| `--jrk-accent-on-solid` | the label ON the solid accent; DARK ink in both modes |
 | `--jrk-text-link` | inline links, accent text |
 | `--jrk-text-on-banner`, `--jrk-text-on-banner-muted` | on `surface-banner` |
 
@@ -72,47 +81,99 @@ fail on the plane behind it.
 
 ## Borders
 
-`--jrk-border-card` (**the outer edge of a card-like tile — 2px, brand blue**) ·
 `--jrk-border-subtle` (gridlines, table rules) · `--jrk-border-default` (inputs,
-card footers, the neutral-edge escape hatch) · `--jrk-border-strong` (axis,
+popover edges, **the nested-tile hairline**) · `--jrk-border-strong` (axis,
 baselines, form controls) · `--jrk-border-accent` (active tab, selected input).
 
-Apple separators for everything internal; a brand edge on the outside. In dark a
-card has a fill step *and* an edge; in light it has only the edge, which is why
-the edge is unconditional. That edge is `2px solid var(--jrk-border-card)`
-(`#48a9df`, both modes), drawn with
-`var(--jrk-card-edge)` for the weight, and every outermost tile uses the same
-pair: `.jrk-card`, `.jrk-stat`, `.jrk-stat-row`, `.jrk-chart-card`, `.jrk-sheet`.
-Form controls use `border-strong` plus a contrasting fill.
+**There is no `--jrk-border-card` and no `--jrk-card-edge`.** Both were removed
+with the brand edge; referencing either is a breaking change for a consumer that
+still does. A tile is bounded by its fill step.
 
-Two rules keep the brand edge from turning into noise:
+Every tile still declares `border: 1px solid transparent` — `.jrk-card`,
+`.jrk-stat`, `.jrk-stat-row`, `.jrk-chart-card`, `.jrk-table-wrap`. **Never change
+that to `border: 0`:** the reserved width means an edge appearing changes only a
+colour and never reflows, and `border: 0` sets `border-style: none`, after which
+`border-color` paints nothing at all. Form controls use `border-strong` plus a
+contrasting fill.
 
-- **One brand edge per enclosure.** A card inside a card, or a tile inside
-  `.jrk-stat-row`, takes `--jrk-border-default` (`.jrk-card--outlined`) or no
-  edge at all. Nested blue rectangles read as a rendering bug.
-- **Never on an internal rule.** Gridlines, table rows, card footers, sheet
-  column and total rules, chart axes — all stay neutral 1px. The blue line means
-  "this is one tile"; if it also meant "this is a row boundary" it would mean
-  nothing.
+Where an edge IS drawn:
 
-`border.card` is the one color in `tokens.json` that was specified rather than
-stepped, and **no gate measures it** — the validator does not touch the border
-namespace. Light: 2.62:1 on the white card, 2.35:1 against the page. Dark: 6.5:1
-and 7.0:1. The light figures are under WCAG 1.4.11's 3:1, legal only because the
-edge is decorative separation — the tile is also carried by its fill step, radius
-and padding. Do not make it a signifier, and do not put state on it.
+- **A nested tile takes `--jrk-border-default`**, because a fill step only works
+  once — a tile inside a tile sits on the card plane, where its own fill matches
+  what it sits on. `nesting.css` is the single home for that rule. `--outlined`
+  asks for the same hairline at the top level; `--seamless` is now the only way to
+  suppress it when nested.
+- **`.jrk-sheet` draws it by default.** It is designed for
+  `.jrk-content--document`, which *is* the card plane, so it has no step to inherit.
 
-## Accent (systemIndigo)
+**No gate measures the border namespace** — the validator does not touch it. That
+mattered most for the removed brand edge and it still matters for
+`--jrk-border-accent`: a tab underline is a *signifier*, something depends on
+seeing it, so it needs WCAG 1.4.11's 3:1 and its numbers are recorded by hand on
+the token (`#0069d9`, 5.22:1 on the card, 4.68:1 on the page). Decorative
+separation may sit below 3:1; the moment state rides on a border it may not. Note
+this token used to need a bespoke value to clear 3:1 at all; it now tracks
+`accent.text`, which is always safe because its floor is the higher one.
+
+## Accent (blue, hue 212 degrees)
 
 `--jrk-accent-solid` (button fill) · `-solid-hover` · `-solid-active` ·
 `-on-solid` · `-text` · `-wash` (selected row, soft badge) · `-wash-text`.
 
-systemIndigo `#5856d6` is Apple verbatim — white on it measures 5.65:1, so it
-needs no darkening (systemBlue would).
+**The anchor is `#0069d9`, a saturated mid-tone, and every role takes it.**
+5.22:1 on the white card, 4.68:1 on the `#f2f2f7` page, white label at 5.22:1 —
+so `-text`, `--jrk-text-link`, `--jrk-border-accent` and `--jrk-focus-ring` are
+all the anchor itself. Only `-wash-text` steps away, and only because its
+background does.
 
-**`--jrk-accent-on-solid` is the label ON the fill, and it is white in both
-modes.** Do not use `--jrk-text-inverse` there: in dark mode that is the dark ink
-for the light inverse surface, and black on the dark indigo is only 4.15:1.
+This is the second replacement — systemIndigo `#5856d6`, then a `#9ee4ff` cyan
+pastel, now this. The pastel is worth remembering because it is the shape of the
+mistake: at 1.40:1 on the card it could not be text or a signifier on any light
+surface, so each of those four roles needed its own hand-derived step and the
+banner turned the report's heaviest element into its palest. An accent whose
+anchor cannot be used in the accent's own roles is the wrong anchor.
+
+**It is not `systemBlue`.** `#007aff` gives a white label 4.02:1 and link text
+3.60:1 on the page — it fails here exactly the way `systemGray` and
+`systemIndigo` do. `#0069d9` is the shallowest step on the hue that clears 4.5:1
+in every light-mode role. The accent is not an Apple colour; the neutrals, status
+colours and chart palette still are.
+
+| Role | Light | Dark | Note |
+|---|---|---|---|
+| `-solid` / `-solid-hover` / `-solid-active` | `#0069d9` / `#005ec4` / `#0057b8` | same | white label GAINS contrast through the press: 5.22 → 6.18 → 6.87 |
+| `-on-solid` | `#ffffff` | `#ffffff` | see below |
+| `-text` / `--jrk-text-link` | `#0069d9` | `#64b5ff` | dark is *selected* — the anchor is only 3.00:1 on the dark card |
+| `-wash` | `#e3efff` | `#0d2947` | |
+| `-wash-text` | `#005ec4` | `#64b5ff` | the anchor lands at **4.49:1** on the light wash — under the floor by 0.01 |
+| `--jrk-border-accent` | `#0069d9` | `#64b5ff` | |
+| `--jrk-focus-ring` | `#0069d9` | `#64b5ff` | |
+
+**The page is the binding surface for light text roles, and it is easy to miss.**
+It is what pins the anchor: a blue tuned only against the white card can sit a
+full step lighter and fail on `#f2f2f7`.
+
+**`--jrk-accent-on-solid` is the label ON the fill, and it is `#ffffff` in both
+modes** at 5.22:1. It has now been white, then dark ink `#052f3b` for the pastel
+era, then white again — so the rule is not a colour, it is **"whatever measures
+against `accent.solid`"**. Re-measure it whenever the anchor moves. It is still
+**not** `--jrk-text-inverse` (`#ffffff` light / `#000000` dark, for the inverse
+surface): the two agree in light and disagree in dark, and have been separate
+facts through all three accents.
+
+**Do not borrow `-on-solid` as a generic "label on a filled control."**
+`.jrk-btn--danger-solid` did exactly that, filling with `status.critical.mark`
+and labelling with the accent's ink — so the red button's ink direction was
+decided by the accent and moved silently every time the accent did, at 4.01:1,
+gated by nothing. It now uses `--jrk-status-critical-solid` `#d81f14` with
+`--jrk-status-critical-on-solid` `#ffffff` (5.09:1). The mark could not simply be
+relabelled: white on `#ff3b30` is 3.55:1.
+
+Because the banner tracks `accent.solid`, `--jrk-text-on-banner` went back to
+white in light with it. `--jrk-text-on-banner-muted` is the tightest type pairing
+in the library: white on the band is only 5.22:1, leaving 0.72 of headroom above
+the floor, so the muted step is a near-white tint (`#e8f1fd`, 4.58:1) rather than
+a grey. If the banner ever needs a genuinely muted label, deepen the band.
 
 ## Status — reserved, never a chart series
 

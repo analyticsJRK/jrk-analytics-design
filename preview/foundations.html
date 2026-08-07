@@ -25,11 +25,13 @@
     <p class="gal-sec__note">
       Dark values are selected for the dark surface, not flipped from light. Body text
       clears 4.5:1 on both the card surface and the page plane — the validator checks
-      both, because the two are different surfaces in dark. In light they are now the same
-      value: <code class="jrk-mono">surface-canvas</code> and
-      <code class="jrk-mono">surface-default</code> are both <code class="jrk-mono">#ffffff</code>,
-      so a light tile is bounded by <code class="jrk-mono">border-card</code> alone and
-      <code class="jrk-mono">surface-subtle</code> is the only tint left to recess with.
+      both, and in light the <strong>page</strong> is the binding one: a value tuned only
+      against the white card can land at 4.04:1 on
+      <code class="jrk-mono">#f2f2f7</code> and fail. A tile carries
+      <strong>no border</strong> and is bounded by its fill step off the page — 1.12:1 in
+      light, 1.17:1 in dark. Note that
+      <code class="jrk-mono">surface-subtle</code> now <em>equals</em> the page in light, so
+      it recesses on a card and does nothing on the page.
     </p>
     <div class="gal-swatches" id="sw-core"></div>
   </section>
@@ -166,9 +168,12 @@ function render() {
   ]) {
     core.append(swatch(n, contrast(tokenValue(n), bg).toFixed(2) + ':1'));
   }
-  // border-card carries its measurement on the swatch: it is the one color in
-  // the file the validator never sees, so the gallery is where the number shows.
-  core.append(swatch('--jrk-border-card', contrast(tokenValue('--jrk-border-card'), surface()).toFixed(2) + ':1 on card'));
+  // border-accent carries its measurement on the swatch, because the validator
+  // never sees the border namespace and this is the one border something DEPENDS
+  // on seeing — it marks the selected tab, so it owes WCAG 1.4.11's 3:1. The
+  // removed border-card used to hold this slot for the opposite reason: it was
+  // decorative, sat under 3:1, and the number was shown here to keep that honest.
+  core.append(swatch('--jrk-border-accent', contrast(tokenValue('--jrk-border-accent'), surface()).toFixed(2) + ':1 on card'));
   for (const n of ['--jrk-border-subtle', '--jrk-border-default', '--jrk-border-strong']) {
     core.append(swatch(n));
   }
