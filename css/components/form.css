@@ -218,13 +218,20 @@
    below can break a browser that does not implement it.
 
    Geometry is the grouped list's (see list.css): rounded container, hairline,
-   32px rows, separators inset past the leading text edge. Selection follows
-   .jrk-daterange rather than .jrk-list__row[aria-selected] — a checkmark and a
-   semibold label, not an accent fill. Those two existing precedents disagree,
-   and this one is a POPUP, so it takes the popup's convention. It is also what
-   macOS does, and it is why the accent fill is free to mean "hovered" here
-   instead. A resting list with one large blue block in it is the thing this
-   rule set exists to get rid of. */
+   32px rows, separators inset past the leading text edge.
+
+   SELECTION AND HOVER ARE BOTH QUIET, and the accent appears in neither as a
+   fill. Selection is accent TEXT plus semibold; hover is the soft neutral wash
+   that .jrk-menu__item uses. An earlier pass gave this a checkmark column and an
+   accent-filled hover row, which put a saturated blue block in a resting list
+   and made the popup the loudest thing on a form. The rule that replaced it:
+   a list you are picking FROM should not shout, because the closed control
+   already tells you what is chosen — the open list only has to confirm which
+   row it was.
+
+   The hover token is raised-hover, NOT surface-hover. This popup is a raised
+   surface, and surface-hover.dark is identical to surface-raised.dark, so the
+   obvious token is a silent no-op in one theme. */
 @supports (appearance: base-select) {
   .jrk-select,
   .jrk-select::picker(select) {
@@ -232,7 +239,32 @@
   }
 
   /* The control becomes a real button, so the inlined chevron is replaced by
-     ::picker-icon and the padding reserved for it is given back. */
+     ::picker-icon and the padding reserved for it is given back.
+
+     The last two declarations are what keep it a CONTROL rather than a paragraph,
+     and they are needed only here. A native select renders its label on one line
+     however narrow the box gets; a base-select one is a flex container whose
+     label is an anonymous flex item, and an anonymous item takes the normal
+     `white-space` and wraps. So in any flex row that squeezes it — a page
+     header's actions, a toolbar — a two-word label breaks onto two lines inside a
+     box still exactly `--jrk-control-md` tall, and the second line draws outside
+     the border. Not a narrow-viewport case: observed at 1700px wide.
+
+     `min-width` is the half that actually fixes it. Without a floor, nowrap alone
+     stops the wrap and the label spills past the border instead — the same defect
+     drawn horizontally. With one the control refuses to shrink below its own
+     content and the enclosing flex row absorbs the difference, which is where that
+     decision belongs: a consumer can always cap the width from a wrapper, and
+     cannot un-break a control that has already reflowed itself.
+
+     IT MUST BE `max-content`, NOT `fit-content`, and the difference is invisible
+     until the row is tight. `fit-content` is `min(max-content, max(min-content,
+     available))` — so under pressure it resolves to the AVAILABLE width, which is
+     the very thing being defended against. Worse, ::picker-icon does not
+     contribute to the clamped result: measured on a real page, the control settled
+     at 134px with a 139px scrollWidth and drew its chevron 7px outside its own
+     right border, sitting in the gap before the next button. `max-content` is a
+     true floor and includes the icon — same measurement, 151px, zero overflow. */
   .jrk-select {
     display: inline-flex;
     align-items: center;
@@ -241,6 +273,8 @@
     padding-inline-end: var(--jrk-space-2_5);
     background-image: none;
     text-align: start;
+    white-space: nowrap;
+    min-width: max-content;
   }
 
   .jrk-select::picker-icon {
@@ -277,52 +311,46 @@
 
   /* Inset separator, same pseudo-element mechanism as .jrk-list__row — a
      full-bleed rule is the giveaway that a list was built as a generic table.
-     It clears the checkmark column so it lines up with the LABEL, which is the
-     .jrk-list__row--icon case. */
+     Insets to the plain text edge now that there is no checkmark column to
+     clear. */
   .jrk-select option + option::before {
     content: '';
     position: absolute;
     top: 0;
-    inset-inline-start: calc(var(--jrk-space-4) + var(--jrk-icon-md) + var(--jrk-space-3));
+    inset-inline-start: var(--jrk-space-4);
     inset-inline-end: 0;
     height: 1px;
     background: var(--jrk-border-subtle);
   }
 
-  /* The checkmark column is always present, only hidden — so labels align
-     whether or not a row is the selected one. Same trick as .jrk-daterange. */
+  /* The checkmark is suppressed, not merely hidden. `::checkmark` is a UA
+     pseudo-element that base-select inserts and lays out as a flex item, so
+     leaving it at visibility:hidden would keep reserving its column and the
+     labels would sit indented against nothing. */
   .jrk-select option::checkmark {
-    content: '✓';
-    width: var(--jrk-icon-md);
-    height: var(--jrk-icon-md);
-    flex-shrink: 0;
-    font-weight: var(--jrk-weight-semibold);
-    color: var(--jrk-accent-text);
-    visibility: hidden;
+    display: none;
   }
 
+  /* Selection is accent text plus SEMIBOLD — no glyph, no fill. This is the
+     same answer .jrk-nav-flyout gives for the current item in a menu surface,
+     and for the same reason: the closed control already shows the chosen value,
+     so the open list only has to confirm which row it was. Weight is the second
+     channel that keeps it off colour-as-the-only-signal. */
   .jrk-select option:checked {
+    color: var(--jrk-accent-text);
     font-weight: var(--jrk-weight-semibold);
   }
 
-  .jrk-select option:checked::checkmark {
-    visibility: visible;
-  }
-
-  /* Accent fill means HOVERED here, not selected. */
+  /* Hover is the soft neutral wash, matching .jrk-menu__item. raised-hover
+     rather than surface-hover: this popup is a raised surface, where
+     surface-hover equals the plane itself in dark mode and does nothing. */
   .jrk-select option:hover,
   .jrk-select option:focus {
-    background: var(--jrk-accent-solid);
-    color: var(--jrk-accent-on-solid);
+    background: var(--jrk-surface-raised-hover);
     outline: none;
   }
 
-  .jrk-select option:hover::checkmark,
-  .jrk-select option:focus::checkmark {
-    color: var(--jrk-accent-on-solid);
-  }
-
-  /* A filled row would otherwise be cut by the next row's separator. */
+  /* A washed row would otherwise be cut by the next row's separator. */
   .jrk-select option:hover + option::before,
   .jrk-select option:focus + option::before {
     background: transparent;
@@ -521,8 +549,10 @@
   cursor: pointer;
 }
 
+/* raised-hover — the daterange list is a popover on surface-raised, where
+   surface-hover is a dark-mode no-op. Same fix as .jrk-menu__item. */
 .jrk-daterange__option:hover {
-  background: var(--jrk-surface-hover);
+  background: var(--jrk-surface-raised-hover);
 }
 
 .jrk-daterange__option[aria-selected='true'] {

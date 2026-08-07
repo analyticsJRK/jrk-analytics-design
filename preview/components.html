@@ -387,6 +387,117 @@
       same affordance as a mouse click. Every money and count column is right-aligned on
       tabular figures so digits stack.
     </div>
+
+    <!-- signed values: the two forms -->
+    <p class="gal-label">Signed values — pick by the job</p>
+    <div class="gal-demo gal-demo--stack">
+      <div class="jrk-card">
+        <div class="jrk-card__header">
+          <h4 class="jrk-card__title">Variance to budget</h4>
+          <p class="jrk-card__subtitle">One column, compared down its length — length is the precise channel</p>
+        </div>
+        <table class="jrk-table">
+          <thead>
+            <tr><th scope="col" class="jrk-col-start">Property</th><th scope="col">Variance</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="jrk-col-start">Bellevue Commons</td>
+              <td><span class="jrk-cell-bar jrk-cell-bar--signed"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill jrk-cell-bar__fill--pos" style="width:41%"></span></span><span class="jrk-cell-bar__value">+82k</span></span></td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Harbor Point</td>
+              <td><span class="jrk-cell-bar jrk-cell-bar--signed"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill jrk-cell-bar__fill--neg" style="width:24%"></span></span><span class="jrk-cell-bar__value">−47k</span></span></td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Sutter Yards</td>
+              <td><span class="jrk-cell-bar jrk-cell-bar--signed"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill jrk-cell-bar__fill--neg" style="width:50%"></span></span><span class="jrk-cell-bar__value">−100k</span></span></td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Ridgeline</td>
+              <td><span class="jrk-cell-bar jrk-cell-bar--signed"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill jrk-cell-bar__fill--pos" style="width:8%"></span></span><span class="jrk-cell-bar__value">+16k</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="jrk-card">
+        <div class="jrk-card__header">
+          <h4 class="jrk-card__title">NOI variance by month</h4>
+          <p class="jrk-card__subtitle">A grid scanned for where the problem is — colour is the coarse channel</p>
+        </div>
+        <table class="jrk-table">
+          <thead>
+            <tr>
+              <th scope="col" class="jrk-col-start">Property</th>
+              <th scope="col">Jan</th><th scope="col">Feb</th><th scope="col">Mar</th>
+              <th scope="col">Apr</th><th scope="col">May</th><th scope="col">Jun</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="jrk-col-start">Bellevue Commons</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-2">+4.1</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-4">+9.6</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-1">+1.2</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-1">−0.8</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-3">+6.7</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-2">+3.9</td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Harbor Point</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-2">−3.4</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-4">−9.9</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-3">−6.1</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-4">−8.8</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-2">−4.2</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-1">−1.1</td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Sutter Yards</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-1">+0.9</td>
+              <td class="jrk-cell-heat jrk-cell-heat--zero">0.0</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-1">−1.4</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-2">+3.1</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-1">+1.8</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-2">−2.9</td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Ridgeline</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-1">−1.0</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-3">+7.2</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-4">+10.0</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-2">+4.4</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-3">−5.6</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-1">+1.5</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="jrk-card__footer">
+          <div class="jrk-heat-legend">
+            <span>−10.0</span>
+            <span class="jrk-heat-legend__swatches" aria-hidden="true">
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-neg-4)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-neg-3)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-neg-2)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-neg-1)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-pos-1)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-pos-2)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-pos-3)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-pos-4)"></span>
+            </span>
+            <span>+10.0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="gal-rule">
+      Red ↔ blue, never red ↔ green — red beside green is the textbook protan collapse,
+      and on a signed table the arm IS the meaning. Every cell prints its value, so colour
+      is the second channel and never the only one. The ramp stops short of both poles
+      because <code class="jrk-mono">text.primary</code> has to clear 4.5:1 on every step;
+      the binding value is the deepest positive step in dark at 4.89:1.
+    </div>
   </section>
 
   <!-- ============================ feedback ============================ -->

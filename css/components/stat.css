@@ -20,9 +20,17 @@
   background: var(--jrk-surface-tinted);
 }
 
+/* Label, value and meta all centre together. The value is what the direction
+   asked for, but a centred figure over a left-aligned label is not an
+   alignment, it is a tile that looks broken — the three lines are one stack and
+   they share an axis. Note this is a FLEX row (it carries an optional info
+   glyph beside the text), so centring is justify-content, not text-align;
+   text-align on a flex container reaches the text inside each child, not the
+   children themselves. */
 .jrk-stat__label {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--jrk-space-1_5);
   font-size: var(--jrk-text-sm);
   font-weight: var(--jrk-weight-medium);
@@ -39,6 +47,7 @@
   line-height: var(--jrk-leading-tight);
   letter-spacing: var(--jrk-tracking-tight);
   color: var(--jrk-text-primary);
+  text-align: center;
 }
 
 .jrk-stat__value--sm {
@@ -56,6 +65,7 @@
 .jrk-stat__meta {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--jrk-space-2);
   font-size: var(--jrk-text-xs);
   color: var(--jrk-text-muted);

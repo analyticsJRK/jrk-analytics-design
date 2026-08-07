@@ -88,6 +88,12 @@ T.chart.sequential.steps.forEach((hex, i) => add(`chart-seq-${i + 1}`, hex));
 add('chart-div-negative', T.chart.diverging.negative);
 add('chart-div-positive', T.chart.diverging.positive);
 add('chart-div-mid', T.chart.diverging.midpoint.light, T.chart.diverging.midpoint.dark);
+// Signed cell fills. Themed, because a tint that sits under text has to be pale
+// in light and deep in dark — this ramp is never flipped.
+for (const arm of ['negative', 'positive']) {
+  const short = arm === 'negative' ? 'neg' : 'pos';
+  for (const s of T.chart.diverging.steps[arm]) add(`chart-div-${short}-${s.step}`, s.light, s.dark);
+}
 addThemed('chart', T.chart.chrome); // -> --jrk-chart-grid / -axis / -tick / -label / -deltaUp…
 
 // ---- scalars
@@ -229,7 +235,22 @@ export const chartDiverging = {
   negative: '${T.chart.diverging.negative}',
   positive: '${T.chart.diverging.positive}',
   midpoint: { light: '${T.chart.diverging.midpoint.light}', dark: '${T.chart.diverging.midpoint.dark}' },
+  steps: {
+    negative: ${JSON.stringify(T.chart.diverging.steps.negative)},
+    positive: ${JSON.stringify(T.chart.diverging.steps.positive)},
+  },
 } as const;
+
+/** Signed value -> diverging step 1..4. 'max' is the largest ABSOLUTE value in
+ *  the set being compared, so every cell in one table shares a scale — a
+ *  per-cell scale would make two different numbers the same colour. Returns
+ *  null at exactly zero, which is the midpoint and takes no fill. */
+export function divergingStep(value: number, max: number): { arm: 'negative' | 'positive'; step: 1 | 2 | 3 | 4 } | null {
+  if (!value || !max) return null;
+  const ratio = Math.min(Math.abs(value) / Math.abs(max), 1);
+  const step = Math.min(4, Math.max(1, Math.ceil(ratio * 4))) as 1 | 2 | 3 | 4;
+  return { arm: value < 0 ? 'negative' : 'positive', step };
+}
 
 export const chartChrome = ${JSON.stringify(T.chart.chrome, null, 2).replace(/"([^"]+)":/g, '$1:').replace(/"/g, "'")} as const;
 

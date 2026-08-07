@@ -12,10 +12,11 @@
   --color-surface-tinted: var(--jrk-surface-tinted);
   --color-surface-subtle: var(--jrk-surface-subtle);
   --color-surface-raised: var(--jrk-surface-raised);
-  --color-surface-thumb: var(--jrk-surface-thumb);
+  --color-surface-track: var(--jrk-surface-track);
   --color-surface-inverse: var(--jrk-surface-inverse);
   --color-surface-banner: var(--jrk-surface-banner);
   --color-surface-hover: var(--jrk-surface-hover);
+  --color-surface-raised-hover: var(--jrk-surface-raisedHover);
   --color-surface-card-hover: var(--jrk-surface-cardHover);
   --color-surface-active: var(--jrk-surface-active);
   --color-surface-disabled: var(--jrk-surface-disabled);

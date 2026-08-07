@@ -37,7 +37,22 @@ export const chartDiverging = {
   negative: '#ff3b30',
   positive: '#007aff',
   midpoint: { light: '#e5e5ea', dark: '#3a3a3c' },
+  steps: {
+    negative: [{"step":1,"light":"#ffdedb","dark":"#551c17"},{"step":2,"light":"#ffc9c5","dark":"#6d241d"},{"step":3,"light":"#ffb3ac","dark":"#872d24"},{"step":4,"light":"#ff9c93","dark":"#a3372c"}],
+    positive: [{"step":1,"light":"#dbeaff","dark":"#193754"},{"step":2,"light":"#c2dcff","dark":"#20466c"},{"step":3,"light":"#a8cdff","dark":"#275786"},{"step":4,"light":"#8dbdff","dark":"#2f68a1"}],
+  },
 } as const;
+
+/** Signed value -> diverging step 1..4. 'max' is the largest ABSOLUTE value in
+ *  the set being compared, so every cell in one table shares a scale — a
+ *  per-cell scale would make two different numbers the same colour. Returns
+ *  null at exactly zero, which is the midpoint and takes no fill. */
+export function divergingStep(value: number, max: number): { arm: 'negative' | 'positive'; step: 1 | 2 | 3 | 4 } | null {
+  if (!value || !max) return null;
+  const ratio = Math.min(Math.abs(value) / Math.abs(max), 1);
+  const step = Math.min(4, Math.max(1, Math.ceil(ratio * 4))) as 1 | 2 | 3 | 4;
+  return { arm: value < 0 ? 'negative' : 'positive', step };
+}
 
 export const chartChrome = {
   $comment: 'surface is the CARD, not the page — that is what chart marks sit on and what the validator measures against.',

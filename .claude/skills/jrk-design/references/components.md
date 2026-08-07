@@ -46,9 +46,14 @@ are declared once.
 - `.jrk-select` stays a real `<select>` — do NOT build a custom listbox. Its OPEN
   list is styled to match the grouped list via `appearance: base-select`, behind
   `@supports`, so unsupporting browsers keep the native popup untouched. Selection
-  there is a checkmark + semibold label; the accent fill means *hovered*. When two
-  precedents disagree — `.jrk-list__row[aria-selected]` fills, `.jrk-daterange__option`
-  checks — a popup takes the popup's convention
+  there is accent TEXT + semibold and hover is the soft neutral wash — no
+  checkmark, no accent fill. A list you pick *from* should not shout; the closed
+  control already says what is chosen
+- **Hover inside any raised surface uses `--jrk-surface-raised-hover`**, never
+  `--jrk-surface-hover`. `surface.hover.dark` and `surface.raised.dark` are the
+  same value, so the obvious token paints a menu row the exact colour of the menu
+  under it and dark mode gets no hover at all. Applies to `.jrk-menu__item`,
+  `.jrk-daterange__option`, and the select popup
 - `.jrk-input-group` + `.jrk-input-group__icon` for adornments
 - `.jrk-check` wraps a checkbox/radio + `.jrk-check__label` (+ `__hint`)
 - `.jrk-switch` for settings that apply **immediately** — if the change needs a

@@ -32,7 +32,7 @@ export type { BadgeProps, StatusProps, TagProps, StatusTone } from './Badge';
 export { Stat, StatRow, Delta, Sparkline } from './Stat';
 export type { StatProps, DeltaProps } from './Stat';
 
-export { DataTable, CellBar } from './DataTable';
+export { DataTable, CellBar, CellBarSigned, HeatLegend, cellHeatProps, divergingStep } from './DataTable';
 export type { DataTableProps, Column, SortDir } from './DataTable';
 
 export {

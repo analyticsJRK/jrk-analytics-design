@@ -125,7 +125,10 @@
   padding: var(--jrk-space-2);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  /* Was a hardcoded 2px, which check:css does not catch — it gates hex, not
+     px. 4px is the tokenised step up, and it is what makes the rail read as a
+     list of destinations rather than a stack of adjacent bars. */
+  gap: var(--jrk-space-1);
 }
 
 .jrk-sidebar__group {
@@ -155,11 +158,20 @@
   align-items: center;
   gap: var(--jrk-space-2);
   width: 100%;
-  height: var(--jrk-control-md);
+  /* 32px, up from the 28px macOS row. The note above about 40px being "a touch
+     ergonomic" still stands and is not being undone — this is the next step on
+     the existing control scale, not a return to a touch target. Height is the
+     real constraint on a 1080px display, so this is spent deliberately: the rail
+     holds ~12 destinations, and 4px each is affordable where a content grid's
+     would not be. */
+  height: var(--jrk-control-lg);
   padding-inline: var(--jrk-space-2);
   font-family: inherit;
-  font-size: var(--jrk-text-md);
-  font-weight: var(--jrk-weight-medium);
+  /* Lighter and one step larger together. Either alone reads as a mistake —
+     15px at medium looks heavy-set, 14px at regular looks washed out. The pair
+     is what gives the airier, more vertical rail. */
+  font-size: var(--jrk-text-lg);
+  font-weight: var(--jrk-weight-regular);
   color: var(--jrk-text-secondary);
   text-align: start;
   text-decoration: none;
@@ -173,10 +185,15 @@
     color var(--jrk-transition);
 }
 
+/* Bare SVGs only — `.jrk-icon` is em-sized and already tracks the label, so it
+   grew with the font-size above on its own and must not be caught here. */
 .jrk-nav-item svg:not(.jrk-icon) {
   width: var(--jrk-icon-md);
   height: var(--jrk-icon-md);
-  stroke-width: 1.75;
+  /* Follows the label down from medium to regular. "Icons inherit text weight"
+     is the rule that makes them feel native rather than bolted on, and a 1.75
+     stroke beside a 400 label is exactly where that breaks visibly. */
+  stroke-width: 1.5;
   flex-shrink: 0;
 }
 
@@ -482,7 +499,20 @@
 /* ============================== tabs ============================== */
 
 /* Markup: role="tablist" > role="tab" buttons, each with aria-selected and
-   aria-controls pointing at its role="tabpanel". */
+   aria-controls pointing at its role="tabpanel".
+
+   OR a nav of links, which is a different widget wearing the same clothes. A row
+   of sub-page links looks like this and should — the reader is picking one of
+   several views of one subject either way — but the markup underneath cannot be
+   the same. A link is not a tab: `role="tab"` promises a panel in this document
+   that aria-controls can point at, and `aria-selected` is only meaningful inside
+   a tablist. Put them on an <a> and assistive tech announces a tab widget whose
+   panel never arrives.
+
+   So the link form is `<nav> > <a aria-current="page">`, with no roles at all,
+   and every selected rule below answers to aria-current as well as
+   aria-selected. Pick by what the row DOES: swaps panels in place → buttons and
+   aria-selected; changes the URL → links and aria-current. */
 .jrk-tabs {
   display: flex;
   align-items: center;
@@ -505,11 +535,23 @@
   font-weight: var(--jrk-weight-medium);
   color: var(--jrk-text-muted);
   white-space: nowrap;
+  /* For the link form. base.css underlines anchors, and an underlined tab beside
+     the 2px selected rule reads as two competing marks on the same edge. */
+  text-decoration: none;
   background: none;
   border: 0;
   /* Transparent underline reserves the space, so selecting a tab does not
      shift the row by 2px. */
   border-bottom: 2px solid transparent;
+  /* base.css rounds EVERY anchor by radius-sm so the focus ring has soft
+     corners, and on the link form that 4px lands on the 2px selected underline
+     and curls both of its ends upward into little ticks. Only the bottom pair is
+     zeroed: the top corners are invisible here — no background, no top border —
+     but the focus ring still uses them, so squaring all four would trade one
+     cosmetic fault for another. The pills variant sets its own radius at 0-2-0
+     and is unaffected. */
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
   margin-bottom: -1px;
   cursor: pointer;
   transition: color var(--jrk-transition), border-color var(--jrk-transition);
@@ -517,9 +559,11 @@
 
 .jrk-tab:hover {
   color: var(--jrk-text-primary);
+  text-decoration: none;
 }
 
-.jrk-tab[aria-selected='true'] {
+.jrk-tab[aria-selected='true'],
+.jrk-tab[aria-current='page'] {
   color: var(--jrk-accent-text);
   border-bottom-color: var(--jrk-border-accent);
 }
@@ -549,7 +593,9 @@
   gap: 0;
   padding: 2px;
   border-bottom: 0;
-  background: var(--jrk-surface-subtle);
+  /* surface-track — see .jrk-btn-group in button.css. surface-subtle is #ffffff
+     in light since the page flattening, so this well had no anatomy. */
+  background: var(--jrk-surface-track);
   border-radius: var(--jrk-radius-md);
 }
 
@@ -587,13 +633,19 @@
   color: var(--jrk-text-primary);
 }
 
-/* The thumb. */
+/* The selected pill. Same three channels as .jrk-btn-group — fill, ink, weight
+   — and the same reason: a white thumb on a white track measured 1.00:1 and the
+   selection was carried by a 0.5px shadow. See $removedThumbNote on the tokens. */
 .jrk-tabs--pills .jrk-tab[aria-selected='true'] {
-  background: var(--jrk-surface-thumb);
-  color: var(--jrk-text-primary);
-  box-shadow:
-    0 0 0 0.5px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.12);
+  background: var(--jrk-accent-solid);
+  color: var(--jrk-accent-on-solid);
+  font-weight: var(--jrk-weight-semibold);
+  box-shadow: none;
+}
+
+.jrk-tabs--pills .jrk-tab[aria-selected='true']:hover {
+  background: var(--jrk-accent-solid-hover);
+  color: var(--jrk-accent-on-solid);
 }
 
 /* ============================== responsive ============================== */

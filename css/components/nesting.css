@@ -53,6 +53,32 @@
   border-color: var(--jrk-border-default);
 }
 
+/* A tile filling a FLUSH body is not nested on the card plane — it IS the card's
+   body, and the card's own boundary is already drawn around it.
+
+   `.jrk-card__body--flush` is `padding: 0`, so a table or sheet inside one lands
+   flat against the card's edge. The hairline above then paints a second rounded
+   rectangle immediately inside the first, and because the two radii are struck
+   from different origins the inner curve pulls away from the outer at every
+   corner and leaves a visible notch. It reads as a rendering fault rather than as
+   structure — the same failure the brand-edge era of this file existed to
+   prevent, except it is now a hairline doubling a fill step instead of a blue
+   line doubling a blue line.
+
+   The fill-step reasoning does not reach this case either. A flush body's tile is
+   not sitting ON the card plane needing to separate from it; it IS that plane,
+   out to the card's own edge, so there is nothing for it to separate from.
+
+   0-2-0, the same as the rule above, so this depends on coming LATER IN THIS FILE
+   and on nothing else — do not move it above that block. The child combinator is
+   deliberate: a tile nested deeper inside a flush body is genuinely on the card
+   plane and keeps its hairline. */
+.jrk-card__body--flush > .jrk-table-wrap,
+.jrk-card__body--flush > .jrk-sheet,
+.jrk-card__body--flush > .jrk-card {
+  border-color: transparent;
+}
+
 /* A JOINED band is one enclosure whose tiles are divided by internal hairlines,
    so its tiles carry no edge at any depth. 0-4-0 with the :not(), which keeps
    this from also catching the split tiles handled above — a split row matches

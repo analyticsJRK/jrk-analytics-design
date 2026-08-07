@@ -45,7 +45,10 @@
      is a Material convention and one of the loudest non-Apple tells; macOS
      table headers are small, grey and plainly cased. */
   letter-spacing: var(--jrk-tracking-normal);
-  text-align: start;
+  /* Follows the cells below it. A header is a column's name, so it has to sit
+     over the column — leaving this at `start` while the body centres reads as a
+     broken table rather than as a deliberate alignment. */
+  text-align: center;
   white-space: nowrap;
   color: var(--jrk-text-muted);
   background: var(--jrk-surface-subtle);
@@ -103,6 +106,7 @@
   padding: var(--jrk-space-2_5) var(--jrk-space-4);
   border-bottom: 1px solid var(--jrk-border-subtle);
   vertical-align: middle;
+  text-align: center;
 }
 
 .jrk-table tbody tr:last-child td {
@@ -119,15 +123,36 @@
 
 /* ---------- column alignment ---------- */
 
-/* Numbers right-align on tabular figures so digits stack. Text stays left. */
+/* CENTRED IS THE DEFAULT, by explicit design direction. Know what it costs:
+   `tabular-nums` below makes every digit the same width so figures stack, and
+   centring throws most of that away — 98 and 1,204 no longer start at the same
+   offset, so a reader cannot compare magnitudes by running an eye down the
+   column, which is most of what a numeric table is for. The figures are still
+   tabular, so a column of EQUAL-length values (currency to 2dp, percentages,
+   dates) still aligns perfectly; it is mixed-magnitude columns that lose it.
+   `.jrk-col-end` is the way back for a column where that matters. */
 .jrk-table .jrk-num {
-  text-align: right;
+  text-align: center;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
+/* Retained and now a no-op against the default. Kept rather than deleted
+   because consumers already write it, and a class that silently stops existing
+   is worse than one that agrees with the default. */
 .jrk-table .jrk-col-center {
   text-align: center;
+}
+
+/* The escape hatches. `start` for a row-identifying name column, where centred
+   long text leaves a ragged left edge and the reader loses the scan line;
+   `end` for a numeric column that has to be compared down its length. */
+.jrk-table .jrk-col-start {
+  text-align: start;
+}
+
+.jrk-table .jrk-col-end {
+  text-align: end;
 }
 
 /* Row-identifying first column. Sticks horizontally so it stays visible while
@@ -208,6 +233,120 @@
   font-variant-numeric: tabular-nums;
   min-width: 4ch;
   text-align: right;
+}
+
+/* ---------- signed values: two forms, two jobs ---------- */
+
+/* PICK BY THE JOB, not by taste. Both encode a signed number and they are not
+   interchangeable:
+     .jrk-cell-bar--signed  — LENGTH from a centre axis. Length is the precise
+       channel, so use it when the reader compares magnitudes down one column
+       (variance to budget, delta by property). One column, many rows.
+     .jrk-cell-heat         — a diverging TINT. Colour is the coarse channel, so
+       use it when the reader scans a GRID for where the problem is and reads
+       the exact figure only after landing on a cell. Many columns, many rows.
+   A grid of bars is unreadable and a single column of tints wastes the precise
+   channel on a job length would do better. */
+
+/* ---- signed bar: length from a centre axis ---- */
+
+.jrk-cell-bar--signed {
+  justify-content: initial;
+}
+
+/* The axis. A signed bar means nothing without a visible zero to read from —
+   without it a short negative and a short positive look like the same bar in
+   different colours. */
+.jrk-cell-bar--signed .jrk-cell-bar__track {
+  position: relative;
+  max-width: none;
+}
+
+.jrk-cell-bar--signed .jrk-cell-bar__track::before {
+  content: '';
+  position: absolute;
+  inset-block: -2px;
+  inset-inline-start: 50%;
+  width: 1px;
+  background: var(--jrk-chart-axis);
+}
+
+/* Both halves are absolutely positioned off the 50% mark, so a row with only a
+   negative value still aligns its axis with every other row. Width is set
+   inline as a percentage of the half-track. */
+.jrk-cell-bar--signed .jrk-cell-bar__fill {
+  position: absolute;
+  inset-block: 0;
+  height: auto;
+}
+
+.jrk-cell-bar__fill--neg {
+  inset-inline-end: 50%;
+  background: var(--jrk-chart-div-negative);
+}
+
+.jrk-cell-bar__fill--pos {
+  inset-inline-start: 50%;
+  background: var(--jrk-chart-div-positive);
+}
+
+/* ---- heat cell: diverging tint ---- */
+
+/* The tint is a fill UNDER text, which is why it draws from chart-div-*-N and
+   never from the poles: every step is gated to keep text.primary above 4.5:1,
+   and the poles are mark colours that are not.
+
+   Sign is ALSO in the number — a heat cell always prints its value, so colour
+   is the second channel and never the only one. That is not a nicety here: at
+   rank 1 the two arms are deliberately faint, and a reader should never have to
+   resolve polarity from a pale wash. */
+.jrk-cell-heat {
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--jrk-transition);
+}
+
+/* Zero takes no fill. A grey midpoint wash would shade every near-zero cell in
+   the table and make an unremarkable row look like a finding. */
+.jrk-cell-heat--zero {
+  background: transparent;
+}
+
+.jrk-cell-heat--neg-1 { background: var(--jrk-chart-div-neg-1); }
+.jrk-cell-heat--neg-2 { background: var(--jrk-chart-div-neg-2); }
+.jrk-cell-heat--neg-3 { background: var(--jrk-chart-div-neg-3); }
+.jrk-cell-heat--neg-4 { background: var(--jrk-chart-div-neg-4); }
+.jrk-cell-heat--pos-1 { background: var(--jrk-chart-div-pos-1); }
+.jrk-cell-heat--pos-2 { background: var(--jrk-chart-div-pos-2); }
+.jrk-cell-heat--pos-3 { background: var(--jrk-chart-div-pos-3); }
+.jrk-cell-heat--pos-4 { background: var(--jrk-chart-div-pos-4); }
+
+/* A tinted cell must keep its tint on row hover, or scanning the grid makes the
+   value under the pointer drop out of the scale you are reading it against. */
+.jrk-table tbody tr:hover td.jrk-cell-heat {
+  background-color: inherit;
+}
+
+/* The scale legend. Charts get a legend for identity; this is the same
+   obligation for magnitude — a tint means nothing without the range printed. */
+.jrk-heat-legend {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.jrk-heat-legend__swatches {
+  display: flex;
+  gap: 1px;
+}
+
+.jrk-heat-legend__swatch {
+  display: block;
+  width: 18px;
+  height: 10px;
+  border-radius: 1px;
 }
 
 /* ---------- footer / pagination ---------- */

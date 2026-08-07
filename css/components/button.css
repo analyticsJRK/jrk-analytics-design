@@ -226,7 +226,10 @@
   display: inline-flex;
   gap: 0;
   padding: 2px;
-  background: var(--jrk-surface-subtle);
+  /* surface-track, not surface-subtle. subtle is #ffffff in light since the page
+     flattening, so the well was the same colour as the card and the control had
+     no anatomy at all. */
+  background: var(--jrk-surface-track);
   border-radius: var(--jrk-radius-md);
   isolation: isolate;
 }
@@ -239,7 +242,9 @@
   background: transparent;
   border-color: transparent;
   box-shadow: none;
-  color: var(--jrk-text-primary);
+  /* Unselected segments are SECONDARY ink. They used to be primary, identical to
+     the selected one, which left the fill doing the whole job alone. */
+  color: var(--jrk-text-secondary);
   border-radius: calc(var(--jrk-radius-md) - 2px);
   margin-inline-start: 0;
 }
@@ -271,14 +276,28 @@
   z-index: 1;
 }
 
-/* The thumb. */
+/* The selected segment. THREE channels — fill, ink and weight — because which
+   segment is selected is a state a reader depends on, and it previously had one
+   channel that measured 1.00:1 (a white thumb on a white track) plus a 0.5px
+   shadow. See $removedThumbNote on the tokens.
+
+   accent.solid is the same treatment .jrk-nav-item[aria-current] uses for "this
+   is the active one", so the library now answers that question one way. It also
+   measures: 4.28:1 against the light track, 3.40:1 against the dark one, both
+   past the 3:1 WCAG 1.4.11 asks of a state indicator. The shadow is gone rather
+   than kept alongside — it only ever worked in light, and the fill now carries
+   this in both themes. */
 .jrk-btn-group > .jrk-btn[aria-pressed='true'],
 .jrk-btn-group > .jrk-btn[aria-selected='true'] {
-  background: var(--jrk-surface-thumb);
-  color: var(--jrk-text-primary);
+  background: var(--jrk-accent-solid);
+  color: var(--jrk-accent-on-solid);
+  font-weight: var(--jrk-weight-semibold);
   border-color: transparent;
-  box-shadow:
-    0 0 0 0.5px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.12);
+  box-shadow: none;
   z-index: 1;
+}
+
+.jrk-btn-group > .jrk-btn[aria-pressed='true']:hover:not(:disabled),
+.jrk-btn-group > .jrk-btn[aria-selected='true']:hover:not(:disabled) {
+  background: var(--jrk-accent-solid-hover);
 }

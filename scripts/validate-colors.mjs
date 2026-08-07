@@ -251,6 +251,51 @@ console.log('\n== sequential ramp ==');
   }
 }
 
+// ---------- diverging cell ramp ----------
+// These steps sit UNDER text, which no other chart colour in this file does, so
+// they get their own gate. Three properties, and losing any one of them breaks a
+// different thing: ink legibility, the ramp's direction, and the polarity signal.
+//
+// NOT checked here, deliberately: CVD separation between CONSECUTIVE steps in an
+// arm. Those run deltaE 4.2-6.5 and that is what a magnitude ramp is supposed to
+// look like. The categorical floor is for naming which series a mark belongs to;
+// applying it here would be a category error and would force the arms apart until
+// the ramp read as four unrelated colours. See $rampVsIdentity on the token.
+console.log('\n== diverging cell ramp ==');
+{
+  const D = T.chart.diverging.steps;
+  const INK = { light: T.color.text.primary.light, dark: T.color.text.primary.dark };
+
+  for (const mode of ['light', 'dark']) {
+    for (const arm of ['negative', 'positive']) {
+      const steps = D[arm];
+
+      // 1. The cell carries its number. This is the constraint that caps the ramp.
+      for (const s of steps) {
+        const c = contrast(INK[mode], s[mode]);
+        c >= 4.5 ? pass(`div ${arm} ${s.step} ${mode} — text.primary ${c.toFixed(2)}:1`)
+                 : fail(`div ${arm} ${s.step} ${mode} — text.primary ${c.toFixed(2)}:1, needs 4.5:1 (the cell shows its value)`);
+      }
+
+      // 2. A ramp that is not monotonic is not a ramp — magnitude stops reading.
+      const ls = steps.map((s) => lum(s[mode]));
+      const ok = mode === 'light'
+        ? ls.every((v, i) => i === 0 || v < ls[i - 1])
+        : ls.every((v, i) => i === 0 || v > ls[i - 1]);
+      ok ? pass(`div ${arm} ${mode} — monotonic (${mode === 'light' ? 'pale -> saturated' : 'deep -> lifted'})`)
+         : fail(`div ${arm} ${mode} — steps are not monotonic, so magnitude does not read`);
+    }
+
+    // 3. On a signed table the ARM is the meaning, so polarity must survive CVD.
+    for (let i = 0; i < D.negative.length; i++) {
+      const w = worstSeparation(D.negative[i][mode], D.positive[i][mode]);
+      w.deltaE >= CVD_FLOOR
+        ? pass(`div polarity rank ${i + 1} ${mode} — dE ${w.deltaE.toFixed(1)} (${w.kind})`)
+        : fail(`div polarity rank ${i + 1} ${mode} — dE ${w.deltaE.toFixed(1)} under ${CVD_FLOOR}; negative and positive collapse under ${w.kind}`);
+    }
+  }
+}
+
 console.log(`\n${failures ? 'FAILED' : 'OK'} — ${failures} failure(s), ${warnings} warning(s)\n`);
 if (warnings && !failures) {
   console.log('Warnings above are the documented relief cases: sub-3:1 marks ship with');

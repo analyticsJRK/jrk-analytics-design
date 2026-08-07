@@ -174,3 +174,81 @@ export function CellBar({ value, max, format }: { value: number; max: number; fo
     </span>
   );
 }
+
+/* ------------------------- signed values in a cell ------------------------- */
+
+/** Signed value -> which diverging step, 1..4.
+ *
+ *  `max` is the largest ABSOLUTE value across the whole set being compared, and
+ *  it is a required prop rather than something derived per cell on purpose: two
+ *  cells in one table with different numbers must never get the same colour.
+ *  Pass the same `max` to every cell in the table (and to <HeatLegend>).
+ *  Returns null at exactly zero — the midpoint takes no fill. */
+export function divergingStep(value: number, max: number): { arm: 'neg' | 'pos'; step: 1 | 2 | 3 | 4 } | null {
+  if (!value || !max) return null;
+  const ratio = Math.min(Math.abs(value) / Math.abs(max), 1);
+  const step = Math.min(4, Math.max(1, Math.ceil(ratio * 4))) as 1 | 2 | 3 | 4;
+  return { arm: value < 0 ? 'neg' : 'pos', step };
+}
+
+/** Signed magnitude as LENGTH from a centre axis. Use when the reader compares
+ *  magnitudes down ONE column — length is the precise channel. For a whole grid
+ *  of signed numbers use <CellHeat> instead; a grid of bars is unreadable. */
+export function CellBarSigned({
+  value,
+  max,
+  format,
+}: {
+  value: number;
+  max: number;
+  format?: (n: number) => string;
+}) {
+  const pct = max > 0 ? Math.min(100, (Math.abs(value) / max) * 100) : 0;
+  const neg = value < 0;
+  return (
+    <span className="jrk-cell-bar jrk-cell-bar--signed">
+      <span className="jrk-cell-bar__track" aria-hidden="true">
+        <span
+          className={cx('jrk-cell-bar__fill', neg ? 'jrk-cell-bar__fill--neg' : 'jrk-cell-bar__fill--pos')}
+          style={{ width: `${pct / 2}%` }}
+        />
+      </span>
+      <span className="jrk-cell-bar__value">{format ? format(value) : value.toLocaleString()}</span>
+    </span>
+  );
+}
+
+/** A table cell tinted by signed value. Use for a GRID the reader scans to find
+ *  where a problem is; the exact figure is read after landing on a cell.
+ *
+ *  Spread the returned props onto a <td>. The value is ALWAYS rendered as text:
+ *  the tint is the second channel, never the only one, and at step 1 the two
+ *  arms are deliberately faint. */
+export function cellHeatProps(value: number, max: number) {
+  const d = divergingStep(value, max);
+  return {
+    className: cx('jrk-cell-heat', d ? `jrk-cell-heat--${d.arm}-${d.step}` : 'jrk-cell-heat--zero'),
+  };
+}
+
+/** The magnitude legend. A tint means nothing without its range printed —
+ *  the same obligation a chart legend carries for identity. `max` must be the
+ *  one passed to the cells. */
+export function HeatLegend({ max, format }: { max: number; format?: (n: number) => string }) {
+  const fmt = format ?? ((n: number) => n.toLocaleString());
+  const steps = [4, 3, 2, 1] as const;
+  return (
+    <div className="jrk-heat-legend">
+      <span>{fmt(-max)}</span>
+      <span className="jrk-heat-legend__swatches" aria-hidden="true">
+        {steps.map((s) => (
+          <span key={`n${s}`} className="jrk-heat-legend__swatch" style={{ background: `var(--jrk-chart-div-neg-${s})` }} />
+        ))}
+        {([1, 2, 3, 4] as const).map((s) => (
+          <span key={`p${s}`} className="jrk-heat-legend__swatch" style={{ background: `var(--jrk-chart-div-pos-${s})` }} />
+        ))}
+      </span>
+      <span>{fmt(max)}</span>
+    </div>
+  );
+}

@@ -177,8 +177,12 @@
   color: var(--jrk-text-muted);
 }
 
+/* raised-hover, NOT surface-hover. A menu sits on surface-raised, and in dark
+   mode surface-hover IS surface-raised (#2c2c2e both), so this rule painted the
+   row the exact colour of the menu under it and dark mode had no hover at all.
+   See the note on the token. */
 .jrk-menu__item:hover {
-  background: var(--jrk-surface-hover);
+  background: var(--jrk-surface-raised-hover);
 }
 
 .jrk-menu__item:disabled {
