@@ -2,7 +2,20 @@ import { forwardRef } from 'react';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { cx } from './utils';
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'danger-quiet' | 'link';
+/** `primary` is the tinted everyday button. `cta` is the solid accent, reserved
+ *  for the one committing action on a view — see the note in button.css. */
+export type ButtonVariant =
+  | 'primary'
+  | 'cta'
+  | 'secondary'
+  | 'ghost'
+  | 'danger'
+  /** The filled red confirm inside a destructive dialog. Present in the CSS
+   *  since it was written but missing from this union, so React callers could
+   *  not reach it without a raw className. */
+  | 'danger-solid'
+  | 'danger-quiet'
+  | 'link';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'className'> {

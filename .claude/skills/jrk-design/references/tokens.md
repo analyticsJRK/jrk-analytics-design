@@ -117,8 +117,21 @@ this token used to need a bespoke value to clear 3:1 at all; it now tracks
 
 ## Accent (blue, hue 212 degrees)
 
-`--jrk-accent-solid` (button fill) · `-solid-hover` · `-solid-active` ·
-`-on-solid` · `-text` · `-wash` (selected row, soft badge) · `-wash-text`.
+`--jrk-accent-solid` (the `.jrk-btn--cta` fill) · `-solid-hover` ·
+`-solid-active` · `-on-solid` · `-text` · `-wash` (selected row, soft badge, and
+the `.jrk-btn--primary` fill) · `-wash-hover` · `-wash-active` · `-wash-border` ·
+`-wash-text`.
+
+**Two button volumes, and the split is deliberate.** `-solid` + `-on-solid` is
+`--cta`, one per view; the `-wash` family is `--primary`, the everyday button.
+Three things about the wash family are load-bearing. `-wash-text` is the label on
+every step of it, so `validate` measures it against `-wash`, `-wash-hover` **and**
+`-wash-active` — the press deepens the fill *toward* its ink, the opposite of
+`-solid`'s sequence, and `-wash-active` is the last step that still clears 4.5:1.
+`-wash-border` exists because a wash is a 1.16:1 fill step on the white card and
+1.06:1 on the dark one: it cannot bound a control, and a button has to look
+pressable. And `-wash-border` is kept far below `--jrk-border-accent` on purpose —
+that one means *selected* on a segment or a tab, and the two must not converge.
 
 **The anchor is `#0069d9`, a saturated mid-tone, and every role takes it.**
 5.22:1 on the white card, 4.68:1 on the `#f2f2f7` page, white label at 5.22:1 —

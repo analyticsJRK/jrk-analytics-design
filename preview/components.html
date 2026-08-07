@@ -20,7 +20,8 @@
   <section class="gal-sec">
     <h2>Buttons</h2>
     <div class="gal-demo">
-      <button class="jrk-btn jrk-btn--primary">Run report</button>
+      <button class="jrk-btn jrk-btn--cta">Run report</button>
+      <button class="jrk-btn jrk-btn--primary">New view</button>
       <button class="jrk-btn jrk-btn--secondary">Export</button>
       <button class="jrk-btn jrk-btn--ghost">Cancel</button>
       <button class="jrk-btn jrk-btn--danger">Delete</button>
@@ -29,6 +30,16 @@
       <button class="jrk-btn jrk-btn--link">View details</button>
       <button class="jrk-btn jrk-btn--primary" disabled>Disabled</button>
       <button class="jrk-btn jrk-btn--primary" data-loading="true" aria-busy="true"><span>Saving</span></button>
+      <button class="jrk-btn jrk-btn--cta" data-loading="true" aria-busy="true"><span>Running</span></button>
+      <button class="jrk-btn jrk-btn--danger" data-loading="true" aria-busy="true"><span>Deleting</span></button>
+    </div>
+
+    <div class="gal-rule">
+      <code class="jrk-mono">--primary</code> is the tinted everyday button;
+      <code class="jrk-mono">--cta</code> is the solid accent and there is at most one per view.
+      Both spinners are visible above — the loading ink is set per variant, because the
+      rule that hides the label sets <code class="jrk-mono">color: transparent</code> and
+      <code class="jrk-mono">currentColor</code> cannot be inherited through it.
     </div>
 
     <div class="gal-demo">

@@ -38,6 +38,9 @@
   --color-accent-on-solid: var(--jrk-accent-onSolid);
   --color-accent-text: var(--jrk-accent-text);
   --color-accent-wash: var(--jrk-accent-wash);
+  --color-accent-wash-hover: var(--jrk-accent-washHover);
+  --color-accent-wash-active: var(--jrk-accent-washActive);
+  --color-accent-wash-border: var(--jrk-accent-washBorder);
   --color-accent-wash-text: var(--jrk-accent-washText);
   --color-good-mark: var(--jrk-status-good-mark);
   --color-good-text: var(--jrk-status-good-text);

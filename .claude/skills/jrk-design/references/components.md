@@ -24,7 +24,14 @@ Textarea Topbar` plus `cx`, `setTheme`, `variantClass`, `MAX_SERIES`,
 
 `.jrk-btn` + one variant + optional size.
 
-- Variants: `--primary` `--secondary` `--ghost` `--danger` `--danger-quiet` `--link`
+- Variants: `--primary` `--cta` `--secondary` `--ghost` `--danger` `--danger-solid`
+  `--danger-quiet` `--link`
+- **`--primary` is TINTED** (accent wash + `accent.washText` + an
+  `accent.washBorder` hairline) and is the everyday button. **`--cta` is the solid
+  accent** — at most one per view, for the action that commits. Putting two `--cta`s
+  on a screen removes the only reason either is loud
+- The loading spinner's ink is set per variant and defaults to `text.secondary`;
+  a new filled variant must name its own or it inherits the quiet one
 - Sizes: `--sm` `--lg` (md is default), plus `--icon` (square), `--block`
 - Loading: `data-loading="true"` + `aria-busy` — content stays in flow at zero
   opacity so the button does not resize mid-action
@@ -167,6 +174,13 @@ For workbook-style financial reports use the **sheet** layer instead — see
   the same attribute assistive tech reads, so the two cannot disagree. Renders on
   an `<a>` for a destination and a `<button>` for a flyout parent; the button
   resets live in the base rule so the two are pixel-identical
+  - the current row is the **tinted button** — `accent.wash` + `accent.washText` +
+    **semibold**, same as `.jrk-btn--primary` and the segmented thumb. It replaced a
+    solid `accent.solid` pill that measured 5.22:1 against every neighbour; the wash
+    is 1.04:1 against a hovered row and 1.08:1 against an open one, so hue and
+    weight are what distinguish where-am-I from a pointer state. The semibold is
+    the channel that survives greyscale — keep it
+  - `.jrk-sidebar__action[aria-current]` tracks this rule; change both
 - **Second nav level** — `<NavMenu>`, or by hand: a `.jrk-nav-item` `<button>`
   with `aria-expanded` + `aria-controls`, then a **sibling**
   `.jrk-menu.jrk-nav-flyout` panel. Four things are load-bearing:
@@ -195,6 +209,16 @@ For workbook-style financial reports use the **sheet** layer instead — see
 - `.jrk-tabs` (`--pills`) + `.jrk-tab` + `__count`. `role="tablist"` / `role="tab"`
   with `aria-selected` and `aria-controls`; arrow keys must move between tabs
   (`<Tabs>` handles this)
+  - the link form is `<nav> > <a aria-current="page">` with no roles — a row that
+    changes the URL is not a tablist. Both variants style off `aria-current` as
+    well as `aria-selected`
+  - `--pills` is the same widget as `.jrk-btn-group`, rendered the same way: a
+    `surface.track` well, unselected segments as bare labels, and the selected one
+    as a raised tinted thumb (`accent.wash` + `accent.washText` + **semibold** +
+    `shadow.md` + an `accent.washBorder` hairline). Change one and change the other
+  - no channel on that thumb measures 3:1 — the semibold is the only one that
+    survives greyscale and CVD, so it is load-bearing. Full numbers and the
+    one-line way back to a measuring signal are in `button.css`
 
 ## Feedback
 

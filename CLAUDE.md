@@ -144,8 +144,15 @@ blue at hue 212° and slot 1 is systemBlue at 211° — the same hue, and slot 1
 the default single-series color for every bar list, cell bar and sparkline. The
 palette has NOT been re-derived; only lightness separates them (white on the
 accent is 5.22:1, on slot 1 it is 4.02:1). So: never put a chart on an accent
-wash, and never let a lone blue series sit beside a primary button in the same
-tile without a label between them.
+wash, and never let a lone blue series sit beside a `.jrk-btn--cta` in the same
+tile without a label between them. **The tinted `--primary` inherits a second,
+milder version of the same collision**: its fill family (`accent.wash` /
+`washHover` / `washActive`) lands on top of `--jrk-chart-tint-1` — `#cfe1fd`
+against `#c7deff` in light, `#143a5e` against `#113a5e` in dark, i.e. the same
+color. Accepted, because the two are never the identity channel for the same
+thing and only the button carries a hairline (`accent.washBorder`) and a label.
+The rule it produces: a tinted button does not sit inside a chart tile among
+tint-filled marks.
 
 **Color is never the only signal.** Status needs icon + label. Deltas state
 direction in text. Charts have a table view.
@@ -200,6 +207,51 @@ surface: the two now agree in light and disagree in dark. Do not collapse them,
 and **do not borrow `accent.onSolid` as a generic "label on a filled control"** —
 `.jrk-btn--danger-solid` did, so a red button's ink direction moved every time
 the accent did. That is what `status.critical.solid` / `.onSolid` are for.
+
+**The accent has two button volumes, and which one is the DEFAULT is the whole
+decision.** `.jrk-btn--primary` is **tinted** — `accent.wash` fill,
+`accent.washText` label, `accent.washBorder` hairline — and it is the everyday
+button. `.jrk-btn--cta` is the solid anchor with a white label, and there is **at
+most one per view**, for the action that commits. `--primary` used to *be* the
+solid one; the reason it moved is that a screen here shows a page-header action, an
+export, a filter and a segmented control at once, and four saturated blue
+rectangles tell the reader nothing about which one commits. Three details are
+load-bearing, all of them recorded on the tokens: the label is `washText`, not
+`accent.text` (the anchor is 4.49:1 on the wash — under by 0.01); the wash cannot
+bound the control (1.16:1 on the white card, 1.06:1 on the dark one) so the
+hairline is not decoration you can drop; and `accent.washBorder` is kept far below
+`border.accent`, which means *selected* on a segment or tab — if those two ever
+converge, a button and a chosen control look alike.
+
+**A segmented control is an inset well with a RAISED TINTED THUMB, and the
+current-page nav row is the same tinted pill.** `.jrk-btn-group`,
+`.jrk-tabs--pills`, `.jrk-nav-item[aria-current]` and
+`.jrk-sidebar__action[aria-current]` all say "this is the one" the same way now:
+`accent.wash` + `accent.washText` + **semibold**. On the two segmented controls the
+thumb adds `shadow.md` and the faint `accent.washBorder` hairline and floats in a
+`surface.track` well whose unselected segments are bare labels — no fill, no
+border, so there is one enclosure in the control and it marks the choice. The two
+segmented controls are the same widget in two markup contracts; a change to one
+belongs in both. Segment height comes from the button's own size modifier (the
+first track era pinned it at 22px, under the 24px `minTouch` floor).
+
+**This design spends a measured signal, and you need to know that before you
+touch it.** No channel on the thumb reaches 3:1: the fill is **1.05:1** against the
+track in light and 1.20:1 in dark, the hairline 1.44:1 and 2.30:1, and the shadow
+is invisible in dark by construction. The nav pill is the same story — **1.04:1**
+against a hovered row, 1.08:1 against an open one. Immediately before this the
+segment carried `border.accent` at 5.22:1/6.37:1 and the nav row a solid
+`accent.solid` pill at 5.22:1. Both were traded, deliberately and on instruction,
+for the quieter look.
+
+So: **the `semibold` is structure, not styling.** It is the only channel that
+survives greyscale, both dichromacies and both themes, and it is what keeps
+"which one is selected" and "where am I" answerable at all. Do not let a tidy-up
+drop it. Two more consequences worth carrying: a neutral or white thumb must never
+come back, because `accent.wash`'s 1.05:1 on the track is the entire margin between
+this design and the 1.00:1 white thumb this library already recorded as a failure;
+and if a 3:1 state signal is ever wanted again, the fix is one line —
+`border.accent` on the thumb rule.
 
 **Adopt Apple values only where they pass** — see above. The accent is not an
 Apple color; the neutrals, status colors and chart palette still are.

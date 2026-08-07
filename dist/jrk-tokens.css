@@ -65,6 +65,9 @@
   --jrk-accent-on-solid: #ffffff;
   --jrk-accent-text: #0069d9;
   --jrk-accent-wash: #e3efff;
+  --jrk-accent-wash-hover: #d6e6ff;
+  --jrk-accent-wash-active: #cfe1fd;
+  --jrk-accent-wash-border: #a3c6f3;
   --jrk-accent-wash-text: #005ec4;
   --jrk-status-good-mark: #34c759;
   --jrk-status-good-text: #1e7a34;
@@ -274,6 +277,9 @@
     --jrk-accent-on-solid: #ffffff;
     --jrk-accent-text: #64b5ff;
     --jrk-accent-wash: #0d2947;
+    --jrk-accent-wash-hover: #123252;
+    --jrk-accent-wash-active: #143a5e;
+    --jrk-accent-wash-border: #215588;
     --jrk-accent-wash-text: #64b5ff;
     --jrk-status-good-mark: #30d158;
     --jrk-status-good-text: #4cd964;
@@ -369,6 +375,9 @@
     --jrk-accent-on-solid: #ffffff;
     --jrk-accent-text: #64b5ff;
     --jrk-accent-wash: #0d2947;
+    --jrk-accent-wash-hover: #123252;
+    --jrk-accent-wash-active: #143a5e;
+    --jrk-accent-wash-border: #215588;
     --jrk-accent-wash-text: #64b5ff;
     --jrk-status-good-mark: #30d158;
     --jrk-status-good-text: #4cd964;

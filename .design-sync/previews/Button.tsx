@@ -12,16 +12,42 @@ const Download = () => (
   </svg>
 );
 
-/* The variant axis — the prop that most changes appearance. `--danger` is
+/* The variant axis — the prop that most changes appearance. `danger` is
    reserved for actions that lose data, never as an accent. */
 export const Variants = () => (
   <div className="jrk-row" style={{ flexWrap: 'wrap' }}>
-    <Button variant="primary">Run audit</Button>
+    <Button variant="cta">Run audit</Button>
+    <Button variant="primary">New view</Button>
     <Button variant="secondary">Export</Button>
     <Button variant="ghost">Cancel</Button>
     <Button variant="danger">Delete batch</Button>
+    <Button variant="danger-solid">Delete permanently</Button>
     <Button variant="danger-quiet">Discard</Button>
     <Button variant="link">View details</Button>
+  </div>
+);
+
+/* `primary` is TINTED and `cta` is the solid accent, which is the whole
+   hierarchy: primary is the everyday button and appears as often as it needs to,
+   cta appears at most once per view. Reach for cta when the button commits
+   something — posts a close, runs a report, saves. If two of them are on screen
+   the reader has to choose which one is the action, which is the job the solid
+   fill was supposed to do for them. */
+export const Emphasis = () => (
+  <div className="jrk-stack" style={{ alignItems: 'flex-start' }}>
+    <div className="jrk-row" style={{ flexWrap: 'wrap', alignItems: 'center' }}>
+      <Button variant="cta">Post close</Button>
+      <Button variant="primary">New view</Button>
+      <Button variant="secondary">Export</Button>
+      <Button variant="ghost">Cancel</Button>
+      <span className="jrk-caption">one cta, and it is the thing that commits</span>
+    </div>
+    <div className="jrk-row" style={{ flexWrap: 'wrap', alignItems: 'center' }}>
+      <Button variant="cta">Post close</Button>
+      <Button variant="cta">Run report</Button>
+      <Button variant="cta">Export</Button>
+      <span className="jrk-caption">three, and none of them means anything</span>
+    </div>
   </div>
 );
 
@@ -45,8 +71,10 @@ export const WithIcons = () => (
    disabled is the other statically-renderable state. */
 export const States = () => (
   <div className="jrk-row" style={{ flexWrap: 'wrap', alignItems: 'center' }}>
-    <Button variant="primary" loading>Posting</Button>
+    <Button variant="cta" loading>Posting</Button>
+    <Button variant="primary" loading>Saving</Button>
     <Button variant="secondary" loading>Refreshing</Button>
+    <Button variant="danger" loading>Deleting</Button>
     <Button variant="primary" disabled>Unavailable</Button>
     <Button variant="secondary" disabled>Locked</Button>
   </div>

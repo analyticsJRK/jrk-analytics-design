@@ -114,9 +114,15 @@ for (const mode of ['light', 'dark']) {
   ci >= 4.5 ? pass(`text.inverse on surface.inverse ${mode} ${ci.toFixed(2)}:1`)
             : fail(`text.inverse on surface.inverse ${mode} ${ci.toFixed(2)}:1 — needs 4.5:1`);
 
-  const cw = contrast(T.color.accent.washText[mode], T.color.accent.wash[mode]);
-  cw >= 4.5 ? pass(`accent.washText on accent.wash ${mode} ${cw.toFixed(2)}:1`)
-            : fail(`accent.washText on accent.wash ${mode} ${cw.toFixed(2)}:1 — needs 4.5:1`);
+  // The label does not change on hover or press, so every wash step the tinted
+  // button can be showing has to hold it. washActive is the binding one: the
+  // fill deepens TOWARD its ink there, the opposite of accent.solid's press
+  // sequence, so this is the check that catches a wash stepped one shade too far.
+  for (const key of ['wash', 'washHover', 'washActive']) {
+    const cw = contrast(T.color.accent.washText[mode], T.color.accent[key][mode]);
+    cw >= 4.5 ? pass(`accent.washText on accent.${key} ${mode} ${cw.toFixed(2)}:1`)
+              : fail(`accent.washText on accent.${key} ${mode} ${cw.toFixed(2)}:1 — needs 4.5:1`);
+  }
 }
 
 // The sheet banner is a filled band carrying text, so both its ink steps are
