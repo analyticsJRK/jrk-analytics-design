@@ -48,6 +48,24 @@ const contrast = (a, b) => {
 const SURFACE = T.$meta.surfaces;
 const CANVAS = { light: T.color.surface.canvas.light, dark: T.color.surface.canvas.dark };
 
+// ---------- the constants this file measures against ----------
+// A validator cannot check its own constant, which is exactly how $meta.surfaces
+// stayed at #1c1c1e for as long as it did: every dark ratio below was computed
+// against a card that no longer existed and read ~8% high, with nothing to say
+// so. chart.chrome.surface had the same drift and worse consequences — it is
+// STROKED as the ring around a dot, so a stale value paints a dark outline where
+// a gap belongs. Both must equal color.surface.default; this is the check that
+// says so out loud.
+console.log('\n== measurement surfaces track surface.default ==');
+for (const mode of ['light', 'dark']) {
+  const truth = T.color.surface.default[mode];
+  for (const [label, got] of [['$meta.surfaces', SURFACE[mode]], ['chart.chrome.surface', T.chart.chrome.surface[mode]]]) {
+    got === truth
+      ? pass(`${label}.${mode} = ${got}`)
+      : fail(`${label}.${mode} is ${got} but surface.default.${mode} is ${truth} — every ${mode} measurement below is against the wrong surface`);
+  }
+}
+
 console.log('\n== WCAG contrast ==');
 
 // Body text must clear 4.5:1 on BOTH the card surface and the page plane.

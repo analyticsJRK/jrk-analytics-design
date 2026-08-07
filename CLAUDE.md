@@ -117,6 +117,11 @@ deliberately left alone and the CARD was lifted (`#1c1c1e` → `#232326`) to wid
 the step, so the halation decision stayed settled. Same reason `text.primary` in
 dark is `#ebebf0`, not `#ffffff`. Both noted on their tokens. Lifting the card
 cost every dark chart mark ~8% contrast — worst case 4.30:1, all still passing.
+**When you move a surface, move what MEASURES it in the same commit.**
+`$meta.surfaces` and `chart.chrome.surface` both stayed at the old `#1c1c1e`, so
+`validate` spent that period reporting dark against a card that no longer
+existed, and the second one is stroked as the ring around a dot — a gap that was
+painting a dark outline. `validate` now gates both against `surface.default`.
 
 **An interactive card's hover needs BOTH a shadow and a fill, because each works
 in only one theme.** The shadow carries light and is invisible in dark (a black

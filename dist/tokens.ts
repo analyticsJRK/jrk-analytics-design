@@ -58,7 +58,8 @@ export const chartChrome = {
   $comment: 'surface is the CARD, not the page — that is what chart marks sit on and what the validator measures against.',
   surface: {
     light: '#ffffff',
-    dark: '#1c1c1e'
+    dark: '#232326',
+    $darkNote: 'Was #1c1c1e, left behind when surface.default.dark was lifted. This one is not only a measurement — chart.css strokes it as the 2px ring around .jrk-dot, whose job is to read as a GAP where a dot crosses a line. A ring painted #1c1c1e on a #232326 card is darker than the card, so instead of a gap every dot in dark mode wore a faint dark outline. Nothing failed a gate because a ring is not text and not a mark. Keep this equal to color.surface.default.'
   },
   grid: {
     light: '#f2f2f7',
