@@ -626,16 +626,25 @@
     </div>
 
     <div class="gal-rule">
-      What is guaranteed, measured at the same dE 10 floor <code class="jrk-mono">validate</code>
-      uses: <strong>adjacent siblings never collide</strong> — consecutive slots are the exact pair
-      the palette order was searched to maximise, dE 22.3 light / 16.5 dark. Slot 9 restarts at
-      slot 1, eight positions away. What is <em>not</em> guaranteed: every collapsing pair in the
-      palette is same-parity, so siblings two, four or six apart can read as one colour under
-      dichromacy — worst case orange and yellow at dE 0.8, literally the same colour. With three
-      groups or fewer this is fully CVD-safe, because the cycle never leaves slots 1–3 and the
-      all-pairs safe cap is exactly 3. The connectors stay <code class="jrk-mono">text.muted</code>
-      and are never tinted: four of the eight hues sit at 2.12–2.57:1 on the light card, which is
-      fine for a keyline beside a label and not fine for the one mark that has to be readable.
+      <strong>The keyline carries two channels, hue and texture</strong> — solid, dashed, dotted,
+      double-rail, assigned <code class="jrk-mono">ceil(slot/2)</code>. That pairing is derived, not
+      chosen: every collapsing pair in the palette is same-parity, so pairing the slots up puts each
+      bucket's two members an <em>odd</em> distance apart (always safe) and lands all nine collapsing
+      pairs in different buckets. On hue alone the first eight groups contain <strong>9 pairs that
+      are the same colour to a dichromat</strong> — orange and yellow are dE 0.8. With texture that
+      count is <strong>0</strong>.
+    </div>
+
+    <div class="gal-rule">
+      Adjacent siblings never collide at any count: consecutive slots are the exact pair the palette
+      order was searched to maximise, dE 22.3 light / 16.5 dark. The ceiling is 3 × textures = 12,
+      since only three hues here are pairwise CVD-safe — so this ships 8 and group 9 repeats group 1
+      exactly. That repeat is deliberate: shifting texture on a second lap removes it but buys 4 CVD
+      collisions instead, and an exact repeat is visible to everyone while a CVD collision looks
+      correct to the author and lands only on readers who cannot see it. The connectors stay
+      <code class="jrk-mono">text.muted</code> and are never tinted: four of the eight hues sit at
+      2.12–2.57:1 on the light card, which is fine for a keyline beside a label and not fine for the
+      one mark that has to be readable.
     </div>
 
     <div class="gal-rule">

@@ -295,10 +295,29 @@ keyline inside the card.
   dark, floor 10. The org chart's adjacency requirement and the palette's search
   objective are the same objective, so cycle in canonical order and do not
   invent a different one for this.
-- **Not guaranteed at 4+ groups:** collapsing pairs are same-parity, so siblings
-  2, 4 or 6 apart can read as one colour under dichromacy (worst orange|yellow,
-  dE 0.8). **3 or fewer groups is fully CVD-safe** — the cycle never leaves
-  slots 1–3 and the all-pairs safe cap is 3. Slot 9 restarts at slot 1.
+- **The keyline carries TWO channels — hue and texture — and the first 8 groups
+  are fully distinguishable because of it.** Texture is `ceil(slot / 2)`:
+  slots 1–2 solid, 3–4 dashed, 5–6 dotted, 7–8 double-rail. That pairing is
+  derived, not chosen: every collapsing pair is same-parity, so pairing slots up
+  puts each bucket's two members an *odd* distance apart (always safe) and lands
+  all nine collapsing pairs in different buckets. Hue alone leaves **9
+  unseparable pairs in the first 8**; with texture it is **0**.
+- **The ceiling is 3 × textures.** At most three hues here are pairwise CVD-safe
+  (blue, orange, mint — the declared all-pairs cap), so four textures cap the
+  theoretical maximum at **12**. Reaching 12 would mean abandoning the canonical
+  slot order, which the palette forbids re-deriving, so this ships **8**.
+- **Past 8, hue and texture repeat together** — group 9 is group 1 exactly.
+  Deliberate: shifting texture on a second lap removes the exact repeats but
+  buys 4 CVD collisions instead (7 unseparable → 4 at 15 groups). An exact
+  repeat is visible to everyone and gets noticed; a CVD collision looks correct
+  to the author and lands only on readers who cannot see it. Do not trade a
+  visible failure for a silent one.
+- **The texture definitions must be declared on `.jrk-org__node`, not
+  `.jrk-org`.** A `var()` inside a custom property resolves against the element
+  it is *declared* on, not where it is used — declared on `.jrk-org` (no
+  `--jrk-org-group` there) all four become invalid-at-computed-value, the
+  keyline falls back to the plain colour, and every texture silently vanishes
+  with no error.
 - **Keyline, not a wash and not a coloured connector.** A wash collides with
   `aria-current` (`accent.washHover` and `chart-tint-1` are the same colour);
   tinting the connectors would drop the one mark that must clear 3:1 to
