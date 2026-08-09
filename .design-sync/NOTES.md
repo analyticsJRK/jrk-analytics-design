@@ -316,7 +316,25 @@ here** — `css/` and `react/src/` were left untouched.
 
 ## Known render warns (expected — not new)
 
-**One outstanding**, added Jul 30 2026:
+**Two outstanding.** The second was added 2026-08-09.
+
+- `[GRID_OVERFLOW] NavMenu (Open) — escape (fixed/portal)` → **recorded, not
+  fixed, and that was a decision.** It appeared for the first time on the
+  2026-08-09 run *without NavMenu changing at all* — its `sourceKey` was
+  unchanged and it sat in the `verified-by-upload` partition. What moved was
+  `scriptsSha` (`0f1e261bfa23b5bf` → `e0316766f3bdd146`): the staged converter is
+  a newer build and its grid-overflow check is stricter. `.jrk-nav-flyout` is
+  `position: fixed`, so the panel resolves against the viewport rather than the
+  grid cell. The prescribed remedy is
+  `cfg.overrides.NavMenu = {"cardMode":"single","primaryStory":"…"}`, and it
+  **costs three of the four stories** — single mode renders one export per card.
+  The card renders acceptably solo (checked `_screenshots/shell__NavMenu.png`:
+  all four cells present, flyout inside its cell), the failure is only claimed
+  for the product's grid, which cannot be reproduced locally. So it was left
+  alone rather than silently degrading a live card. **If someone confirms the
+  card is actually broken in the DS pane, apply the override — it is one line.**
+
+**One from Jul 30 2026:**
 
 - `[FONT_REMOTE] "Inter var"` → expected and correct. `css/index.css` imports
   `css/fonts.css`, whose Google Fonts `@import` esbuild hoists into
@@ -457,6 +475,19 @@ documents, and it is why it documents it that way.
 
 ## Re-sync risks — what can silently go stale
 
+- **The light page is `#ffffff` and every tile is unbounded in light.** A live
+  library defect, not a sync one — see its own section near the end of this file.
+  It is the reason `conventions.md`'s surface table documents a state the rest of
+  the repo says is wrong. If someone fixes `canvas.light`, that table and the
+  "no boundary in light" paragraph must be re-read in the same change.
+- **A converter upgrade can invent warns on components nobody touched.** Watch
+  `scriptsSha` in the anchor versus the fresh `_ds_sync.json`: when it moves, new
+  `[…]` lines on `unchanged` components are the check getting stricter, not a
+  regression you caused. That is how `[GRID_OVERFLOW] NavMenu` appeared on
+  2026-08-09. Diagnose from that first; do not go hunting in the component.
+- **A preview can be cropped horizontally with every flag green** — see the
+  harness-width section. Read the sheet.
+
 - **A re-sync can report `upload: docs` with nothing else changed.** Seen once
   (Jul 2026, the run immediately after the Icon/List/ListRow sync): every
   component `sourceKey`, `styleSha` and `bundleSha12` matched the anchor exactly,
@@ -569,3 +600,129 @@ documents, and it is why it documents it that way.
 - The `preview/*.html` gallery and `.design-sync/previews/*.tsx` are now two
   parallel sets of examples. A component API change needs both updated; nothing
   cross-checks them.
+
+## The light page is #ffffff and every tile is unbounded in light — READ THIS
+
+**Found 2026-08-09 while validating `conventions.md` against the build. This is a
+library defect, not a sync one, and it is currently shipping.**
+
+`color.surface.canvas.light` is **`#ffffff`**, identical to
+`color.surface.default.light`. The card-on-page fill step in light is therefore
+**1.000:1**, and `.jrk-card` ships `border: 1px solid transparent`. So in light
+mode a card has *no boundary of any kind* — not a fill step, not an edge. Dark is
+healthy at 1.174:1 (`#232326` on `#141416`).
+
+Git says exactly how it happened, and the doctrine predicted it:
+
+- `2b89411` "Give tiles a brand edge, then flatten the light page to white" set
+  `canvas.light` `#f2f2f7` → `#ffffff`. That was legitimate **as half of a pair**:
+  the 2px `#48a9df` brand edge did the bounding.
+- A later change removed the brand edge and made the card border transparent —
+  and **never restored the page**. `philosophy.md`'s conflict register says
+  "undo a pair together — the flat page and the heavy edge were each other's
+  justification, and removing either alone leaves tiles unbounded." That is
+  precisely what shipped.
+
+Everything else in the repo already describes the *intended* state and disagrees
+with the token: `CLAUDE.md` ("Light: `#f2f2f7` page, `#ffffff` cards (1.12:1)"),
+`references/tokens.md`, and **the token's own `$lightNote`**, which reads "the
+page is tinted again, so the 1.12:1 step to the white card IS the tile boundary."
+The note and the value contradict each other in the same JSON object.
+
+Nothing gates it: `validate` does not measure surface-to-surface fill steps, and
+1.12:1 is a fill relationship WCAG has nothing to say about, so both the intended
+and the broken value pass every check.
+
+**The fix is one value** — `canvas.light` back to `#f2f2f7` — but it changes the
+look of every light-mode screen in the consuming app, so it was NOT applied
+inside a sync run. Left for a deliberate decision. If it is applied: re-run
+`npm run validate` (light text roles are pinned against the PAGE, so
+`accent.text`, `text.link` and friends must be re-measured), then re-sync, then
+re-read `conventions.md` — the surface table and the "no boundary in light"
+paragraph both become wrong in the good direction.
+
+**Until then `conventions.md` documents the broken state on purpose**, because
+the design agent acts on what it is told and a card it believes is bounded would
+be built unbounded. It names `.jrk-card--outlined` as the remedy.
+
+## Toolchain facts for a fresh clone on this machine (2026-08-09)
+
+- **`npm i --no-save react react-dom` silently does nothing here.** `react` is an
+  *optional* peerDependency, and npm (v11 / node 24) treats the spec as already
+  satisfied — it prints "up to date, audited 4 packages" and installs neither
+  package, even with `--force`. The fresh-clone block above still says to run it;
+  it will not work. Install into a scratch dir and copy in:
+  ```sh
+  mkdir /tmp/rd && cd /tmp/rd && echo '{"name":"t","private":true}' > package.json
+  npm i react@^19 react-dom@^19
+  cp -r node_modules/react node_modules/react-dom node_modules/scheduler <repo>/node_modules/
+  ```
+  `package.json` / `package-lock.json` stay clean, which is the point of
+  `--no-save` anyway. Verify with `ls node_modules/react` before building —
+  without it the bundle and `_vendor/` are wrong and nothing says so loudly.
+- **There is no playwright browser cache on this machine** (`%LOCALAPPDATA%/
+  ms-playwright` is absent — the one NOTES recorded in Jul 2026 is gone). Do
+  **not** spend the ~200MB `npx playwright install chromium`: both
+  `package-validate.mjs` and `package-capture.mjs` honour **`DS_CHROMIUM_PATH`**,
+  and the system Chrome works:
+  ```sh
+  export DS_CHROMIUM_PATH="C:/Program Files/Google/Chrome/Application/chrome.exe"
+  ```
+  Verified against playwright-core 1.62.1 driving Chrome 151 — 45/45 previews
+  rendered and every screenshot captured. Install the npm packages with
+  `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` so the postinstall does not fetch anyway.
+- npm's `allow-scripts` policy blocks esbuild's postinstall with a warning. It
+  does not matter — `@esbuild/win32-x64` ships the binary as an optional dep and
+  `esbuild.transform` works. Do not "fix" it by approving scripts.
+
+## The preview harness crops WIDE cells too, not just tall ones
+
+The harness note above says taller content is silently cut at 900x700. **Width
+behaves the same way and it bit `OrgNode.Rollup` on 2026-08-09.** The org chart
+scrolls horizontally by design (`.jrk-org-scroll`), so an oversized tree does not
+overflow the page — it just sits in a scroll box that a *screenshot cannot
+scroll*, and the sheet shows a tree sliced down the right edge. Nothing flags it:
+the render check passes (root non-empty, not thin, not blank) and `[GRID_OVERFLOW]`
+did not fire on that export.
+
+Measured: five leaves = **1024px** inside an 860px scroll box. Trimmed to four
+leaves = 852px and it fits. Arithmetic for the next person — each leaf costs
+`--jrk-org-node` + 2x`--jrk-org-gutter` (176 + 16 = 192px), and **every nesting
+level adds another 16px per node**, which is why 5x192 = 960 measured 1024.
+
+Rule: **look at the sheet, do not trust the flags** — this is the same lesson as
+the `t3_pct` placeholder finding, in a different dimension.
+
+## conventions.md validation log — 2026-08-09
+
+Re-validated against the fresh build per the base skill. Mechanical pass: 60
+classes and 16 tokens enumerated, **all resolve** in `_ds_bundle.css` /
+`styles.css`; all 14 named components exist as `components/<group>/<Name>/` dirs.
+(`jrk-block__element--modifier` reports missing and always will — it is the
+naming *pattern*, not a class.)
+
+**Five statements were stale and were corrected** — all five predate the
+`design/inter-dark-mode-and-doctrine` merge (`c6b3455`), which is the worked
+example of this file's own warning that a *value* change is invisible to a name
+grep:
+
+1. "systemIndigo accent" → the accent is `#0069d9`, hue 212°, explicitly not an
+   Apple colour.
+2. Dark card `#1c1c1e` → `#232326` (it was lifted when the brand edge went).
+3. "the dark card is only a 1.08:1 fill step" → 1.174:1.
+4. "**Cards carry a fill AND a hairline** … `.jrk-card` ships a
+   `--jrk-border-subtle` edge … never remove a card's border in dark" → flatly
+   false against the build, which reads `border: 1px solid transparent`. Replaced
+   with the edge-is-a-colour-change rule, the automatic nested-tile hairline, and
+   the light-mode no-boundary warning above.
+5. "every pair that collapses under simulated dichromacy is `(n, n+4)`" → wrong,
+   and its own example disproved it (orange|yellow is slots 2 and 4). Corrected
+   to **same-parity**; see the matching fix in `CLAUDE.md` and
+   `scripts/validate-colors.mjs`.
+
+**Added:** the two-button-volume rule (`primary` tinted vs `cta` solid, one per
+view — new API surface the agent would otherwise misuse), `jrk-org`, and the
+`jrk-content--document` trap that the Jul 31 log deferred until that branch
+merged. It has merged, so it is in.
+
+Header is 9,898 chars — well inside the ~31.9k inline-truncation limit.
