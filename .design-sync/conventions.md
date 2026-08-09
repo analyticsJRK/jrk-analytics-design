@@ -18,25 +18,33 @@ const { AppShell, Sidebar, Card, Button } = window.JrkDesign;
 (`'light' | 'dark' | 'system'`), which stamps `data-theme` on `<html>`. An
 explicit stamp beats the OS preference in both directions.
 
-The look is **Apple** — macOS/iOS grouped surfaces, Apple system greys,
-systemIndigo accent, compact non-touch density for 1920x1080 desktop. The two
-modes are **not the same palette** and dark is selected, never computed:
+The look is **Apple** — macOS/iOS grouped surfaces, Apple system greys, compact
+non-touch density for 1920x1080 desktop. The accent is **not** an Apple colour:
+it is a saturated blue anchored on `#0069d9` (hue 212°), one step deeper than
+systemBlue, which fails as both a button label and link text. The two modes are
+**not the same palette** and dark is selected, never computed. These values are
+read from the shipped token layer, not from intent:
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#f2f2f7` | `#141416` |
-| card | `#ffffff` | `#1c1c1e` |
+| page plane | `#ffffff` | `#141416` |
+| card | `#ffffff` | `#232326` |
 | popover / input | `#ffffff` | `#2c2c2e` |
 
 The dark page is **not** true black: at 1920x1080 it halates against near-white
 text, so `--jrk-text-primary` in dark is `#ebebf0` rather than `#ffffff` for the
-same reason. One consequence you must design around: the dark card is only a
-1.08:1 fill step off the page, so **in dark the hairline is what makes a card
-read as a card** — never remove a card's border in dark.
+same reason.
 
-The page is tinted and the **cards are white** — Apple grouped style, the
-reverse of a conventional dashboard. Because of that, **the card is the chart
-surface**, so marks are measured against `#ffffff` / `#1c1c1e`, never the page.
+**In dark a card is bounded by its fill step** — `#232326` on `#141416`, 1.174:1
+— and carries no border. **In light it currently has no boundary at all**: the
+page and the card are both `#ffffff`, a 1.000:1 step, and `.jrk-card` ships
+`border: 1px solid transparent`. So a card on the light page reads only by its
+content and spacing. **When a tile needs a visible edge in light, ask for one —
+`.jrk-card--outlined` (`--jrk-border-default`, 1.52:1 on white).** Do not assume
+a fill step is doing the work; verify against `styles.css` before relying on it.
+
+Because the card is the surface a component sits on, **the card is the chart
+surface** — marks are measured against `#ffffff` / `#232326`, never the page.
 Never hand-pick a color for one mode.
 
 ## The styling idiom — classes and tokens, NOT utilities or style props
@@ -62,7 +70,7 @@ Classes follow `jrk-block__element--modifier`. Tokens follow `--jrk-<group>-<nam
 `jrk-table-wrap` `jrk-num` `jrk-cell-bar` `jrk-app` `jrk-sidebar` `jrk-main`
 `jrk-topbar` `jrk-content` `jrk-nav-item` `jrk-page-header` `jrk-tabs` `jrk-tab`
 `jrk-alert` `jrk-empty` `jrk-spinner` `jrk-chart` `jrk-chart-card` `jrk-bars`
-`jrk-legend` `jrk-sheet` `jrk-icon` `jrk-list`
+`jrk-legend` `jrk-sheet` `jrk-icon` `jrk-list` `jrk-org`
 
 **Tokens you will reach for most** — never a raw hex, never a ramp step:
 surfaces `--jrk-surface-canvas|default|tinted|subtle|raised` · text
@@ -80,19 +88,30 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
 - **`Delta` requires `vs`** (a percentage with no comparison window is
   meaningless), and `good`/`bad` mean *interpretation*, not sign — pass
   `upIsGood={false}` for delinquency, churn, turnover, error rate.
-- **Cards carry a fill AND a hairline.** iOS would let the fill do everything; at
-  desktop viewing distance it is too faint, so `.jrk-card` ships a
-  `--jrk-border-subtle` edge (`--seamless` opts out, `--outlined` goes heavier for
-  a card on a tinted surface). Elevation (`raised`) stays opt-in — a dashboard of
-  many tiles reads calmer flat.
+- **A card's edge is a colour change, never a width change.** `.jrk-card` and
+  friends ship `border: 1px solid transparent` and the modifiers only repaint it
+  (`--outlined` → `--jrk-border-default`, `--seamless`/`--flush` → transparent),
+  so an edge appearing never reflows the layout by a pixel. Elevation (`raised`)
+  stays opt-in — a dashboard of many tiles reads calmer flat.
+- **A tile inside another tile takes a hairline automatically.** A fill step only
+  works once per plane, so a Card/Stat/table nested in a Card gets
+  `--jrk-border-default` from the library. Do not add your own.
+- **There are two accent button volumes and picking the wrong one is the common
+  mistake.** `variant="primary"` is **tinted** (accent wash + wash-text + a faint
+  hairline) and is the everyday button. `variant="cta"` is the solid accent with
+  a white label and there is **at most one per view** — the action that commits.
+  Four saturated blue rectangles on one screen tell the reader nothing.
 - **Right-align money and counts** with `jrk-num` on the cell **and** its header.
 - **Never cycle the 8-slot chart palette** — the fixed order is the
   colorblind-safety mechanism. A 9th series folds into "Other" or facets.
 - **Hue only separates ADJACENT slots, so charts need a second channel.** The
-  order was searched to maximise the worst *adjacent* pair, and the arithmetic
-  consequence is that similar hues get pushed four apart — every pair that
-  collapses under simulated dichromacy is `(n, n+4)`. Slot 2 orange against slot
-  4 yellow is ΔE 0.8: the same colour. So each slot also carries a dash,
+  order was searched to maximise the worst *adjacent* pair, which pushes
+  confusable hues apart — so every pair that collapses under simulated
+  dichromacy is **same-parity**: `(n, n+2)`, `(n, n+4)` or `(n, n+6)`, never an
+  odd distance. Consecutive slots are always safe (worst adjacent ΔE 22.3 light /
+  16.5 dark). Slot 2 orange against slot 4 yellow is ΔE 0.8 — the same colour —
+  and orange, yellow, pink and brown collapse *pairwise*, all six pairs. So each
+  slot also carries a dash,
   `--jrk-chart-dash-1…8`, which `.jrk-s1…8` expose as `--series-dash` alongside
   `--series`. It is **opt-in** — set `data-encoding="redundant"` on the
   `.jrk-chart` root and the line strokes and legend keys pick it up. Opt-in
@@ -103,7 +122,7 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
 - **Every data surface needs an `Empty`** — say what would appear and give the
   action that produces it.
 
-## Three live traps
+## Four live traps
 
 - **Do not put an SVG inside a `jrk-grid` container.** `chart.css` scopes
   `.jrk-grid line, .jrk-grid path` to the chart gridline group, and the layout
@@ -121,6 +140,12 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
   wrap the pair in `jrk-row`. Icons are sized in `em` — they take the size and
   weight of the text beside them, so set `font-size` on the container, not the
   icon.
+- **`jrk-content--document` is a report plane, never a dashboard one.** It paints
+  the content area with `--jrk-surface-default`, i.e. the *card* colour, so
+  anything placed on it has no fill step left to separate with. `Sheet` is the
+  one component built for it and draws its own hairline; everything else on that
+  plane needs `.jrk-card--outlined`. Put a normal tile grid on it and the tiles
+  dissolve into the background in both modes.
 
 ## Where the truth is
 

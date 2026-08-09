@@ -122,7 +122,11 @@ export const Stacked = () => (
    keyline is an accelerator, never the identity channel. Adjacent siblings are
    guaranteed distinct (dE 22.3 light / 16.5 dark, the pair the palette order was
    searched to maximise); reuse happens at distance 8. One rollup level per
-   chart — nesting warns, because two rollups both start at slot 1. */
+   chart — nesting warns, because two rollups both start at slot 1.
+
+   Kept to four leaves on purpose: the preview harness captures a cell at 900px
+   and the tree scrolls rather than wraps, so a fifth leaf pushes it to 1024px
+   and the card shows a cropped tree with no way to scroll a screenshot. */
 export const Rollup = () => (
   <OrgChart label="Portfolio rollup by region">
     <OrgNode name="JRK Fund IV" role="All regions" meta="$1.42B AUM · 37 assets" rollup>
@@ -132,7 +136,6 @@ export const Rollup = () => (
       </OrgNode>
       <OrgNode name="Midwest" role="P. Nandi" meta="$488M · 12 assets">
         <OrgNode name="Lakeside Commons" meta="318 units" />
-        <OrgNode name="Maple Yards" meta="246 units" />
       </OrgNode>
       {/* A vacant seat KEEPS its keyline. The vacancy is about the post; the
           rollup is about the branch, and a region with no manager still has
