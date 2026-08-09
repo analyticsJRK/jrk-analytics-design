@@ -1,0 +1,626 @@
+/* Org chart — hierarchy runs DOWN, peers fan OUT.
+ * =============================================
+ *
+ * Reporting structure, portfolio structure, entity ownership: all the same
+ * shape. A level is a horizontal row of peers; depth is vertical. That is the
+ * only thing this component is for, and it is why it is not a nav tree — the
+ * sidebar's nav group answers "where else can I go" by indenting, which makes
+ * two peers at depth 3 look like a list and hides how many of them there are.
+ * Here the fan-out IS the reading: five direct reports side by side is a
+ * different fact from five stacked names, and the whole point is to see it.
+ *
+ *   <div class="jrk-org-scroll">
+ *     <ul class="jrk-org" aria-label="Reporting structure">
+ *       <li class="jrk-org__node">
+ *         <div class="jrk-org__card" aria-current="true">
+ *           <span class="jrk-org__name">Dana Whitfield</span>
+ *           <span class="jrk-org__role">VP, Asset Management</span>
+ *           <span class="jrk-org__meta">37 properties · 8,412 units</span>
+ *         </div>
+ *         <ul class="jrk-org__branch">
+ *           <li class="jrk-org__node"> … </li>
+ *         </ul>
+ *       </li>
+ *     </ul>
+ *   </div>
+ *
+ * IT IS A NESTED LIST, NOT role="tree", and that is deliberate. `role="tree"`
+ * is a promise: roving tabindex, arrow keys between siblings, Home/End, type-
+ * ahead. Nothing in this library implements any of it, and a claimed tree that
+ * does not respond to arrow keys is worse for a screen-reader user than the
+ * plain nested list they already know how to walk. The nesting is real markup,
+ * so the hierarchy is announced whether or not anything is styled. Disclosure
+ * uses the ordinary button + aria-expanded + aria-controls pattern, which is
+ * fully specified and which the library can actually deliver.
+ *
+ * `aria-label` on the outer <ul> is not optional. "A list of 14 items" is not
+ * an answer to what the reader is looking at.
+ *
+ * `:has()` is used twice, for the stacked branch and the leaf-row rule. Both
+ * degrade to something merely plainer rather than broken; neither is load-
+ * bearing for the default horizontal tree.
+ */
+
+.jrk-org {
+  /* The four numbers that shape the tree. Set --jrk-org-node on the .jrk-org
+     element to widen the cards; the rest follow from it. */
+  --jrk-org-node: 176px;
+  /* Half the vertical gap between levels. The parent's drop spends one, the
+     child's stem spends the other, so a level costs 2x this. */
+  --jrk-org-drop: var(--jrk-space-4);
+  /* Half the horizontal gap between peers. See the padding note on the node —
+     this is padding rather than `gap` for a reason that will not survive a
+     tidy-up. */
+  --jrk-org-gutter: var(--jrk-space-2);
+  /* How far a stacked branch's tick reaches from its spine to a card. */
+  --jrk-org-tick: var(--jrk-space-4);
+
+  /* THE CONNECTOR IS DATA, SO IT IS DRAWN AT DATA WEIGHT — text.muted, measured
+     5.07:1 on the light card and 5.46:1 on the dark one. Nothing gates the
+     border namespace, so the numbers are recorded here by hand, which is the
+     rule the conflict register sets for any ink something depends on seeing.
+
+     border.strong is the value this obviously wants and it is the wrong one:
+     1.71:1 / 1.72:1, well under WCAG 1.4.11's 3:1 for a graphical object
+     required to understand the content — and here the lines ARE the content.
+     Which node reports to which is carried by nothing else on screen once a row
+     is wide enough that a child is not visibly under its own parent. That is a
+     different case from `chart.axis`, which sits at the same 1.52:1 and is
+     legitimately chrome: an axis frames marks that carry their own values, and
+     a connector carries the only relationship in the picture.
+
+     It reads darker than this library's hairlines because it is not a hairline.
+     Keep it thin instead — 1px, never 2px, never dashed. */
+  --jrk-org-line: var(--jrk-text-muted);
+
+  display: flex;
+  /* Two declarations, and the second is the one that matters. A centred tree
+     that outgrows its container gets clipped on the LEFT by ordinary `center`,
+     and the clipped part is unreachable — scrolling only ever reveals the right
+     overflow. `safe center` centres while it fits and falls back to start when
+     it does not. The plain `center` above is what a browser without safe
+     alignment gets, and clipped-but-centred is the better of the two failures. */
+  justify-content: center;
+  justify-content: safe center;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Horizontal overflow is the honest answer for a WIDE tree, and it is not the
+   answer for a DEEP one — depth resolves by disclosure (the toggle below), the
+   way everything else here resolves height. A reader who scrolls sideways to
+   find a peer has still lost the comparison, so a fan wide enough to need this
+   wrapper is usually a fan that wants --stacked. */
+.jrk-org-scroll {
+  overflow-x: auto;
+  /* A scroll container clips its own overflow, so the padding is what keeps a
+     focus ring on an edge card from being sliced off. The negative margin gives
+     the space back to the layout. */
+  padding: var(--jrk-space-1);
+  margin: calc(var(--jrk-space-1) * -1);
+}
+
+/* ============================== the node ============================== */
+
+/* A node is a column: card, then optionally a toggle, then its branch. The card
+   is centred on the column, and the column's width is whatever its subtree
+   needs — which is what puts every parent card exactly over the middle of its
+   own children, with nobody measuring anything. */
+.jrk-org__node {
+  /* Where this node's connectors meet its card, measured from the node's
+     leading edge. It is the midpoint for every ordinary node, and the whole
+     reason it is a variable is the stacked branch further down, which moves the
+     card off centre and would otherwise leave the incoming stem attached to
+     empty space. One name, one place to change, three rules that read it. */
+  --jrk-org-anchor: 50%;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* PADDING, NOT `gap`, AND THIS IS LOAD-BEARING. The horizontal bus between
+     peers is drawn as two half-width borders on each node's own pseudo-elements
+     and relies on adjacent nodes being flush, so the segments meet across the
+     boundary. A `gap` on the branch puts a hole between every pair of siblings
+     and the bus turns into a dashed line that no author asked for. */
+  padding-inline: var(--jrk-org-gutter);
+}
+
+/* ============================== the branch ============================== */
+
+.jrk-org__branch {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  /* Each node is its own height; nothing stretches. See the leaf-row rule below
+     for the one case where equalising is right. */
+  align-items: flex-start;
+  /* The first of the two drops. The child's own padding-top is the second. */
+  margin: 0;
+  padding: var(--jrk-org-drop) 0 0;
+  list-style: none;
+}
+
+/* `display: flex` out-specifies the UA's `[hidden] { display: none }`, so a
+   collapsed branch would stay on screen with only its aria state changed —
+   visible to the eye, gone from the accessibility tree. Restate it. */
+.jrk-org__branch[hidden] {
+  display: none;
+}
+
+/* The drop from the parent card into the bus. `inset-inline-start: 50%` is the
+   branch's own midpoint, and the branch is centred under the parent card, so
+   this lands on the card's centre for free. The stacked branch overrides it,
+   because there the two are not the same point. */
+.jrk-org__branch::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
+  height: var(--jrk-org-drop);
+  border-inline-start: 1px solid var(--jrk-org-line);
+}
+
+/* The bus and the stems.
+   ---------------------
+   Each node in a branch draws the HALF of the horizontal bus on its own side of
+   the anchor, plus (on ::after) the vertical stem down into its card:
+
+     ::before   node's leading edge → anchor
+     ::after    anchor → node's trailing edge, and the stem on its leading edge
+
+   Adjacent nodes are flush (padding, not gap), so node N's leading half meets
+   node N-1's trailing half and the bus reads as one line. The ends are then
+   trimmed off the first and last node so the bus stops at the outermost stems
+   instead of running on into the gutter.
+
+   Logical properties throughout, so the whole construction mirrors in RTL for
+   free — the leading half is the leading half in both directions. */
+.jrk-org__branch > .jrk-org__node {
+  padding-top: var(--jrk-org-drop);
+}
+
+.jrk-org__branch > .jrk-org__node::before,
+.jrk-org__branch > .jrk-org__node::after {
+  content: '';
+  position: absolute;
+  inset-block-start: 0;
+  height: var(--jrk-org-drop);
+  border-block-start: 1px solid var(--jrk-org-line);
+}
+
+/* Both insets set and width auto, rather than a width of 50%: that is what lets
+   the anchor be an arbitrary length instead of only a percentage. */
+.jrk-org__branch > .jrk-org__node::before {
+  inset-inline: 0 calc(100% - var(--jrk-org-anchor));
+}
+
+.jrk-org__branch > .jrk-org__node::after {
+  inset-inline: var(--jrk-org-anchor) 0;
+  border-inline-start: 1px solid var(--jrk-org-line);
+}
+
+/* Trim the overhanging ends. COLOR ONLY, never `border: 0` — the same rule the
+   tiles follow, and here it earns its keep twice over. `border: 0` also sets
+   border-style to none, which would take the LAST node's stem with it, because
+   the stem lives on the same pseudo-element as the trailing half of its bus.
+   That is exactly why the classic version of this technique has to hand the
+   stem back on a different pseudo-element for :last-child; changing only a
+   colour means it never leaves. An only child matches both rules, loses the
+   whole bus, and keeps its stem. */
+.jrk-org__branch > .jrk-org__node:first-child::before,
+.jrk-org__branch > .jrk-org__node:last-child::after {
+  border-block-start-color: transparent;
+}
+
+/* A branch with no branch inside it is a row of leaves, and leaf cards read as
+   a set — ragged bottoms make peers look like different kinds of thing.
+   Equalise them.
+
+   The :has() is what keeps this off a MIXED row, where a leaf beside a deep
+   subtree would stretch into an absurdly tall card. The :not(--stacked) is what
+   keeps it off a stacked branch, whose children are also all leaves and whose
+   own `align-items: flex-start` this rule would otherwise out-specify (0-2-0
+   against 0-1-0) and silently blow every card out to full width. Where :has()
+   is unsupported the row is merely ragged, which is what it was before. */
+.jrk-org__branch:not(.jrk-org__branch--stacked):not(:has(.jrk-org__branch)) {
+  align-items: stretch;
+}
+
+.jrk-org__branch:not(.jrk-org__branch--stacked):not(:has(.jrk-org__branch))
+  > .jrk-org__node
+  > .jrk-org__card {
+  /* Grow, never shrink. `flex: 1` would let a long role line compress a card
+     below its own content. */
+  flex: 1 0 auto;
+}
+
+/* ============================== the card ============================== */
+
+/* The node card DRAWS ITS OWN HAIRLINE, like .jrk-sheet and unlike every tile.
+   The fill-step mechanism that bounds a card works exactly once per plane, and
+   an org chart is a plane covered in small boxes — usually inside a .jrk-card,
+   where surface.default is already what they sit on. There is no step left to
+   spend, and nesting.css cannot help because these are not tiles. border.default
+   at 1.52:1 / 1.54:1 is the same decorative separation the nested-tile hairline
+   spends, which is right here: the hairline separates, the CONNECTOR carries the
+   meaning, and only the connector had a floor to clear. */
+.jrk-org__card {
+  /* For the rollup keyline's pseudo-element. See the rollup block at the end. */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: var(--jrk-org-node);
+  padding: var(--jrk-space-2) var(--jrk-space-3);
+  background: var(--jrk-surface-default);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-lg);
+  /* Start-aligned, against org-chart convention, and on purpose. Centring a
+     name over a role over a metric is the diagram-tool look; it also makes a
+     wrapped two-line name and a three-part meta line materially harder to scan,
+     and this library left-aligns every other stack of label-over-value. The
+     geometry already says the card is centred on its stem — the text does not
+     have to say it a second time. */
+  text-align: start;
+}
+
+.jrk-org__name {
+  font-size: var(--jrk-text-md);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-primary);
+}
+
+/* The position, not the person. Keep it to one line by preference — a row of
+   leaf cards equalises to the tallest, so a two-line role sets the height for
+   every peer beside it. */
+.jrk-org__role {
+  font-size: var(--jrk-text-sm);
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-secondary);
+}
+
+/* Where the analytics goes: "37 properties · 8,412 units", "Southeast · 4 sites".
+   An org chart in this library is a chart, so a node carrying no figure is a
+   diagram — but the figure is free text here rather than a rendered metric,
+   because Badge, Delta and Status already exist and compose into __aside. */
+.jrk-org__meta {
+  font-size: var(--jrk-text-xs);
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Trailing slot for a Badge, a Status or a Delta. Below the meta line, so a
+   badge never competes with the name for the first read. */
+.jrk-org__aside {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+  margin-block-start: var(--jrk-space-1);
+}
+
+/* ============================== card states ============================== */
+
+/* The one the chart is ABOUT — the person whose reporting line is being shown,
+   the property under review. Keyed off aria-current rather than a modifier
+   class, the same as .jrk-nav-item, so the styling and what assistive tech
+   reads can never disagree.
+
+   It wears the library's settled "this is the one" treatment: accent.wash fill,
+   accent.washText ink, accent.washBorder hairline, semibold. And it inherits
+   that treatment's known cost — the wash is 1.16:1 against the light card and
+   1.06:1 against the dark one, the hairline 1.76:1 / 2.03:1, so no colour
+   channel here reaches 3:1. THE SEMIBOLD IS THE STRUCTURE. It is the only
+   channel that survives greyscale, both dichromacies and both themes, and it is
+   what keeps "which one is this about" answerable at all. Do not let a tidy-up
+   drop it, and do not put a --cta beside it in the same tile. */
+.jrk-org__card[aria-current] {
+  background: var(--jrk-accent-wash);
+  border-color: var(--jrk-accent-wash-border);
+}
+
+.jrk-org__card[aria-current] .jrk-org__name {
+  color: var(--jrk-accent-wash-text);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-org__card[aria-current] .jrk-org__role {
+  color: var(--jrk-accent-wash-text);
+}
+
+/* An open position. The dash is redundant coding, NOT the signal — the card
+   still has to say "Open" in words, which is why __role carries the vacancy
+   text and this rule only quiets the ink. A dashed box with a greyed name and
+   no label is a card that looks broken rather than a role that is unfilled. */
+.jrk-org__card--vacant {
+  background: transparent;
+  border-style: dashed;
+  border-color: var(--jrk-border-strong);
+}
+
+.jrk-org__card--vacant .jrk-org__name {
+  color: var(--jrk-text-muted);
+  font-weight: var(--jrk-weight-medium);
+}
+
+/* ============================== interactive card ============================== */
+
+/* A node that drills through to a person or a property. Renders as <a> or
+   <button>, so the resets belong in the rule rather than in a second modifier. */
+.jrk-org__card--link {
+  cursor: pointer;
+  font: inherit;
+  text-decoration: none;
+  transition:
+    background-color var(--jrk-transition),
+    border-color var(--jrk-transition);
+}
+
+/* surface.hover IS safe here, and it is exactly the value that must never wash
+   a whole tile. The trap on a tile is that surface.hover equals the light page,
+   so it erases the fill step that bounds the card. This card is not bounded by
+   a fill step — it draws a real hairline — so the wash is free to pull it
+   toward the page: 1.12:1 in both themes, with the edge still holding. No
+   shadow, because there are dozens of these and one card lifting under the
+   pointer in a field of flat peers is noise rather than a signifier. */
+.jrk-org__card--link:hover {
+  background: var(--jrk-surface-hover);
+  border-color: var(--jrk-border-strong);
+}
+
+.jrk-org__card--link[aria-current]:hover {
+  background: var(--jrk-accent-wash-hover);
+  border-color: var(--jrk-accent-wash-border);
+}
+
+/* ============================== the toggle ============================== */
+
+/* Disclosure for depth. The count is the label — "4 reports", never a bare
+   caret — so a collapsed node still answers what is behind it instead of being
+   a dead end. That is the same trade the sidebar caret makes: restraint in
+   decoration, generosity in signifiers. */
+.jrk-org__toggle {
+  position: relative;
+  /* The gap it opens above itself is filled by its own stem, below. */
+  margin-block-start: var(--jrk-org-drop);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+  min-height: var(--jrk-min-touch);
+  padding: 0 var(--jrk-space-2);
+  font-family: inherit;
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-medium);
+  color: var(--jrk-text-secondary);
+  white-space: nowrap;
+  background: var(--jrk-surface-default);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-full);
+  cursor: pointer;
+  transition:
+    background-color var(--jrk-transition),
+    color var(--jrk-transition);
+}
+
+/* The toggle interrupts the line between a card and its branch, so it carries
+   the segment above itself. The height matches the margin exactly, which is why
+   both are --jrk-org-drop: change one and the line detaches from the card. */
+.jrk-org__toggle::before {
+  content: '';
+  position: absolute;
+  inset-block-end: 100%;
+  inset-inline-start: 50%;
+  height: var(--jrk-org-drop);
+  border-inline-start: 1px solid var(--jrk-org-line);
+}
+
+.jrk-org__toggle:hover {
+  background: var(--jrk-surface-hover);
+  color: var(--jrk-text-primary);
+}
+
+/* Bare SVGs only — .jrk-icon is em-sized and already tracks the label, and a
+   plain descendant rule here would out-specify it and kill that contract. */
+.jrk-org__toggle svg:not(.jrk-icon) {
+  width: var(--jrk-icon-sm);
+  height: var(--jrk-icon-sm);
+  flex-shrink: 0;
+}
+
+/* It does not rotate, for the same reason .jrk-nav-item__caret does not: a
+   chevron that swings promises the content appears immediately below the
+   control in a stack. This one fans out a whole level. The caret points down at
+   where that level lands and stays pointing there; the count text carries the
+   state, in words. */
+
+/* ============================== stacked branch ============================== */
+
+/* The escape valve for a wide fan, and the reason the horizontal default is
+   safe to ship. Twelve properties under one regional manager is 2,300px of
+   fan-out that no 1920px screen holds and no reader can compare across; the
+   same twelve stacked down an indented spine fit in a column. Density resolves
+   by disclosure, and this is that rule pointed sideways.
+   ---------------------------------------------------------------------------
+   FOR LEAF CHILDREN ONLY. A stacked child with a branch of its own would centre
+   its card over that subtree and pull away from the spine it is meant to hang
+   from. The React layer warns in development; the CSS cannot.
+   ---------------------------------------------------------------------------
+   The geometry is asymmetric, so the parent card stops being centred: the node
+   switches to flex-start, the card sits at the leading edge, and the spine drops
+   from the card's own midpoint at --jrk-org-node / 2. THE ANCHOR MOVES WITH IT,
+   which is the part that is easy to miss — without it the stem arriving from
+   the level above stays at the node's 50%, which is now somewhere out in the
+   middle of the stacked column rather than on the card. */
+.jrk-org__node:has(> .jrk-org__branch--stacked) {
+  align-items: flex-start;
+  --jrk-org-anchor: calc(var(--jrk-org-gutter) + var(--jrk-org-node) / 2);
+}
+
+.jrk-org__branch--stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  padding-inline-start: calc(var(--jrk-org-node) / 2 + var(--jrk-org-tick));
+}
+
+.jrk-org__branch--stacked::before {
+  inset-inline-start: calc(var(--jrk-org-node) / 2);
+}
+
+/* The toggle hangs off the spine rather than sitting on it, because the node is
+   no longer centred and a pill centred on the spine would push the whole column
+   half a pill to the leading side of everything below it. */
+.jrk-org__node:has(> .jrk-org__branch--stacked) > .jrk-org__toggle {
+  margin-inline-start: calc(var(--jrk-org-node) / 2);
+}
+
+.jrk-org__node:has(> .jrk-org__branch--stacked) > .jrk-org__toggle::before {
+  inset-inline-start: 0;
+}
+
+/* Padding rather than gap, for the second time and for the same reason: each
+   child paints its own full height of the spine, so the run is continuous only
+   while the children are flush. A gap leaves the spine broken between every
+   pair, and it looks like four separate stubs rather than one list. */
+.jrk-org__branch--stacked > .jrk-org__node {
+  align-items: flex-start;
+  padding-inline: 0;
+  padding-block: var(--jrk-space-1);
+}
+
+/* Fully restated rather than patched, because the horizontal rules above match
+   at the same specificity and a partial override leaves a stray bus segment
+   behind. ::before is this child's share of the spine; ::after is the tick
+   across into its card. */
+.jrk-org__branch--stacked > .jrk-org__node::before {
+  inset-block-start: 0;
+  inset-inline: calc(var(--jrk-org-tick) * -1) auto;
+  width: 0;
+  height: 100%;
+  border-block-start: 0;
+  border-inline-start: 1px solid var(--jrk-org-line);
+}
+
+/* The run ends at the LAST child's tick, not at the bottom of its card — a
+   spine that overshoots into empty space reads as a branch someone forgot to
+   fill in. Halving the last child's share is what stops it, and it is the only
+   rule in this block that has to know which child is last.
+
+   The 50% is why the child's padding-block has to stay symmetric: it is half the
+   NODE, and it only lands on the tick because the card is centred within it. */
+.jrk-org__branch--stacked > .jrk-org__node:last-child::before {
+  height: 50%;
+}
+
+.jrk-org__branch--stacked > .jrk-org__node::after {
+  inset-block-start: 50%;
+  inset-inline: calc(var(--jrk-org-tick) * -1) auto;
+  width: var(--jrk-org-tick);
+  height: 0;
+  border-block-start: 1px solid var(--jrk-org-line);
+  border-inline-start: 0;
+}
+
+/* ============================== rollup groups ============================== */
+
+/* Colour by branch, so a reader can see what rolls up into what.
+ * ------------------------------------------------------------
+ * Put --rollup on the branch whose children are the rollup units (regions,
+ * funds, districts). Each child takes the next palette slot and every node in
+ * its SUBTREE inherits it, because --jrk-org-group is a custom property and
+ * custom properties inherit. That is the whole mechanism — one declaration per
+ * slot, no per-node authoring, and a node cannot be given a colour that
+ * disagrees with the branch it hangs from.
+ *
+ * THE PALETTE IS CYCLED HERE, AND EVERYWHERE ELSE IN THIS LIBRARY THAT IS
+ * BANNED. The ban protects IDENTITY: two lines on a chart sharing a colour
+ * cannot be told apart, because colour is the only thing naming them, which is
+ * why seriesColor(8) throws instead of wrapping. Nothing in that argument
+ * reaches this component. Every node here carries its own name, and the tree
+ * DRAWS the grouping — the connector from a child to its parent is the rollup,
+ * stated structurally, before any colour is involved. The keyline is an
+ * accelerator over a chart that is already complete and already readable at
+ * rest, so two distant subtrees sharing a slot costs a glance, not a fact.
+ *
+ * WHAT IS ACTUALLY GUARANTEED, measured against scripts/cvd.mjs at the same
+ * floor validate uses (dE 10), both themes:
+ *
+ *   - ADJACENT SIBLINGS NEVER COLLIDE. Consecutive slots are the pair the
+ *     palette order was SEARCHED to maximise — worst adjacent dE 22.3 light /
+ *     16.5 dark. The org chart's requirement and the palette's objective are
+ *     the same objective, which is why cycling in canonical order is safe and
+ *     why you must not invent a different order for this.
+ *   - Every collapsing pair in the palette is SAME-PARITY, so siblings two,
+ *     four or six apart CAN read as one colour under dichromacy — worst case
+ *     orange|yellow at slots 2 and 4, dE 0.8, literally the same colour.
+ *     {orange, yellow, pink, brown} collapse pairwise, all six pairs.
+ *   - Slot 9 restarts at slot 1, eight positions away. That is the deliberate
+ *     trade: reuse at distance, never adjacency.
+ *
+ * So: with 3 or fewer groups this is fully CVD-safe with no caveats, because
+ * the cycle only ever reaches slots 1-3 and the palette's all-pairs safe cap is
+ * exactly 3. With 4 or more, only adjacency is guaranteed. Do not promote the
+ * keyline to the identity channel at any count — no legend-only-by-colour, no
+ * unlabelled node, no colour-as-the-only-difference between two cards.
+ *
+ * ONE BRANCH PER CHART. Two --rollup branches both start at slot 1, so branch
+ * B's first child can end up beside branch A's last child wearing the same
+ * colour — the one case that breaks adjacency. <OrgNode> warns in development.
+ * It is also the right IA answer: one organising principle, named on screen. */
+
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 1) { --jrk-org-group: var(--jrk-chart-1); }
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 2) { --jrk-org-group: var(--jrk-chart-2); }
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 3) { --jrk-org-group: var(--jrk-chart-3); }
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 4) { --jrk-org-group: var(--jrk-chart-4); }
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 5) { --jrk-org-group: var(--jrk-chart-5); }
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 6) { --jrk-org-group: var(--jrk-chart-6); }
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 7) { --jrk-org-group: var(--jrk-chart-7); }
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 8) { --jrk-org-group: var(--jrk-chart-8); }
+
+/* The keyline. A capsule inside the card's leading padding, NOT a wash and NOT
+   a coloured border, for three separate reasons:
+
+     - A full-card wash would collide with aria-current. accent.washHover is
+       #cfe1fd against chart-tint-1's #c7deff — already recorded as the same
+       colour — so a tint-1 card and the current card would be the same object.
+       The keyline sits INSIDE the card, so both signals show at once.
+     - Widening the card's own border would reflow every ungrouped card beside a
+       grouped one by 2px. The pseudo-element costs no layout at all.
+     - It must not touch the CONNECTORS. Those clear 3:1 as text.muted because
+       they carry the reporting relationship; four of the eight series hues sit
+       at 2.12-2.57:1 on the light card (mint, yellow, orange, teal), so
+       colouring the lines would drop the one mark that has to be readable below
+       the floor for half the palette. The line says who reports to whom; the
+       keyline says which rollup this belongs to. Different jobs, different ink.
+
+   Those same four sub-3:1 hues are why the keyline is an accelerator and not a
+   signifier: they are the documented relief cases, legal exactly while the mark
+   ships a visible label, and every node card does.
+
+   Transparent when --jrk-org-group is unset, so an ungrouped chart pays
+   nothing. The fallback is what keeps check:css from reading the property as a
+   typo, and it is also the real default. */
+.jrk-org__card::before {
+  content: '';
+  position: absolute;
+  inset-block: var(--jrk-space-2);
+  inset-inline-start: 4px;
+  width: 3px;
+  border-radius: var(--jrk-radius-full);
+  background: var(--jrk-org-group, transparent);
+}
+
+/* A VACANT CARD KEEPS ITS KEYLINE, and the tempting rule is the wrong one.
+   "An unfilled post is a hole in the rollup, so drop the colour" reads well and
+   breaks the feature: --jrk-org-group is set on the node and INHERITED by the
+   subtree, so blanking only this card leaves its children wearing the group
+   while their own parent does not — a gap in the middle of a colour band, which
+   looks like a rendering fault rather than a vacancy.
+
+   It is also the wrong model. The vacancy is about the SEAT; the rollup is about
+   the BRANCH. A region with no manager still has properties rolling up into it.
+   Two orthogonal facts get two channels: the dashed edge, muted name and the
+   word "Open" say the post is unfilled, the keyline says which rollup it heads. */

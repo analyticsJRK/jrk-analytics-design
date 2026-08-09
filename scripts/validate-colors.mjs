@@ -174,10 +174,20 @@ console.log('\n== CVD separation (Machado 2009 + CIEDE2000) ==');
                         : fail(`${capMsg} — update chart.categorical.seriesCapAllPairs`);
   }
 
-  // Every pair that collapses is (n, n+4) — the side effect of optimising the
-  // adjacent objective. Those pairs are exactly the ones the dash and shape
-  // channels have to separate, so assert the channels are actually distinct
-  // rather than trusting the table to stay hand-maintained.
+  // Every pair that collapses is SAME-PARITY — (n, n+2), (n, n+4) or (n, n+6),
+  // never an odd distance. That is the side effect of optimising the adjacent
+  // objective: the search pushed confusable hues apart, and "apart" landed on
+  // even offsets. This used to be written as "(n, n+4)", which the run below
+  // has always disproved — orange|yellow is the worst pair in the palette at
+  // dE 0.8 and sits at (2, 4), and {orange, yellow, pink, brown} collapse
+  // PAIRWISE, all six pairs. The measured invariant is the parity one, and it
+  // is worth stating correctly because things outside this file lean on it:
+  // anything walking the slots in order (org-chart rollup groups) gets its
+  // adjacent-pair safety from odd distances always being clear.
+  //
+  // These pairs are exactly the ones the dash and shape channels have to
+  // separate, so assert the channels are actually distinct rather than
+  // trusting the table to stay hand-maintained.
   const collapsing = [];
   for (let i = 0; i < slots.length; i++) {
     for (let j = i + 1; j < slots.length; j++) {
