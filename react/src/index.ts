@@ -45,6 +45,9 @@ export {
 } from './Chart';
 export type { ChartCardProps, LegendProps, BarListProps, BarListItem, LineChartProps, Series } from './Chart';
 
+export { OrgChart, OrgNode } from './Org';
+export type { OrgChartProps, OrgNodeProps } from './Org';
+
 export {
   AppShell,
   Sidebar,

@@ -158,12 +158,18 @@ tint-filled marks.
 direction in text. Charts have a table view.
 
 **Hue only separates ADJACENT slots.** The order was searched to maximise the
-worst adjacent pair, which pushes similar hues four apart — so every pair that
-collapses under CVD is `(n, n+4)`, and orange/yellow is ΔE 0.8, i.e. the same
-color. Each slot therefore also carries a **dash** (`--jrk-chart-dash-N`, lines,
-opt-in via `data-encoding="redundant"` because a dash otherwise means
-threshold) and a **shape** (`seriesShape(i)`, mandatory on scatter). `validate`
-fails if a collapsing pair ever shares both.
+worst adjacent pair, which pushes similar hues apart — so **every pair that
+collapses under CVD is SAME-PARITY**, `(n, n+2)`, `(n, n+4)` or `(n, n+6)`, and
+every odd distance is clear (worst adjacent ΔE 16.5, floor 10). Orange/yellow is
+ΔE 0.8, i.e. the same color, and it sits at `(2, 4)`. `{orange, yellow, pink,
+brown}` collapse PAIRWISE — all six pairs. This used to be written as "every
+collapsing pair is `(n, n+4)`", which `validate` has always disproved in its own
+output; the parity form is the measured one, and anything walking the slots in
+order (org-chart rollup groups) takes its adjacent-pair safety from it. Each slot
+therefore also carries a **dash** (`--jrk-chart-dash-N`, lines, opt-in via
+`data-encoding="redundant"` because a dash otherwise means threshold) and a
+**shape** (`seriesShape(i)`, mandatory on scatter). `validate` fails if a
+collapsing pair ever shares both.
 
 **`--jrk-chart-*` and `--jrk-chart-tint-*` are not interchangeable.** The
 categorical set carries identity and is CVD-validated. Tints are pastel fills

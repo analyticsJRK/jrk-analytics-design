@@ -15,10 +15,10 @@ import { Button, Stat, DataTable } from '@jrk/design';
 
 React exports: `Alert AppShell Badge BarList Button ButtonGroup Card CellBar
 ChartCard Checkbox Content DataTable Delta Empty Input Legend LineChart Main
-NavGroup NavItem NavMenu NavMenuItem NavMenuSeparator PageHeader Select Sidebar
-SidebarAction Sparkline Spinner Stat StatRow Status Switch TabPanel Tabs Tag
-Textarea Topbar` plus `cx`, `setTheme`, `variantClass`, `MAX_SERIES`,
-`MAX_SERIES_ALL_PAIRS`.
+NavGroup NavItem NavMenu NavMenuItem NavMenuSeparator OrgChart OrgNode
+PageHeader Select Sidebar SidebarAction Sparkline Spinner Stat StatRow Status
+Switch TabPanel Tabs Tag Textarea Topbar` plus `cx`, `setTheme`,
+`variantClass`, `MAX_SERIES`, `MAX_SERIES_ALL_PAIRS`.
 
 ## Button
 
@@ -219,6 +219,95 @@ For workbook-style financial reports use the **sheet** layer instead — see
   - no channel on that thumb measures 3:1 — the semibold is the only one that
     survives greyscale and CVD, so it is load-bearing. Full numbers and the
     one-line way back to a measuring signal are in `button.css`
+
+## Org chart
+
+Hierarchy DOWN, peers ACROSS. Reporting lines, portfolio structure, entity
+ownership — all the same shape. Nesting in the markup is nesting in the chart;
+every connector is derived from the layout, so there is nothing to measure.
+
+```html
+<div class="jrk-org-scroll">
+  <ul class="jrk-org" aria-label="Reporting structure">
+    <li class="jrk-org__node">
+      <div class="jrk-org__card" aria-current="true">
+        <span class="jrk-org__name">Dana Whitfield</span>
+        <span class="jrk-org__role">VP, Asset Management</span>
+        <span class="jrk-org__meta">37 properties · 8,412 units</span>
+        <span class="jrk-org__aside"><!-- Badge / Status / Delta --></span>
+      </div>
+      <button class="jrk-org__toggle" aria-expanded="true" aria-controls="b1">…</button>
+      <ul class="jrk-org__branch" id="b1"> <li class="jrk-org__node">…</li> </ul>
+    </li>
+  </ul>
+</div>
+```
+
+Card modifiers: `--link` (renders as `<a>`/`<button>`), `--vacant` (open post).
+State is `aria-current` on the card, not a modifier. Branch modifiers:
+`--stacked`, `--rollup`. Sizing knob: `--jrk-org-node` on `.jrk-org`
+(default 176px).
+
+- **It is a nested `<ul>`, not `role="tree"`.** A tree role promises roving
+  tabindex and arrow-key movement between siblings, which nothing here
+  implements — a claimed tree that ignores arrow keys is worse for a
+  screen-reader user than the plain list they already know. Disclosure is the
+  ordinary button + `aria-expanded` + `aria-controls` pattern. `aria-label` on
+  the outer `<ul>` is required.
+- **The connector is drawn at `text.muted`, not a border token** — 5.07:1 light,
+  5.46:1 dark, recorded by hand because nothing gates the border namespace. The
+  lines *are* the content: once a row is wide enough that a child is no longer
+  visibly under its own parent, nothing else says who reports to whom, so
+  1.4.11's 3:1 applies. `border.strong` at 1.71:1 is the value this obviously
+  wants and it is wrong. Keep it thin instead — 1px, never 2px.
+- **The card draws its own hairline**, like `.jrk-sheet`. A fill step bounds a
+  tile exactly once per plane, and this is a plane covered in small boxes,
+  usually already inside a `.jrk-card`.
+- **`--stacked` is the escape valve for a wide fan**, and it is why the
+  horizontal default is safe: twelve peers side by side is 2,300px no screen
+  holds. LEAF CHILDREN ONLY — a stacked child with children of its own centres
+  over its subtree and pulls off the spine. `<OrgNode>` warns in development.
+- **Peers are spaced by PADDING, never `gap`.** The bus between siblings is two
+  half-borders on adjacent nodes and needs them flush; a `gap` turns it into a
+  dashed line nobody asked for. Same rule down the stacked spine.
+- **Ends are trimmed with `border-color: transparent`, never `border: 0`** — the
+  last node's stem shares a pseudo-element with its half of the bus, so removing
+  the border takes the stem with it.
+- **`aria-current` costs a measured signal**, exactly like the nav pill: the
+  tinted wash is 1.16:1 on the light card. The **semibold name** is the channel
+  that survives greyscale and both dichromacies. Do not drop it.
+- The toggle's label is the **count** (`4 reports`), never a bare caret, so a
+  collapsed node is still an answer. The caret does not rotate.
+
+**`--rollup` is the one place the categorical palette is cycled.** Put it on the
+branch whose children are the rollup units; each child takes the next slot and
+its whole subtree inherits it through `--jrk-org-group`, which appears as a
+keyline inside the card.
+
+- **The no-cycling rule protects IDENTITY** — two chart lines sharing a colour
+  cannot be told apart, because colour is the only thing naming them, which is
+  why `seriesColor(8)` throws. Nothing in that reaches here: every node is
+  labelled and the tree *draws* the grouping, so the keyline is an accelerator
+  over a chart that already reads without it. Never promote it to the identity
+  channel — no colour-only legend, no unlabelled node.
+- **Guaranteed: adjacent siblings never collide.** Consecutive slots are exactly
+  the pair the palette order was searched to maximise — dE 22.3 light / 16.5
+  dark, floor 10. The org chart's adjacency requirement and the palette's search
+  objective are the same objective, so cycle in canonical order and do not
+  invent a different one for this.
+- **Not guaranteed at 4+ groups:** collapsing pairs are same-parity, so siblings
+  2, 4 or 6 apart can read as one colour under dichromacy (worst orange|yellow,
+  dE 0.8). **3 or fewer groups is fully CVD-safe** — the cycle never leaves
+  slots 1–3 and the all-pairs safe cap is 3. Slot 9 restarts at slot 1.
+- **Keyline, not a wash and not a coloured connector.** A wash collides with
+  `aria-current` (`accent.washHover` and `chart-tint-1` are the same colour);
+  tinting the connectors would drop the one mark that must clear 3:1 to
+  2.12–2.57:1 for mint, yellow, orange and teal in light.
+- **A vacant card keeps its keyline.** The vacancy is about the seat, the rollup
+  about the branch — and blanking it would leave the children wearing a group
+  their own parent does not.
+- **One `--rollup` per chart.** Two both start at slot 1, so B's first child can
+  land beside A's last in the same colour. `<OrgNode>` warns on nesting.
 
 ## Feedback
 
