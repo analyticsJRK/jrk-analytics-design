@@ -1,9 +1,24 @@
 # CLAUDE.md — jrk-analytics-design
 
 Design library for JRK analytics dashboards. One token layer, a plain-CSS
-component library, and React wrappers over the same class names. Consumed by
-`jrk_agents` (Next.js / Tailwind v4) and by `jrk-audit-platform` / `JRK_FORMS`
-(Python + Jinja).
+component library, and React wrappers over the same class names.
+
+**There is exactly one consumer: `jrk-analytics-web-app`** — specifically
+`apps/portal`, Next.js 15 / React 19 / Tailwind v4. It **vendors** this library:
+`scripts/sync-design.mjs` there copies `package.json`, `LICENSE`, `dist`, `css`,
+`react/src`, `tokens` into `vendor/jrk-analytics-design`, wiping the directory
+first. So a change here is not live in the app until someone re-runs
+`npm run sync:design`, and anything edited in that vendored copy is destroyed on
+the next sync. Commit here before syncing — the script records the source SHA and
+warns when the tree is dirty.
+
+**`jrk_agents`, `jrk-audit-platform` and `JRK_FORMS` are NOT consumers**, and the
+list that used to say so cost real design decisions. `jrk_agents` hand-rolls its
+CSS and never wired the library at all; the two Jinja apps are out by decision.
+Nothing here needs to run without a Node toolchain, work behind a `<link>` tag,
+or avoid a React portal. If you find a constraint justified by "the Jinja apps",
+it is justified by nothing — but check what else leans on it before removing it,
+because some of those choices are still right for other reasons.
 
 **This file loads every turn, so it holds only what you cannot derive from the
 code.** Detail lives in the `jrk-design` skill, which loads on demand.
@@ -28,7 +43,10 @@ That is the gate. It is fast; run it after every change.
 | per-component docs and demos for the Design System pane | `.design-sync/{docs,previews}/` | `.design-sync/.cache/` |
 | the local zero-build gallery | `preview/*.html` | — |
 
-`dist/` is generated **and committed** — the Jinja apps have no Node toolchain.
+`dist/` is generated **and committed**. The reason changed but the requirement did
+not: it used to be that the Jinja apps had no Node toolchain; now it is that the
+web app vendors `dist/` as a build input and never runs this library's build. A
+stale committed `dist/` ships stale tokens to production.
 `.ds-sync/`, `ds-bundle/`, `guides/` are sync tooling and build output: all
 gitignored, none of it authored here, do not read them for reference.
 
@@ -61,29 +79,80 @@ themes, real surfaces. If a color fails, re-step it; do not lower the gate. The
 full run needs the `dataviz` skill's validator:
 `JRK_DATAVIZ=/path/to/skills/dataviz npm run validate`.
 
-**The look is Apple.** macOS/iOS grouped surfaces. Light: `#f2f2f7` page,
-**white** cards. Dark: `#141416` page, `#1c1c1e` cards. The page is tinted and
-the cards are white — the reverse of a conventional dashboard, and not a bug.
-Because the card is the chart surface, marks are validated against
-`#ffffff` / `#1c1c1e`, never the page.
+**A tile is bounded by its FILL STEP off the page, in both themes, with no
+border.** Light: `#f2f2f7` page, `#ffffff` cards (1.12:1). Dark: `#141416` page,
+`#232326` cards (1.17:1). Same Apple grouped mechanism on both sides, which is
+new — for one period light was a flat `#ffffff` page bounded by a 2px brand edge,
+and a change that read correctly in dark could be invisible in light. There is no
+longer a per-theme boundary mechanism to get wrong. Because the card is the chart
+surface, marks are validated against `#ffffff` / `#232326`.
+
+**`.jrk-card` and friends carry `border: 1px solid transparent`, and that must not
+become `border: 0`.** The width is reserved so that the three things which give a
+tile an edge — `--outlined`, and the nesting rules — change only a COLOR and never
+reflow the layout. `border: 0` also sets `border-style: none`, after which a
+`border-color` on its own paints nothing. That is the quiet way this breaks.
+
+**A NESTED tile gets a 1px neutral hairline, because a fill step only works
+once.** A tile inside another tile sits on the card plane, where its own
+`surface.default` equals what it sits on. `nesting.css` is the single home for
+that rule. It used to enforce the opposite — suppressing a brand edge on nested
+tiles — and the selectors did not change, only their reason.
+
+**`.jrk-sheet` is the one tile with a real hairline by default.** It is designed
+to sit on `.jrk-content--document`, which IS the card plane, so it has no fill
+step to inherit and draws `border.default` itself.
+
+**In light, `surface.subtle` equals the page** (`#f2f2f7` both). Table headers and
+inset wells no longer recede *from* the page — they match it. If something must
+read as recessed on a card in light, `subtle` still works; on the page it will
+not. `surface.hover` has the same trap and it is worse: washing a whole white card
+with it erases the step that bounds the tile, which is why interactive cards use
+`surface.cardHover` instead.
 
 **The dark page is not `#000000`, and that is deliberate.** iOS grouped dark is
 true black; at 1920x1080 it halates against near-white text and reads as a void.
-The page follows macOS instead. Two consequences: the card is only a 1.08:1 fill
-step off the page, so **`border.subtle` carries the card edge in dark** — never
-drop the hairline there; and `text.primary` in dark is `#ebebf0`, not `#ffffff`,
-because pure white on a near-black page is the glare. Both deviations are noted
-on their tokens.
+The page follows macOS instead. When the brand edge was removed this value was
+deliberately left alone and the CARD was lifted (`#1c1c1e` → `#232326`) to widen
+the step, so the halation decision stayed settled. Same reason `text.primary` in
+dark is `#ebebf0`, not `#ffffff`. Both noted on their tokens. Lifting the card
+cost every dark chart mark ~8% contrast — worst case 4.30:1, all still passing.
+**When you move a surface, move what MEASURES it in the same commit.**
+`$meta.surfaces` and `chart.chrome.surface` both stayed at the old `#1c1c1e`, so
+`validate` spent that period reporting dark against a card that no longer
+existed, and the second one is stroked as the ring around a dot — a gap that was
+painting a dark outline. `validate` now gates both against `surface.default`.
+
+**An interactive card's hover needs BOTH a shadow and a fill, because each works
+in only one theme.** The shadow carries light and is invisible in dark (a black
+shadow on `#141416`); `surface.cardHover` lifts 1.125:1 in dark and is a deliberate
+no-op in light. Neither is redundant — which one does nothing depends on the theme.
 
 **Adopt Apple values only where they pass.** Apple's palette is not
 accessibility-clean — `systemGray` is 2.92:1 as body text, `systemIndigo` is
-3.36:1 as dark link text. Both are rejected here. Measure before reaching for an
-Apple hex; the deviations are noted on each token.
+3.36:1 as dark link text, and `systemBlue` gives a white button label only
+4.02:1. All three are rejected here. Measure before reaching for an Apple hex;
+the deviations are noted on each token.
 
 **The chart series palette is never cycled.** Eight slots, fixed order — the
 order is the colorblind-safety mechanism, derived by search across both modes
 jointly. A ninth series folds into "Other" or facets. `seriesColor(8)` throws on
-purpose. Scatter/bubble/choropleth/small-multiples cap at three.
+purpose. Scatter/bubble/choropleth/small-multiples cap at three. **Known debt,
+now accepted at its worst:** the derivation holds systemIndigo out "as the UI
+accent", which has been stale since the accent left indigo. The accent is now
+blue at hue 212° and slot 1 is systemBlue at 211° — the same hue, and slot 1 is
+the default single-series color for every bar list, cell bar and sparkline. The
+palette has NOT been re-derived; only lightness separates them (white on the
+accent is 5.22:1, on slot 1 it is 4.02:1). So: never put a chart on an accent
+wash, and never let a lone blue series sit beside a `.jrk-btn--cta` in the same
+tile without a label between them. **The tinted `--primary` inherits a second,
+milder version of the same collision**: its fill family (`accent.wash` /
+`washHover` / `washActive`) lands on top of `--jrk-chart-tint-1` — `#cfe1fd`
+against `#c7deff` in light, `#143a5e` against `#113a5e` in dark, i.e. the same
+color. Accepted, because the two are never the identity channel for the same
+thing and only the button carries a hairline (`accent.washBorder`) and a label.
+The rule it produces: a tinted button does not sit inside a chart tile among
+tint-filled marks.
 
 **Color is never the only signal.** Status needs icon + label. Deltas state
 direction in text. Charts have a table view.
@@ -115,9 +184,77 @@ punched out, so they work on any badge wash. SF Symbols cannot be shipped — no
 webfont, and the outlines are Apple's; use Phosphor (MIT) with
 `className="jrk-icon"` beyond the built-in set.
 
-**`accent.onSolid` is not `text.inverse`.** The label on the solid accent stays
-white in both modes; `text.inverse` in dark is the dark ink for the light
-inverse surface. Do not collapse them.
+**The accent is a saturated blue, and every role takes the anchor.** `#0069d9`
+(hue 212°) is the brand anchor and it measures everywhere it is used: 5.22:1 on
+the white card, 4.68:1 on the `#f2f2f7` page, white label at 5.22:1. So
+`accent.text`, `text.link`, `border.accent` and `focus.ring` are all the anchor
+itself. That is the *point* of this value — the previous accent was a pastel
+that could not be text or a signifier on a light surface, and each of those four
+roles needed its own bespoke step. **The PAGE is still the binding surface**, and
+it is what pins the anchor: a lighter blue that looks fine on the white card
+fails there.
+
+**It is not `systemBlue`.** `#007aff` gives a white label 4.02:1 and link text
+3.60:1 on the page. `#0069d9` is the shallowest step on the hue that clears
+4.5:1 in every light-mode role. Do not "correct" it back to the Apple hex.
+
+**`accent.onSolid` is `#ffffff` in both modes, and is still not `text.inverse`.**
+The rule is not "white" and not "dark ink" — this token has been white, then
+`#052f3b` for the pastel era, then white again. It is **whatever measures against
+`accent.solid`**, so re-measure it whenever the anchor moves. It stays distinct
+from `text.inverse`, which is `#ffffff` light / `#000000` dark for the inverse
+surface: the two now agree in light and disagree in dark. Do not collapse them,
+and **do not borrow `accent.onSolid` as a generic "label on a filled control"** —
+`.jrk-btn--danger-solid` did, so a red button's ink direction moved every time
+the accent did. That is what `status.critical.solid` / `.onSolid` are for.
+
+**The accent has two button volumes, and which one is the DEFAULT is the whole
+decision.** `.jrk-btn--primary` is **tinted** — `accent.wash` fill,
+`accent.washText` label, `accent.washBorder` hairline — and it is the everyday
+button. `.jrk-btn--cta` is the solid anchor with a white label, and there is **at
+most one per view**, for the action that commits. `--primary` used to *be* the
+solid one; the reason it moved is that a screen here shows a page-header action, an
+export, a filter and a segmented control at once, and four saturated blue
+rectangles tell the reader nothing about which one commits. Three details are
+load-bearing, all of them recorded on the tokens: the label is `washText`, not
+`accent.text` (the anchor is 4.49:1 on the wash — under by 0.01); the wash cannot
+bound the control (1.16:1 on the white card, 1.06:1 on the dark one) so the
+hairline is not decoration you can drop; and `accent.washBorder` is kept far below
+`border.accent`, which means *selected* on a segment or tab — if those two ever
+converge, a button and a chosen control look alike.
+
+**A segmented control is an inset well with a RAISED TINTED THUMB, and the
+current-page nav row is the same tinted pill.** `.jrk-btn-group`,
+`.jrk-tabs--pills`, `.jrk-nav-item[aria-current]` and
+`.jrk-sidebar__action[aria-current]` all say "this is the one" the same way now:
+`accent.wash` + `accent.washText` + **semibold**. On the two segmented controls the
+thumb adds `shadow.md` and the faint `accent.washBorder` hairline and floats in a
+`surface.track` well whose unselected segments are bare labels — no fill, no
+border, so there is one enclosure in the control and it marks the choice. The two
+segmented controls are the same widget in two markup contracts; a change to one
+belongs in both. Segment height comes from the button's own size modifier (the
+first track era pinned it at 22px, under the 24px `minTouch` floor).
+
+**This design spends a measured signal, and you need to know that before you
+touch it.** No channel on the thumb reaches 3:1: the fill is **1.05:1** against the
+track in light and 1.20:1 in dark, the hairline 1.44:1 and 2.30:1, and the shadow
+is invisible in dark by construction. The nav pill is the same story — **1.04:1**
+against a hovered row, 1.08:1 against an open one. Immediately before this the
+segment carried `border.accent` at 5.22:1/6.37:1 and the nav row a solid
+`accent.solid` pill at 5.22:1. Both were traded, deliberately and on instruction,
+for the quieter look.
+
+So: **the `semibold` is structure, not styling.** It is the only channel that
+survives greyscale, both dichromacies and both themes, and it is what keeps
+"which one is selected" and "where am I" answerable at all. Do not let a tidy-up
+drop it. Two more consequences worth carrying: a neutral or white thumb must never
+come back, because `accent.wash`'s 1.05:1 on the track is the entire margin between
+this design and the 1.00:1 white thumb this library already recorded as a failure;
+and if a 3:1 state signal is ever wanted again, the fix is one line —
+`border.accent` on the thumb rule.
+
+**Adopt Apple values only where they pass** — see above. The accent is not an
+Apple color; the neutrals, status colors and chart palette still are.
 
 **Dark values are selected, not flipped.** Every themed token has an explicit
 `light` and `dark` entry chosen for that surface.

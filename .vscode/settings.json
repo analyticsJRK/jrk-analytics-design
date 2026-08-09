@@ -1,0 +1,100 @@
+{
+  // Design Tokens Explorer (vira.design-tokens-explorer)
+  //
+  // The source is dist/jrk-tokens.css, NOT tokens/tokens.json. tokens.json is
+  // the authoring source — nested, annotated, and light/dark paired — so a flat
+  // token explorer reads its prose ($comment, use, $darkNote) as tokens and its
+  // names never match what you type in CSS. dist/jrk-tokens.css is the built
+  // flat layer: one custom property per token, exactly the names components
+  // reference. Regenerate it with `npm run build` after editing tokens.json.
+  //
+  // Group names are prefixes on the custom-property name minus the leading --.
+  // `type` is omitted where a prefix is not homogeneous; the extension infers
+  // the preview renderer from the value in that case.
+  "designTokensExplorer.sources": [
+    {
+      "name": "JRK Tokens",
+      "path": "dist/jrk-tokens.css",
+      "groups": [
+        // --- semantic color -------------------------------------------------
+        { "name": "jrk-surface", "type": "color" },
+        // --jrk-text-* is mixed: named entries are ink colors, t-shirt sizes
+        // (2xs…5xl) are font sizes. Left untyped so both render sensibly.
+        { "name": "jrk-text" },
+        { "name": "jrk-border", "type": "color" },
+        { "name": "jrk-accent", "type": "color" },
+        { "name": "jrk-status", "type": "color" },
+        { "name": "jrk-focus", "type": "color" },
+
+        // --- chart ----------------------------------------------------------
+        // jrk-chart-1..8 are the fixed categorical slots (never cycled),
+        // jrk-chart-tint-* are pastel fills for already-labelled marks, and
+        // jrk-chart-seq-*/div-* are the sequential and diverging ramps.
+        { "name": "jrk-chart", "type": "color" },
+
+        // --- space and size ---------------------------------------------------
+        { "name": "jrk-space", "type": "size" },
+        { "name": "jrk-radius", "type": "radius" },
+        { "name": "jrk-control", "type": "size" },
+        { "name": "jrk-icon", "type": "size" },
+        { "name": "jrk-min", "type": "size" },
+        { "name": "jrk-sheet", "type": "size" },
+        { "name": "jrk-sidebar", "type": "size" },
+        { "name": "jrk-topbar", "type": "size" },
+        { "name": "jrk-container", "type": "size" },
+
+        // --- type -------------------------------------------------------------
+        { "name": "jrk-font" },
+        { "name": "jrk-weight", "type": "font-weight" },
+        { "name": "jrk-leading", "type": "line-height" },
+        { "name": "jrk-tracking" },
+
+        // --- effects and motion -----------------------------------------------
+        { "name": "jrk-shadow", "type": "shadow" },
+        { "name": "jrk-duration", "type": "time" },
+        { "name": "jrk-ease", "type": "easing" },
+        { "name": "jrk-z" },
+
+        // --- raw ramp ---------------------------------------------------------
+        // Last on purpose: components reference semantic tokens, never a ramp
+        // step. These are here to read, not to insert.
+        { "name": "jrk-neutral", "type": "color" },
+        { "name": "jrk-indigo", "type": "color" }
+      ]
+    },
+
+    // BROWSE ONLY — trial entry, delete if it reads badly.
+    //
+    // The authoring source. Kept as a second source because it pairs light and
+    // dark on one node, which the built CSS splits across three blocks, so it
+    // is the better read for palette review. Do NOT insert from this one: the
+    // names are derived from JSON nesting and resolve to nothing in CSS, and
+    // it carries prose ($comment, use, $darkNote) that will surface as junk
+    // entries. Editing values still happens in the file itself, not here —
+    // the extension has no write-back command.
+    {
+      "name": "JRK Tokens (source, browse only)",
+      "path": "tokens/tokens.json",
+      "groups": [
+        { "name": "color", "type": "color" },
+        { "name": "chart", "type": "color" },
+        { "name": "ramp", "type": "color" },
+        { "name": "space", "type": "size" },
+        { "name": "radius", "type": "radius" },
+        { "name": "size", "type": "size" },
+        { "name": "shadow", "type": "shadow" },
+        { "name": "font" },
+        { "name": "motion" },
+        { "name": "z" }
+      ]
+    }
+  ],
+
+  // rem values in the token layer assume a 16px root.
+  "designTokensExplorer.rootFontSize": 16,
+
+  // The hardcoded-value audit should look at the hand-written component layer
+  // only. dist/ holds the token definitions themselves and is excluded by the
+  // extension's default exclude pattern anyway.
+  "designTokensExplorer.usageScanPath": "css/**/*.css"
+}

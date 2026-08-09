@@ -48,6 +48,24 @@ const contrast = (a, b) => {
 const SURFACE = T.$meta.surfaces;
 const CANVAS = { light: T.color.surface.canvas.light, dark: T.color.surface.canvas.dark };
 
+// ---------- the constants this file measures against ----------
+// A validator cannot check its own constant, which is exactly how $meta.surfaces
+// stayed at #1c1c1e for as long as it did: every dark ratio below was computed
+// against a card that no longer existed and read ~8% high, with nothing to say
+// so. chart.chrome.surface had the same drift and worse consequences — it is
+// STROKED as the ring around a dot, so a stale value paints a dark outline where
+// a gap belongs. Both must equal color.surface.default; this is the check that
+// says so out loud.
+console.log('\n== measurement surfaces track surface.default ==');
+for (const mode of ['light', 'dark']) {
+  const truth = T.color.surface.default[mode];
+  for (const [label, got] of [['$meta.surfaces', SURFACE[mode]], ['chart.chrome.surface', T.chart.chrome.surface[mode]]]) {
+    got === truth
+      ? pass(`${label}.${mode} = ${got}`)
+      : fail(`${label}.${mode} is ${got} but surface.default.${mode} is ${truth} — every ${mode} measurement below is against the wrong surface`);
+  }
+}
+
 console.log('\n== WCAG contrast ==');
 
 // Body text must clear 4.5:1 on BOTH the card surface and the page plane.
@@ -96,9 +114,15 @@ for (const mode of ['light', 'dark']) {
   ci >= 4.5 ? pass(`text.inverse on surface.inverse ${mode} ${ci.toFixed(2)}:1`)
             : fail(`text.inverse on surface.inverse ${mode} ${ci.toFixed(2)}:1 — needs 4.5:1`);
 
-  const cw = contrast(T.color.accent.washText[mode], T.color.accent.wash[mode]);
-  cw >= 4.5 ? pass(`accent.washText on accent.wash ${mode} ${cw.toFixed(2)}:1`)
-            : fail(`accent.washText on accent.wash ${mode} ${cw.toFixed(2)}:1 — needs 4.5:1`);
+  // The label does not change on hover or press, so every wash step the tinted
+  // button can be showing has to hold it. washActive is the binding one: the
+  // fill deepens TOWARD its ink there, the opposite of accent.solid's press
+  // sequence, so this is the check that catches a wash stepped one shade too far.
+  for (const key of ['wash', 'washHover', 'washActive']) {
+    const cw = contrast(T.color.accent.washText[mode], T.color.accent[key][mode]);
+    cw >= 4.5 ? pass(`accent.washText on accent.${key} ${mode} ${cw.toFixed(2)}:1`)
+              : fail(`accent.washText on accent.${key} ${mode} ${cw.toFixed(2)}:1 — needs 4.5:1`);
+  }
 }
 
 // The sheet banner is a filled band carrying text, so both its ink steps are
@@ -248,6 +272,51 @@ console.log('\n== sequential ramp ==');
     const c = contrast(hex, SURFACE[mode]);
     c >= 2 ? pass(`ordinal floor ${mode} ${hex} ${c.toFixed(2)}:1`)
            : fail(`ordinal floor ${mode} ${hex} ${c.toFixed(2)}:1 — needs 2:1`);
+  }
+}
+
+// ---------- diverging cell ramp ----------
+// These steps sit UNDER text, which no other chart colour in this file does, so
+// they get their own gate. Three properties, and losing any one of them breaks a
+// different thing: ink legibility, the ramp's direction, and the polarity signal.
+//
+// NOT checked here, deliberately: CVD separation between CONSECUTIVE steps in an
+// arm. Those run deltaE 4.2-6.5 and that is what a magnitude ramp is supposed to
+// look like. The categorical floor is for naming which series a mark belongs to;
+// applying it here would be a category error and would force the arms apart until
+// the ramp read as four unrelated colours. See $rampVsIdentity on the token.
+console.log('\n== diverging cell ramp ==');
+{
+  const D = T.chart.diverging.steps;
+  const INK = { light: T.color.text.primary.light, dark: T.color.text.primary.dark };
+
+  for (const mode of ['light', 'dark']) {
+    for (const arm of ['negative', 'positive']) {
+      const steps = D[arm];
+
+      // 1. The cell carries its number. This is the constraint that caps the ramp.
+      for (const s of steps) {
+        const c = contrast(INK[mode], s[mode]);
+        c >= 4.5 ? pass(`div ${arm} ${s.step} ${mode} — text.primary ${c.toFixed(2)}:1`)
+                 : fail(`div ${arm} ${s.step} ${mode} — text.primary ${c.toFixed(2)}:1, needs 4.5:1 (the cell shows its value)`);
+      }
+
+      // 2. A ramp that is not monotonic is not a ramp — magnitude stops reading.
+      const ls = steps.map((s) => lum(s[mode]));
+      const ok = mode === 'light'
+        ? ls.every((v, i) => i === 0 || v < ls[i - 1])
+        : ls.every((v, i) => i === 0 || v > ls[i - 1]);
+      ok ? pass(`div ${arm} ${mode} — monotonic (${mode === 'light' ? 'pale -> saturated' : 'deep -> lifted'})`)
+         : fail(`div ${arm} ${mode} — steps are not monotonic, so magnitude does not read`);
+    }
+
+    // 3. On a signed table the ARM is the meaning, so polarity must survive CVD.
+    for (let i = 0; i < D.negative.length; i++) {
+      const w = worstSeparation(D.negative[i][mode], D.positive[i][mode]);
+      w.deltaE >= CVD_FLOOR
+        ? pass(`div polarity rank ${i + 1} ${mode} — dE ${w.deltaE.toFixed(1)} (${w.kind})`)
+        : fail(`div polarity rank ${i + 1} ${mode} — dE ${w.deltaE.toFixed(1)} under ${CVD_FLOOR}; negative and positive collapse under ${w.kind}`);
+    }
   }
 }
 

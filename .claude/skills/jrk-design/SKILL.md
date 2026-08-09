@@ -9,15 +9,20 @@ description: >
 when_to_use: >
   Triggers: "build a dashboard", "add a chart", "style this table", "make a
   report", "pick a color", "what token", "AM report", "restyle", "dark mode",
-  anything touching a .tsx/.css file or a Jinja template in a JRK app.
+  anything touching a .tsx or .css file in a JRK app.
 paths: "**/*.tsx,**/*.jsx,**/*.css,**/templates/**/*.html,**/static/**/*.html"
 ---
 
 # JRK Analytics Design
 
-Tokens, plain-CSS components, and React wrappers over the same class names. One
-token layer serves both org stacks: `jrk_agents` (Next.js / Tailwind v4) and
-`jrk-audit-platform` / `JRK_FORMS` (Python + Jinja).
+Tokens, plain-CSS components, and React wrappers over the same class names.
+
+**One consumer: `jrk-analytics-web-app/apps/portal`** (Next.js 15 / React 19 /
+Tailwind v4), which VENDORS this library — a change here is not live there until
+someone re-runs `npm run sync:design`. `jrk_agents`, `jrk-audit-platform` and
+`JRK_FORMS` are not consumers; a rule justified by "the Jinja apps" is justified
+by nothing. The plain-CSS layer is still the primary interface, because the
+portal imports the component files directly and uses the React wrappers on top.
 
 Library root: `jrk-analytics-design/`. If it is not in the session, ask before
 guessing class names — this skill lists the contract, not every modifier.
@@ -64,28 +69,54 @@ small multiples, or takes a second encoding. `seriesColor(8)` throws deliberatel
 picking the scales. Two measures of different magnitude become two charts, small
 multiples, or values indexed to a common base.
 
-## The look is Apple
+## Apple grouped surfaces, a stepped-blue brand
 
-macOS/iOS grouped surfaces, Apple system greys, systemIndigo accent, Inter as
-the SF stand-in, macOS-compact density for non-touch 1920x1080.
+Apple system greys, Inter as the SF stand-in, macOS-compact density for non-touch
+1920x1080, and Apple's grouped surface hierarchy in **both** themes. The accent is
+not Apple's — it is a blue at hue 212° anchored on `#0069d9`, one step deeper than
+`systemBlue`, which fails both as a button label (4.02:1) and as link text.
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#f2f2f7` systemGroupedBackground | `#141416` |
-| card | `#ffffff` | `#1c1c1e` |
+| page plane | `#f2f2f7` | `#141416` |
+| card | `#ffffff` | `#232326` |
 | popover / input | `#ffffff` | `#2c2c2e` |
 
-The page is tinted and the **cards are white** — the reverse of a conventional
-dashboard, and the thing that most makes it read as Apple. Cards carry a fill
-*and* a hairline: iOS uses fill alone, but at desktop viewing distance a
-white-on-`#f2f2f7` edge is too faint to hold a dense layout together.
+**A tile is bounded by its fill step off the page, and there is no border.**
+1.12:1 in light, 1.17:1 in dark — the same Apple grouped mechanism on both sides.
+That symmetry is the point: for one period this library ran a flat `#ffffff` light
+page bounded by a 2px `#48a9df` brand edge, which meant a change that read
+correctly in dark could be invisible in light. Both halves of that pair were
+removed together, which is the only safe way to undo a pair. `border.card` and
+`size.cardEdge` no longer exist.
+
+Three follow-on rules:
+- **Tiles keep `border: 1px solid transparent`, never `border: 0`.** The width is
+  reserved so an edge appearing changes only a colour and never reflows. `border:
+  0` sets `border-style: none`, after which `border-color` paints nothing.
+- **A nested tile takes a 1px neutral hairline**, because a fill step only works
+  once — a tile inside a tile sits on the card plane, where its own fill matches
+  what it sits on. `nesting.css` is the single home for that rule; it used to
+  *suppress* a brand edge and now *supplies* a hairline, with the same selectors.
+- **`.jrk-sheet` is the exception** and draws `border.default` by default: it is
+  built to sit on `.jrk-content--document`, which *is* the card plane.
+
+In light, `surface.subtle` now **equals** the page (`#f2f2f7` both), so table
+headers and inset wells match the page rather than receding from it. `surface.hover`
+has the same value and a sharper trap: washing a whole white card with it erases
+the step that bounds the tile. Interactive cards use `surface.cardHover` instead.
 
 Two consequences that bite:
 - **The card, not the page, is the chart surface.** Marks are validated against
-  `#ffffff` / `#1c1c1e`, never against white or black.
-- **In dark mode the hairline is the elevation cue, not the fill.** The card is
-  only a 1.08:1 fill step off the `#141416` page, so `border.subtle` is what
-  makes a tile read as a tile. Never drop the card hairline in dark.
+  `#ffffff` / `#232326`. Lifting the dark card cost every dark mark ~8% (worst
+  case 4.30:1, all still passing) — that headroom is nearly spent.
+- **An interactive card's hover needs a shadow AND a fill.** The shadow carries
+  light and is invisible in dark; `surface.cardHover` lifts 1.125:1 in dark and is
+  a deliberate no-op in light. Which declaration does nothing depends on the theme,
+  so neither can be dropped as redundant.
+
+`.jrk-card--seamless` and `.jrk-content--document` both work in light again — they
+were a no-op and a boundary-less card respectively during the flat-white period.
 
 **The dark page is `#141416`, not `#000000`.** iOS grouped dark is true black; on
 a 1920x1080 desktop it halates against near-white text and reads as a void, so
@@ -106,6 +137,23 @@ documented in the file. `font.feature.sans` turns on Inter's tailed lowercase
 accessibility-clean: `systemGray` is 2.92:1 as body text and `systemIndigo` is
 3.36:1 as dark link text — both rejected here. Measure before reaching for an
 Apple hex; deviations are noted on each token.
+
+**The accent anchor is used in every accent role.** `#0069d9` measures 5.22:1 on
+the white card and 4.68:1 on the `#f2f2f7` page, so `accent.text`, `text.link`,
+`border.accent` and `focus.ring` are all the anchor itself, and `accent.onSolid`
+is plain `#ffffff` (5.22:1). The **page** is the binding surface and it is what
+pins the anchor — a blue tuned only to the card can sit a step lighter and fail
+there. Only `accent.washText` steps away (`#005ec4`), because the anchor lands at
+4.49:1 on the light wash, under the floor by 0.01. Dark text roles are *selected*,
+not derived: `#64b5ff`, since the anchor is 3.00:1 on the dark card.
+
+The previous accent was a `#9ee4ff` pastel at 1.40:1 on the card, which could not
+be text or a signifier on any light surface — so each of those roles carried a
+bespoke step and `accent.onSolid` was dark ink. If you find prose asserting that,
+it is stale. The durable rule is that `accent.onSolid` is **whatever measures
+against `accent.solid`**, and that it is never a generic "label on a filled
+control" — `status.critical.solid` / `.onSolid` exist because
+`.jrk-btn--danger-solid` used to borrow it.
 
 **Icons are `em`-sized and inherit text weight**, with filled status glyphs whose
 inner mark is punched out so they work on any badge wash. SF Symbols cannot be

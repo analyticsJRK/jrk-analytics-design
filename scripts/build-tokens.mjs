@@ -88,6 +88,12 @@ T.chart.sequential.steps.forEach((hex, i) => add(`chart-seq-${i + 1}`, hex));
 add('chart-div-negative', T.chart.diverging.negative);
 add('chart-div-positive', T.chart.diverging.positive);
 add('chart-div-mid', T.chart.diverging.midpoint.light, T.chart.diverging.midpoint.dark);
+// Signed cell fills. Themed, because a tint that sits under text has to be pale
+// in light and deep in dark — this ramp is never flipped.
+for (const arm of ['negative', 'positive']) {
+  const short = arm === 'negative' ? 'neg' : 'pos';
+  for (const s of T.chart.diverging.steps[arm]) add(`chart-div-${short}-${s.step}`, s.light, s.dark);
+}
 addThemed('chart', T.chart.chrome); // -> --jrk-chart-grid / -axis / -tick / -label / -deltaUp…
 
 // ---- scalars
@@ -106,6 +112,13 @@ addFlat('topbar', T.size.topbar);
 addFlat('container', T.size.container);
 addFlat('sheet', T.size.sheet);
 add('min-touch', T.size.minTouch);
+/* No card-edge: the brand tile edge was removed and a tile is bounded by its fill
+   step. This line used to read `add('card-edge', T.size.cardEdge)`, and deleting
+   the token without deleting the line emitted `--jrk-card-edge: undefined` — a
+   valid-looking declaration that check:css does not catch, because it scans
+   authored CSS for raw hex and undefined token REFERENCES, not for undefined
+   values in its own generated output. If you remove a token from tokens.json,
+   grep this file for its name. */
 addFlat('duration', T.motion.duration);
 addFlat('ease', T.motion.easing);
 addFlat('z', T.z);
@@ -157,7 +170,12 @@ for (const [s, parts] of Object.entries(T.color.status)) {
 }
 T.chart.categorical.slots.forEach((s) => twMap(`color-chart-${s.slot}`, `chart-${s.slot}`));
 T.chart.tint.slots.forEach((s) => twMap(`color-tint-${s.slot}`, `chart-tint-${s.slot}`));
-for (const [k, v] of Object.entries(T.font.size)) tw.push(`  --text-${kebab(k)}: ${v};`);
+// The isMeta guard here is not optional and its absence failed LOUDLY, one
+// consumer downstream: font.size carries a $comment, so this emitted
+// `--text-$comment: Apple's type ladder …;` into the Tailwind theme, and the
+// apostrophe made Tailwind's parser die with "Unterminated string" — the whole
+// app build, not just this rule. Every sibling line already had the guard.
+for (const [k, v] of Object.entries(T.font.size)) if (!isMeta(k)) tw.push(`  --text-${kebab(k)}: ${v};`);
 for (const [k, v] of Object.entries(T.space)) if (!isMeta(k)) tw.push(`  --spacing-${kebab(k)}: ${v};`);
 for (const [k, v] of Object.entries(T.radius)) if (!isMeta(k)) tw.push(`  --radius-${kebab(k)}: ${v};`);
 tw.push(`  --font-sans: ${T.font.family.sans};`);
@@ -217,7 +235,22 @@ export const chartDiverging = {
   negative: '${T.chart.diverging.negative}',
   positive: '${T.chart.diverging.positive}',
   midpoint: { light: '${T.chart.diverging.midpoint.light}', dark: '${T.chart.diverging.midpoint.dark}' },
+  steps: {
+    negative: ${JSON.stringify(T.chart.diverging.steps.negative)},
+    positive: ${JSON.stringify(T.chart.diverging.steps.positive)},
+  },
 } as const;
+
+/** Signed value -> diverging step 1..4. 'max' is the largest ABSOLUTE value in
+ *  the set being compared, so every cell in one table shares a scale — a
+ *  per-cell scale would make two different numbers the same colour. Returns
+ *  null at exactly zero, which is the midpoint and takes no fill. */
+export function divergingStep(value: number, max: number): { arm: 'negative' | 'positive'; step: 1 | 2 | 3 | 4 } | null {
+  if (!value || !max) return null;
+  const ratio = Math.min(Math.abs(value) / Math.abs(max), 1);
+  const step = Math.min(4, Math.max(1, Math.ceil(ratio * 4))) as 1 | 2 | 3 | 4;
+  return { arm: value < 0 ? 'negative' : 'positive', step };
+}
 
 export const chartChrome = ${JSON.stringify(T.chart.chrome, null, 2).replace(/"([^"]+)":/g, '$1:').replace(/"/g, "'")} as const;
 

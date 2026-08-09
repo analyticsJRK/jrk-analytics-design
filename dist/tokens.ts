@@ -37,13 +37,29 @@ export const chartDiverging = {
   negative: '#ff3b30',
   positive: '#007aff',
   midpoint: { light: '#e5e5ea', dark: '#3a3a3c' },
+  steps: {
+    negative: [{"step":1,"light":"#ffdedb","dark":"#551c17"},{"step":2,"light":"#ffc9c5","dark":"#6d241d"},{"step":3,"light":"#ffb3ac","dark":"#872d24"},{"step":4,"light":"#ff9c93","dark":"#a3372c"}],
+    positive: [{"step":1,"light":"#dbeaff","dark":"#193754"},{"step":2,"light":"#c2dcff","dark":"#20466c"},{"step":3,"light":"#a8cdff","dark":"#275786"},{"step":4,"light":"#8dbdff","dark":"#2f68a1"}],
+  },
 } as const;
+
+/** Signed value -> diverging step 1..4. 'max' is the largest ABSOLUTE value in
+ *  the set being compared, so every cell in one table shares a scale — a
+ *  per-cell scale would make two different numbers the same colour. Returns
+ *  null at exactly zero, which is the midpoint and takes no fill. */
+export function divergingStep(value: number, max: number): { arm: 'negative' | 'positive'; step: 1 | 2 | 3 | 4 } | null {
+  if (!value || !max) return null;
+  const ratio = Math.min(Math.abs(value) / Math.abs(max), 1);
+  const step = Math.min(4, Math.max(1, Math.ceil(ratio * 4))) as 1 | 2 | 3 | 4;
+  return { arm: value < 0 ? 'negative' : 'positive', step };
+}
 
 export const chartChrome = {
   $comment: 'surface is the CARD, not the page — that is what chart marks sit on and what the validator measures against.',
   surface: {
     light: '#ffffff',
-    dark: '#1c1c1e'
+    dark: '#232326',
+    $darkNote: 'Was #1c1c1e, left behind when surface.default.dark was lifted. This one is not only a measurement — chart.css strokes it as the 2px ring around .jrk-dot, whose job is to read as a GAP where a dot crosses a line. A ring painted #1c1c1e on a #232326 card is darker than the card, so instead of a gap every dot in dark mode wore a faint dark outline. Nothing failed a gate because a ring is not text and not a mark. Keep this equal to color.surface.default.'
   },
   grid: {
     light: '#f2f2f7',
@@ -126,6 +142,16 @@ export const status = {
     wash: {
       light: '#ffe8e6',
       dark: '#42110e'
+    },
+    solid: {
+      light: '#d81f14',
+      dark: '#d81f14',
+      use: 'fill of the ONE filled destructive button — .jrk-btn--danger-solid, never a status mark'
+    },
+    onSolid: {
+      light: '#ffffff',
+      dark: '#ffffff',
+      use: 'label ON status.critical.solid'
     }
   },
   neutral: {

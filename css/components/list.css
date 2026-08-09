@@ -192,6 +192,18 @@
   color: var(--jrk-text-primary);
 }
 
+/* `text-align: end` above right-aligns the value while .jrk-select is a plain
+   native control. Under `appearance: base-select` (see the open-list block in
+   form.css) the control becomes a flex button and text-align no longer reaches
+   the label, so the alignment has to be restated as a flex rule. Both are
+   needed: the text-align one is what still works in browsers without
+   base-select. */
+@supports (appearance: base-select) {
+  .jrk-list__row--control .jrk-select {
+    justify-content: flex-end;
+  }
+}
+
 /* ============================== density ============================== */
 
 /* Roomier rows, for a settings surface rather than a dense data panel. */

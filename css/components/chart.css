@@ -592,7 +592,12 @@ button.jrk-legend__item:hover {
   display: flex;
   flex-direction: column;
   background: var(--jrk-surface-default);
-  border: 1px solid var(--jrk-border-subtle);
+  /* Same treatment as .jrk-card — this is a card that happens to hold a chart, so
+     the fill step bounds it and the 1px transparent border is reserved for the
+     nesting hairline. Chart chrome (axis, gridlines) is border.strong /
+     chart.grid, so the tile boundary and the data's own rules stay distinct
+     regardless of what the tile edge is doing. */
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-xl);
 }
 

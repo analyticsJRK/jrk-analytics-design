@@ -15,15 +15,23 @@ import { Button, Stat, DataTable } from '@jrk/design';
 
 React exports: `Alert AppShell Badge BarList Button ButtonGroup Card CellBar
 ChartCard Checkbox Content DataTable Delta Empty Input Legend LineChart Main
-NavGroup NavItem PageHeader Select Sidebar Sparkline Spinner Stat StatRow Status
-Switch TabPanel Tabs Tag Textarea Topbar` plus `cx`, `setTheme`, `variantClass`,
-`MAX_SERIES`, `MAX_SERIES_ALL_PAIRS`.
+NavGroup NavItem NavMenu NavMenuItem NavMenuSeparator PageHeader Select Sidebar
+SidebarAction Sparkline Spinner Stat StatRow Status Switch TabPanel Tabs Tag
+Textarea Topbar` plus `cx`, `setTheme`, `variantClass`, `MAX_SERIES`,
+`MAX_SERIES_ALL_PAIRS`.
 
 ## Button
 
 `.jrk-btn` + one variant + optional size.
 
-- Variants: `--primary` `--secondary` `--ghost` `--danger` `--danger-quiet` `--link`
+- Variants: `--primary` `--cta` `--secondary` `--ghost` `--danger` `--danger-solid`
+  `--danger-quiet` `--link`
+- **`--primary` is TINTED** (accent wash + `accent.washText` + an
+  `accent.washBorder` hairline) and is the everyday button. **`--cta` is the solid
+  accent** — at most one per view, for the action that commits. Putting two `--cta`s
+  on a screen removes the only reason either is loud
+- The loading spinner's ink is set per variant and defaults to `text.secondary`;
+  a new filled variant must name its own or it inherits the quiet one
 - Sizes: `--sm` `--lg` (md is default), plus `--icon` (square), `--block`
 - Loading: `data-loading="true"` + `aria-busy` — content stays in flow at zero
   opacity so the button does not resize mid-action
@@ -42,6 +50,17 @@ are declared once.
 - `.jrk-field__label` (add `data-required` for the asterisk), `__help`, `__error`
 - `.jrk-input` `.jrk-select` `.jrk-textarea` — sizes `--sm` `--lg`; `--numeric`
   right-aligns on tabular figures; `--filled` for white chrome (topbar)
+- `.jrk-select` stays a real `<select>` — do NOT build a custom listbox. Its OPEN
+  list is styled to match the grouped list via `appearance: base-select`, behind
+  `@supports`, so unsupporting browsers keep the native popup untouched. Selection
+  there is accent TEXT + semibold and hover is the soft neutral wash — no
+  checkmark, no accent fill. A list you pick *from* should not shout; the closed
+  control already says what is chosen
+- **Hover inside any raised surface uses `--jrk-surface-raised-hover`**, never
+  `--jrk-surface-hover`. `surface.hover.dark` and `surface.raised.dark` are the
+  same value, so the obvious token paints a menu row the exact colour of the menu
+  under it and dark mode gets no hover at all. Applies to `.jrk-menu__item`,
+  `.jrk-daterange__option`, and the select popup
 - `.jrk-input-group` + `.jrk-input-group__icon` for adornments
 - `.jrk-check` wraps a checkbox/radio + `.jrk-check__label` (+ `__hint`)
 - `.jrk-switch` for settings that apply **immediately** — if the change needs a
@@ -56,10 +75,26 @@ An error is never signalled by the red border alone. `<Input error="...">` sets
 
 ## Card / Section
 
-`.jrk-card` (borderless, separates by fill) with `__header` `__title` `__subtitle`
-`__actions` `__body` `__footer`. Modifiers: `--raised` (elevation is opt-in — a
-dashboard of many tiles reads calmer flat), `--tinted`, `--outlined` (a hairline,
-for a card sitting on a tinted surface), `--interactive`, `--flush`.
+`.jrk-card` (white fill, **no border** — bounded by its fill step off the page)
+with `__header` `__title` `__subtitle` `__actions` `__body` `__footer`. Modifiers:
+`--raised` (elevation is opt-in — a dashboard of many tiles reads calmer flat),
+`--tinted`, `--outlined` (an explicit neutral hairline, for a card with no fill
+step to use: one on the card plane or on a tinted surface), `--seamless`
+(transparent edge — a no-op at the top level, and the only way to suppress the
+nested-tile hairline), `--interactive`, `--flush`.
+
+The card declares `border: 1px solid transparent`. **Never change that to
+`border: 0`** — the reserved width keeps an appearing edge from reflowing the
+layout, and `border: 0` sets `border-style: none`, after which `border-color`
+paints nothing.
+
+`--interactive:hover` sets **both** `surface-card-hover` and `shadow-lg`, and
+neither is redundant: the shadow carries light mode and is invisible in dark (a
+black shadow on `#141416`), while the fill lifts 1.125:1 in dark and is a
+deliberate no-op in light. Do not "simplify" it to the fill alone with
+`surface-hover` — that token is the page colour in light and would erase the step
+that bounds the tile. `:focus-visible` lists `shadow-focus` first, because setting
+only the lift would replace base.css's focus bloom rather than add to it.
 
 `.jrk-section` + `__header` + `__title` groups several cards under one heading.
 
@@ -70,8 +105,11 @@ When the data is a single headline number, a tile beats a one-bar chart.
 `.jrk-stat` + `__label` `__value` (`--sm`) `__unit` `__meta` `__spark`.
 `--tinted`, `--with-spark`.
 
-Bands: `.jrk-stat-row` (joined, hairline-divided) or `.jrk-stat-row--split`
-(discrete rounded tiles with a gap) and `--tinted`.
+Bands: `.jrk-stat-row` (joined — the **band** is the one enclosure and takes the
+fill step, the tiles inside it are divided by neutral hairlines and carry no edge)
+or `.jrk-stat-row--split` (discrete rounded tiles with a gap, each its own
+enclosure sitting directly on the page and so each bounded by its own fill step,
+white by default) and `--tinted`.
 
 `.jrk-delta` + `--good` `--bad` `--flat`. **`good`/`bad` mean interpretation, not
 direction** — pick from the metric, not the sign. `<Delta upIsGood={false}>` for
@@ -120,18 +158,67 @@ For workbook-style financial reports use the **sheet** layer instead — see
 
 ```
 .jrk-app > .jrk-sidebar + .jrk-main
+.jrk-sidebar > __brand + __actions + __nav + __footer   (only __nav is required)
 .jrk-main > .jrk-topbar + .jrk-content > .jrk-content__inner
 ```
 
-- `.jrk-sidebar` + `__brand` `__nav` `__group` `__footer`; `data-collapsed="true"`
-  collapses to an icon rail, `data-open="true"` opens the mobile drawer
+- `.jrk-sidebar` + `__brand` `__actions` `__nav` `__group` `__footer`;
+  `data-collapsed="true"` collapses to an icon rail, `data-open="true"` opens the
+  mobile drawer
+- `.jrk-sidebar__actions` — the rail's **verbs** (Home, Create), above a hairline
+  and separate from `__nav`'s **destinations**. Icon-only, so every child needs
+  `aria-label` + `title`; `<SidebarAction>` makes `label` required so there is no
+  way to render a nameless one. Only add a rail Search if the shell has **no
+  topbar** — otherwise it is the same mechanism twice
 - `.jrk-nav-item` — set `aria-current="page"` on the anchor; the styling keys off
-  the same attribute assistive tech reads, so the two cannot disagree
+  the same attribute assistive tech reads, so the two cannot disagree. Renders on
+  an `<a>` for a destination and a `<button>` for a flyout parent; the button
+  resets live in the base rule so the two are pixel-identical
+  - the current row is the **tinted button** — `accent.wash` + `accent.washText` +
+    **semibold**, same as `.jrk-btn--primary` and the segmented thumb. It replaced a
+    solid `accent.solid` pill that measured 5.22:1 against every neighbour; the wash
+    is 1.04:1 against a hovered row and 1.08:1 against an open one, so hue and
+    weight are what distinguish where-am-I from a pointer state. The semibold is
+    the channel that survives greyscale — keep it
+  - `.jrk-sidebar__action[aria-current]` tracks this rule; change both
+- **Second nav level** — `<NavMenu>`, or by hand: a `.jrk-nav-item` `<button>`
+  with `aria-expanded` + `aria-controls`, then a **sibling**
+  `.jrk-menu.jrk-nav-flyout` panel. Four things are load-bearing:
+  - It is a **disclosure, not a `role="menu"`**. These are links to places; a
+    labelled group of links that Tab walks and Escape dismisses is both less code
+    and more correct than application-mode menu semantics
+  - The panel is `position: fixed`, and the clip it escapes is real —
+    `.jrk-sidebar__nav` is `overflow-y: auto` and CSS forces the other axis into a
+    scroll container too, so an in-flow panel gets sliced off at the rail's edge.
+    **Fixed-over-portal was chosen to keep it working in the Jinja apps, which are
+    no longer consumers.** The clip still has to be escaped, but a React portal is
+    now available and would avoid the measuring dance below and the
+    `[GRID_OVERFLOW]` warning the design-sync validator raises on this component.
+    Revisit before adding a second flyout
+  - Therefore both offsets are viewport coordinates: **measure the rail** and
+    write `--jrk-nav-flyout-top` / `--jrk-nav-flyout-inset`. Reading the width off
+    a token assumes the rail starts at viewport x=0 — false the moment the shell
+    sits inside anything. Re-place on scroll (capture), resize, and a
+    `ResizeObserver` on the rail (collapsing animates width over 200ms without
+    ever resizing the window)
+  - `.jrk-nav-flyout__title` is not decoration: in the collapsed rail the row
+    label is sr-only, so the title is the only thing naming the panel
+  - **Hover does not open.** Click / Enter / Space / ArrowRight / ArrowDown do
 - `.jrk-page-header` + `__title` `__desc` `__actions`
 - `.jrk-breadcrumbs` — separator is generated content, so it is never announced
 - `.jrk-tabs` (`--pills`) + `.jrk-tab` + `__count`. `role="tablist"` / `role="tab"`
   with `aria-selected` and `aria-controls`; arrow keys must move between tabs
   (`<Tabs>` handles this)
+  - the link form is `<nav> > <a aria-current="page">` with no roles — a row that
+    changes the URL is not a tablist. Both variants style off `aria-current` as
+    well as `aria-selected`
+  - `--pills` is the same widget as `.jrk-btn-group`, rendered the same way: a
+    `surface.track` well, unselected segments as bare labels, and the selected one
+    as a raised tinted thumb (`accent.wash` + `accent.washText` + **semibold** +
+    `shadow.md` + an `accent.washBorder` hairline). Change one and change the other
+  - no channel on that thumb measures 3:1 — the semibold is the only one that
+    survives greyscale and CVD, so it is load-bearing. Full numbers and the
+    one-line way back to a measuring signal are in `button.css`
 
 ## Feedback
 

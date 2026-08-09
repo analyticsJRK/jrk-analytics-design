@@ -7,7 +7,11 @@
   gap: var(--jrk-space-1);
   padding: var(--jrk-space-4) var(--jrk-space-5);
   background: var(--jrk-surface-default);
-  border: 1px solid var(--jrk-border-subtle);
+  /* Same treatment as a card — a standalone tile IS a card by another name, and a
+     KPI row bounded differently from the charts beside it would read as two
+     systems on one page. Bounded by the fill step; the 1px transparent border is
+     reserved so the nesting hairline never reflows it. See card.css. */
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-xl);
 }
 
@@ -16,9 +20,17 @@
   background: var(--jrk-surface-tinted);
 }
 
+/* Label, value and meta all centre together. The value is what the direction
+   asked for, but a centred figure over a left-aligned label is not an
+   alignment, it is a tile that looks broken — the three lines are one stack and
+   they share an axis. Note this is a FLEX row (it carries an optional info
+   glyph beside the text), so centring is justify-content, not text-align;
+   text-align on a flex container reaches the text inside each child, not the
+   children themselves. */
 .jrk-stat__label {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--jrk-space-1_5);
   font-size: var(--jrk-text-sm);
   font-weight: var(--jrk-weight-medium);
@@ -35,6 +47,7 @@
   line-height: var(--jrk-leading-tight);
   letter-spacing: var(--jrk-tracking-tight);
   color: var(--jrk-text-primary);
+  text-align: center;
 }
 
 .jrk-stat__value--sm {
@@ -52,6 +65,7 @@
 .jrk-stat__meta {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--jrk-space-2);
   font-size: var(--jrk-text-xs);
   color: var(--jrk-text-muted);
@@ -132,7 +146,9 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   background: var(--jrk-surface-default);
-  border: 1px solid var(--jrk-border-subtle);
+  /* The band is one enclosure: its own fill step bounds it, and the tiles inside
+     stay on internal hairlines — see the > .jrk-stat rule below. */
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-xl);
   overflow: hidden;
 }
@@ -166,11 +182,21 @@
   overflow: visible;
 }
 
-/* Split tiles are standalone cards again, so they take their hairline back —
-   the joined-band rule above zeroes the border, and without this they would be
-   the only card on the page without an edge. */
+/* Split tiles are standalone cards again, so they take their own fill back — the
+   joined-band rule above zeroes the border and the fill, and each split tile is
+   its own enclosure sitting directly on the page. surface.default is what bounds
+   it, exactly as for .jrk-card.
+
+   White, not the brand wash: the wash is available per tile via .jrk-stat--tinted
+   below, but as a default it would put a tint where the page-to-card step is
+   supposed to do the separating, and a tinted tile on a tinted page has a weaker
+   boundary than a white one. */
 .jrk-stat-row--split > .jrk-stat {
-  background: var(--jrk-surface-tinted);
-  border: 1px solid var(--jrk-border-subtle);
+  background: var(--jrk-surface-default);
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-xl);
+}
+
+.jrk-stat-row--split > .jrk-stat--tinted {
+  background: var(--jrk-surface-tinted);
 }

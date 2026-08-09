@@ -20,7 +20,8 @@
   <section class="gal-sec">
     <h2>Buttons</h2>
     <div class="gal-demo">
-      <button class="jrk-btn jrk-btn--primary">Run report</button>
+      <button class="jrk-btn jrk-btn--cta">Run report</button>
+      <button class="jrk-btn jrk-btn--primary">New view</button>
       <button class="jrk-btn jrk-btn--secondary">Export</button>
       <button class="jrk-btn jrk-btn--ghost">Cancel</button>
       <button class="jrk-btn jrk-btn--danger">Delete</button>
@@ -29,6 +30,16 @@
       <button class="jrk-btn jrk-btn--link">View details</button>
       <button class="jrk-btn jrk-btn--primary" disabled>Disabled</button>
       <button class="jrk-btn jrk-btn--primary" data-loading="true" aria-busy="true"><span>Saving</span></button>
+      <button class="jrk-btn jrk-btn--cta" data-loading="true" aria-busy="true"><span>Running</span></button>
+      <button class="jrk-btn jrk-btn--danger" data-loading="true" aria-busy="true"><span>Deleting</span></button>
+    </div>
+
+    <div class="gal-rule">
+      <code class="jrk-mono">--primary</code> is the tinted everyday button;
+      <code class="jrk-mono">--cta</code> is the solid accent and there is at most one per view.
+      Both spinners are visible above — the loading ink is set per variant, because the
+      rule that hides the label sets <code class="jrk-mono">color: transparent</code> and
+      <code class="jrk-mono">currentColor</code> cannot be inherited through it.
     </div>
 
     <div class="gal-demo">
@@ -69,7 +80,9 @@
           <select class="jrk-select" id="f-prop">
             <option>All properties</option>
             <option>Bellevue Commons</option>
-            <option>Harbor Point</option>
+            <option selected>Harbor Point</option>
+            <option>Sutter Yards</option>
+            <option disabled>Westgate (no data)</option>
           </select>
         </div>
 
@@ -217,6 +230,105 @@
     </div>
   </section>
 
+  <!-- ============================ surfaces ============================ -->
+  <section class="gal-sec">
+    <h2>Surfaces — the tile boundary</h2>
+    <p class="gal-sec__note">
+      A tile has <strong>no border</strong>. It is bounded by its <strong>fill step off the
+      page</strong>, and both themes now use the same Apple grouped mechanism:
+      <code class="jrk-mono">#ffffff</code> on <code class="jrk-mono">#f2f2f7</code> in light
+      (1.12:1), <code class="jrk-mono">#232326</code> on <code class="jrk-mono">#141416</code>
+      in dark (1.17:1). That symmetry is the point — for one period light was a flat
+      <code class="jrk-mono">#ffffff</code> page bounded by a 2px brand edge, so a change that
+      read correctly in dark could be invisible in light.
+    </p>
+    <p class="gal-sec__note">
+      Tiles still declare <code class="jrk-mono">border: 1px solid transparent</code>, never
+      <code class="jrk-mono">border: 0</code>: the reserved width means an edge appearing
+      changes only a colour and never reflows, and <code class="jrk-mono">border: 0</code> sets
+      <code class="jrk-mono">border-style: none</code>, after which
+      <code class="jrk-mono">border-color</code> paints nothing at all.
+    </p>
+
+    <div class="jrk-grid jrk-grid-3">
+      <div class="jrk-card">
+        <div class="jrk-card__body">
+          <p class="gal-label">default</p>
+          <p class="jrk-card__subtitle">Card fill, no border. The step to the page behind it is the whole boundary.</p>
+        </div>
+      </div>
+
+      <div class="jrk-card jrk-card--interactive">
+        <div class="jrk-card__body">
+          <p class="gal-label">--interactive</p>
+          <p class="jrk-card__subtitle">Hover lifts it: a shadow (which carries light) <em>and</em> a fill lift (which carries dark, where a black shadow is invisible). Neither channel works in both themes.</p>
+        </div>
+      </div>
+
+      <div class="jrk-card jrk-card--seamless">
+        <div class="jrk-card__body">
+          <p class="gal-label">--seamless</p>
+          <p class="jrk-card__subtitle">A no-op at the top level now — and the only way to suppress the hairline a nested tile is given.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="jrk-card" style="margin-top:var(--jrk-space-4)">
+      <div class="jrk-card__header">
+        <div>
+          <h3 class="jrk-card__title">A nested tile draws the edge its fill step cannot</h3>
+          <p class="jrk-card__subtitle">A fill step only works once. Panels nested in this card sit on the <em>card</em> plane, where their own fill matches what they sit on (1.0:1), so <code class="jrk-mono">nesting.css</code> gives them a 1px neutral hairline automatically — <code class="jrk-mono">--outlined</code> asks for the same thing at the top level.</p>
+        </div>
+      </div>
+      <div class="jrk-card__body">
+        <div class="jrk-grid jrk-grid-2">
+          <div class="jrk-card jrk-card--outlined jrk-card--tinted">
+            <div class="jrk-card__body"><p class="gal-label">--outlined --tinted</p></div>
+          </div>
+          <div class="jrk-card jrk-card--outlined">
+            <div class="jrk-card__body"><p class="gal-label">--outlined</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="gal-sec__note" style="margin-top:var(--jrk-space-5)">
+      A joined KPI band is <em>one</em> enclosure, so the band takes the fill step and the
+      tiles inside it are divided by neutral hairlines. Split tiles each sit directly on the
+      page, so each is bounded by its own step.
+    </p>
+
+    <div class="jrk-stat-row">
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Collected rent</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">$4.21<span class="jrk-stat__unit">M</span></span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Occupancy</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">93.8<span class="jrk-stat__unit">%</span></span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Delinquency rate</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">4.7<span class="jrk-stat__unit">%</span></span>
+      </div>
+    </div>
+
+    <div class="jrk-stat-row jrk-stat-row--split" style="margin-top:var(--jrk-space-4)">
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Collected rent</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">$4.21<span class="jrk-stat__unit">M</span></span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Occupancy</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">93.8<span class="jrk-stat__unit">%</span></span>
+      </div>
+      <div class="jrk-stat jrk-stat--tinted">
+        <span class="jrk-stat__label">Delinquency rate</span>
+        <span class="jrk-stat__value jrk-stat__value--sm">4.7<span class="jrk-stat__unit">%</span></span>
+      </div>
+    </div>
+  </section>
+
   <!-- ============================ table ============================ -->
   <section class="gal-sec">
     <h2>Data table</h2>
@@ -285,6 +397,117 @@
       <code class="jrk-mono">aria-sort</code>, so keyboard and screen-reader users get the
       same affordance as a mouse click. Every money and count column is right-aligned on
       tabular figures so digits stack.
+    </div>
+
+    <!-- signed values: the two forms -->
+    <p class="gal-label">Signed values — pick by the job</p>
+    <div class="gal-demo gal-demo--stack">
+      <div class="jrk-card">
+        <div class="jrk-card__header">
+          <h4 class="jrk-card__title">Variance to budget</h4>
+          <p class="jrk-card__subtitle">One column, compared down its length — length is the precise channel</p>
+        </div>
+        <table class="jrk-table">
+          <thead>
+            <tr><th scope="col" class="jrk-col-start">Property</th><th scope="col">Variance</th></tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="jrk-col-start">Bellevue Commons</td>
+              <td><span class="jrk-cell-bar jrk-cell-bar--signed"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill jrk-cell-bar__fill--pos" style="width:41%"></span></span><span class="jrk-cell-bar__value">+82k</span></span></td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Harbor Point</td>
+              <td><span class="jrk-cell-bar jrk-cell-bar--signed"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill jrk-cell-bar__fill--neg" style="width:24%"></span></span><span class="jrk-cell-bar__value">−47k</span></span></td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Sutter Yards</td>
+              <td><span class="jrk-cell-bar jrk-cell-bar--signed"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill jrk-cell-bar__fill--neg" style="width:50%"></span></span><span class="jrk-cell-bar__value">−100k</span></span></td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Ridgeline</td>
+              <td><span class="jrk-cell-bar jrk-cell-bar--signed"><span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill jrk-cell-bar__fill--pos" style="width:8%"></span></span><span class="jrk-cell-bar__value">+16k</span></span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="jrk-card">
+        <div class="jrk-card__header">
+          <h4 class="jrk-card__title">NOI variance by month</h4>
+          <p class="jrk-card__subtitle">A grid scanned for where the problem is — colour is the coarse channel</p>
+        </div>
+        <table class="jrk-table">
+          <thead>
+            <tr>
+              <th scope="col" class="jrk-col-start">Property</th>
+              <th scope="col">Jan</th><th scope="col">Feb</th><th scope="col">Mar</th>
+              <th scope="col">Apr</th><th scope="col">May</th><th scope="col">Jun</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="jrk-col-start">Bellevue Commons</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-2">+4.1</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-4">+9.6</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-1">+1.2</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-1">−0.8</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-3">+6.7</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-2">+3.9</td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Harbor Point</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-2">−3.4</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-4">−9.9</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-3">−6.1</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-4">−8.8</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-2">−4.2</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-1">−1.1</td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Sutter Yards</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-1">+0.9</td>
+              <td class="jrk-cell-heat jrk-cell-heat--zero">0.0</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-1">−1.4</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-2">+3.1</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-1">+1.8</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-2">−2.9</td>
+            </tr>
+            <tr>
+              <td class="jrk-col-start">Ridgeline</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-1">−1.0</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-3">+7.2</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-4">+10.0</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-2">+4.4</td>
+              <td class="jrk-cell-heat jrk-cell-heat--neg-3">−5.6</td>
+              <td class="jrk-cell-heat jrk-cell-heat--pos-1">+1.5</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="jrk-card__footer">
+          <div class="jrk-heat-legend">
+            <span>−10.0</span>
+            <span class="jrk-heat-legend__swatches" aria-hidden="true">
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-neg-4)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-neg-3)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-neg-2)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-neg-1)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-pos-1)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-pos-2)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-pos-3)"></span>
+              <span class="jrk-heat-legend__swatch" style="background:var(--jrk-chart-div-pos-4)"></span>
+            </span>
+            <span>+10.0</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="gal-rule">
+      Red ↔ blue, never red ↔ green — red beside green is the textbook protan collapse,
+      and on a signed table the arm IS the meaning. Every cell prints its value, so colour
+      is the second channel and never the only one. The ramp stops short of both poles
+      because <code class="jrk-mono">text.primary</code> has to clear 4.5:1 on every step;
+      the binding value is the deepest positive step in dark at 4.89:1.
     </div>
   </section>
 

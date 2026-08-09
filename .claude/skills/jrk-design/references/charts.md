@@ -12,7 +12,23 @@ Color comes **last**. Most bad charts pick colors first.
 | part-to-whole, few parts | stacked bar with a 2px surface gap |
 | position in a sequence (funnel, tier) | **ordinal** — one hue, monotone steps |
 | polarity around a baseline | diverging — two hues, neutral grey middle |
+| signed values in ONE table column | `.jrk-cell-bar--signed` — length from a centre axis |
+| signed values across a table GRID | `.jrk-cell-heat` — diverging tint + `.jrk-heat-legend` |
 | state (good → critical) | status tokens, with icon + label |
+
+**Signed in a table — bar or tint?** Length is the precise channel and colour is
+the coarse one, so a single column compared down its length takes the bar, and a
+grid scanned to find *where* the problem is takes the tint. A grid of bars is
+unreadable; a lone column of tints wastes the precise channel. Both print the
+value, always — colour and direction are second channels, the sign in the text is
+the first.
+
+The tint draws from `--jrk-chart-div-{neg,pos}-1..4`, **never the poles**: those
+steps are gated to keep `text.primary` above 4.5:1 because the fill sits under a
+number, and the poles are mark colours that are not. Do not extend either arm for
+"more contrast" — the ramp already stops exactly where legibility does (the
+binding value is the deepest positive step in dark, 4.89:1). One `max` across the
+whole set, or two different numbers get the same colour.
 
 **Categorical or ordinal?** If swapping the category order would change the
 meaning (funnel stages, size tiers, age bands) it is ordinal and takes a one-hue
@@ -45,7 +61,7 @@ not adopted; worst adjacent ΔE is 16.3 light / 15.1 dark.
 Blue is slot 1 deliberately — it is the default single-series colour. systemGreen
 and systemRed are held out of the series entirely (they are status good/critical,
 and a green or red series in a financial chart reads as a verdict), and
-systemIndigo is held out as the UI accent.
+systemIndigo is held out as the UI accent. **That last reason is now stale** — the UI accent moved to a cyan at hue 197 degrees, which sits 7.6 degrees from slot 7 (teal), and indigo is reserved by nothing. The palette has NOT been re-derived; what separates accent from series in practice is lightness, not hue. See the note on `chart.categorical` in `tokens.json`.
 
 A ninth series folds into "Other", facets into small multiples, or takes a second
 encoding.

@@ -12,10 +12,12 @@
   --color-surface-tinted: var(--jrk-surface-tinted);
   --color-surface-subtle: var(--jrk-surface-subtle);
   --color-surface-raised: var(--jrk-surface-raised);
-  --color-surface-thumb: var(--jrk-surface-thumb);
+  --color-surface-track: var(--jrk-surface-track);
   --color-surface-inverse: var(--jrk-surface-inverse);
   --color-surface-banner: var(--jrk-surface-banner);
   --color-surface-hover: var(--jrk-surface-hover);
+  --color-surface-raised-hover: var(--jrk-surface-raisedHover);
+  --color-surface-card-hover: var(--jrk-surface-cardHover);
   --color-surface-active: var(--jrk-surface-active);
   --color-surface-disabled: var(--jrk-surface-disabled);
   --color-ink-primary: var(--jrk-text-primary);
@@ -36,6 +38,9 @@
   --color-accent-on-solid: var(--jrk-accent-onSolid);
   --color-accent-text: var(--jrk-accent-text);
   --color-accent-wash: var(--jrk-accent-wash);
+  --color-accent-wash-hover: var(--jrk-accent-washHover);
+  --color-accent-wash-active: var(--jrk-accent-washActive);
+  --color-accent-wash-border: var(--jrk-accent-washBorder);
   --color-accent-wash-text: var(--jrk-accent-washText);
   --color-good-mark: var(--jrk-status-good-mark);
   --color-good-text: var(--jrk-status-good-text);
@@ -49,6 +54,8 @@
   --color-critical-mark: var(--jrk-status-critical-mark);
   --color-critical-text: var(--jrk-status-critical-text);
   --color-critical-wash: var(--jrk-status-critical-wash);
+  --color-critical-solid: var(--jrk-status-critical-solid);
+  --color-critical-onSolid: var(--jrk-status-critical-onSolid);
   --color-neutral-mark: var(--jrk-status-neutral-mark);
   --color-neutral-text: var(--jrk-status-neutral-text);
   --color-neutral-wash: var(--jrk-status-neutral-wash);
@@ -68,7 +75,6 @@
   --color-tint-6: var(--jrk-chart-tint-6);
   --color-tint-7: var(--jrk-chart-tint-7);
   --color-tint-8: var(--jrk-chart-tint-8);
-  --text-$comment: Apple's type ladder adapted for a dense desktop dashboard. md (14px) is body.;
   --text-2xs: 0.6875rem;
   --text-xs: 0.75rem;
   --text-sm: 0.8125rem;

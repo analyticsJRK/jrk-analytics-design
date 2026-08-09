@@ -25,37 +25,103 @@
 <div class="gal-frame">
 <div class="jrk-app">
 
+  <!-- Rail in the Snowsight shape: brand, then a row of VERBS behind a hairline,
+       then grouped DESTINATIONS, and the depth held in flyouts rather than in a
+       long scrolling list. Every second-level row here used to be either absent
+       or flattened into the top level. -->
   <nav class="jrk-sidebar" aria-label="Main">
-    <div class="jrk-sidebar__brand"><span class="gal-nav__mark">J</span> <span>JRK Analytics</span></div>
+    <div class="jrk-sidebar__brand">
+      <span class="gal-nav__mark">J</span> <span>JRK Analytics</span>
+    </div>
+
+    <div class="jrk-sidebar__actions">
+      <a class="jrk-sidebar__action" href="#" aria-current="page" aria-label="Home" title="Home">
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="house"></svg>
+      </a>
+      <button class="jrk-sidebar__action" type="button" aria-label="Create" title="Create">
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="plus"></svg>
+      </button>
+      <!-- Snowsight's third action is Search. It is deliberately NOT here: this
+           shell keeps its topbar, and the topbar already owns the search field.
+           Two entry points to one mechanism is the parallel-navigation failure,
+           just in miniature. A rail search belongs here only if the topbar goes. -->
+    </div>
+
     <div class="jrk-sidebar__nav">
+      <div class="jrk-sidebar__group">Portfolio</div>
+
       <a class="jrk-nav-item" href="#" aria-current="page">
         <svg viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="7" rx="1.5"/><rect x="11" y="3" width="6" height="4" rx="1.5"/><rect x="3" y="12" width="6" height="5" rx="1.5"/><rect x="11" y="9" width="6" height="8" rx="1.5"/></svg>
         <span class="jrk-nav-item__label">Overview</span>
       </a>
-      <a class="jrk-nav-item" href="#">
+
+      <!-- A parent row: <button aria-expanded aria-controls> plus a sibling
+           panel. The panel is a labelled GROUP of links, never role="menu" —
+           these are places, not commands. -->
+      <button class="jrk-nav-item" type="button" aria-expanded="false" aria-controls="fly-perf">
         <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chartBar"></svg>
         <span class="jrk-nav-item__label">Performance</span>
-      </a>
-      <a class="jrk-nav-item" href="#">
-        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="clock"></svg>
-        <span class="jrk-nav-item__label">Delinquency</span>
-        <span class="jrk-nav-item__badge"><span class="jrk-badge jrk-badge--critical jrk-badge--sm">12</span></span>
-      </a>
+        <svg class="jrk-icon jrk-nav-item__caret" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronRight"></svg>
+      </button>
+      <div class="jrk-menu jrk-nav-flyout" id="fly-perf" role="group" aria-labelledby="fly-perf-t" hidden>
+        <div class="jrk-nav-flyout__title" id="fly-perf-t">Performance</div>
+        <a class="jrk-menu__item" href="#">Revenue &amp; occupancy</a>
+        <a class="jrk-menu__item" href="#">Expense variance</a>
+        <a class="jrk-menu__item" href="#">NOI trend</a>
+        <a class="jrk-menu__item" href="#">Budget vs actual</a>
+        <hr class="jrk-menu__separator">
+        <a class="jrk-menu__item" href="#">Saved views</a>
+      </div>
 
-      <div class="jrk-sidebar__group">Portfolio</div>
+      <button class="jrk-nav-item" type="button" aria-expanded="false" aria-controls="fly-collections">
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="clock"></svg>
+        <span class="jrk-nav-item__label">Collections</span>
+        <span class="jrk-nav-item__badge"><span class="jrk-badge jrk-badge--critical jrk-badge--sm">12</span></span>
+        <svg class="jrk-icon jrk-nav-item__caret" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronRight"></svg>
+      </button>
+      <div class="jrk-menu jrk-nav-flyout" id="fly-collections" role="group" aria-labelledby="fly-collections-t" hidden>
+        <div class="jrk-nav-flyout__title" id="fly-collections-t">Collections</div>
+        <a class="jrk-menu__item" href="#">Delinquency</a>
+        <a class="jrk-menu__item" href="#">Aging buckets</a>
+        <a class="jrk-menu__item" href="#">Write-offs</a>
+      </div>
+
       <a class="jrk-nav-item" href="#">
         <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="house"></svg>
         <span class="jrk-nav-item__label">Properties</span>
       </a>
-      <a class="jrk-nav-item" href="#">
+
+      <div class="jrk-sidebar__group">Leasing</div>
+
+      <button class="jrk-nav-item" type="button" aria-expanded="false" aria-controls="fly-leasing">
         <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="calendar"></svg>
         <span class="jrk-nav-item__label">Renewals</span>
-      </a>
-      <a class="jrk-nav-item" href="#">
+        <svg class="jrk-icon jrk-nav-item__caret" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronRight"></svg>
+      </button>
+      <div class="jrk-menu jrk-nav-flyout" id="fly-leasing" role="group" aria-labelledby="fly-leasing-t" hidden>
+        <div class="jrk-nav-flyout__title" id="fly-leasing-t">Renewals</div>
+        <a class="jrk-menu__item" href="#">Upcoming expirations</a>
+        <a class="jrk-menu__item" href="#">Offers out</a>
+        <a class="jrk-menu__item" href="#">Renewal rate</a>
+      </div>
+
+      <div class="jrk-sidebar__group">Data quality</div>
+
+      <button class="jrk-nav-item" type="button" aria-expanded="false" aria-controls="fly-gl">
         <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="doc"></svg>
         <span class="jrk-nav-item__label">GL quality</span>
-      </a>
+        <svg class="jrk-icon jrk-nav-item__caret" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronRight"></svg>
+      </button>
+      <div class="jrk-menu jrk-nav-flyout" id="fly-gl" role="group" aria-labelledby="fly-gl-t" hidden>
+        <div class="jrk-nav-flyout__title" id="fly-gl-t">GL quality</div>
+        <a class="jrk-menu__item" href="#">Unbalanced accounts</a>
+        <a class="jrk-menu__item" href="#">Missing closes</a>
+        <a class="jrk-menu__item" href="#">Mapping exceptions</a>
+        <hr class="jrk-menu__separator">
+        <a class="jrk-menu__item" href="#">Audit log</a>
+      </div>
     </div>
+
     <div class="jrk-sidebar__footer">
       <a class="jrk-nav-item" href="#">
         <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="gear"></svg>
@@ -101,7 +167,7 @@
                 <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="true">QTD</button>
                 <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="false">YTD</button>
               </div>
-              <button class="jrk-btn jrk-btn--primary jrk-btn--sm">Run report</button>
+              <button class="jrk-btn jrk-btn--cta jrk-btn--sm">Run report</button>
             </div>
           </div>
         </div>
@@ -270,7 +336,12 @@ new ResizeObserver(([e])=>{
 }).observe($('line-chart'));
 renderLine();
 
-$('line-table').innerHTML=`<div class="jrk-table-wrap" style="border:0"><table class="jrk-table jrk-table--compact">
+/* No inline border override: this wrap is nested inside a .jrk-chart-card, which
+   is exactly the case nesting.css handles — it gives a nested tile the 1px
+   neutral hairline it cannot get from a fill step. The old `style="border:0"`
+   existed to cancel a 2px brand edge that no longer exists, and it now overrides
+   the correct treatment. */
+$('line-table').innerHTML=`<div class="jrk-table-wrap"><table class="jrk-table jrk-table--compact">
   <caption class="jrk-sr-only">Collections by region, monthly, $ thousands</caption>
   <thead><tr><th scope="col">Month</th>${SERIES.map(s=>`<th scope="col" class="jrk-num">${s.name}</th>`).join('')}</tr></thead>
   <tbody>${LABELS.map((l,i)=>`<tr><td>${l}</td>${SERIES.map(s=>`<td class="jrk-num">$${s.values[i].toLocaleString()}K</td>`).join('')}</tr>`).join('')}</tbody>
@@ -320,6 +391,89 @@ $('rows').innerHTML=ROWS.map(([name,region,tone,units,occ,bal,del])=>`
       <span class="jrk-cell-bar__track" aria-hidden="true"><span class="jrk-cell-bar__fill" style="width:${(del/maxD)*100}%"></span></span>
       <span class="jrk-cell-bar__value">${del.toFixed(1)}%</span></span></td>
   </tr>`).join('');
+
+/* Nav flyout controller — the vanilla twin of <NavMenu> in react/src/Shell.tsx.
+   Kept deliberately small, because it is what a Jinja app has to reimplement:
+   toggle, place, dismiss. Nothing else.
+
+   Hover does not open. Click, Enter, Space, ArrowRight and ArrowDown do. */
+(() => {
+  const rail = document.querySelector('.jrk-sidebar');
+  const parents = [...rail.querySelectorAll('.jrk-nav-item[aria-controls]')];
+  const panelOf = (btn) => document.getElementById(btn.getAttribute('aria-controls'));
+
+  /* The panel is position: fixed, so both offsets are viewport coordinates.
+     Measure the RAIL for the inline offset rather than trusting the width token:
+     this page nests the shell in a 24px-margined frame, so a token offset would
+     put every panel 24px off the rail's edge. */
+  function place(btn) {
+    const panel = panelOf(btn);
+    const margin = 8;
+    const wanted = btn.getBoundingClientRect().top;
+    const lowest = window.innerHeight - panel.offsetHeight - margin;
+    panel.style.setProperty('--jrk-nav-flyout-top', `${Math.max(margin, Math.min(wanted, lowest))}px`);
+
+    const box = rail.getBoundingClientRect();
+    const rtl = getComputedStyle(rail).direction === 'rtl';
+    const inset = rtl ? document.documentElement.clientWidth - box.left : box.right;
+    panel.style.setProperty('--jrk-nav-flyout-inset', `${inset}px`);
+  }
+
+  function setOpen(btn, open) {
+    btn.setAttribute('aria-expanded', String(open));
+    panelOf(btn).hidden = !open;
+    if (open) place(btn);
+  }
+
+  const openOne = () => parents.find((b) => b.getAttribute('aria-expanded') === 'true');
+  const closeAll = () => parents.forEach((b) => setOpen(b, false));
+
+  for (const btn of parents) {
+    btn.addEventListener('click', () => {
+      const was = btn.getAttribute('aria-expanded') === 'true';
+      closeAll();
+      if (!was) setOpen(btn, true);
+    });
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        closeAll();
+        setOpen(btn, true);
+        panelOf(btn).querySelector('a, button')?.focus();
+      } else if (e.key === 'ArrowLeft') {
+        setOpen(btn, false);
+      }
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    const btn = openOne();
+    if (e.key === 'Escape' && btn) {
+      setOpen(btn, false);
+      btn.focus();
+    }
+  });
+
+  const outside = (btn, t) => !btn.contains(t) && !panelOf(btn).contains(t);
+  // focusin covers tabbing past the last link, which pointerdown never sees.
+  for (const evt of ['pointerdown', 'focusin']) {
+    document.addEventListener(evt, (e) => {
+      const btn = openOne();
+      if (btn && outside(btn, e.target)) setOpen(btn, false);
+    });
+  }
+  const replace = () => {
+    const btn = openOne();
+    if (btn) place(btn);
+  };
+  // Re-place on scroll with capture: the nav's own scroll never reaches window.
+  window.addEventListener('resize', replace);
+  window.addEventListener('scroll', replace, true);
+  /* And observe the rail, which is the case neither listener catches: collapsing
+     it animates the width over 200ms without ever resizing the window, so a
+     one-shot measurement lands the panel mid-transition and leaves it adrift. */
+  new ResizeObserver(replace).observe(rail);
+})();
 </script>
 </body>
 </html>

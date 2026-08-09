@@ -25,7 +25,13 @@
     <p class="gal-sec__note">
       Dark values are selected for the dark surface, not flipped from light. Body text
       clears 4.5:1 on both the card surface and the page plane — the validator checks
-      both, because a token that passes on white can fail on the canvas behind it.
+      both, and in light the <strong>page</strong> is the binding one: a value tuned only
+      against the white card can land at 4.04:1 on
+      <code class="jrk-mono">#f2f2f7</code> and fail. A tile carries
+      <strong>no border</strong> and is bounded by its fill step off the page — 1.12:1 in
+      light, 1.17:1 in dark. Note that
+      <code class="jrk-mono">surface-subtle</code> now <em>equals</em> the page in light, so
+      it recesses on a card and does nothing on the page.
     </p>
     <div class="gal-swatches" id="sw-core"></div>
   </section>
@@ -120,6 +126,7 @@
       a mouse click never paints one, every keyboard path does. Tab through these.
     </p>
     <div class="gal-demo">
+      <button class="jrk-btn jrk-btn--cta">CTA</button>
       <button class="jrk-btn jrk-btn--primary">Primary</button>
       <button class="jrk-btn jrk-btn--secondary">Secondary</button>
       <input class="jrk-input" style="width:200px" placeholder="Input" aria-label="Focus demo input">
@@ -162,6 +169,12 @@ function render() {
   ]) {
     core.append(swatch(n, contrast(tokenValue(n), bg).toFixed(2) + ':1'));
   }
+  // border-accent carries its measurement on the swatch, because the validator
+  // never sees the border namespace and this is the one border something DEPENDS
+  // on seeing — it marks the selected tab, so it owes WCAG 1.4.11's 3:1. The
+  // removed border-card used to hold this slot for the opposite reason: it was
+  // decorative, sat under 3:1, and the number was shown here to keep that honest.
+  core.append(swatch('--jrk-border-accent', contrast(tokenValue('--jrk-border-accent'), surface()).toFixed(2) + ':1 on card'));
   for (const n of ['--jrk-border-subtle', '--jrk-border-default', '--jrk-border-strong']) {
     core.append(swatch(n));
   }

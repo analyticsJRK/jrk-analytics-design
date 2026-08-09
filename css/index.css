@@ -1,39 +1,53 @@
 /* JRK Analytics Design — full plain-CSS library.
  *
- * Consumers that are NOT using Tailwind (Jinja templates, plain HTML, any
- * server-rendered app) need only this one file:
- *
- *   <link rel="stylesheet" href="/static/jrk/index.css">
- *
- * Consumers that ARE using Tailwind v4 import the tokens and theme instead,
- * and pull in whichever component files they want:
+ * The one consumer is jrk-analytics-web-app/apps/portal (Tailwind v4), which
+ * imports in this order — and the order is load-bearing:
  *
  *   @import "tailwindcss";
- *   @import "@jrk/design/dist/jrk-tokens.css";
- *   @import "@jrk/design/dist/jrk-theme.tailwind.css";
- *   @import "@jrk/design/css/index.css";
+ *   @import "@jrk/design/tokens.css";              the custom properties
+ *   @import "@jrk/design/tailwind";                maps them onto Tailwind's theme
+ *   @import "@jrk/design/css";                     this file, the component layer
  *
- * Both paths resolve to the same CSS custom properties, so a Tailwind app and
- * a Jinja template render identically and follow the same theme toggle.
+ * Put the component layer before the tokens and every component resolves its
+ * custom properties to nothing. Tailwind must come first or its preflight reset
+ * lands on top of the components.
+ *
+ * EVERY @import BELOW USES THE QUOTED-STRING FORM, NOT url(). This is not style.
+ * Tailwind v4's import inliner only follows the string form: with `url(...)` it
+ * resolves THIS file correctly and then leaves all sixteen inner imports as
+ * literal statements, which are relative to the output file rather than the
+ * source, so lightningcss drops them. The build still succeeds. The bundle comes
+ * out at 21KB instead of 87KB and the app renders as unstyled markup with
+ * `.jrk-app` nowhere in the output — and the only warning reads like a cosmetic
+ * ordering complaint. It shipped that way once. Do not "tidy" these back.
+ *
+ * A browser resolver handles both forms, which is why this survived as long as
+ * there was a consumer loading the file through a <link> tag. There is not one
+ * anymore.
  */
 
 /* Typeface first — see the file for the CSP note, the preconnect pair, and how
    to self-host or hand the job to next/font instead. */
-@import url('./fonts.css');
+@import './fonts.css';
 
-@import url('../dist/jrk-tokens.css');
+@import '../dist/jrk-tokens.css';
 
-@import url('./base.css');
+@import './base.css';
 
-@import url('./components/button.css');
-@import url('./components/form.css');
-@import url('./components/card.css');
-@import url('./components/badge.css');
-@import url('./components/icon.css');
-@import url('./components/stat.css');
-@import url('./components/table.css');
-@import url('./components/list.css');
-@import url('./components/sheet.css');
-@import url('./components/shell.css');
-@import url('./components/feedback.css');
-@import url('./components/chart.css');
+@import './components/button.css';
+@import './components/form.css';
+@import './components/card.css';
+@import './components/badge.css';
+@import './components/icon.css';
+@import './components/stat.css';
+@import './components/table.css';
+@import './components/list.css';
+@import './components/sheet.css';
+@import './components/shell.css';
+@import './components/feedback.css';
+@import './components/chart.css';
+
+/* LAST, and it must stay last — the single home for the "one brand edge per
+   enclosure" rule, which resolves the edge treatment of a tile nested inside
+   another tile. */
+@import './components/nesting.css';

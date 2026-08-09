@@ -25,7 +25,16 @@
       "PowerShell($ids = @\\(34368\\); $seen = @\\(\\); while \\($ids.Count -gt 0\\) { $next = @\\(\\); foreach \\($id in $ids\\) { if \\($seen -contains $id\\) { continue }; $seen += $id; $p = Get-CimInstance Win32_Process -Filter \"ProcessId = $id\" -ErrorAction SilentlyContinue; if \\($p\\) { \"PID $\\($p.ProcessId\\)  PPID $\\($p.ParentProcessId\\)  started $\\($p.CreationDate\\)\"; \"  name: $\\($p.Name\\)\"; \"  cmd : $\\($p.CommandLine\\)\"; \"\"; $next += $p.ParentProcessId } }; $ids = $next })",
       "PowerShell(Get-CimInstance *)",
       "Read(//c/Users/npayumo/.claude/**)",
-      "Read(//c/Users/npayumo/.claude/plugins/**)"
+      "Read(//c/Users/npayumo/.claude/plugins/**)",
+      "Bash(cp *)",
+      "Bash(perl -pi -e 's/\\\\r\\\\n/\\\\n/g' css/components/shell.css)",
+      "Bash(grep -vE \"^\\\\s*$\")",
+      "Bash(awk '/\\\\.jrk-icon\\\\s*\\\\{/,/\\\\}/' _ds_bundle.css)",
+      "Bash(grep -nE \"^\\(img|svg\\)[,{ ]\" _ds_bundle.css)",
+      "Bash(awk '/^\\\\.jrk-s2 \\\\{/,/\\\\}/' _ds_bundle.css)",
+      "Bash(git status *)",
+      "Bash(git fetch *)",
+      "Bash(npm test *)"
     ]
   }
 }

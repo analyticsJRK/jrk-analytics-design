@@ -80,17 +80,61 @@
    and a small radius. Flat borderless rectangles read as Material; the bezel is
    what makes it a Mac control. */
 
+/* TINTED, not solid: a pale accent wash carrying accent ink. This is the
+   everyday button — the one that appears several times on a page.
+
+   It used to be accent.solid with a white label, and that value has not gone
+   anywhere: it is --cta below. What changed is which of the two is the DEFAULT.
+   A screen here typically shows a page-header action, an export, a filter and a
+   segmented control at once; when the everyday button is a saturated blue
+   rectangle, four things shout and the reader cannot tell which one commits
+   anything. Tinted spends the accent at a lower volume so that the one solid
+   button on a screen still means something.
+
+   Two things this treatment must not lose, both handled below rather than
+   assumed. The LABEL: accent.washText, not accent.text — the anchor lands at
+   4.49:1 on this wash, 0.01 under the floor, which is the reason washText is a
+   separate token at all. The BOUNDARY: a wash is 1.16:1 on the white card and
+   1.06:1 on the dark one, so the fill cannot bound the control and
+   accent.washBorder draws the edge. A tile can be bounded by a fill step alone
+   because its content groups it; a button cannot, because looking pressable is
+   the job. */
 .jrk-btn--primary {
+  background: var(--jrk-accent-wash);
+  color: var(--jrk-accent-wash-text);
+  border-color: var(--jrk-accent-wash-border);
+  /* The same faint bezel as --secondary, not --cta's heavier one: a 0.16 shadow
+     under a pale fill reads as a grey smudge. */
+  box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.08);
+}
+
+.jrk-btn--primary:hover:not(:disabled) {
+  background: var(--jrk-accent-wash-hover);
+}
+
+.jrk-btn--primary:active:not(:disabled) {
+  background: var(--jrk-accent-wash-active);
+  box-shadow: none;
+}
+
+/* The one committing action on a screen — Run report, Post close, Save. Solid
+   accent with a white label, which is what --primary was before the tinted
+   treatment took that name, so nothing here is new except the reservation.
+   Use at most one per view: it is the loudest thing the library can draw, and
+   its whole value is that a reader does not have to choose between two of them.
+   Not for destructive confirmation — that is --danger-solid, which owns its own
+   solid/onSolid pair for the reason recorded there. */
+.jrk-btn--cta {
   background: var(--jrk-accent-solid);
   color: var(--jrk-accent-on-solid);
   box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.16);
 }
 
-.jrk-btn--primary:hover:not(:disabled) {
+.jrk-btn--cta:hover:not(:disabled) {
   background: var(--jrk-accent-solid-hover);
 }
 
-.jrk-btn--primary:active:not(:disabled) {
+.jrk-btn--cta:active:not(:disabled) {
   background: var(--jrk-accent-solid-active);
   box-shadow: none;
 }
@@ -142,10 +186,16 @@
 }
 
 /* Filled red, for the confirming button in a destructive alert — the one place
-   Apple does fill it. Not for toolbars. */
+   Apple does fill it. Not for toolbars.
+
+   Fills with status.critical.SOLID, not .mark, and labels with the matching
+   onSolid. It used to fill with the mark and borrow --jrk-accent-on-solid,
+   which meant the red button's ink direction was decided by the accent and
+   moved silently every time the accent did. The mark cannot carry a white
+   label anyway: #ff3b30 gives white 3.55:1. See the note on the token. */
 .jrk-btn--danger-solid {
-  background: var(--jrk-status-critical-mark);
-  color: var(--jrk-accent-on-solid);
+  background: var(--jrk-status-critical-solid);
+  color: var(--jrk-status-critical-on-solid);
   box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.16);
 }
 
@@ -189,6 +239,16 @@
   opacity: 0;
 }
 
+/* The spinner cannot inherit currentColor — the rule above sets the button's
+   color to transparent to hide the label — so its ink is set here and every
+   variant whose fill disagrees has to name its own.
+
+   The DEFAULT is text-secondary, which is legible on every pale fill, and only
+   the two solid fills override it. It used to default to accent.onSolid, i.e.
+   white, which was correct for exactly one variant: --danger and --danger-quiet
+   were painting a white spinner on a white button and had been for as long as
+   they existed. Defaulting to the quiet ink instead of the loud one means the
+   next variant added inherits something visible. */
 .jrk-btn[data-loading='true']::after {
   content: '';
   position: absolute;
@@ -197,13 +257,27 @@
   border: 2px solid currentColor;
   border-top-color: transparent;
   border-radius: var(--jrk-radius-full);
-  color: var(--jrk-accent-on-solid);
+  color: var(--jrk-text-secondary);
   animation: jrk-spin var(--jrk-duration-slow) linear infinite;
 }
 
-.jrk-btn--secondary[data-loading='true']::after,
-.jrk-btn--ghost[data-loading='true']::after {
-  color: var(--jrk-text-secondary);
+.jrk-btn--primary[data-loading='true']::after {
+  color: var(--jrk-accent-wash-text);
+}
+
+.jrk-btn--cta[data-loading='true']::after {
+  color: var(--jrk-accent-on-solid);
+}
+
+/* status.critical.onSolid, not accent.onSolid — the red button's ink direction
+   is its own, for the reason recorded on --danger-solid. */
+.jrk-btn--danger-solid[data-loading='true']::after {
+  color: var(--jrk-status-critical-on-solid);
+}
+
+.jrk-btn--danger[data-loading='true']::after,
+.jrk-btn--danger-quiet[data-loading='true']::after {
+  color: var(--jrk-status-critical-text);
 }
 
 @keyframes jrk-spin {
@@ -214,65 +288,118 @@
 
 /* ---------- segmented control ---------- */
 
-/* Same anatomy as .jrk-tabs--pills: an inset track with a floating thumb. A
-   run of joined bordered boxes is the Bootstrap shape, not Apple's. */
+/* An inset well with a RAISED TINTED THUMB on the selected segment. The full
+   sequence, because this control has been rebuilt five times and each version was
+   a correct answer to the previous one's failure:
+     1. Apple's well with a floating WHITE thumb. Died because in light the thumb
+        was #ffffff on a #ffffff track — 1.00:1, with a 0.5px shadow as the only
+        evidence anything was selected.
+     2. Same well, thumb FILLED accent.solid. Measured (4.28:1 light / 3.40:1
+        dark) but was exactly as loud as the then-solid .jrk-btn--primary standing
+        beside it in the page header.
+     3. Well removed; joined bordered boxes, selected one wearing border.accent as
+        an EDGE. Measured at 5.22:1 / 6.37:1 and stopped competing with the button.
+     4. Same boxes, selected one wearing the newly-tinted button's fill and ink,
+        edge kept — because the wash alone is 1.16:1 against a white neighbour.
+     5. This: the well is back, unselected segments are bare labels in it, and the
+        thumb is the tinted button LIFTED — wash fill, washText ink, semibold,
+        shadow, and only the button's faint hairline.
+   Steps 1-4 were each driven by a measurement. Step 5 was a direct design
+   instruction and it SPENDS the measurement: see the note on the thumb rule for
+   what is left carrying the state and what to change if it is not enough. */
+/* An inset well. surface.track exists for exactly this and is recessed in BOTH
+   themes — 1.22:1 in light, 1.13:1 in dark — which surface.subtle is not since
+   the light-page flattening. */
 .jrk-btn-group {
   display: inline-flex;
   gap: 0;
   padding: 2px;
-  background: var(--jrk-surface-subtle);
+  background: var(--jrk-surface-track);
   border-radius: var(--jrk-radius-md);
   isolation: isolate;
 }
 
+/* Unselected segments are bare labels in the well: no fill, no border, no
+   shadow. That is what makes the selected one read as RAISED rather than as one
+   box among identical boxes — there is only one enclosure in the control and it
+   marks the choice. Height, padding and font-size come from the button's own
+   size modifier; the previous track era pinned them at 22px, under the 24px
+   minTouch floor. */
 .jrk-btn-group > .jrk-btn {
   position: relative;
-  height: 22px;
-  padding-inline: var(--jrk-space-3);
-  font-size: var(--jrk-text-sm);
   background: transparent;
+  color: var(--jrk-text-secondary);
   border-color: transparent;
   box-shadow: none;
-  color: var(--jrk-text-primary);
   border-radius: calc(var(--jrk-radius-md) - 2px);
-  margin-inline-start: 0;
 }
 
 .jrk-btn-group > .jrk-btn:hover:not(:disabled) {
-  background: transparent;
+  /* surface-hover lifts off the track in both themes here (#f2f2f7 on #e8e8ed,
+     #2c2c2e on #18181a) — unlike on a raised surface, where it is a no-op in
+     dark. The pairing depends on what is underneath, so check both. */
+  background: var(--jrk-surface-hover);
+  color: var(--jrk-text-primary);
 }
 
-/* Hairline divider between unselected neighbours, suppressed either side of
-   the thumb. */
-.jrk-btn-group > .jrk-btn + .jrk-btn::before {
-  content: '';
-  position: absolute;
-  inset-inline-start: 0;
-  top: 4px;
-  bottom: 4px;
-  width: 1px;
-  background: var(--jrk-border-default);
+.jrk-btn-group > .jrk-btn:active:not(:disabled) {
+  background: var(--jrk-surface-active);
 }
 
-.jrk-btn-group > .jrk-btn[aria-pressed='true']::before,
-.jrk-btn-group > .jrk-btn[aria-selected='true']::before,
-.jrk-btn-group > .jrk-btn[aria-pressed='true'] + .jrk-btn::before,
-.jrk-btn-group > .jrk-btn[aria-selected='true'] + .jrk-btn::before {
-  background: transparent;
-}
+/* The thumb: the tinted button, LIFTED out of the well. Same accent.wash fill,
+   same accent.washText ink, same semibold and the same wash steps on hover and
+   press as .jrk-btn--primary, plus a shadow and the button's own faint
+   accent.washBorder hairline. No accent edge — this is a raised object, not an
+   outlined one.
 
-.jrk-btn-group > .jrk-btn:focus-visible {
-  z-index: 1;
-}
+   READ THIS BEFORE CHANGING IT, because the number is not obvious from looking at
+   it. NO CHANNEL HERE MEASURES 3:1. The fill is 1.05:1 against the track in light
+   and 1.20:1 in dark; the hairline is 1.44:1 and 2.30:1; the shadow is invisible
+   in dark by construction. The state rides on four sub-3:1 channels at once —
+   hue, weight, the hairline, and the shadow in light only — and this is a
+   deliberate, directed deviation from the rule that a selection signal must
+   measure. It was an accent edge at 5.22:1 / 6.37:1 immediately before this.
 
-/* The thumb. */
+   The one channel that is theme-independent, CVD-independent and survives
+   greyscale is the WEIGHT step, medium -> semibold. It is the reason this is
+   defensible at all, so do not "clean up" the font-weight here, and do not let a
+   future variant drop it. If the control ever needs to state selection at 3:1
+   again, put border.accent back on this rule — that is the whole fix, and it is
+   one line.
+
+   For the same reason, do not go further in this direction. A white or neutral
+   thumb in this well is the version that already failed at 1.00:1 in light: the
+   tint is doing the little work that separates this from that. */
 .jrk-btn-group > .jrk-btn[aria-pressed='true'],
 .jrk-btn-group > .jrk-btn[aria-selected='true'] {
-  background: var(--jrk-surface-thumb);
-  color: var(--jrk-text-primary);
-  border-color: transparent;
-  box-shadow:
-    0 0 0 0.5px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.12);
+  background: var(--jrk-accent-wash);
+  /* washText, not accent.text: the ink sits on the wash, where the anchor is
+     4.49:1 — under the floor by 0.01. That 0.01 is the entire reason washText
+     exists as a separate token. */
+  color: var(--jrk-accent-wash-text);
+  border-color: var(--jrk-accent-wash-border);
+  font-weight: var(--jrk-weight-semibold);
+  /* shadow-md, tokenised rather than the buttons' hand-rolled 0.5px bezel: this
+     one has to read as LIFT, not as a hairline substitute. It contributes nothing
+     in dark — a black shadow on a #18181a track — which is why the hairline is
+     not optional. */
+  box-shadow: var(--jrk-shadow-md);
   z-index: 1;
+}
+
+.jrk-btn-group > .jrk-btn[aria-pressed='true']:hover:not(:disabled),
+.jrk-btn-group > .jrk-btn[aria-selected='true']:hover:not(:disabled) {
+  background: var(--jrk-accent-wash-hover);
+  color: var(--jrk-accent-wash-text);
+}
+
+.jrk-btn-group > .jrk-btn[aria-pressed='true']:active:not(:disabled),
+.jrk-btn-group > .jrk-btn[aria-selected='true']:active:not(:disabled) {
+  background: var(--jrk-accent-wash-active);
+}
+
+/* Over the selected segment as well, so a focus ring is never clipped by the
+   neighbour it overlaps. */
+.jrk-btn-group > .jrk-btn:focus-visible {
+  z-index: 2;
 }

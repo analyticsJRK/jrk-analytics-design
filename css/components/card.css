@@ -1,30 +1,50 @@
 /* Card / panel — the container every dashboard tile and chart sits in. */
 
-/* Apple grouped card: white, on the tinted page. iOS would draw no border at
-   all and let the fill do everything; on a 1920x1080 monitor at desktop viewing
-   distance a #ffffff-on-#f2f2f7 edge is too faint to hold a dense layout
-   together, so this takes the macOS treatment instead — fill plus a hairline. */
+/* The card has NO edge. It is bounded by its fill step off the page — #ffffff on
+   #f2f2f7 in light (1.12:1), #232326 on #141416 in dark (1.17:1) — which is the
+   Apple grouped mechanism, and for the first time both themes use the same one.
+   Nothing here is per-theme any more.
+
+   The 1px TRANSPARENT border is load-bearing and must not become `border: 0`.
+   Three things only change its COLOR — --outlined, --seamless, and the nesting
+   rules that give a nested tile a neutral hairline — so keeping the width
+   reserved means an edge appearing or disappearing never reflows the layout by a
+   pixel. `border: 0` would also set border-style to `none`, and a later
+   `border-color` on its own would then paint nothing at all, which is the quiet
+   way this breaks.
+
+   Historical note, because it explains the modifiers below: this card used to
+   carry a 2px #48a9df brand edge, and the light page was #ffffff to go with it.
+   Both are gone in the same change — the page is tinted again, so the fill step
+   is the boundary and the brand no longer lives on a rectangle. */
 .jrk-card {
   display: flex;
   flex-direction: column;
   background: var(--jrk-surface-default);
-  border: 1px solid var(--jrk-border-subtle);
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-xl);
 }
 
-/* Truly borderless, for a card sitting alone on the page where the fill is
-   separation enough. */
+/* Truly borderless, for a card whose surroundings already bound it. This is now
+   the same value as the base card, so at the TOP level it is a no-op — kept
+   because it still overrides the nested-tile hairline, and because it documents
+   intent at the call site. It was a dark-mode-and-nested-only modifier during the
+   flat-white-page period, when a seamless card in light had no boundary at all;
+   the fill step gives it one again in both themes. */
 .jrk-card--seamless {
   border-color: transparent;
 }
 
-/* Periwinkle wash, for tiles that lead a page. */
+/* Brand wash, for tiles that lead a page. */
 .jrk-card--tinted {
   background: var(--jrk-surface-tinted);
 }
 
-/* Opt back in to a hairline where a card sits ON a tinted surface and the
-   fill alone no longer separates it. */
+/* An explicit neutral hairline, for a card that has no fill step to rely on —
+   one sitting on the card plane rather than the page plane, or on a tinted
+   surface where its own fill no longer separates it. This is the same treatment
+   the nesting rules apply automatically; the modifier is how an author asks for
+   it at the top level. */
 .jrk-card--outlined {
   border-color: var(--jrk-border-default);
 }
@@ -35,8 +55,11 @@
   box-shadow: var(--jrk-shadow-md);
 }
 
+/* No container at all — the card dissolves into whatever plane it sits on.
+   border-COLOR rather than border: 0, so it keeps the reserved 1px and does not
+   reflow against its siblings. */
 .jrk-card--flush {
-  border: 0;
+  border-color: transparent;
   background: transparent;
 }
 
@@ -97,13 +120,43 @@
   cursor: pointer;
   text-align: start;
   transition:
-    border-color var(--jrk-transition),
+    box-shadow var(--jrk-transition),
     background-color var(--jrk-transition);
 }
 
+/* Hover LIFTS the card off the page. Both declarations are needed, because each
+   one is doing the whole job in exactly one theme — a single channel is not
+   enough here and the reason is measurable:
+
+     - The SHADOW carries light mode. It cannot carry dark: a black shadow on a
+       #141416 page is very nearly invisible (the shadow tokens say so directly),
+       and a screenshot of a hovered tile in dark is indistinguishable from a
+       resting one.
+     - The FILL carries dark mode, lifting the card 1.125:1. It cannot carry
+       light, and this is the trap: surface.hover.light is #f2f2f7, the page
+       value, so washing a white card with it would erase the 1.12:1 step that
+       bounds the tile — dissolving it at the moment it is meant to respond.
+       surface.cardHover is #ffffff in light for that reason and is a no-op there.
+
+   Neither channel is redundant and neither can be dropped as "the one that does
+   nothing", because which one does nothing depends on the theme.
+
+   No transform. A 1px translate would be the obvious way to sell the lift, but
+   `transform` makes the card a containing block for fixed-position descendants —
+   which would silently break any .jrk-nav-flyout or popover rendered inside one. */
 .jrk-card--interactive:hover {
-  border-color: var(--jrk-border-strong);
-  background: var(--jrk-surface-hover);
+  background: var(--jrk-surface-card-hover);
+  box-shadow: var(--jrk-shadow-lg);
+}
+
+/* Keyboard parity, and both shadows are listed on purpose. base.css draws the
+   focus bloom with `box-shadow: var(--jrk-shadow-focus)`, so setting only the
+   lift here would REPLACE the bloom rather than add to it — the outline would
+   survive and the halo would quietly vanish. Focus value first so the ring reads
+   above the elevation. */
+.jrk-card--interactive:focus-visible {
+  background: var(--jrk-surface-card-hover);
+  box-shadow: var(--jrk-shadow-focus), var(--jrk-shadow-lg);
 }
 
 /* ============================== section ============================== */

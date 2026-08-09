@@ -2,7 +2,11 @@
 
    Layout contract:
      .jrk-app > .jrk-sidebar + .jrk-main
-     .jrk-main > .jrk-topbar + .jrk-content */
+     .jrk-main > .jrk-topbar + .jrk-content
+
+   The rail carries two optional rows above the nav and a second nav level below
+   it. Full order, all four parts optional except __nav:
+     .jrk-sidebar > __brand + __actions + __nav + __footer */
 
 .jrk-app {
   display: grid;
@@ -20,9 +24,15 @@
   height: 100vh;
   position: sticky;
   top: 0;
-  /* Chrome sits on the page plane; the white cards in the content area are the
-     things that read as raised. Apple grouped style, so the plane is the tinted
-     one and the cards are white — the reverse of a conventional dashboard. */
+  /* Chrome sits on the page plane in both themes, so this hairline divides the
+     sidebar from content of the SAME fill and is the only thing there. #e5e5ea on
+     the #f2f2f7 page is 1.12:1 — faint by design, because the cards floating on
+     the content side are what actually establish where content begins.
+
+     If the sidebar ever needs to read as chrome rather than as more page, give it
+     surface.DEFAULT, not surface.subtle: subtle is #f2f2f7 in light, which is now
+     the page value itself and would change nothing. Either way, do not thicken
+     this rule. */
   background: var(--jrk-surface-canvas);
   border-inline-end: 1px solid var(--jrk-border-subtle);
   transition: width var(--jrk-duration-base) var(--jrk-ease-standard);
@@ -44,13 +54,85 @@
   white-space: nowrap;
 }
 
+/* Action row — the rail's verbs, above a hairline, separated from the rail's
+   nouns. Home / Create / Search are things you DO; everything in __nav is a
+   place you GO. Snowsight splits them this way and it is the reason its rail
+   stays short: the actions never compete with the destinations for a row.
+
+   These are icon-only by design, which puts them straight into the one rule
+   layer 3 will not bend on — never a bare icon button. Every child must carry
+   an aria-label AND a title, and <SidebarAction> makes `label` required so
+   there is no way to render one without both. */
+.jrk-sidebar__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: var(--jrk-space-1_5) var(--jrk-space-2);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--jrk-border-subtle);
+}
+
+/* Three 28px squares do not fit in a 52px rail, so they stack. This is a COLUMN
+   flex container and it must never gain flex-wrap — a wrapping column goes
+   multi-line and align-content:stretch then inflates every line. That bug
+   tripled a grid's height once already. */
+.jrk-sidebar[data-collapsed='true'] .jrk-sidebar__actions {
+  flex-direction: column;
+}
+
+.jrk-sidebar__action {
+  display: inline-grid;
+  place-items: center;
+  width: var(--jrk-control-md);
+  height: var(--jrk-control-md);
+  flex-shrink: 0;
+  color: var(--jrk-text-secondary);
+  text-decoration: none;
+  background: none;
+  border: 0;
+  border-radius: var(--jrk-radius-md);
+  cursor: pointer;
+  transition:
+    background-color var(--jrk-transition),
+    color var(--jrk-transition);
+}
+
+.jrk-sidebar__action svg:not(.jrk-icon) {
+  width: var(--jrk-icon-lg);
+  height: var(--jrk-icon-lg);
+  stroke-width: 1.75;
+}
+
+.jrk-sidebar__action:hover {
+  background: var(--jrk-surface-hover);
+  color: var(--jrk-text-primary);
+}
+
+/* Same tinted pill the nav uses, for the same reason: it is the answer to
+   "where am I", and Home is a destination that happens to live in this row. It
+   tracks .jrk-nav-item[aria-current] — including the semibold, even though this
+   row is usually icon-only, so that a labelled and an unlabelled rail agree. */
+.jrk-sidebar__action[aria-current='page'] {
+  background: var(--jrk-accent-wash);
+  color: var(--jrk-accent-wash-text);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-sidebar__action[aria-current='page']:hover {
+  background: var(--jrk-accent-wash-hover);
+  color: var(--jrk-accent-wash-text);
+}
+
 .jrk-sidebar__nav {
   flex: 1;
   overflow-y: auto;
   padding: var(--jrk-space-2);
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  /* Was a hardcoded 2px, which check:css does not catch — it gates hex, not
+     px. 4px is the tokenised step up, and it is what makes the rail read as a
+     list of destinations rather than a stack of adjacent bars. */
+  gap: var(--jrk-space-1);
 }
 
 .jrk-sidebar__group {
@@ -69,28 +151,53 @@
 
 /* Apple sidebar row: a rounded pill, tight, with the icon in the accent when
    selected. macOS rows sit around 28px — the previous 40px was a touch
-   ergonomic on a mouse-driven 1080px-tall display. */
+   ergonomic on a mouse-driven 1080px-tall display.
+
+   This renders on an <a> for a destination and on a <button> for a row that
+   opens a flyout, so the button resets are part of the base rule rather than a
+   modifier — the two elements have to be pixel-identical or the rail reads as
+   two different row types. */
 .jrk-nav-item {
   display: flex;
   align-items: center;
   gap: var(--jrk-space-2);
-  height: var(--jrk-control-md);
+  width: 100%;
+  /* 32px, up from the 28px macOS row. The note above about 40px being "a touch
+     ergonomic" still stands and is not being undone — this is the next step on
+     the existing control scale, not a return to a touch target. Height is the
+     real constraint on a 1080px display, so this is spent deliberately: the rail
+     holds ~12 destinations, and 4px each is affordable where a content grid's
+     would not be. */
+  height: var(--jrk-control-lg);
   padding-inline: var(--jrk-space-2);
-  font-size: var(--jrk-text-md);
-  font-weight: var(--jrk-weight-medium);
+  font-family: inherit;
+  /* Lighter and one step larger together. Either alone reads as a mistake —
+     15px at medium looks heavy-set, 14px at regular looks washed out. The pair
+     is what gives the airier, more vertical rail. */
+  font-size: var(--jrk-text-lg);
+  font-weight: var(--jrk-weight-regular);
   color: var(--jrk-text-secondary);
+  text-align: start;
   text-decoration: none;
   white-space: nowrap;
+  background: none;
+  border: 0;
   border-radius: var(--jrk-radius-md);
+  cursor: pointer;
   transition:
     background-color var(--jrk-transition),
     color var(--jrk-transition);
 }
 
+/* Bare SVGs only — `.jrk-icon` is em-sized and already tracks the label, so it
+   grew with the font-size above on its own and must not be caught here. */
 .jrk-nav-item svg:not(.jrk-icon) {
   width: var(--jrk-icon-md);
   height: var(--jrk-icon-md);
-  stroke-width: 1.75;
+  /* Follows the label down from medium to regular. "Icons inherit text weight"
+     is the rule that makes them feel native rather than bolted on, and a 1.75
+     stroke beside a 400 label is exactly where that breaks visibly. */
+  stroke-width: 1.5;
   flex-shrink: 0;
 }
 
@@ -99,22 +206,135 @@
   color: var(--jrk-text-primary);
 }
 
+/* Open flyout. Snowsight marks both the current row and the open row with the
+   same quiet grey; here they are deliberately two different treatments, because
+   they are two different facts. "This menu is open" is transient and belongs to
+   the pointer; "this is the page you are on" is the answer to where-am-I and
+   gets the tinted pill below.
+
+   ORDER IS LOAD-BEARING: this rule sits above the aria-current block at equal
+   specificity, so a row that is both current and open keeps the tinted pill.
+   Moving it below silently turns the current page grey while its menu is open. */
+.jrk-nav-item[aria-expanded='true'] {
+  background: var(--jrk-surface-active);
+  color: var(--jrk-text-primary);
+}
+
 /* Current page. Set aria-current="page" on the anchor — the styling keys off
-   the same attribute assistive tech reads, so the two can never disagree. */
-/* Apple marks the selected sidebar row with a filled accent pill and a white
-   label, not a soft tint. The icon inherits currentColor, so it comes along. */
+   the same attribute assistive tech reads, so the two can never disagree.
+
+   The row wears the TINTED BUTTON: accent.wash fill, accent.washText ink,
+   semibold. The icon inherits currentColor, so it comes along. This replaces a
+   filled accent.solid pill with a white label — Apple's treatment, and the thing
+   the register entry above used to call "the accent pill".
+
+   The weight step is doing more work here than it looks. Against a HOVERED
+   neighbour the wash is 1.04:1 in light and 1.06:1 in dark, and against an OPEN
+   row (surface.active) 1.08:1 and 1.30:1 — so where-am-I versus a transient
+   pointer state is separated by hue and by weight, not by lightness. Hue holds up
+   under both dichromacies (blue is the safe end of the spectrum) but not in
+   greyscale, which leaves semibold as the only channel that survives everything.
+   The solid pill it replaced was 5.22:1 against all three. Keep the weight. */
 .jrk-nav-item[aria-current='page'] {
-  background: var(--jrk-accent-solid);
-  color: var(--jrk-accent-on-solid);
+  background: var(--jrk-accent-wash);
+  color: var(--jrk-accent-wash-text);
+  font-weight: var(--jrk-weight-semibold);
 }
 
 .jrk-nav-item[aria-current='page']:hover {
-  background: var(--jrk-accent-solid-hover);
-  color: var(--jrk-accent-on-solid);
+  background: var(--jrk-accent-wash-hover);
+  color: var(--jrk-accent-wash-text);
 }
 
 .jrk-nav-item__badge {
   margin-inline-start: auto;
+}
+
+/* ========================= second nav level (flyout) ========================= */
+
+/* Disclosure caret. Snowsight ships NO caret on these rows — you find the second
+   level by hovering and hoping. That is the discoverability-spent-on-cleanliness
+   failure layer 3 exists to refuse, so the caret is added back: restraint in
+   decoration, generosity in signifiers. It costs 13px of row width and it is the
+   only thing that distinguishes "goes somewhere" from "opens something". */
+/* It does not rotate on open, and that is deliberate — a chevron swinging down
+   is the accordion gesture and it promises the panel will appear BELOW the row.
+   This one appears beside it. The caret points at where the content lands and
+   stays there; the row's grey fill and the panel itself carry the open state. */
+.jrk-nav-item__caret {
+  margin-inline-start: auto;
+  color: var(--jrk-text-muted);
+  transition: color var(--jrk-transition);
+}
+
+/* A badge takes the trailing-edge slot when both are present, so the caret gives
+   up its auto margin and just trails the badge. */
+.jrk-nav-item__badge ~ .jrk-nav-item__caret {
+  margin-inline-start: 0;
+}
+
+.jrk-nav-item[aria-expanded='true'] .jrk-nav-item__caret {
+  color: inherit;
+}
+
+/* The panel. Composes on .jrk-menu — the second nav level is a menu surface and
+   the library already has one, so this adds placement only, never appearance.
+   Set no property .jrk-menu also sets: feedback.css is imported AFTER this file,
+   so at equal specificity it wins. That is why the width below is `width` and
+   not `min-width`.
+ *
+ * position: fixed, and it has to be. .jrk-sidebar__nav is `overflow-y: auto`,
+ * and CSS forces the other axis to a scroll container too — a `visible` axis
+ * paired with a non-visible one computes to `auto`. So ANY descendant of the nav
+ * is clipped horizontally, and an absolutely-positioned panel would be sliced
+ * off at the rail's edge. Fixed escapes the clip without a portal, which keeps
+ * this working in the Jinja apps that have no React tree to portal into — and
+ * THOSE APPS ARE NO LONGER CONSUMERS, so that half of the reasoning is dead. The
+ * clip is still real and still has to be escaped, but a portal is available now
+ * and would drop the measuring below. See references/components.md.
+ *
+ * The cost is that fixed coordinates are VIEWPORT coordinates, so neither offset
+ * can come from CSS alone — the controller measures the rail and writes
+ * --jrk-nav-flyout-top and --jrk-nav-flyout-inset (see <NavMenu>, and the vanilla
+ * equivalent in preview/dashboard.html). Measuring the inset rather than reading
+ * the rail width from a token is the difference between working and nearly
+ * working: a token offset silently assumes the rail begins at viewport x=0, which
+ * is true in an app and false the moment the shell sits inside anything —
+ * preview/dashboard.html puts it in a 24px-margined frame and every panel would
+ * land 24px adrift. The fallbacks below cover that unmeasured case approximately.
+ *
+ * One caveat worth knowing: below 720px the rail takes `transform`, which makes
+ * it the containing block for fixed descendants and brings the clipping back.
+ * That is the mobile drawer, well outside this library's 1920x1080 target. */
+.jrk-nav-flyout {
+  position: fixed;
+  inset-inline-start: var(--jrk-nav-flyout-inset, var(--jrk-sidebar-expanded));
+  top: var(--jrk-nav-flyout-top, 0px);
+  width: 232px;
+  max-height: calc(100vh - var(--jrk-space-4));
+  overflow-y: auto;
+}
+
+.jrk-sidebar[data-collapsed='true'] .jrk-nav-flyout {
+  inset-inline-start: var(--jrk-nav-flyout-inset, var(--jrk-sidebar-collapsed));
+}
+
+/* The current sub-page. The parent row already carries the tinted pill, and a
+   second pill inside the panel is two answers to one question — so this states
+   it in accent text plus weight instead. Weight is the second channel, which is
+   what keeps it off colour-as-the-only-signal. */
+.jrk-nav-flyout .jrk-menu__item[aria-current='page'] {
+  color: var(--jrk-accent-text);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+/* In the collapsed rail the label is the only thing naming the panel, so it is
+   painted rather than clipped away with the row labels. */
+.jrk-nav-flyout__title {
+  padding: var(--jrk-space-1_5) var(--jrk-space-2_5) var(--jrk-space-1);
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-primary);
 }
 
 /* Collapsed rail: the icon centers and the label is hidden but stays in the
@@ -132,6 +352,13 @@
   height: 1px;
   overflow: hidden;
   clip-path: inset(50%);
+}
+
+/* The caret is aria-hidden decoration, so unlike the label and badge it is
+   removed outright rather than kept in the accessibility tree — the button's
+   aria-expanded is what announces the disclosure, and it survives the collapse. */
+.jrk-sidebar[data-collapsed='true'] .jrk-nav-item__caret {
+  display: none;
 }
 
 .jrk-sidebar__footer {
@@ -185,22 +412,25 @@
   min-width: 0;
 }
 
-/* Document view: the content plane takes the CARD fill instead of the page
-   fill, so a full-bleed report sits on white rather than on the tinted plane.
+/* Document view: the content plane takes the CARD fill instead of the page fill,
+   so a full-bleed report sits on the card surface rather than on the page plane.
 
-   This is a deliberate departure from the grouped look, which is normally the
-   tinted-page/white-card inversion, and it is scoped to the view rather than
-   applied to the token — surface.canvas stays tinted everywhere else, because
-   flattening it globally would erase the plane separation every other screen
-   depends on.
+   This is load-bearing in BOTH themes again — #ffffff content on an #f2f2f7 page,
+   #232326 on #141416. For one period it was a no-op in light, because the page had
+   been flattened to #ffffff and there was nothing left for it to change; the page
+   is tinted again and the modifier does real work in light as it originally did.
 
-   It is legal here for the same reason the look exists: a report is ONE
-   full-width object, not a set of tiles. There is no card grid for the tinted
-   plane to separate, so the plane is doing no work and the white reads as paper.
-   Do not reach for this on a dashboard — with tiles on it, the cards lose their
-   edge and the hierarchy goes flat.
+   The history is worth keeping, because it is a full round trip. This rule
+   ORIGINALLY existed to give one full-bleed view a white plane locally, and warned
+   against doing it globally — "would erase the plane separation every other screen
+   depends on". That warning was then overridden globally, survivably, but only
+   because the tile edge became a 2px brand line in the same change. Both halves
+   have now been reverted together, which is the only safe way to undo a pair.
 
-   Anything placed on this plane must carry its own hairline; .jrk-sheet does. */
+   Anything placed on this plane has no fill step to use, so it must carry its own
+   edge. .jrk-sheet is the one component designed for it and it draws a real 1px
+   neutral hairline for exactly this reason; anything else needs
+   .jrk-card--outlined. */
 .jrk-content--document {
   background: var(--jrk-surface-default);
 }
@@ -285,7 +515,20 @@
 /* ============================== tabs ============================== */
 
 /* Markup: role="tablist" > role="tab" buttons, each with aria-selected and
-   aria-controls pointing at its role="tabpanel". */
+   aria-controls pointing at its role="tabpanel".
+
+   OR a nav of links, which is a different widget wearing the same clothes. A row
+   of sub-page links looks like this and should — the reader is picking one of
+   several views of one subject either way — but the markup underneath cannot be
+   the same. A link is not a tab: `role="tab"` promises a panel in this document
+   that aria-controls can point at, and `aria-selected` is only meaningful inside
+   a tablist. Put them on an <a> and assistive tech announces a tab widget whose
+   panel never arrives.
+
+   So the link form is `<nav> > <a aria-current="page">`, with no roles at all,
+   and every selected rule below answers to aria-current as well as
+   aria-selected. Pick by what the row DOES: swaps panels in place → buttons and
+   aria-selected; changes the URL → links and aria-current. */
 .jrk-tabs {
   display: flex;
   align-items: center;
@@ -308,11 +551,23 @@
   font-weight: var(--jrk-weight-medium);
   color: var(--jrk-text-muted);
   white-space: nowrap;
+  /* For the link form. base.css underlines anchors, and an underlined tab beside
+     the 2px selected rule reads as two competing marks on the same edge. */
+  text-decoration: none;
   background: none;
   border: 0;
   /* Transparent underline reserves the space, so selecting a tab does not
      shift the row by 2px. */
   border-bottom: 2px solid transparent;
+  /* base.css rounds EVERY anchor by radius-sm so the focus ring has soft
+     corners, and on the link form that 4px lands on the 2px selected underline
+     and curls both of its ends upward into little ticks. Only the bottom pair is
+     zeroed: the top corners are invisible here — no background, no top border —
+     but the focus ring still uses them, so squaring all four would trade one
+     cosmetic fault for another. The pills variant sets its own radius at 0-2-0
+     and is unaffected. */
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
   margin-bottom: -1px;
   cursor: pointer;
   transition: color var(--jrk-transition), border-color var(--jrk-transition);
@@ -320,9 +575,11 @@
 
 .jrk-tab:hover {
   color: var(--jrk-text-primary);
+  text-decoration: none;
 }
 
-.jrk-tab[aria-selected='true'] {
+.jrk-tab[aria-selected='true'],
+.jrk-tab[aria-current='page'] {
   color: var(--jrk-accent-text);
   border-bottom-color: var(--jrk-border-accent);
 }
@@ -332,6 +589,12 @@
   cursor: not-allowed;
 }
 
+/* On a SELECTED pill this chip's fill is 1.08:1 against the wash under it in
+   light, so the pill shape all but disappears there. Left alone on purpose: the
+   NUMBER is the information and it inherits the pill's ink, which is 4.92:1 light
+   and 5.19:1 dark on this chip — the enclosure is decoration and the gap already
+   separates it from the label. accent.washBorder was the obvious fill to swap in
+   and it fails: it puts the count at 3.51:1. */
 .jrk-tab__count {
   padding: 0 var(--jrk-space-1_5);
   font-size: var(--jrk-text-2xs);
@@ -340,63 +603,85 @@
   border-radius: var(--jrk-radius-full);
 }
 
-/* Segmented control — Apple's, not a button group.
+/* Segmented control — an inset well with a raised tinted thumb on the selected
+ * segment. Anatomy, the five-version history and the measurements are all written
+ * on .jrk-btn-group in button.css. The short version: unselected segments are bare
+ * labels in the well, the thumb is the tinted .jrk-btn--primary lifted out of it
+ * (wash fill, washText ink, semibold, shadow, faint hairline), and NO channel here
+ * measures 3:1 — the weight step is what keeps the state readable in greyscale and
+ * under CVD. Read the thumb note in button.css before changing either file.
  *
- * The anatomy is specific and it is what makes it recognisable: an INSET grey
- * track, and a floating white thumb on the selected segment carrying a hairline
- * and a soft shadow. Segments are separated by thin dividers that disappear
- * either side of the thumb. Joined bordered boxes are the Bootstrap shape and
- * read as web, not Apple. */
+ * The two segmented controls must not drift apart. They are the same widget in
+ * two markup contracts — a toolbar of toggle buttons vs a tablist or a nav — and a
+ * reader who sees both on one page reads any difference as meaning. */
 .jrk-tabs--pills {
   display: inline-flex;
   gap: 0;
   padding: 2px;
   border-bottom: 0;
-  background: var(--jrk-surface-subtle);
+  background: var(--jrk-surface-track);
   border-radius: var(--jrk-radius-md);
+  isolation: isolate;
 }
 
 .jrk-tabs--pills .jrk-tab {
   position: relative;
+  height: var(--jrk-control-md);
   padding: 0 var(--jrk-space-3);
-  height: 22px;
   font-size: var(--jrk-text-sm);
   font-weight: var(--jrk-weight-medium);
-  color: var(--jrk-text-primary);
-  border-bottom: 0;
-  margin-bottom: 0;
-  border-radius: calc(var(--jrk-radius-md) - 2px);
-  transition: background-color var(--jrk-transition), box-shadow var(--jrk-transition);
-}
-
-/* Hairline divider between unselected neighbours. */
-.jrk-tabs--pills .jrk-tab + .jrk-tab::before {
-  content: '';
-  position: absolute;
-  inset-inline-start: 0;
-  top: 4px;
-  bottom: 4px;
-  width: 1px;
-  background: var(--jrk-border-default);
-}
-
-/* The divider is suppressed on both sides of the thumb. */
-.jrk-tabs--pills .jrk-tab[aria-selected='true']::before,
-.jrk-tabs--pills .jrk-tab[aria-selected='true'] + .jrk-tab::before {
+  color: var(--jrk-text-secondary);
   background: transparent;
+  /* The base .jrk-tab is border: 0 plus a 2px transparent bottom rule, because the
+     underline variant selects by that rule. A pill is a box, so it takes a real
+     border on all four sides — transparent here, coloured on the thumb. Set as the
+     shorthand, which also resets the border-style that `border: 0` left as `none`;
+     that is the quiet way a later border-color paints nothing. */
+  border: 1px solid transparent;
+  border-radius: calc(var(--jrk-radius-md) - 2px);
+  margin-bottom: 0;
+  transition:
+    background-color var(--jrk-transition),
+    border-color var(--jrk-transition),
+    box-shadow var(--jrk-transition),
+    color var(--jrk-transition);
 }
 
-.jrk-tabs--pills .jrk-tab:hover {
+.jrk-tabs--pills .jrk-tab:hover:not(:disabled) {
+  /* surface-hover, which lifts off the TRACK in both themes. On a raised surface
+     it would be a no-op in dark; what it pairs against decides. */
+  background: var(--jrk-surface-hover);
   color: var(--jrk-text-primary);
 }
 
-/* The thumb. */
-.jrk-tabs--pills .jrk-tab[aria-selected='true'] {
-  background: var(--jrk-surface-thumb);
-  color: var(--jrk-text-primary);
-  box-shadow:
-    0 0 0 0.5px rgba(0, 0, 0, 0.08),
-    0 1px 2px rgba(0, 0, 0, 0.12);
+/* aria-current is answered as well as aria-selected, matching the underline
+   variant. The link form of this row — <nav> > <a aria-current="page"> — had no
+   selected state at all in the track era: every selected rule keyed on
+   aria-selected, which is only meaningful inside a tablist, so a pill row used as
+   navigation rendered with nothing marked. */
+.jrk-tabs--pills .jrk-tab[aria-selected='true'],
+.jrk-tabs--pills .jrk-tab[aria-current='page'] {
+  background: var(--jrk-accent-wash);
+  color: var(--jrk-accent-wash-text);
+  border-color: var(--jrk-accent-wash-border);
+  font-weight: var(--jrk-weight-semibold);
+  box-shadow: var(--jrk-shadow-md);
+  z-index: 1;
+}
+
+.jrk-tabs--pills .jrk-tab[aria-selected='true']:hover,
+.jrk-tabs--pills .jrk-tab[aria-current='page']:hover {
+  background: var(--jrk-accent-wash-hover);
+  color: var(--jrk-accent-wash-text);
+}
+
+.jrk-tabs--pills .jrk-tab[aria-selected='true']:active,
+.jrk-tabs--pills .jrk-tab[aria-current='page']:active {
+  background: var(--jrk-accent-wash-active);
+}
+
+.jrk-tabs--pills .jrk-tab:focus-visible {
+  z-index: 2;
 }
 
 /* ============================== responsive ============================== */

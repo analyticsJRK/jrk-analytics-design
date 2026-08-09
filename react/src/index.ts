@@ -32,7 +32,7 @@ export type { BadgeProps, StatusProps, TagProps, StatusTone } from './Badge';
 export { Stat, StatRow, Delta, Sparkline } from './Stat';
 export type { StatProps, DeltaProps } from './Stat';
 
-export { DataTable, CellBar } from './DataTable';
+export { DataTable, CellBar, CellBarSigned, HeatLegend, cellHeatProps, divergingStep } from './DataTable';
 export type { DataTableProps, Column, SortDir } from './DataTable';
 
 export {
@@ -48,8 +48,12 @@ export type { ChartCardProps, LegendProps, BarListProps, BarListItem, LineChartP
 export {
   AppShell,
   Sidebar,
+  SidebarAction,
   NavItem,
   NavGroup,
+  NavMenu,
+  NavMenuItem,
+  NavMenuSeparator,
   Main,
   Topbar,
   Content,
@@ -58,4 +62,11 @@ export {
   TabPanel,
   setTheme,
 } from './Shell';
-export type { SidebarProps, NavItemProps, PageHeaderProps, TabsProps } from './Shell';
+export type {
+  SidebarProps,
+  SidebarActionProps,
+  NavItemProps,
+  NavMenuProps,
+  PageHeaderProps,
+  TabsProps,
+} from './Shell';
