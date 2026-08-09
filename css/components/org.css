@@ -55,6 +55,10 @@
   /* How far a stacked branch's tick reaches from its spine to a card. */
   --jrk-org-tick: var(--jrk-space-4);
 
+  /* The four rollup textures live on .jrk-org__node, NOT here — see the note
+     there. Putting them on this element is the obvious thing to do and it
+     silently produces solid keylines. */
+
   /* THE CONNECTOR IS DATA, SO IT IS DRAWN AT DATA WEIGHT — text.muted, measured
      5.07:1 on the light card and 5.46:1 on the dark one. Nothing gates the
      border namespace, so the numbers are recorded here by hand, which is the
@@ -115,6 +119,52 @@
      card off centre and would otherwise leave the incoming stem attached to
      empty space. One name, one place to change, three rules that read it. */
   --jrk-org-anchor: 50%;
+
+  /* The four rollup textures, and THEY HAVE TO BE DECLARED HERE — on the same
+     element the rollup rules set --jrk-org-group on — because of a custom
+     property rule that is easy to get backwards.
+     ------------------------------------------------------------------------
+     A `var()` inside a custom property's VALUE is resolved at computed-value
+     time against the element the property is DECLARED on. It is not deferred to
+     wherever the property is eventually used. So declaring these on `.jrk-org`,
+     where --jrk-org-group does not exist, makes every one of them
+     invalid-at-computed-value — the empty token stream — and the keyline then
+     falls through to the plain colour and paints SOLID. Every texture silently
+     disappears, no console error, and the only symptom is eight identical
+     keylines that look like the feature was never wired up. Diagnosed exactly
+     that way; the computed --jrk-org-group-texture reads as an empty string.
+     ------------------------------------------------------------------------
+     On the node the reference resolves: rollup children have --jrk-org-group,
+     so the gradients build; every other node does not, so these stay invalid,
+     --jrk-org-group-texture ends up empty, and the ::before falls back to
+     transparent. That is the correct default and it costs nothing.
+
+     They are whole `background` values rather than a pair of numbers because
+     the fourth is on a different AXIS, and that is the point: three vertical
+     rhythms plus one horizontal split stay apart far better than four rhythms.
+     THE RAIL EXISTS BECAUSE RHYTHMS FAIL ON SHORT CARDS. A keyline is only as
+     tall as the card's text block, so a name-only card gives it ~18px, and a
+     fourth rhythm coarse enough to read as distinct from `dash` would fit one
+     dash in that space and be indistinguishable from `solid`. The rail reads
+     the same at 18px and at 80px. Keep any future texture height-independent,
+     or check it against a one-line card. */
+  --jrk-org-tex-solid: var(--jrk-org-group);
+  --jrk-org-tex-dash: repeating-linear-gradient(
+    to bottom,
+    var(--jrk-org-group) 0 6px,
+    transparent 6px 10px
+  );
+  --jrk-org-tex-dot: repeating-linear-gradient(
+    to bottom,
+    var(--jrk-org-group) 0 2px,
+    transparent 2px 6px
+  );
+  --jrk-org-tex-rail: linear-gradient(
+    to right,
+    var(--jrk-org-group) 0 1px,
+    transparent 1px 3px,
+    var(--jrk-org-group) 3px 4px
+  );
 
   position: relative;
   display: flex;
@@ -571,14 +621,69 @@
  * colour — the one case that breaks adjacency. <OrgNode> warns in development.
  * It is also the right IA answer: one organising principle, named on screen. */
 
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 1) { --jrk-org-group: var(--jrk-chart-1); }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 2) { --jrk-org-group: var(--jrk-chart-2); }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 3) { --jrk-org-group: var(--jrk-chart-3); }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 4) { --jrk-org-group: var(--jrk-chart-4); }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 5) { --jrk-org-group: var(--jrk-chart-5); }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 6) { --jrk-org-group: var(--jrk-chart-6); }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 7) { --jrk-org-group: var(--jrk-chart-7); }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 8) { --jrk-org-group: var(--jrk-chart-8); }
+/* THE KEYLINE CARRIES TWO CHANNELS, HUE AND TEXTURE, AND THE PAIRING IS DERIVED
+   RATHER THAN CHOSEN. Hue alone tops out fast: measured against scripts/cvd.mjs
+   at validate's own dE 10 floor, eight groups contain NINE pairs that are the
+   same colour to a dichromat, worst case orange|yellow at dE 0.8. Texture is the
+   library's standing answer to that — "the fix is a second channel (dash,
+   shape), not a second palette" — and it is what makes the palette usable past
+   three groups at all.
+
+   THE ASSIGNMENT IS texture = ceil(slot / 2), and it is not arbitrary. Every
+   collapsing pair in this palette is SAME-PARITY, so pairing the slots up
+   (1,2)(3,4)(5,6)(7,8) puts the two members of every bucket an ODD distance
+   apart — and odd distances never collapse. Each bucket therefore holds a
+   CVD-safe pair, and all nine collapsing pairs land in different buckets and are
+   separated by texture. Result: THE FIRST EIGHT GROUPS ARE FULLY MUTUALLY
+   DISTINGUISHABLE — 0 unseparable pairs, down from 9. Re-derive this if the
+   palette order ever changes; do not hand-tune it.
+
+   THE CEILING IS REAL AND WORTH KNOWING. At most THREE hues in this palette are
+   pairwise CVD-safe (blue, orange, mint — it is the same fact as the declared
+   all-pairs safe cap of 3), so with T textures at most 3xT groups can ever be
+   fully distinguishable: 12 with these four. Reaching 12 would mean abandoning
+   the canonical slot order, which is the one thing the palette forbids
+   re-deriving, so this ships 8 and repeats after.
+
+   PAST EIGHT, HUE AND TEXTURE REPEAT TOGETHER — group 9 is group 1 exactly.
+   That is deliberate. Shifting texture on the second lap removes those exact
+   repeats and costs 4 CVD collisions instead (measured at 15 groups: 7
+   unseparable becomes 4). It reads better and fails worse: an exact repeat is
+   visible to everyone and an author will notice it, while a CVD collision looks
+   correct to the author and lands only on the ~8% who cannot see it. This
+   library does not trade a visible failure for a silent one. */
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 1) {
+  --jrk-org-group: var(--jrk-chart-1);
+  --jrk-org-group-texture: var(--jrk-org-tex-solid);
+}
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 2) {
+  --jrk-org-group: var(--jrk-chart-2);
+  --jrk-org-group-texture: var(--jrk-org-tex-solid);
+}
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 3) {
+  --jrk-org-group: var(--jrk-chart-3);
+  --jrk-org-group-texture: var(--jrk-org-tex-dash);
+}
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 4) {
+  --jrk-org-group: var(--jrk-chart-4);
+  --jrk-org-group-texture: var(--jrk-org-tex-dash);
+}
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 5) {
+  --jrk-org-group: var(--jrk-chart-5);
+  --jrk-org-group-texture: var(--jrk-org-tex-dot);
+}
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 6) {
+  --jrk-org-group: var(--jrk-chart-6);
+  --jrk-org-group-texture: var(--jrk-org-tex-dot);
+}
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 7) {
+  --jrk-org-group: var(--jrk-chart-7);
+  --jrk-org-group-texture: var(--jrk-org-tex-rail);
+}
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 8) {
+  --jrk-org-group: var(--jrk-chart-8);
+  --jrk-org-group-texture: var(--jrk-org-tex-rail);
+}
 
 /* The keyline. A capsule inside the card's leading padding, NOT a wash and NOT
    a coloured border, for three separate reasons:
@@ -603,14 +708,24 @@
    Transparent when --jrk-org-group is unset, so an ungrouped chart pays
    nothing. The fallback is what keeps check:css from reading the property as a
    typo, and it is also the real default. */
+/* 4px rather than 3px, and the width is the rail's minimum: 1px + 2px gap + 1px
+   is the narrowest split that still reads as two rails instead of a fuzzy edge.
+   It sits at 4px from the padding box and the text starts at 12px, so there is
+   4px of clearance either way.
+
+   The fallback chain is doing real work. `--jrk-org-group-texture` is set only
+   by the rollup rules, so an ungrouped chart falls through to
+   `--jrk-org-group` — which is how a hand-set group colour still paints — and
+   then to transparent, which is the true default and costs nothing. Both
+   fallbacks are also what keeps check:css from reading these as typos. */
 .jrk-org__card::before {
   content: '';
   position: absolute;
   inset-block: var(--jrk-space-2);
   inset-inline-start: 4px;
-  width: 3px;
+  width: 4px;
   border-radius: var(--jrk-radius-full);
-  background: var(--jrk-org-group, transparent);
+  background: var(--jrk-org-group-texture, var(--jrk-org-group, transparent));
 }
 
 /* A VACANT CARD KEEPS ITS KEYLINE, and the tempting rule is the wrong one.

@@ -91,13 +91,21 @@ export interface OrgNodeProps {
    *  palette slot and its whole subtree inherits it, so a reader can see what
    *  rolls up into what.
    *
-   *  Adjacent siblings never collide — consecutive slots are the pair the
-   *  palette order was searched to maximise (dE 22.3 light / 16.5 dark). Slot 9
-   *  restarts at slot 1, eight positions away, and siblings an even number of
-   *  slots apart can read as one colour under dichromacy (worst: orange|yellow,
-   *  dE 0.8). Both are fine because the tree already draws the grouping and
-   *  every card is labelled — the keyline is an accelerator, never the identity
-   *  channel. With 3 or fewer groups it is fully CVD-safe.
+   *  The keyline carries TWO channels — hue and texture (solid / dashed /
+   *  dotted / double-rail, assigned `ceil(slot / 2)`) — which is what makes the
+   *  **first 8 groups fully distinguishable**, including under both
+   *  dichromacies. Hue alone leaves 9 unseparable pairs in those 8; with texture
+   *  it is 0. Adjacent siblings never collide at any count.
+   *
+   *  Past 8, hue and texture repeat together — group 9 is group 1 exactly. That
+   *  is a deliberate trade: shifting texture on a second lap would remove the
+   *  repeats but introduce CVD collisions instead, and an exact repeat is
+   *  visible to everyone while a CVD collision is invisible to the author. The
+   *  hard ceiling is 3 x textures = 12, since only three hues here are pairwise
+   *  CVD-safe.
+   *
+   *  It is still an accelerator, never the identity channel — every card is
+   *  labelled and the tree draws the grouping regardless.
    *
    *  ONE PER CHART; nesting warns in development. */
   rollup?: boolean;

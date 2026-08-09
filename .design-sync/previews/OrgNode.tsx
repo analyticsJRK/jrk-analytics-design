@@ -116,6 +116,10 @@ export const Stacked = () => (
    and the connectors must stay `text.muted`, since four of the eight hues sit
    under 3:1 on the light card and the lines are the one mark that has to read.
 
+   The keyline carries hue AND texture — solid, dashed, dotted, double-rail,
+   assigned ceil(slot/2) so every CVD-collapsing pair lands in a different
+   bucket. That is what takes the first 8 groups from 9 unseparable pairs to 0.
+
    This cycles the categorical palette, which is banned everywhere else here.
    The ban protects IDENTITY — two chart lines sharing a colour cannot be told
    apart. Every node here is labelled and the tree draws the grouping, so the
@@ -148,10 +152,38 @@ export const Rollup = () => (
   </OrgChart>
 );
 
-/* Three groups or fewer is the fully CVD-safe case: the cycle never leaves
-   slots 1-3, and 3 is exactly the palette's measured all-pairs safe cap. Past
-   that only adjacency is guaranteed — siblings an even number of slots apart
-   can collapse under dichromacy (worst: orange|yellow, dE 0.8). */
+/* The full encoding, eight groups, narrow nodes so the whole cycle fits one
+   card. Read the keylines left to right: blue solid, orange solid, mint dashed,
+   yellow dashed, purple dotted, pink dotted, teal rail, brown rail.
+
+   The two channels are what make these eight mutually distinguishable. On hue
+   alone, nine of these pairs are the same colour to a dichromat — orange|yellow
+   is dE 0.8 — and every one of those pairs is separated here by texture, because
+   collapsing pairs are same-parity and ceil(slot/2) always splits them. A ninth
+   group would restart at blue solid.
+
+   Every card carries a meta line deliberately: the keyline is only as tall as
+   the card's text block, and on a name-only card that is ~18px — enough to
+   render the textures but not enough to READ them at a glance, which defeats
+   the one card whose job is to teach the encoding. */
+export const RollupAllEight = () => (
+  <OrgChart label="All eight rollup slots" nodeWidth={88}>
+    <OrgNode name="Portfolio" meta="37 assets" rollup>
+      <OrgNode name="North" meta="6 assets" />
+      <OrgNode name="South" meta="5 assets" />
+      <OrgNode name="East" meta="4 assets" />
+      <OrgNode name="West" meta="6 assets" />
+      <OrgNode name="Central" meta="3 assets" />
+      <OrgNode name="Coastal" meta="5 assets" />
+      <OrgNode name="Gulf" meta="4 assets" />
+      <OrgNode name="Plains" meta="4 assets" />
+    </OrgNode>
+  </OrgChart>
+);
+
+/* Three groups or fewer never leaves slots 1-3 — the palette's measured
+   all-pairs safe cap — so it is CVD-safe on hue alone, before texture even
+   helps. Texture then makes the guarantee hold all the way to 8. */
 export const RollupSafeCount = () => (
   <OrgChart label="Three regions">
     <OrgNode name="All regions" meta="37 assets" rollup>
