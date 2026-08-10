@@ -27,7 +27,7 @@ read from the shipped token layer, not from intent:
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#ffffff` | `#141416` |
+| page plane | `#f2f2f7` | `#141416` |
 | card | `#ffffff` | `#232326` |
 | popover / input | `#ffffff` | `#2c2c2e` |
 
@@ -35,13 +35,20 @@ The dark page is **not** true black: at 1920x1080 it halates against near-white
 text, so `--jrk-text-primary` in dark is `#ebebf0` rather than `#ffffff` for the
 same reason.
 
-**In dark a card is bounded by its fill step** — `#232326` on `#141416`, 1.174:1
-— and carries no border. **In light it currently has no boundary at all**: the
-page and the card are both `#ffffff`, a 1.000:1 step, and `.jrk-card` ships
-`border: 1px solid transparent`. So a card on the light page reads only by its
-content and spacing. **When a tile needs a visible edge in light, ask for one —
-`.jrk-card--outlined` (`--jrk-border-default`, 1.52:1 on white).** Do not assume
-a fill step is doing the work; verify against `styles.css` before relying on it.
+**A card is bounded by its fill step off the page, in both themes, and carries no
+border** — `#ffffff` on `#f2f2f7` in light (1.12:1), `#232326` on `#141416` in
+dark (1.17:1). `.jrk-card` ships `border: 1px solid transparent`, so the step is
+the boundary and an edge is opt-in. **When a tile has no fill step to rely on —
+one nested inside another tile, or sitting on a tinted surface — ask for an edge:
+`.jrk-card--outlined` (`--jrk-border-default`, 1.52:1 on white).** Nested tiles
+get that hairline automatically, because a fill step only works once per plane.
+
+The instinct in the previous sentence is the durable part: **do not assume a fill
+step is doing the work — verify against `styles.css` before relying on it.** For
+one period the light page was flattened to `#ffffff` while the brand edge that
+had justified it was removed, so light cards had a 1.000:1 step and no border,
+i.e. no boundary at all. The tokens are fixed; the habit of checking is not
+optional.
 
 Because the card is the surface a component sits on, **the card is the chart
 surface** — marks are measured against `#ffffff` / `#232326`, never the page.
@@ -101,6 +108,13 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
   hairline) and is the everyday button. `variant="cta"` is the solid accent with
   a white label and there is **at most one per view** — the action that commits.
   Four saturated blue rectangles on one screen tell the reader nothing.
+- **"This one is selected" is a tinted pill, everywhere it appears.** The current
+  row in `jrk-nav-item` / `jrk-sidebar__action`, the selected segment in
+  `jrk-btn-group` / `jrk-tabs--pills`, and the current node in `OrgChart` all take
+  the accent wash with `--jrk-accent-wash-text` ink **and semibold**. The weight is
+  not decoration: the wash is only ~1.05:1 against what surrounds it, so weight is
+  the one channel that survives greyscale and colour-blindness. If you build a
+  selection state of your own, carry a second channel the same way.
 - **Right-align money and counts** with `jrk-num` on the cell **and** its header.
 - **Never cycle the 8-slot chart palette** — the fixed order is the
   colorblind-safety mechanism. A 9th series folds into "Other" or facets.
@@ -149,9 +163,11 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
   icon.
 - **`jrk-content--document` is a report plane, never a dashboard one.** It paints
   the content area with `--jrk-surface-default`, i.e. the *card* colour, so
-  anything placed on it has no fill step left to separate with. `Sheet` is the
-  one component built for it and draws its own hairline; everything else on that
-  plane needs `.jrk-card--outlined`. Put a normal tile grid on it and the tiles
+  anything placed on it has no fill step left to separate with. The **sheet** —
+  the `.jrk-sheet` class layer, which is CSS-only and has **no React export**, so
+  build it from the class names rather than reaching for a `<Sheet>` component — is
+  the one thing built for that plane and draws its own hairline; everything else on
+  it needs `.jrk-card--outlined`. Put a normal tile grid there and the tiles
   dissolve into the background in both modes.
 
 ## Where the truth is
