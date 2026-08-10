@@ -261,6 +261,27 @@ here** — `css/` and `react/src/` were left untouched.
 - `react/src/Stat.tsx` comments that a flat series renders as a "centered line";
   the maths (`y = h - pad - 0`) puts it on the baseline. Comment is wrong.
 
+**Found 2026-08-07, in the sheets, after the segmented control became a well with
+a raised thumb. Both are design-consistency findings rather than defects, and both
+were left alone as out of scope — but they will be noticed by anyone browsing the
+pane, so decide them deliberately rather than by drift:**
+
+- **`.jrk-btn-group`'s action-toolbar form lost its affordance.** Unselected
+  segments are now bare labels in a `surface.track` well with no fill and no
+  border, which is right for a picker. But `ButtonGroup` is documented — in its own
+  JSDoc and in its `ActionToolbar` preview export — as serving a *toolbar of
+  related actions* too, and with no `aria-pressed` anywhere that export now reads
+  as a segmented control with **nothing selected** rather than three buttons.
+  Visible in `actions__ButtonGroup` (`Export CSV | Export XLSX | Schedule`).
+  Options: give the toolbar form its own modifier, or document that a toolbar of
+  actions is plain `.jrk-btn`s in a `jrk-row` and drop the export.
+- **Selection is now answered two ways.** `.jrk-nav-item[aria-current]` and the
+  segmented thumb are the tinted wash pill; `.jrk-list__row[aria-selected]` and
+  `ListRow`'s selected variant are still a **solid** `accent.solid` bar
+  (`list.css:154`). Both are visible on sheet 2 — a pale blue current nav row and a
+  saturated blue selected list row, in adjacent cards. Whichever is right, one
+  question should not have two answers.
+
 ## API traps that cost a preview iteration
 
 - `Empty` takes `description`, **not** `text`.
@@ -326,6 +347,24 @@ here** — `css/` and `react/src/` were left untouched.
   CDN). See **Fonts**. Do not try to remove the `@import` to silence it — that
   would break Inter for every consuming app.
 
+**Resolved by config on 2026-08-07 — should not return:**
+
+- `[GRID_OVERFLOW] NavMenu (Open)` with kind `escape` ("stories position content
+  outside their cells (fixed/portal) — no grid layout can present this"). The
+  flyout is `position: fixed` with measured viewport coordinates, so in a grid
+  cell it lands outside its own card. Fixed with
+  `cfg.overrides.NavMenu = {"cardMode": "single", "primaryStory": "Open",
+  "viewport": "900x700"}`. This warn was **already documented in the library's own
+  skill reference** (`references/components.md` names "the `[GRID_OVERFLOW]`
+  warning the design-sync validator raises on this component") but had never been
+  recorded here, so it read as new. It is the same root cause as the standing
+  fixed-over-portal note.
+- **The `single` remedy is not a presentation-only edit, unlike `column`.**
+  `preview-rebuild.mjs --components NavMenu` refused with `[CONFIG_STALE]`, because
+  switching to `single` collapses four grade keys into one and only a full
+  `package-build.mjs` re-stamps them. So: `column` can go through the targeted
+  loop, `single` needs a full build. Budget a driver run for it.
+
 Anything else is new; investigate, then fix or record it here.
 
 Confirmed still the only warn on the 2026-07-31 re-sync: validate exited 0 with
@@ -334,6 +373,41 @@ Confirmed still the only warn on the 2026-07-31 re-sync: validate exited 0 with
 expected. Token count is now **220** in `jrk-tokens.css` (244 defined across the
 whole shipped closure), up from 212 — the colorblind dash set in 829ebab, not a
 regression.
+
+## The flat-white light page was a half-finished revert — READ THIS BEFORE TRUSTING A SURFACE VALUE
+
+**Found and fixed 2026-08-07, during the design-sync validation pass, not by any
+gate.** For one period `surface.canvas.light` and `surface.subtle.light` were
+`#ffffff`. They were the surviving half of a PAIR: commit 2b89411 ("Give tiles a
+brand edge, then flatten the light page to white") introduced both a 2px brand
+edge on every tile and a flat white page. The brand edge was later removed —
+`border.card` and `size.cardEdge` are gone and `.jrk-card` is
+`border: 1px solid transparent` — but **the page was never un-flattened with it.**
+
+Consequence while it lasted: in light, page and card were both `#ffffff` and the
+card's border was transparent, so **a plain `.jrk-card` had no boundary at all** —
+no fill step, no edge. It shipped, and it was visible in the repo's own dashboard
+preview as one flat white sheet.
+
+Two things make this worth a section of its own:
+
+- **Every doc had already been rewritten for the fixed state.** `card.css`'s
+  header comment ("`#ffffff` on `#f2f2f7` in light (1.12:1)"), `CLAUDE.md`'s hard
+  rule, and the `jrk-design` skill all described the tinted page. So reading the
+  prose confirmed a state the tokens did not implement, and no amount of
+  cross-reading the docs would have caught it.
+- **The tell was inside the token itself.** `canvas`'s own `$lightNote` said "the
+  page is tinted again, so the 1.12:1 step to the white card IS the tile boundary"
+  while `light` said `#ffffff`. **When a note disagrees with its own value, suspect
+  a half-finished revert** — the note is usually the newer of the two, because
+  prose gets rewritten in the same breath as the decision and the value needs a
+  separate edit.
+
+`npm test` passed throughout, in both states, and it always will: the gate
+measures ink against surfaces, and a page that is too light only ever *raises*
+text contrast. **No gate anywhere checks that a surface still separates from its
+neighbour.** That is the standing hole this cost, and the reason to re-derive the
+1.12:1 / 1.17:1 steps by hand whenever a surface moves.
 
 ## conventions.md validation log
 
@@ -359,6 +433,41 @@ at `(n, n+4)` and how to opt into the redundant encoding. Deliberately **not**
 added: `.jrk-content--document`, which is still uncommitted branch work — add it
 once `design/inter-dark-mode-and-doctrine` merges (it has a real "never on a
 dashboard" trap and belongs in the traps list).
+
+**2026-08-07 — six false statements found and corrected. This is the run that
+proves the header needs READING, not grepping.** The mechanical pass was clean
+both times: 36 tokens and 59 classes all verify against the built closure (the
+only "miss" is `jrk-block__element--modifier`, which is the naming *pattern*, not
+a class), every component named exists under `components/`, `setTheme` is in the
+bundle, and `cta` / `danger-solid` are both in the emitted `Button.d.ts`. What was
+wrong was **values and mechanisms**, none of which any grep can see:
+
+1. "systemIndigo accent" — the accent has been a blue at hue 212° (`#0069d9`)
+   since the stepped-blue change. Corrected, with the reason both Apple blues are
+   rejected.
+2. light page `#f2f2f7` — was true when written, then false while the token said
+   `#ffffff`, and true again now. See the half-revert section above.
+3. dark card `#1c1c1e` → `#232326` (the card was lifted to widen the fill step).
+4. "the dark card is only a 1.08:1 fill step off the page, so **in dark the
+   hairline is what makes a card read as a card** — never remove a card's border
+   in dark." Wrong twice over: the step is 1.17:1, and `.jrk-card`'s border is
+   `transparent`. This one actively instructed the agent to do the opposite of
+   what the library does, which is the worst failure mode for this file.
+5. "`.jrk-card` ships a `--jrk-border-subtle` edge" — it ships
+   `border: 1px solid transparent`; `--outlined` is what colours it in.
+6. "marks are measured against `#ffffff` / `#1c1c1e`" — dark is `#232326`.
+
+Added the same run, because they are what an agent gets wrong by default:
+the **two button volumes** (`primary` is tinted, `cta` is the solid accent and
+there is at most one per view), the **accent wash family** in the token list with
+the reason `-wash-text` exists (the anchor is 4.49:1 on the wash), and the
+**tinted selection pill** shared by the nav row and the segmented thumb, including
+why its semibold is structural rather than styling.
+
+**The lesson for the next run: items 3-6 all trace to ONE change** (the surface
+rework), and the header was validated as clean in between. When a surface or a
+component's default classes move, re-read every sentence in this file that
+mentions a *number* or a *mechanism* — the name-greps will pass regardless.
 
 Two warns appeared in the Jul 2026 sync and were **resolved by config**, so they
 should not return. Do not re-diagnose them from scratch if they do:
@@ -456,6 +565,25 @@ under `.jrk-chart[data-encoding=redundant]`. That is what `conventions.md`
 documents, and it is why it documents it that way.
 
 ## Re-sync risks — what can silently go stale
+
+- **No gate anywhere checks that a surface still separates from its neighbour**,
+  and that is how a flat white page shipped with unbounded light cards for a whole
+  period. `validate` measures ink against a surface, so a page drifting *toward*
+  its card only ever raises text contrast and the gate gets quieter as the bug gets
+  worse. Whenever a `surface.*` value moves, re-derive the page-to-card step by
+  hand (it should be ~1.12:1 light, ~1.17:1 dark) and look at a light-mode card.
+  Full account in the half-revert section above.
+- **A `$note` that disagrees with its own `light`/`dark` value is the signature of
+  a half-finished revert**, because prose gets rewritten with the decision while the
+  value needs a separate edit. Worth a scan whenever a surface question comes up:
+  `canvas`'s note described the tinted page while its value said `#ffffff`.
+- **The two segmented controls and the nav pill are now maintenance-coupled to the
+  BUTTON.** The thumb and the current-page row both borrow `accent.wash` +
+  `accent.washText` + semibold from `.jrk-btn--primary`. Re-tone the tinted button
+  and you silently re-tone selection everywhere; the only thing keeping a chosen
+  segment distinguishable from a plain tinted button is the hairline
+  (`accent.washBorder` vs `border.accent`) and the well around it. `CLAUDE.md`
+  carries the rule; this is the note for whoever changes the button next.
 
 - **A re-sync can report `upload: docs` with nothing else changed.** Seen once
   (Jul 2026, the run immediately after the Icon/List/ListRow sync): every

@@ -13,6 +13,7 @@
     "guides/*.md"
   ],
   "overrides": {
+    "NavMenu": { "cardMode": "single", "primaryStory": "Open", "viewport": "900x700" },
     "BarList": { "cardMode": "column" },
     "Tag": { "cardMode": "column" },
     "Card": { "cardMode": "column" },
