@@ -8,6 +8,7 @@ const PAGES = [
   ['components.html', 'Components'],
   ['charts.html', 'Charts'],
   ['report.html', 'Report'],
+  ['auth.html', 'Sign in'],
   ['dashboard.html', 'Dashboard'],
 ];
 

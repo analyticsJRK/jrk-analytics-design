@@ -48,6 +48,9 @@ export type { ChartCardProps, LegendProps, BarListProps, BarListItem, LineChartP
 export { OrgChart, OrgNode } from './Org';
 export type { OrgChartProps, OrgNodeProps } from './Org';
 
+export { AuthLayout, SsoButton } from './Auth';
+export type { AuthLayoutProps, SsoButtonProps } from './Auth';
+
 export {
   AppShell,
   Sidebar,
