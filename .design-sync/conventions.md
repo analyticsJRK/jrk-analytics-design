@@ -163,9 +163,11 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
   icon.
 - **`jrk-content--document` is a report plane, never a dashboard one.** It paints
   the content area with `--jrk-surface-default`, i.e. the *card* colour, so
-  anything placed on it has no fill step left to separate with. `Sheet` is the
-  one component built for it and draws its own hairline; everything else on that
-  plane needs `.jrk-card--outlined`. Put a normal tile grid on it and the tiles
+  anything placed on it has no fill step left to separate with. The **sheet** —
+  the `.jrk-sheet` class layer, which is CSS-only and has **no React export**, so
+  build it from the class names rather than reaching for a `<Sheet>` component — is
+  the one thing built for that plane and draws its own hairline; everything else on
+  it needs `.jrk-card--outlined`. Put a normal tile grid there and the tiles
   dissolve into the background in both modes.
 
 ## Where the truth is
