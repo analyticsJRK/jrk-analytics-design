@@ -13,6 +13,12 @@ const MicrosoftMark = () => (
   </svg>
 );
 
+/* One note for every state: on a card showing six states of the SAME app, five
+   saying "your identity provider" while one says "Microsoft Entra ID" reads as
+   an oversight. Naming the provider is also the part that lets someone notice a
+   page that ISN'T the real one. */
+const NOTE = 'You will be redirected to Microsoft Entra ID to sign in. Your password is never sent to this app.';
+
 const AlertIcon = () => (
   <svg viewBox="0 0 20 20" aria-hidden="true" strokeLinecap="round">
     <circle cx="10" cy="10" r="8" />
@@ -46,7 +52,7 @@ export const Default = () => (
   <AuthLayout
     brandName="JRK Portfolio Manager"
     subtitle="Sign in with your organization account."
-    note="You will be redirected to Microsoft Entra ID to sign in. Your password is never sent to this app."
+    note={NOTE}
     meta="Production · portfolio.jrkanalytics.com"
     footer={<>Trouble signing in? <a href="#">Contact IT</a></>}
   >
@@ -62,6 +68,7 @@ export const SignInFailed = () => (
   <AuthLayout
     brandName="JRK Portfolio Manager"
     subtitle="Sign in with your organization account."
+    note={NOTE}
     meta="Production · portfolio.jrkanalytics.com"
     notice={
       <Alert tone="critical" title="Sign-in failed" icon={<AlertIcon />}>
@@ -83,6 +90,7 @@ export const DomainNotPermitted = () => (
     brandName="JRK Portfolio Manager"
     title="Access denied"
     subtitle="That Microsoft account signed in, but it is not from an authorized organization."
+    note={NOTE}
     meta="Production · portfolio.jrkanalytics.com"
     notice={
       <Alert tone="serious" title="@contoso.com is not permitted" icon={<AlertIcon />}>
@@ -103,6 +111,7 @@ export const SessionExpired = () => (
   <AuthLayout
     brandName="JRK Portfolio Manager"
     subtitle="Sign in with your organization account."
+    note={NOTE}
     meta="Production · portfolio.jrkanalytics.com"
     notice={
       <Alert tone="warning" title="Your session expired" icon={<AlertIcon />}>
@@ -125,6 +134,7 @@ export const AccountDisabled = () => (
     brandName="JRK Portfolio Manager"
     title="Account disabled"
     subtitle="Your access to Portfolio Manager has been turned off."
+    note={NOTE}
     meta="Production · portfolio.jrkanalytics.com"
     notice={
       <Alert tone="serious" title="Signing in again will not restore access" icon={<AlertIcon />}>
@@ -145,6 +155,7 @@ export const SignedOut = () => (
   <AuthLayout
     brandName="JRK Portfolio Manager"
     subtitle="Sign in with your organization account."
+    note={NOTE}
     meta="Production · portfolio.jrkanalytics.com"
     notice={
       <Alert tone="good" title="You are signed out" icon={<AlertIcon />}>

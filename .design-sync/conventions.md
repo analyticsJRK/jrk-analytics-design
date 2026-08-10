@@ -70,7 +70,7 @@ Classes follow `jrk-block__element--modifier`. Tokens follow `--jrk-<group>-<nam
 `jrk-table-wrap` `jrk-num` `jrk-cell-bar` `jrk-app` `jrk-sidebar` `jrk-main`
 `jrk-topbar` `jrk-content` `jrk-nav-item` `jrk-page-header` `jrk-tabs` `jrk-tab`
 `jrk-alert` `jrk-empty` `jrk-spinner` `jrk-chart` `jrk-chart-card` `jrk-bars`
-`jrk-legend` `jrk-sheet` `jrk-icon` `jrk-list` `jrk-org`
+`jrk-legend` `jrk-sheet` `jrk-icon` `jrk-list` `jrk-org` `jrk-auth`
 
 **Tokens you will reach for most** — never a raw hex, never a ramp step:
 surfaces `--jrk-surface-canvas|default|tinted|subtle|raised` · text
@@ -121,6 +121,13 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
   SVG on the palette does not.
 - **Every data surface needs an `Empty`** — say what would appear and give the
   action that produces it.
+- **A sign-in screen gets NO password field.** Auth here is SSO: `AuthLayout` +
+  `SsoButton` hand the visitor off to Microsoft Entra ID, which is what collects
+  the credential. There is no password prop and you must not add an input for
+  one — a password box beside "Sign in with Microsoft" teaches people that typing
+  a work password into a non-Microsoft form is normal, which is the habit SSO
+  exists to break. A local-login fallback, if it ever exists, goes on its own
+  route behind a link.
 
 ## Four live traps
 
