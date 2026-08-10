@@ -105,19 +105,37 @@ themes, real surfaces. If a color fails, re-step it; do not lower the gate. The
 full run needs the `dataviz` skill's validator:
 `JRK_DATAVIZ=/path/to/skills/dataviz npm run validate`.
 
-**A tile is bounded by its FILL STEP off the page, in both themes, with no
-border.** Light: `#f2f2f7` page, `#ffffff` cards (1.12:1). Dark: `#141416` page,
-`#232326` cards (1.17:1). Same Apple grouped mechanism on both sides, which is
-new — for one period light was a flat `#ffffff` page bounded by a 2px brand edge,
-and a change that read correctly in dark could be invisible in light. There is no
-longer a per-theme boundary mechanism to get wrong. Because the card is the chart
-surface, marks are validated against `#ffffff` / `#232326`.
+**The light page is FLAT `#ffffff`, so a tile is bounded by a HAIRLINE, and the
+two move together.** `.jrk-card` draws `border.subtle` — 1.26:1 on the white page
+in light, 1.24:1 on the card fill in dark. Dark also keeps its fill step
+(`#232326` on `#141416`, 1.17:1), so there the hairline is additive and the step
+still does the work. **One mechanism, both themes, per-theme values** — that is
+the point, and it is why the hairline is drawn in dark too rather than only in
+light. A light-hairline/dark-fill split is the shape the conflict register calls
+the most expensive thing in the file to forget, because a change that reads
+correctly in one theme goes invisible in the other.
 
-**`.jrk-card` and friends carry `border: 1px solid transparent`, and that must not
-become `border: 0`.** The width is reserved so that the three things which give a
-tile an edge — `--outlined`, and the nesting rules — change only a COLOR and never
-reflow the layout. `border: 0` also sets `border-style: none`, after which a
-`border-color` on its own paints nothing. That is the quiet way this breaks.
+**`surface.canvas.light` and the card's edge are a PAIR. Never move one alone.**
+This has been got wrong once, expensively: the flat page originally shipped with a
+2px brand edge doing the bounding, the edge was later removed, the page was not
+un-flattened with it, and light cards sat at a 1.00:1 step behind a transparent
+border — no boundary at all — and shipped that way. The page then went tinted so
+the fill step could bound the tile, and it is flat again now with a hairline. Every
+one of those states was coherent; the only broken one was the half-finished
+revert. So: **page flat → the card needs its own edge; page tinted → the fill step
+is the edge and the border can go transparent.**
+
+Because the card is the chart surface, marks are validated against `#ffffff` /
+`#232326`.
+
+**`.jrk-card` and friends carry a 1px border and that must never become
+`border: 0`.** The base colour is now `border.subtle` rather than transparent, but
+the rule is unchanged and is about the WIDTH: everything that gives a tile a
+different edge — `--outlined` (heavier), `--seamless` / `--flush` (none), and the
+nesting rules — only ever changes a COLOR, so an edge appearing or disappearing
+never reflows the layout by a pixel. `border: 0` also sets `border-style: none`,
+after which a `border-color` on its own paints nothing at all. That is the quiet
+way this breaks.
 
 **A NESTED tile gets a 1px neutral hairline, because a fill step only works
 once.** A tile inside another tile sits on the card plane, where its own
@@ -129,12 +147,17 @@ tiles — and the selectors did not change, only their reason.
 to sit on `.jrk-content--document`, which IS the card plane, so it has no fill
 step to inherit and draws `border.default` itself.
 
-**In light, `surface.subtle` equals the page** (`#f2f2f7` both). Table headers and
-inset wells no longer recede *from* the page — they match it. If something must
-read as recessed on a card in light, `subtle` still works; on the page it will
-not. `surface.hover` has the same trap and it is worse: washing a whole white card
-with it erases the step that bounds the tile, which is why interactive cards use
-`surface.cardHover` instead.
+**`surface.subtle` is a real recess in light again** (`#f2f2f7`, 1.12:1 below both
+the flat white page and the white card), so table headers and inset wells read as
+set into whatever they sit on. It spent one period EQUAL to the page, where it
+receded from a card but was invisible on the page itself — do not re-derive it from
+the page value, the point is that it sits below whatever the page is. It still does
+not replace `surface.track`, which is recessed in both themes where this one is a
+recess in light and a lift in dark (`#2c2c2e` is lighter than the `#232326` card).
+`surface.hover` is the same value and its old trap is gone with the flat page — a
+`#f2f2f7` wash no longer erases a boundary, because the card carries a hairline —
+but interactive cards still use `surface.cardHover`, because that is the token that
+means "hover on a card" and the shadow is the better lift signal in light.
 
 **The dark page is not `#000000`, and that is deliberate.** iOS grouped dark is
 true black; at 1920x1080 it halates against near-white text and reads as a void.
@@ -218,7 +241,7 @@ webfont, and the outlines are Apple's; use Phosphor (MIT) with
 
 **The accent is a saturated blue, and every role takes the anchor.** `#0069d9`
 (hue 212°) is the brand anchor and it measures everywhere it is used: 5.22:1 on
-the white card, 4.68:1 on the `#f2f2f7` page, white label at 5.22:1. So
+the white card, 5.22:1 on the flat white page, white label at 5.22:1. So
 `accent.text`, `text.link`, `border.accent` and `focus.ring` are all the anchor
 itself. That is the *point* of this value — the previous accent was a pastel
 that could not be text or a signifier on a light surface, and each of those four

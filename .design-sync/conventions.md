@@ -27,7 +27,7 @@ read from the shipped token layer, not from intent:
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#f2f2f7` | `#141416` |
+| page plane | `#ffffff` | `#141416` |
 | card | `#ffffff` | `#232326` |
 | popover / input | `#ffffff` | `#2c2c2e` |
 
@@ -35,20 +35,25 @@ The dark page is **not** true black: at 1920x1080 it halates against near-white
 text, so `--jrk-text-primary` in dark is `#ebebf0` rather than `#ffffff` for the
 same reason.
 
-**A card is bounded by its fill step off the page, in both themes, and carries no
-border** — `#ffffff` on `#f2f2f7` in light (1.12:1), `#232326` on `#141416` in
-dark (1.17:1). `.jrk-card` ships `border: 1px solid transparent`, so the step is
-the boundary and an edge is opt-in. **When a tile has no fill step to rely on —
-one nested inside another tile, or sitting on a tinted surface — ask for an edge:
-`.jrk-card--outlined` (`--jrk-border-default`, 1.52:1 on white).** Nested tiles
-get that hairline automatically, because a fill step only works once per plane.
+**The light page is flat `#ffffff`, so a card bounds itself with a HAIRLINE.**
+`.jrk-card` ships `border: 1px solid var(--jrk-border-subtle)` — 1.26:1 on the
+page in light. In dark the card also has a fill step (`#232326` on `#141416`,
+1.17:1) and the hairline rides on top of it at 1.24:1, so the mechanism is the
+same in both themes and only the value differs. **You get that edge for free; do
+not add your own.** When a tile needs to assert itself more — on a tinted surface,
+or as a distinct object in a dense stack — ask for `.jrk-card--outlined`
+(`--jrk-border-default`, 1.52:1 on white), which is a step heavier. Nested tiles
+take that heavier hairline automatically, because a fill step only works once per
+plane. `--seamless` and `--flush` remove the edge entirely, which on a flat white
+page means the tile has no boundary at all — use them only where the surrounding
+layout already groups the content.
 
-The instinct in the previous sentence is the durable part: **do not assume a fill
-step is doing the work — verify against `styles.css` before relying on it.** For
-one period the light page was flattened to `#ffffff` while the brand edge that
-had justified it was removed, so light cards had a 1.000:1 step and no border,
-i.e. no boundary at all. The tokens are fixed; the habit of checking is not
-optional.
+The durable habit: **do not assume a fill step is doing the work — verify against
+`styles.css` before relying on it.** The page value has moved more than once, and
+each time the card's edge had to move with it. For one period it did not: the page
+was flattened to `#ffffff` while the brand edge that justified flattening was
+removed, so light cards had a 1.000:1 step behind a transparent border and no
+boundary at all.
 
 Because the card is the surface a component sits on, **the card is the chart
 surface** — marks are measured against `#ffffff` / `#232326`, never the page.

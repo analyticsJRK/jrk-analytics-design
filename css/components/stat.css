@@ -9,9 +9,9 @@
   background: var(--jrk-surface-default);
   /* Same treatment as a card — a standalone tile IS a card by another name, and a
      KPI row bounded differently from the charts beside it would read as two
-     systems on one page. Bounded by the fill step; the 1px transparent border is
-     reserved so the nesting hairline never reflows it. See card.css. */
-  border: 1px solid transparent;
+     systems on one page. So it draws the same border.subtle hairline, which on the
+     flat white light page is the only thing bounding it. See card.css. */
+  border: 1px solid var(--jrk-border-subtle);
   border-radius: var(--jrk-radius-xl);
 }
 
@@ -146,9 +146,10 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   background: var(--jrk-surface-default);
-  /* The band is one enclosure: its own fill step bounds it, and the tiles inside
-     stay on internal hairlines — see the > .jrk-stat rule below. */
-  border: 1px solid transparent;
+  /* The band is one enclosure: it draws the border.subtle hairline like any tile,
+     and the tiles inside stay on internal hairlines — see the > .jrk-stat rule
+     below. */
+  border: 1px solid var(--jrk-border-subtle);
   border-radius: var(--jrk-radius-xl);
   overflow: hidden;
 }
@@ -182,18 +183,27 @@
   overflow: visible;
 }
 
-/* Split tiles are standalone cards again, so they take their own fill back — the
-   joined-band rule above zeroes the border and the fill, and each split tile is
-   its own enclosure sitting directly on the page. surface.default is what bounds
-   it, exactly as for .jrk-card.
+/* Split tiles are standalone cards again, so they take their own fill AND their own
+   hairline back — the joined-band rule above zeroes both, and each split tile is
+   its own enclosure sitting directly on the page. border.subtle is what bounds it,
+   exactly as for .jrk-card.
+
+   The hairline is not optional here, and this rule is where it was missed: with the
+   flat white light page, a split tile with a transparent border is white-on-white
+   and has no boundary whatsoever. It was the last tile in the library still
+   relying on a fill step that no longer exists, and only a screenshot caught it —
+   `npm test` passes either way.
 
    White, not the brand wash: the wash is available per tile via .jrk-stat--tinted
-   below, but as a default it would put a tint where the page-to-card step is
-   supposed to do the separating, and a tinted tile on a tinted page has a weaker
-   boundary than a white one. */
+   below, but as a default it would put a tint where the tile's own edge is supposed
+   to do the separating.
+
+   Nested inside a card this is overridden to the heavier border.default by
+   nesting.css at 0-3-0, which is why that file's comment says it has to
+   out-specify this rule rather than follow it. */
 .jrk-stat-row--split > .jrk-stat {
   background: var(--jrk-surface-default);
-  border: 1px solid transparent;
+  border: 1px solid var(--jrk-border-subtle);
   border-radius: var(--jrk-radius-xl);
 }
 

@@ -1,36 +1,44 @@
 /* Card / panel — the container every dashboard tile and chart sits in. */
 
-/* The card has NO edge. It is bounded by its fill step off the page — #ffffff on
-   #f2f2f7 in light (1.12:1), #232326 on #141416 in dark (1.17:1) — which is the
-   Apple grouped mechanism, and for the first time both themes use the same one.
-   Nothing here is per-theme any more.
+/* The card draws a HAIRLINE, in both themes: border.subtle, 1.26:1 on the white
+   page in light and 1.24:1 on the card fill in dark. That pairs with a FLAT
+   #ffffff light page — see the $lightNote on surface.canvas, which carries the
+   rule this file exists to obey: a flat page has no fill step to the white card,
+   so the card must bound itself, and moving one without the other is the bug this
+   library has already shipped once.
 
-   The 1px TRANSPARENT border is load-bearing and must not become `border: 0`.
-   Three things only change its COLOR — --outlined, --seamless, and the nesting
-   rules that give a nested tile a neutral hairline — so keeping the width
-   reserved means an edge appearing or disappearing never reflows the layout by a
-   pixel. `border: 0` would also set border-style to `none`, and a later
-   `border-color` on its own would then paint nothing at all, which is the quiet
-   way this breaks.
+   In dark the hairline is additive rather than load-bearing — the 1.17:1 fill step
+   off #141416 still does the work, and 1.24:1 is a whisper on top of it. That is
+   deliberate: ONE mechanism across both themes, with the per-theme difference in
+   the VALUE, not in the way a tile is bounded. The alternative (hairline in light,
+   fill step in dark) is the shape the conflict register calls the most expensive
+   thing in the file to forget, because then a change that reads correctly in one
+   theme can be invisible in the other.
 
-   Historical note, because it explains the modifiers below: this card used to
-   carry a 2px #48a9df brand edge, and the light page was #ffffff to go with it.
-   Both are gone in the same change — the page is tinted again, so the fill step
-   is the boundary and the brand no longer lives on a rectangle. */
+   The 1px border must not become `border: 0`. Everything below only changes its
+   COLOR — --outlined steps it up, --seamless and --flush take it away, and the
+   nesting rules override it — so keeping the width reserved means an edge
+   changing never reflows the layout by a pixel. `border: 0` would also set
+   border-style to `none`, after which a later `border-color` paints nothing at
+   all, which is the quiet way this breaks.
+
+   Historical note, because it explains the modifiers: the brand-edge era put a
+   2px #48a9df line here and flattened the page to go with it. The brand is gone
+   for good — it lives on fills now, not on a rectangle — but the flat page is
+   back, so the neutral hairline is what replaces the fill step. */
 .jrk-card {
   display: flex;
   flex-direction: column;
   background: var(--jrk-surface-default);
-  border: 1px solid transparent;
+  border: 1px solid var(--jrk-border-subtle);
   border-radius: var(--jrk-radius-xl);
 }
 
-/* Truly borderless, for a card whose surroundings already bound it. This is now
-   the same value as the base card, so at the TOP level it is a no-op — kept
-   because it still overrides the nested-tile hairline, and because it documents
-   intent at the call site. It was a dark-mode-and-nested-only modifier during the
-   flat-white-page period, when a seamless card in light had no boundary at all;
-   the fill step gives it one again in both themes. */
+/* Truly borderless, for a card whose surroundings already bound it. It is a real
+   modifier again now that the base card draws a hairline — it was a no-op at the
+   top level during the tinted-page era, when base and seamless were both
+   transparent. Use it deliberately: on the flat light page a seamless card has NO
+   boundary, which is the point, but it means the content has to do the grouping. */
 .jrk-card--seamless {
   border-color: transparent;
 }
@@ -40,11 +48,14 @@
   background: var(--jrk-surface-tinted);
 }
 
-/* An explicit neutral hairline, for a card that has no fill step to rely on —
-   one sitting on the card plane rather than the page plane, or on a tinted
-   surface where its own fill no longer separates it. This is the same treatment
-   the nesting rules apply automatically; the modifier is how an author asks for
-   it at the top level. */
+/* A HEAVIER edge than the base hairline — border.default, 1.52:1 on white against
+   the base card's 1.26:1. For a tile that needs to assert itself: one on a tinted
+   surface where its own fill no longer separates it, or one that must read as a
+   distinct object in a dense stack. It is the same value the nesting rules apply
+   automatically, so this modifier is how an author asks for that weight at the top
+   level. Keep it a step ABOVE the base card — if the base ever moves up to
+   border.default, this becomes a no-op and the library loses its only way to say
+   "heavier than usual". */
 .jrk-card--outlined {
   border-color: var(--jrk-border-default);
 }
@@ -132,11 +143,16 @@
        #141416 page is very nearly invisible (the shadow tokens say so directly),
        and a screenshot of a hovered tile in dark is indistinguishable from a
        resting one.
-     - The FILL carries dark mode, lifting the card 1.125:1. It cannot carry
-       light, and this is the trap: surface.hover.light is #f2f2f7, the page
-       value, so washing a white card with it would erase the 1.12:1 step that
-       bounds the tile — dissolving it at the moment it is meant to respond.
-       surface.cardHover is #ffffff in light for that reason and is a no-op there.
+     - The FILL carries dark mode, lifting the card 1.125:1. surface.cardHover is
+       #ffffff in light and is a deliberate no-op there, so the shadow is alone in
+       light. That was originally because surface.hover.light (#f2f2f7) was the
+       page value and washing a white card with it erased the fill step that
+       bounded the tile. The page is flat white now and the card carries its own
+       hairline, so that specific trap is gone — a #f2f2f7 hover would no longer
+       dissolve the boundary. The split is KEPT anyway: cardHover is the token that
+       means "hover on a card", the shadow is a better lift signal than a wash in
+       light, and re-pointing this at surface.hover would re-couple the card to a
+       value that has moved three times.
 
    Neither channel is redundant and neither can be dropped as "the one that does
    nothing", because which one does nothing depends on the theme.

@@ -593,11 +593,12 @@ button.jrk-legend__item:hover {
   flex-direction: column;
   background: var(--jrk-surface-default);
   /* Same treatment as .jrk-card — this is a card that happens to hold a chart, so
-     the fill step bounds it and the 1px transparent border is reserved for the
-     nesting hairline. Chart chrome (axis, gridlines) is border.strong /
-     chart.grid, so the tile boundary and the data's own rules stay distinct
-     regardless of what the tile edge is doing. */
-  border: 1px solid transparent;
+     it draws the same border.subtle hairline. It has to: the light page is flat
+     #ffffff and there is no fill step to bound it there, and a chart tile bounded
+     differently from the cards beside it would read as two systems on one page.
+     Chart chrome (axis, gridlines) is border.strong / chart.grid, so the tile
+     boundary and the data's own rules stay distinct regardless. */
+  border: 1px solid var(--jrk-border-subtle);
   border-radius: var(--jrk-radius-xl);
 }
 

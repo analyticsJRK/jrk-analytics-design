@@ -78,21 +78,28 @@ not Apple's — it is a blue at hue 212° anchored on `#0069d9`, one step deeper
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#f2f2f7` | `#141416` |
+| page plane | `#ffffff` | `#141416` |
 | card | `#ffffff` | `#232326` |
 | popover / input | `#ffffff` | `#2c2c2e` |
 
-**A tile is bounded by its fill step off the page, and there is no border.**
-1.12:1 in light, 1.17:1 in dark — the same Apple grouped mechanism on both sides.
-That symmetry is the point: for one period this library ran a flat `#ffffff` light
-page bounded by a 2px `#48a9df` brand edge, which meant a change that read
-correctly in dark could be invisible in light. Both halves of that pair were
-removed together, which is the only safe way to undo a pair. `border.card` and
-`size.cardEdge` no longer exist.
+**The light page is flat `#ffffff`, so a tile is bounded by a HAIRLINE.**
+`.jrk-card` draws `border.subtle` in both themes: 1.26:1 on the light page where it
+does the whole job, 1.24:1 in dark on top of the fill step that already bounds the
+tile there (1.17:1). One mechanism across themes with per-theme values — deliberately
+not hairline-in-light / fill-in-dark, because two mechanisms is what lets a change
+read correctly in one theme and vanish in the other.
+
+**`canvas.light` and that edge are a PAIR.** Flat page → the card needs its own
+edge; tinted page → the fill step is the edge and the border can go transparent.
+The library has shipped the broken combination once: the 2px `#48a9df` brand edge
+that justified the flat page was removed and the page was not un-flattened with it,
+leaving light cards at a 1.000:1 step behind a transparent border. `border.card`
+and `size.cardEdge` no longer exist.
 
 Three follow-on rules:
-- **Tiles keep `border: 1px solid transparent`, never `border: 0`.** The width is
-  reserved so an edge appearing changes only a colour and never reflows. `border:
+- **Tiles keep a 1px border, never `border: 0`.** `.jrk-card` colours it
+  `border.subtle`; the other tiles reserve the width with `transparent`. The width
+  is reserved so an edge changing is only ever a colour and never reflows. `border:
   0` sets `border-style: none`, after which `border-color` paints nothing.
 - **A nested tile takes a 1px neutral hairline**, because a fill step only works
   once — a tile inside a tile sits on the card plane, where its own fill matches
@@ -101,10 +108,12 @@ Three follow-on rules:
 - **`.jrk-sheet` is the exception** and draws `border.default` by default: it is
   built to sit on `.jrk-content--document`, which *is* the card plane.
 
-In light, `surface.subtle` now **equals** the page (`#f2f2f7` both), so table
-headers and inset wells match the page rather than receding from it. `surface.hover`
-has the same value and a sharper trap: washing a whole white card with it erases
-the step that bounds the tile. Interactive cards use `surface.cardHover` instead.
+In light, `surface.subtle` (`#f2f2f7`) is a genuine recess again — 1.12:1 below
+both the flat white page and the white card — so table headers and inset wells read
+as set in. `surface.hover` is the same value, and its old trap (washing a white card
+with the page colour and erasing the step that bounded it) is gone now that the card
+carries a hairline. Interactive cards still use `surface.cardHover`, because that is
+the token that means "hover on a card" and the shadow is the better lift in light.
 
 Two consequences that bite:
 - **The card, not the page, is the chart surface.** Marks are validated against
@@ -139,7 +148,7 @@ accessibility-clean: `systemGray` is 2.92:1 as body text and `systemIndigo` is
 Apple hex; deviations are noted on each token.
 
 **The accent anchor is used in every accent role.** `#0069d9` measures 5.22:1 on
-the white card and 4.68:1 on the `#f2f2f7` page, so `accent.text`, `text.link`,
+the white card and 5.22:1 on the flat white page, so `accent.text`, `text.link`,
 `border.accent` and `focus.ring` are all the anchor itself, and `accent.onSolid`
 is plain `#ffffff` (5.22:1). The **page** is the binding surface and it is what
 pins the anchor — a blue tuned only to the card can sit a step lighter and fail
