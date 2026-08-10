@@ -12,6 +12,20 @@ first. So a change here is not live in the app until someone re-runs
 the next sync. Commit here before syncing — the script records the source SHA and
 warns when the tree is dirty.
 
+**That warning has already come true, and the casualty is still load-bearing.**
+`react/src/Org.tsx` + `css/components/org.css` — the `OrgChart` / `OrgNode` pair —
+exist **only inside the portal's vendored copy**. They are on no branch of this
+repo (checked `main`, `design/sso-login`, `design-sync/icon-list-sync`), yet
+`apps/portal/components/portfolio/OrgChart.tsx` imports them from `@jrk/design`
+and the org-chart page renders them. So **every `npm run sync:design` deletes them
+and breaks that page**; it happened on 2026-08-07 and was repaired by restoring
+the three files plus the `index.ts` / `css/index.css` / `dist/types` entries that
+name them, which leaves the vendored tree no longer a faithful copy of the SHA in
+`.synced-from`. Until `Org` is upstreamed into this library properly, treat a
+vendor sync as a two-step operation: sync, then check `git status` in the portal
+for **deletions** under `vendor/` and restore any that the library does not
+actually ship.
+
 **`jrk_agents`, `jrk-audit-platform` and `JRK_FORMS` are NOT consumers**, and the
 list that used to say so cost real design decisions. `jrk_agents` hand-rolls its
 CSS and never wired the library at all; the two Jinja apps are out by decision.
