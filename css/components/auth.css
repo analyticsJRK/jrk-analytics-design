@@ -1,0 +1,222 @@
+/* Auth plane — the one screen that has no shell.
+ * ============================================
+ *
+ * Every other layout in this library lives inside `.jrk-app`: sidebar, topbar,
+ * content. An unauthenticated visitor has none of those — there is nowhere to
+ * navigate to and nothing to put in a rail — so the login screen is a single
+ * card centred in the viewport, and that is the only thing this file adds.
+ *
+ *   <main class="jrk-auth">
+ *     <div class="jrk-auth__panel">
+ *       <div class="jrk-auth__brand">
+ *         <span class="jrk-auth__mark">J</span> JRK Analytics
+ *       </div>
+ *       <div class="jrk-card">
+ *         <div class="jrk-card__body">
+ *           <h1 class="jrk-auth__title">Sign in</h1>
+ *           <p class="jrk-auth__subtitle">Use your JRK work account.</p>
+ *           <div class="jrk-auth__providers">
+ *             <button class="jrk-btn jrk-btn--secondary jrk-btn--lg jrk-btn--block jrk-auth__provider">
+ *               <span class="jrk-auth__provider-mark"><!-- brand svg --></span>
+ *               <span>Continue with Microsoft</span>
+ *             </button>
+ *           </div>
+ *           <p class="jrk-auth__note">…</p>
+ *         </div>
+ *       </div>
+ *       <p class="jrk-auth__meta">Production · jrk.com</p>
+ *     </div>
+ *   </main>
+ *
+ * THERE IS NO PASSWORD FIELD HERE AND THAT IS THE POINT, not an omission.
+ * Under SSO the identity provider collects the credential; this page only hands
+ * the visitor off to it. A password box sitting next to "Continue with
+ * Microsoft" teaches people that typing their work password into a non-Microsoft
+ * form is normal, which is precisely the phishing pattern SSO exists to remove.
+ * If a fallback local login is ever genuinely needed it belongs on its own
+ * route, reached by a link, never beside the SSO button. Do not add one here.
+ *
+ * Composition, not reinvention: the card is `.jrk-card`, the button is
+ * `.jrk-btn--secondary --lg --block`, an error is `.jrk-alert`. This file is
+ * layout and lockup only.
+ */
+
+.jrk-auth {
+  /* The card column. Not a container token — the smallest of those is 640px,
+     which is a content width; an auth card wants to stay near a single column of
+     comfortable measure. */
+  --jrk-auth-panel: 400px;
+
+  display: grid;
+  place-items: center;
+  /* Matches `.jrk-app` rather than reaching for dvh, so the two full-screen
+     planes in this library behave the same way. Desktop is the target. */
+  min-height: 100vh;
+  /* Vertical padding so a short viewport scrolls instead of clipping the card,
+     and the panel never touches the edge. */
+  padding: var(--jrk-space-8) var(--jrk-space-5);
+  background: var(--jrk-surface-canvas);
+}
+
+.jrk-auth__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-5);
+  width: 100%;
+  max-width: var(--jrk-auth-panel);
+}
+
+/* THE AUTH CARD ALWAYS TAKES A HAIRLINE, and it is forced here rather than left
+   to the author remembering `--outlined`.
+
+   A tile is normally bounded by its fill step off the page. This card cannot
+   rely on that for two reasons, one temporary and one permanent. The temporary
+   one is that `surface.canvas.light` is currently `#ffffff`, identical to
+   `surface.default`, so the step in light is 1.000:1 and a card here has no
+   boundary whatsoever — this screen is where that defect is most visible,
+   because the card is the only object on the page. The permanent one is that a
+   lone centred card has no sibling tiles to be read against: on a dashboard the
+   grid itself implies the surfaces, and here there is nothing but the card, so
+   its edge has to be explicit.
+
+   A descendant rule rather than a modifier baked into the markup, so it cannot
+   be forgotten and so it still applies to a card an app composes itself. It is
+   the same neutral hairline `nesting.css` hands to a nested tile, for a
+   neighbouring reason — that file owns tile-inside-tile; this owns tile-alone-
+   on-a-plane. The rule survives a fix to `canvas.light` on the permanent
+   argument alone. */
+.jrk-auth .jrk-card {
+  border-color: var(--jrk-border-default);
+}
+
+/* ============================== lockup ============================== */
+
+/* The library ships no brand element — `Sidebar` takes `brand` as a free slot,
+   so every app hand-rolls it. That is fine in a 32px rail and wrong here, where
+   the lockup is the only thing identifying the product before sign-in. */
+.jrk-auth__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--jrk-space-2_5);
+  font-size: var(--jrk-text-lg);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-primary);
+}
+
+/* `accent.on-solid`, NOT `text.inverse`. The two agree in light and disagree in
+   dark, where `text.inverse` is `#000000` — black ink on the accent fill. The
+   rule this library states is that the label on the accent is whatever measures
+   against `accent.solid`, which is `accent.on-solid` (`#ffffff`, 5.22:1). The
+   gallery's own `gal-nav__mark` gets this wrong; it is chrome, not the library,
+   so it is not authoritative. */
+.jrk-auth__mark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  font-size: var(--jrk-text-md);
+  font-weight: var(--jrk-weight-bold);
+  color: var(--jrk-accent-on-solid);
+  background: var(--jrk-accent-solid);
+  border-radius: var(--jrk-radius-lg);
+}
+
+/* ============================== copy ============================== */
+
+.jrk-auth__title {
+  margin: 0;
+  font-size: var(--jrk-text-xl);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-primary);
+}
+
+.jrk-auth__subtitle {
+  margin: var(--jrk-space-1) 0 0;
+  font-size: var(--jrk-text-md);
+  line-height: var(--jrk-leading-normal);
+  color: var(--jrk-text-secondary);
+}
+
+/* ============================== providers ============================== */
+
+.jrk-auth__providers {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-2);
+  margin-block-start: var(--jrk-space-5);
+}
+
+/* The mark is pinned to the leading edge while the label stays centred, so a
+   list of providers has its marks in a column instead of a ragged edge —
+   "which one is mine" is a scanning task and a straight edge is what makes it
+   quick. The label is centred rather than following the mark because a single
+   provider is the common case and a lone left-aligned label in a 400px button
+   looks unfinished.
+
+   Collision is not a risk at this width: the mark occupies 12-30px and the
+   centred label would have to exceed ~290px to reach it. Check that again if
+   --jrk-auth-panel is ever narrowed substantially. */
+.jrk-auth__provider {
+  position: relative;
+}
+
+.jrk-auth__provider-mark {
+  position: absolute;
+  inset-inline-start: var(--jrk-space-3);
+  display: grid;
+  place-items: center;
+  width: var(--jrk-icon-lg);
+  height: var(--jrk-icon-lg);
+  flex-shrink: 0;
+}
+
+/* A BRAND MARK IS NOT AN ICON and the button must not size it like one.
+   `.jrk-icon` is em-sized and inherits currentColor; a provider logo is
+   fixed-geometry, fixed-colour artwork whose whole job is to be recognised, so
+   it keeps its own dimensions and its own fills in both themes. The
+   `svg:not(.jrk-icon)` idiom the rest of the library uses would otherwise catch
+   it via `.jrk-btn svg`. */
+.jrk-auth__provider-mark svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* The reassurance line, and it earns its ink. "You will be redirected" is what
+   makes the absent password field legible as a deliberate design rather than a
+   half-built form, and naming the provider is what lets someone notice when a
+   page ISN'T their real one. */
+.jrk-auth__note {
+  margin: var(--jrk-space-4) 0 0;
+  font-size: var(--jrk-text-xs);
+  line-height: var(--jrk-leading-normal);
+  color: var(--jrk-text-muted);
+}
+
+/* ============================== below the card ============================== */
+
+/* Environment and tenant. On a login screen this is the difference between
+   signing into production and staging, which is otherwise unknowable until
+   after the redirect. */
+.jrk-auth__meta {
+  margin: 0;
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.jrk-auth__footer {
+  margin: 0;
+  font-size: var(--jrk-text-xs);
+  line-height: var(--jrk-leading-normal);
+  color: var(--jrk-text-muted);
+  text-align: center;
+}
+
+.jrk-auth__footer a {
+  color: var(--jrk-text-link);
+}

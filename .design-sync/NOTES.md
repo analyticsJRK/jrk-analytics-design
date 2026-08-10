@@ -994,3 +994,47 @@ bundle.
 
 **Rule: after ANY edit under `css/`, run `node .design-sync/prepare.mjs` before
 the driver.** A green validate proves nothing about freshness.
+
+## Python text-mode writes produce CRLF and poison the anchor
+
+**Caught 2026-08-10, one turn before it would have shipped.** The CRLF section
+above says a CRLF `previews/*.tsx` invalidates a component's verified state. Here
+is the mechanism that produced one, because it is not a checkout this time:
+
+`io.open(path, 'w', encoding='utf-8')` in Python uses `newline=None`, which
+translates every `\n` to `os.linesep` — `\r\n` on Windows. Patching
+`.design-sync/previews/AuthLayout.tsx` with a Python script therefore rewrote the
+whole file as CRLF while `git status` said nothing useful and `npm test` stayed
+green. `sourceKeyFor` hashes those bytes, so the anchor was about to be recorded
+from CRLF and **every future LF checkout would have re-verified and re-graded
+that component for no semantic reason.**
+
+Two details worth keeping:
+
+- **The tell is `git checkout`/`git stash`, not the editor.** The warning
+  `"in the working copy of '<file>', CRLF will be replaced by LF the next time
+  Git touches it"` appeared during a `git stash push`. That line is the cheap
+  signal; do not dismiss it.
+- **It does not fire consistently.** `SsoButton.tsx` was patched by the same
+  script in the same run and stayed LF. So a per-file scan is the only reliable
+  check — a spot check of one file proves nothing.
+
+Prescription, in order:
+
+```sh
+for f in $(git ls-files) $(git ls-files --others --exclude-standard); do
+  grep -qU $'\r' "$f" 2>/dev/null && echo "CRLF: $f"
+done
+perl -pi -e 's/\r\n/\n/g' <the offenders>     # then re-run the driver
+```
+
+Expect the grade to CLEAR when you normalize — the sourceKey moves, which is the
+system working. Re-read the sheet and re-write the same verdicts; the render is
+byte-identical, only the line endings moved. Doing it in this order costs one
+capture; doing it after upload costs a full re-verify on someone else's machine.
+
+**Prefer `Write`/`Edit` over Python for anything under `.design-sync/`.** If a
+script must do it, open with `newline=''`.
+
+`.gitattributes`, `.gitignore` and `LICENSE` are CRLF in this repo and always
+have been — no extension rule covers them and nothing hashes them. Leave them.

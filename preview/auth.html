@@ -1,0 +1,196 @@
+<!-- @dsCard group="Auth" name="SSO sign-in, every state" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="preview.css">
+<style>
+  /* The auth plane is full-height by design; in the gallery each state sits in
+     flow so they can be compared down the page. */
+  .jrk-auth { min-height: 520px; }
+  .gal-state {
+    border-block-end: 1px solid var(--jrk-border-subtle);
+  }
+  .gal-state__label {
+    margin: 0;
+    padding: var(--jrk-space-2) var(--jrk-space-4);
+    font-size: var(--jrk-text-2xs);
+    font-weight: var(--jrk-weight-semibold);
+    letter-spacing: var(--jrk-tracking-caps);
+    text-transform: uppercase;
+    color: var(--jrk-text-muted);
+  }
+</style>
+</head>
+<body>
+
+<div class="gal-page">
+  <header class="gal-page__head">
+    <h1>Sign in</h1>
+    <p>
+      The one screen with no shell. A single card centred on the page plane, assembled from
+      <code class="jrk-mono">.jrk-card</code>, <code class="jrk-mono">.jrk-btn</code> and
+      <code class="jrk-mono">.jrk-alert</code> — <code class="jrk-mono">auth.css</code> adds the
+      centred plane and the lockup, nothing else.
+    </p>
+  </header>
+
+  <div class="gal-rule">
+    <strong>There is no password field, and that is the design.</strong> Under SSO the identity
+    provider collects the credential and this page only hands the visitor off to it. A password box
+    sitting beside “Sign in with Microsoft” teaches people that typing a work password into a
+    non-Microsoft form is normal — the exact habit SSO exists to break. A real local-login fallback
+    belongs on its own route behind a link, never on this card.
+  </div>
+
+  <div class="gal-rule">
+    <strong>The states are read off the real flow, not invented.</strong>
+    <code class="jrk-mono">jrk-portfolio-manager</code> runs a pure OAuth2 auth-code flow against
+    <code class="jrk-mono">login.microsoftonline.com/&#123;tenant&#125;</code> — no MSAL — with a
+    <strong>7-day signed session cookie</strong>, a domain whitelist of
+    <code class="jrk-mono">jrk.com</code> and <code class="jrk-mono">twocoastliving.com</code>, and a
+    per-request user-record re-check that revokes a disabled account even while its cookie is still
+    valid. Hence: <em>domain not permitted</em> is separate from <em>sign-in failed</em>, expiry is a
+    7-day <em>absolute</em> window rather than an idle timeout, <em>account disabled</em> exists at
+    all, and <em>signed out</em> lands here because Entra's
+    <code class="jrk-mono">post_logout_redirect_uri</code> points back at
+    <code class="jrk-mono">/login</code>.
+  </div>
+
+  <div class="gal-rule">
+    Two organizations sign in here, so the subtitle says “your organization account” rather than
+    naming JRK — <code class="jrk-mono">twocoastliving.com</code> users are half the whitelist, and
+    they default to scoped access. The rejected domain is echoed back in the denial for the same
+    reason: guessing why you were refused is the worst part of this screen.
+  </div>
+
+  <div class="gal-rule">
+    The card is forced to carry a hairline by <code class="jrk-mono">.jrk-auth .jrk-card</code>
+    rather than waiting for an author to remember <code class="jrk-mono">--outlined</code>. Two
+    reasons: a lone centred card has no sibling tiles to be read against, and
+    <code class="jrk-mono">surface.canvas.light</code> is currently
+    <code class="jrk-mono">#ffffff</code> — identical to the card — so in light the fill step is
+    1.000:1 and this screen is where that defect shows most.
+  </div>
+
+  <div class="gal-rule">
+    <strong>This is deliberately flatter than the login page in production.</strong> That one paints
+    a radial gradient behind the card and a two-layer drop shadow on it. Both are ink this library
+    spends nowhere else — elevation is opt-in and reserved for things that genuinely float, and a
+    tile is bounded by its surface relationship rather than by a glow. Matching it would import
+    decoration; this keeps the flat treatment on purpose.
+  </div>
+
+  <div class="gal-rule">
+    The Microsoft mark is <strong>not</strong> a library asset. A design system should not carry
+    other companies’ trademarks, and a provider logo is fixed artwork whose colours must survive
+    both themes unchanged — the opposite of a token. It is passed in as a slot; the inline SVG
+    below is the copy-pasteable version. Text-only is a legitimate fallback.
+  </div>
+</div>
+
+<div id="states"></div>
+
+<script type="module" src="preview.js"></script>
+<script>
+  /* Microsoft's four-square mark — fixed brand colours, deliberately not tokens. */
+  const MS = `<svg viewBox="0 0 21 21" aria-hidden="true">
+    <rect x="1"  y="1"  width="9" height="9" fill="#f25022"/>
+    <rect x="11" y="1"  width="9" height="9" fill="#7fba00"/>
+    <rect x="1"  y="11" width="9" height="9" fill="#00a4ef"/>
+    <rect x="11" y="11" width="9" height="9" fill="#ffb900"/>
+  </svg>`;
+
+  const CIRCLE = '<circle cx="10" cy="10" r="8"/><path d="M10 6v5M10 13.5h.01"/>';
+
+  const alert = (tone, title, text) => `
+    <div class="jrk-alert jrk-alert--${tone}" role="${tone === 'critical' ? 'alert' : 'status'}"
+         style="margin-top:var(--jrk-space-4)">
+      <svg class="jrk-alert__icon" viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round">${CIRCLE}</svg>
+      <div class="jrk-alert__body">
+        <p class="jrk-alert__title">${title}</p>
+        <p class="jrk-alert__text">${text}</p>
+      </div>
+    </div>`;
+
+  const NOTE = 'You will be redirected to Microsoft Entra ID to sign in. Your password is never sent to this app.';
+
+  const panel = ({
+    title = 'Sign in',
+    subtitle = 'Sign in with your organization account.',
+    notice = '',
+    loading = false,
+    note = NOTE,
+  }) => `
+    <div class="jrk-auth">
+      <div class="jrk-auth__panel">
+        <div class="jrk-auth__brand">
+          <span class="jrk-auth__mark" aria-hidden="true">J</span>
+          <span>JRK Portfolio Manager</span>
+        </div>
+        <div class="jrk-card">
+          <div class="jrk-card__body">
+            <h1 class="jrk-auth__title">${title}</h1>
+            <p class="jrk-auth__subtitle">${subtitle}</p>
+            ${notice}
+            <div class="jrk-auth__providers">
+              <button class="jrk-btn jrk-btn--secondary jrk-btn--lg jrk-btn--block jrk-auth__provider"
+                      ${loading ? 'data-loading="true" aria-busy="true" disabled' : ''}>
+                <span class="jrk-auth__provider-mark">${MS}</span>
+                <span>Sign in with Microsoft</span>
+              </button>
+            </div>
+            <p class="jrk-auth__note">${note}</p>
+          </div>
+        </div>
+        <p class="jrk-auth__meta">Production · portfolio.jrkanalytics.com</p>
+        <p class="jrk-auth__footer">Trouble signing in? <a href="#">Contact IT</a></p>
+      </div>
+    </div>`;
+
+  /* THE STATES JRK'S ENTRA FLOW ACTUALLY PRODUCES, read off app/auth.py and
+     app/main.py in jrk-portfolio-manager rather than invented.
+
+     There is deliberately no "Redirecting" state: the sign-in control is a plain
+     <a> to the Entra authorize endpoint, so the browser navigates and there is no
+     moment for a spinner to render. SsoButton still supports `loading` for an app
+     that intercepts the click — it just is not this one. */
+  const STATES = [
+    ['Idle', panel({})],
+    ['Sign-in failed', panel({
+      notice: alert('critical', 'Sign-in failed',
+        'Microsoft could not complete the sign-in. Try again, or contact IT if it keeps happening.'),
+    })],
+    ['Domain not permitted', panel({
+      title: 'Access denied',
+      subtitle: 'That Microsoft account signed in, but it is not from an authorized organization.',
+      notice: alert('serious', '@contoso.com is not permitted',
+        'Access is limited to JRK and Two Coast Living accounts. Sign in with your work account, or ask IT to add your organization.'),
+    })],
+    ['Session expired', panel({
+      notice: alert('warning', 'Your session expired',
+        'Sessions last 7 days. Sign in again to pick up where you left off.'),
+    })],
+    ['Account disabled', panel({
+      title: 'Account disabled',
+      subtitle: 'Your access to Portfolio Manager has been turned off.',
+      notice: alert('serious', 'Signing in again will not restore access',
+        'An administrator disabled this account. Contact IT to have it re-enabled.'),
+    })],
+    ['Signed out', panel({
+      notice: alert('good', 'You are signed out',
+        'Your Microsoft session was ended too. Sign in again whenever you are ready.'),
+    })],
+  ];
+
+  document.getElementById('states').innerHTML = STATES
+    .map(([label, html]) => `<section class="gal-state">
+        <p class="gal-state__label">${label}</p>${html}
+      </section>`)
+    .join('');
+</script>
+</body>
+</html>
