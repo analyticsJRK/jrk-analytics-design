@@ -337,7 +337,25 @@ pane, so decide them deliberately rather than by drift:**
 
 ## Known render warns (expected — not new)
 
-**One outstanding**, added Jul 30 2026:
+**Two outstanding.** The second was added 2026-08-09.
+
+- `[GRID_OVERFLOW] NavMenu (Open) — escape (fixed/portal)` → **recorded, not
+  fixed, and that was a decision.** It appeared for the first time on the
+  2026-08-09 run *without NavMenu changing at all* — its `sourceKey` was
+  unchanged and it sat in the `verified-by-upload` partition. What moved was
+  `scriptsSha` (`0f1e261bfa23b5bf` → `e0316766f3bdd146`): the staged converter is
+  a newer build and its grid-overflow check is stricter. `.jrk-nav-flyout` is
+  `position: fixed`, so the panel resolves against the viewport rather than the
+  grid cell. The prescribed remedy is
+  `cfg.overrides.NavMenu = {"cardMode":"single","primaryStory":"…"}`, and it
+  **costs three of the four stories** — single mode renders one export per card.
+  The card renders acceptably solo (checked `_screenshots/shell__NavMenu.png`:
+  all four cells present, flyout inside its cell), the failure is only claimed
+  for the product's grid, which cannot be reproduced locally. So it was left
+  alone rather than silently degrading a live card. **If someone confirms the
+  card is actually broken in the DS pane, apply the override — it is one line.**
+
+**One from Jul 30 2026:**
 
 - `[FONT_REMOTE] "Inter var"` → expected and correct. `css/index.css` imports
   `css/fonts.css`, whose Google Fonts `@import` esbuild hoists into
@@ -584,6 +602,28 @@ documents, and it is why it documents it that way.
   segment distinguishable from a plain tinted button is the hairline
   (`accent.washBorder` vs `border.accent`) and the well around it. `CLAUDE.md`
   carries the rule; this is the note for whoever changes the button next.
+- **The light page was `#ffffff` and every tile was unbounded in light. FIXED
+  2026-08-10** (`canvas.light` and `subtle.light` back to `#f2f2f7`). This entry
+  used to say the defect was live and that `conventions.md` documented a state the
+  rest of the repo called wrong; the instruction attached to it — "if someone fixes
+  `canvas.light`, that table and the 'no boundary in light' paragraph must be
+  re-read in the same change" — was followed, and both were rewritten for the
+  restored 1.12:1 step. Kept rather than deleted because it is the worked example
+  of the rule above it: the fix and the prose that describes it have to move
+  together, and the header is the copy that reaches the design agent.
+- **A converter upgrade can invent warns on components nobody touched.** Watch
+  `scriptsSha` in the anchor versus the fresh `_ds_sync.json`: when it moves, new
+  `[...]` lines on `unchanged` components are the check getting stricter, not a
+  regression you caused. That is how `[GRID_OVERFLOW] NavMenu` appeared on
+  2026-08-09. Diagnose from that first; do not go hunting in the component.
+  **Follow-up:** on 2026-08-07 a later session re-diagnosed that same warn from
+  scratch and resolved it with `cfg.overrides.NavMenu = {cardMode: single,
+  primaryStory: Open, viewport: 900x700}`, which is a real improvement to the card
+  and is now in the config — so the warn should not reappear. The cost of not
+  reading this entry first was one wasted diagnosis, which is exactly what it
+  exists to prevent.
+- **A preview can be cropped horizontally with every flag green** — see the
+  harness-width section. Read the sheet.
 
 - **A re-sync can report `upload: docs` with nothing else changed.** Seen once
   (Jul 2026, the run immediately after the Icon/List/ListRow sync): every
@@ -678,22 +718,39 @@ documents, and it is why it documents it that way.
   shim logic from prepare.mjs — the two will fight.
 - **Grouping depends entirely on `.design-sync/docs/`.** Add a component without
   adding its stub and it silently lands in `general`.
-- **The project holds four components this repo does not produce, and their cards
-  cannot render.** `list_files` on 2026-08-07 showed `components/layout/OrgChart`,
-  `components/layout/OrgNode`, `components/shell/AuthLayout` and
-  `components/shell/SsoButton` (plus their `_preview/*.js`), alongside
-  `templates/line-assignments/` and six `uploads/*.png`. **They are not from any
-  branch of this repo** — checked `origin/design/sso-login` and
-  `origin/design-sync/icon-list-sync`, neither has them in `react/src/` — so they
-  were authored inside Claude Design itself. Their `.jsx` stubs do
-  `window.JrkDesign.<Name>`, which `_ds_bundle.js` has never exported (the previous
-  anchor listed the same 43 names as the current one), so **those four cards were
-  already broken before this run and every re-sync leaves them broken**: they sit
-  outside the anchor, so the diff can neither refresh nor delete them, and
-  `upload.deletePaths` will always be empty for them. Do **not** hand-add them to a
-  plan's `deletes` without asking — they may be someone's in-progress design work.
-  The fix, if they are wanted, is to add the real components to `react/src/`; the
-  fix, if they are not, is a deliberate one-time cleanup in the pane.
+- **SEVERAL BRANCHES SYNC INTO THIS ONE PROJECT, AND EACH UPLOAD REPLACES THE
+  OTHERS' BUNDLE. This is the biggest hazard in this file.** `_ds_bundle.js`,
+  `styles.css`, `README.md` and `_ds_sync.json` are single, project-wide files. A
+  sync from any branch overwrites them with a build of **that branch's** component
+  set, so every component the branch lacks keeps its `components/<group>/<Name>/`
+  files and its card while losing its `window.JrkDesign.<Name>` export — the card
+  then renders nothing, and the anchor no longer mentions it, so no later diff will
+  ever repair or delete it.
+
+  It has happened at least twice. On 2026-08-10 a sync from a branch 9 commits
+  behind `main` replaced a 45-component bundle with a 43-component one and broke
+  the `OrgChart` / `OrgNode` cards that `main` had just published (PR #9,
+  commit 24d7d6f); it also replaced `main`'s corrected `conventions.md` in
+  `README.md`. Restored the same day by re-running the sync from `main`.
+  `AuthLayout` / `SsoButton` are the standing case: they come from
+  `design/sso-login`, are not on `main`, and stay broken in the project until that
+  branch syncs again or merges.
+
+  Rules that follow, and they are cheap:
+  1. **`git fetch` and confirm you are not behind `main` before syncing.** The
+     driver cannot warn you — a stale branch is a perfectly valid build.
+  2. **Prefer syncing from `main`**, or from a branch freshly merged with it.
+     Feature-branch syncs are for previewing that branch's own components and
+     should be re-synced from `main` afterwards.
+  3. Compare the component count against `list_files`: fewer components in your
+     build than directories under `components/` in the project means you are about
+     to orphan the difference.
+  4. **Never hand-add an orphan to a plan's `deletes`** to "tidy up" — it is
+     another branch's work. Fix it by syncing from a tree that has it.
+
+  Also in the project and correctly left alone: `templates/line-assignments/` and
+  six `uploads/*.png`, which are authored in the pane, plus `_ds_manifest.json` /
+  `_adherence.oxlintrc.json` / `.thumbnail`, which the app's self-check regenerates.
 - **A competing sync mechanism exists in this repo.** `scripts/sync-manifest.mjs`
   + the `sync:check` npm script + a README section describe a *manual, one-way
   push of raw repo source* (`react/src/*.tsx`, `preview/*.html`, `package.json`)
@@ -713,3 +770,227 @@ documents, and it is why it documents it that way.
 - The `preview/*.html` gallery and `.design-sync/previews/*.tsx` are now two
   parallel sets of examples. A component API change needs both updated; nothing
   cross-checks them.
+
+## The light page is #ffffff and every tile is unbounded in light — READ THIS
+
+**Found 2026-08-09 while validating `conventions.md` against the build. This is a
+library defect, not a sync one, and it is currently shipping.**
+
+`color.surface.canvas.light` is **`#ffffff`**, identical to
+`color.surface.default.light`. The card-on-page fill step in light is therefore
+**1.000:1**, and `.jrk-card` ships `border: 1px solid transparent`. So in light
+mode a card has *no boundary of any kind* — not a fill step, not an edge. Dark is
+healthy at 1.174:1 (`#232326` on `#141416`).
+
+Git says exactly how it happened, and the doctrine predicted it:
+
+- `2b89411` "Give tiles a brand edge, then flatten the light page to white" set
+  `canvas.light` `#f2f2f7` → `#ffffff`. That was legitimate **as half of a pair**:
+  the 2px `#48a9df` brand edge did the bounding.
+- A later change removed the brand edge and made the card border transparent —
+  and **never restored the page**. `philosophy.md`'s conflict register says
+  "undo a pair together — the flat page and the heavy edge were each other's
+  justification, and removing either alone leaves tiles unbounded." That is
+  precisely what shipped.
+
+Everything else in the repo already describes the *intended* state and disagrees
+with the token: `CLAUDE.md` ("Light: `#f2f2f7` page, `#ffffff` cards (1.12:1)"),
+`references/tokens.md`, and **the token's own `$lightNote`**, which reads "the
+page is tinted again, so the 1.12:1 step to the white card IS the tile boundary."
+The note and the value contradict each other in the same JSON object.
+
+Nothing gates it: `validate` does not measure surface-to-surface fill steps, and
+1.12:1 is a fill relationship WCAG has nothing to say about, so both the intended
+and the broken value pass every check.
+
+**The fix is one value** — `canvas.light` back to `#f2f2f7` — but it changes the
+look of every light-mode screen in the consuming app, so it was NOT applied
+inside a sync run. Left for a deliberate decision. If it is applied: re-run
+`npm run validate` (light text roles are pinned against the PAGE, so
+`accent.text`, `text.link` and friends must be re-measured), then re-sync, then
+re-read `conventions.md` — the surface table and the "no boundary in light"
+paragraph both become wrong in the good direction.
+
+**Until then `conventions.md` documents the broken state on purpose**, because
+the design agent acts on what it is told and a card it believes is bounded would
+be built unbounded. It names `.jrk-card--outlined` as the remedy.
+
+## Toolchain facts for a fresh clone on this machine (2026-08-09)
+
+- **`npm i --no-save react react-dom` silently does nothing here.** `react` is an
+  *optional* peerDependency, and npm (v11 / node 24) treats the spec as already
+  satisfied — it prints "up to date, audited 4 packages" and installs neither
+  package, even with `--force`. The fresh-clone block above still says to run it;
+  it will not work. Install into a scratch dir and copy in:
+  ```sh
+  mkdir /tmp/rd && cd /tmp/rd && echo '{"name":"t","private":true}' > package.json
+  npm i react@^19 react-dom@^19
+  cp -r node_modules/react node_modules/react-dom node_modules/scheduler <repo>/node_modules/
+  ```
+  `package.json` / `package-lock.json` stay clean, which is the point of
+  `--no-save` anyway. Verify with `ls node_modules/react` before building —
+  without it the bundle and `_vendor/` are wrong and nothing says so loudly.
+- **There is no playwright browser cache on this machine** (`%LOCALAPPDATA%/
+  ms-playwright` is absent — the one NOTES recorded in Jul 2026 is gone). Do
+  **not** spend the ~200MB `npx playwright install chromium`: both
+  `package-validate.mjs` and `package-capture.mjs` honour **`DS_CHROMIUM_PATH`**,
+  and the system Chrome works:
+  ```sh
+  export DS_CHROMIUM_PATH="C:/Program Files/Google/Chrome/Application/chrome.exe"
+  ```
+  Verified against playwright-core 1.62.1 driving Chrome 151 — 45/45 previews
+  rendered and every screenshot captured. Install the npm packages with
+  `PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1` so the postinstall does not fetch anyway.
+- npm's `allow-scripts` policy blocks esbuild's postinstall with a warning. It
+  does not matter — `@esbuild/win32-x64` ships the binary as an optional dep and
+  `esbuild.transform` works. Do not "fix" it by approving scripts.
+
+## The preview harness crops WIDE cells too, not just tall ones
+
+The harness note above says taller content is silently cut at 900x700. **Width
+behaves the same way and it bit `OrgNode.Rollup` on 2026-08-09.** The org chart
+scrolls horizontally by design (`.jrk-org-scroll`), so an oversized tree does not
+overflow the page — it just sits in a scroll box that a *screenshot cannot
+scroll*, and the sheet shows a tree sliced down the right edge. Nothing flags it:
+the render check passes (root non-empty, not thin, not blank) and `[GRID_OVERFLOW]`
+did not fire on that export.
+
+Measured: five leaves = **1024px** inside an 860px scroll box. Trimmed to four
+leaves = 852px and it fits. Arithmetic for the next person — each leaf costs
+`--jrk-org-node` + 2x`--jrk-org-gutter` (176 + 16 = 192px), and **every nesting
+level adds another 16px per node**, which is why 5x192 = 960 measured 1024.
+
+Rule: **look at the sheet, do not trust the flags** — this is the same lesson as
+the `t3_pct` placeholder finding, in a different dimension.
+
+## conventions.md validation log — 2026-08-09
+
+Re-validated against the fresh build per the base skill. Mechanical pass: 60
+classes and 16 tokens enumerated, **all resolve** in `_ds_bundle.css` /
+`styles.css`; all 14 named components exist as `components/<group>/<Name>/` dirs.
+(`jrk-block__element--modifier` reports missing and always will — it is the
+naming *pattern*, not a class.)
+
+**Five statements were stale and were corrected** — all five predate the
+`design/inter-dark-mode-and-doctrine` merge (`c6b3455`), which is the worked
+example of this file's own warning that a *value* change is invisible to a name
+grep:
+
+1. "systemIndigo accent" → the accent is `#0069d9`, hue 212°, explicitly not an
+   Apple colour.
+2. Dark card `#1c1c1e` → `#232326` (it was lifted when the brand edge went).
+3. "the dark card is only a 1.08:1 fill step" → 1.174:1.
+4. "**Cards carry a fill AND a hairline** … `.jrk-card` ships a
+   `--jrk-border-subtle` edge … never remove a card's border in dark" → flatly
+   false against the build, which reads `border: 1px solid transparent`. Replaced
+   with the edge-is-a-colour-change rule, the automatic nested-tile hairline, and
+   the light-mode no-boundary warning above.
+5. "every pair that collapses under simulated dichromacy is `(n, n+4)`" → wrong,
+   and its own example disproved it (orange|yellow is slots 2 and 4). Corrected
+   to **same-parity**; see the matching fix in `CLAUDE.md` and
+   `scripts/validate-colors.mjs`.
+
+**Added:** the two-button-volume rule (`primary` tinted vs `cta` solid, one per
+view — new API surface the agent would otherwise misuse), `jrk-org`, and the
+`jrk-content--document` trap that the Jul 31 log deferred until that branch
+merged. It has merged, so it is in.
+
+Header is 9,898 chars — well inside the ~31.9k inline-truncation limit.
+
+## A `var()` inside a custom property resolves where it is DECLARED
+
+**Cost one debugging cycle on 2026-08-09 and the failure is completely silent.**
+
+The org rollup keyline carries a texture channel built from gradients that
+reference the group colour:
+
+```css
+--jrk-org-tex-dash: repeating-linear-gradient(to bottom,
+  var(--jrk-org-group) 0 6px, transparent 6px 10px);
+```
+
+Declaring those four on `.jrk-org` — the obvious home, next to the other
+`--jrk-org-*` knobs — makes **every texture silently disappear**. Custom property
+substitution is lazy in the sense that the *token stream* is stored unresolved,
+but a `var()` inside that stream is resolved at computed-value time against the
+element the property is **declared** on, not the element it is eventually used
+on. `--jrk-org-group` does not exist on `.jrk-org`, so all four resolve to the
+guaranteed-invalid value (the empty token stream), `--jrk-org-group-texture`
+inherits that emptiness, and the `::before` falls through its fallback chain to
+the plain colour. Result: eight identical solid keylines, no console error,
+`check:css` clean, and it looks exactly like the feature was never wired up.
+
+Diagnosed by reading `getComputedStyle(card, '::before').backgroundImage` and the
+node's own `--jrk-org-group-texture`, which came back as an **empty string**
+while `--jrk-org-group` on the same element was correct — the two are set by the
+same rule block, which is what makes it confusing.
+
+**Fix: declare them on `.jrk-org__node`**, the same element the rollup rules set
+`--jrk-org-group` on. Non-rollup nodes have no group colour, so they stay invalid
+there too — which is the correct default, since the fallback then lands on
+`transparent`.
+
+Generalises: **any `--jrk-*` value in this library that embeds `var()` must be
+declared on an element where the referenced property already resolves.** If a
+token-built value ever "does nothing", check that first.
+
+## The rollup encoding — what is guaranteed, and the ceiling
+
+Added 2026-08-09 after "verticals can have 15+". Numbers measured with
+`scripts/cvd.mjs` at validate's own dE 10 floor, both themes.
+
+- Texture is `ceil(slot / 2)` — slots 1-2 solid, 3-4 dashed, 5-6 dotted, 7-8
+  double-rail. **Derived, not chosen:** every collapsing pair in the palette is
+  same-parity, so pairing slots up puts each bucket's members an odd distance
+  apart (odd distances never collapse) and separates all nine collapsing pairs
+  by texture. Re-derive if the palette order changes.
+- **First 8 groups: 0 unseparable pairs** (was 9 on hue alone).
+- **Ceiling is 3 x textures.** Only three hues here are pairwise CVD-safe (blue,
+  orange, mint = the declared all-pairs cap of 3), so four textures cap the
+  theoretical maximum at 12. Getting 12 needs a non-canonical slot order, which
+  the palette forbids re-deriving. Ships 8.
+- **At 15 groups: 7 unseparable, all of them exact repeats** (groups 1&9, 2&10,
+  …) — down from 37 on hue alone. Zero CVD collisions, zero adjacent collisions.
+- **Why no lap shift.** Shifting texture on lap 2 kills the exact repeats and
+  scores better (4 unseparable at 15 vs 7) — and was rejected. Its failures are
+  CVD-only: they look correct to the author and land only on the ~8% who cannot
+  see them. An exact repeat is visible to everyone and gets fixed. Do not
+  "improve" the score by reintroducing it.
+- **The rail is height-independent on purpose.** Three vertical rhythms plus one
+  horizontal split; a fourth rhythm coarse enough to differ from `dash` fits one
+  dash in the ~18px keyline of a single-line card and reads as solid. Verified
+  against a one-line-card row in both themes. Any future texture must clear the
+  same test.
+
+## prepare.mjs is not part of the driver, and the way it bit me is worth reading
+
+The "Re-sync risks" bullet already says this. Here is the concrete failure from
+2026-08-09, because the symptom points at the wrong file.
+
+Sequence: edited `css/components/org.css` (moved the texture custom properties
+onto `.jrk-org__node`), ran `npm run check:css` — clean — then `npm test` — clean
+— then the driver. The driver rebuilt the bundle, re-rendered 45/45 previews,
+validated clean and produced a healthy verdict. **And the shipped keylines were
+all solid**, i.e. the exact symptom of the bug I had just fixed.
+
+Cause: `cfg.cssEntry` is `.design-sync/.cache/jrk-flat.css`, generated by
+`prepare.mjs` from `css/index.css`. `resync.mjs` does not run it, and `npm test`
+runs `build-tokens` + `build-guides`, **not** prepare. So the flattened file
+still held the pre-fix CSS, and `_ds_bundle.css` was faithfully built from it.
+Every gate passed because every gate was reading a consistent — and stale —
+input.
+
+What made it findable: **looking at the rendered card**, then diffing where the
+declaration landed:
+
+```sh
+node -e "const s=require('fs').readFileSync('ds-bundle/_ds_bundle.css','utf8');
+const i=s.indexOf('--jrk-org-tex-solid');console.log(s.slice(i-200,i+80))"
+```
+
+The bundle said `.jrk-org {` where the source said `.jrk-org__node {`. That
+one-line check is the fastest way to prove a CSS edit did or did not reach the
+bundle.
+
+**Rule: after ANY edit under `css/`, run `node .design-sync/prepare.mjs` before
+the driver.** A green validate proves nothing about freshness.

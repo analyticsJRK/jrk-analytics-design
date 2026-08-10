@@ -19,7 +19,9 @@
     "Card": { "cardMode": "column" },
     "ChartCard": { "cardMode": "column" },
     "CellBarSigned": { "cardMode": "column" },
-    "HeatLegend": { "cardMode": "column" }
+    "HeatLegend": { "cardMode": "column" },
+    "OrgChart": { "cardMode": "column" },
+    "OrgNode": { "cardMode": "column" }
   },
   "runtimeFontPrefixes": ["SF Pro", "SF Mono"],
   "extraFonts": [

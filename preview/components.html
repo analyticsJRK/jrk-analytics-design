@@ -511,6 +511,158 @@
     </div>
   </section>
 
+  <!-- ============================ org chart ============================ -->
+  <section class="gal-sec">
+    <h2>Org chart</h2>
+
+    <div class="gal-demo gal-demo--plain">
+      <div class="jrk-card" style="width:100%">
+        <div class="jrk-card__header">
+          <div>
+            <div class="jrk-card__title">Reporting structure</div>
+            <div class="jrk-card__subtitle">Asset Management · as of 9 Aug 2026</div>
+          </div>
+        </div>
+        <div class="jrk-card__body">
+          <div class="jrk-org-scroll">
+            <ul class="jrk-org" aria-label="Asset Management reporting structure">
+              <li class="jrk-org__node">
+                <div class="jrk-org__card" aria-current="true">
+                  <span class="jrk-org__name">Dana Whitfield</span>
+                  <span class="jrk-org__role">VP, Asset Management</span>
+                  <span class="jrk-org__meta">37 properties · 8,412 units</span>
+                </div>
+                <ul class="jrk-org__branch jrk-org__branch--rollup">
+                  <li class="jrk-org__node">
+                    <a class="jrk-org__card jrk-org__card--link" href="#">
+                      <span class="jrk-org__name">Marcus Reed</span>
+                      <span class="jrk-org__role">Regional Manager, Southeast</span>
+                      <span class="jrk-org__meta">14 properties · 3,120 units</span>
+                    </a>
+                    <button class="jrk-org__toggle" aria-expanded="true" aria-controls="org-southeast">
+                      <span>2 properties</span>
+                      <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg>
+                    </button>
+                    <ul class="jrk-org__branch" id="org-southeast">
+                      <li class="jrk-org__node">
+                        <div class="jrk-org__card">
+                          <span class="jrk-org__name">Harbor Point</span>
+                          <span class="jrk-org__role">Community Manager · L. Okafor</span>
+                          <span class="jrk-org__meta">412 units · 94.2% occupied</span>
+                        </div>
+                      </li>
+                      <li class="jrk-org__node">
+                        <div class="jrk-org__card">
+                          <span class="jrk-org__name">Cedar Grove</span>
+                          <span class="jrk-org__role">Community Manager · R. Diaz</span>
+                          <span class="jrk-org__meta">204 units · 88.6% occupied</span>
+                          <span class="jrk-org__aside">
+                            <span class="jrk-badge jrk-badge--warning jrk-badge--sm"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warningFill"></svg>Under target</span>
+                          </span>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li class="jrk-org__node">
+                    <a class="jrk-org__card jrk-org__card--link" href="#">
+                      <span class="jrk-org__name">Priya Nandi</span>
+                      <span class="jrk-org__role">Regional Manager, Midwest</span>
+                      <span class="jrk-org__meta">12 properties · 2,910 units</span>
+                    </a>
+                    <button class="jrk-org__toggle" aria-expanded="false" aria-controls="org-midwest">
+                      <span>12 properties</span>
+                      <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg>
+                    </button>
+                    <ul class="jrk-org__branch jrk-org__branch--stacked" id="org-midwest" hidden>
+                      <li class="jrk-org__node">
+                        <div class="jrk-org__card"><span class="jrk-org__name">Lakeside Commons</span><span class="jrk-org__meta">318 units · 96.1% occupied</span></div>
+                      </li>
+                      <li class="jrk-org__node">
+                        <div class="jrk-org__card"><span class="jrk-org__name">Maple Yards</span><span class="jrk-org__meta">246 units · 91.4% occupied</span></div>
+                      </li>
+                      <li class="jrk-org__node">
+                        <div class="jrk-org__card"><span class="jrk-org__name">Ninth &amp; Rail</span><span class="jrk-org__meta">180 units · 93.8% occupied</span></div>
+                      </li>
+                      <li class="jrk-org__node">
+                        <div class="jrk-org__card"><span class="jrk-org__name">Prairie Walk</span><span class="jrk-org__meta">402 units · 89.0% occupied</span></div>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li class="jrk-org__node">
+                    <div class="jrk-org__card jrk-org__card--vacant">
+                      <span class="jrk-org__name">Open position</span>
+                      <span class="jrk-org__role">Regional Manager, Mountain West</span>
+                      <span class="jrk-org__meta">11 properties · 2,382 units</span>
+                    </div>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      Depth is vertical, peers are horizontal, and the connectors are drawn at
+      <code class="jrk-mono">text.muted</code> — 5.07:1 light, 5.46:1 dark, not the 1.71:1 of
+      <code class="jrk-mono">border.strong</code>. The lines <strong>are</strong> the content:
+      once a row is wide enough that a child is no longer visibly beneath its own parent,
+      nothing else on screen says who reports to whom. The card hairlines stay decorative
+      at 1.52:1, which is the difference the choice turns on.
+    </div>
+
+    <div class="gal-rule">
+      The branch under Dana is <code class="jrk-mono">--rollup</code>: each child takes the next
+      palette slot and its whole <em>subtree</em> inherits it, so Harbor Point and Cedar Grove
+      wear Southeast's blue and the four Midwest properties wear Priya's orange. <strong>This
+      cycles the categorical palette, which everywhere else in this library is banned</strong> —
+      and the ban is about <em>identity</em>: two lines on a chart sharing a colour cannot be told
+      apart because colour is the only thing naming them. Here every node is labelled and the tree
+      <em>draws</em> the grouping, so the keyline is an accelerator over a chart that already reads
+      without it.
+    </div>
+
+    <div class="gal-rule">
+      <strong>The keyline carries two channels, hue and texture</strong> — solid, dashed, dotted,
+      double-rail, assigned <code class="jrk-mono">ceil(slot/2)</code>. That pairing is derived, not
+      chosen: every collapsing pair in the palette is same-parity, so pairing the slots up puts each
+      bucket's two members an <em>odd</em> distance apart (always safe) and lands all nine collapsing
+      pairs in different buckets. On hue alone the first eight groups contain <strong>9 pairs that
+      are the same colour to a dichromat</strong> — orange and yellow are dE 0.8. With texture that
+      count is <strong>0</strong>.
+    </div>
+
+    <div class="gal-rule">
+      Adjacent siblings never collide at any count: consecutive slots are the exact pair the palette
+      order was searched to maximise, dE 22.3 light / 16.5 dark. The ceiling is 3 × textures = 12,
+      since only three hues here are pairwise CVD-safe — so this ships 8 and group 9 repeats group 1
+      exactly. That repeat is deliberate: shifting texture on a second lap removes it but buys 4 CVD
+      collisions instead, and an exact repeat is visible to everyone while a CVD collision looks
+      correct to the author and lands only on readers who cannot see it. The connectors stay
+      <code class="jrk-mono">text.muted</code> and are never tinted: four of the eight hues sit at
+      2.12–2.57:1 on the light card, which is fine for a keyline beside a label and not fine for the
+      one mark that has to be readable.
+    </div>
+
+    <div class="gal-rule">
+      Midwest is <code class="jrk-mono">--stacked</code>, the escape valve for a wide fan —
+      twelve peers side by side is 2,300px no screen holds, and the same twelve down an
+      indented spine fit in a column. It is for leaf children only. Open it with the
+      toggle: the count is the label, because a bare caret leaves a collapsed node as a
+      dead end instead of an answer. The two toggles sit differently on purpose — Southeast
+      centres on its stem, Midwest hangs off the spine, because a stacked branch moves its
+      parent card off the node's midpoint and the connectors follow it. Mountain West is
+      vacant, and the dashed edge is redundant coding — the words <em>Open position</em>
+      are the signal.
+      Dana carries <code class="jrk-mono">aria-current</code>, whose tinted wash is
+      1.16:1 on the light card, so the <strong>semibold name is the channel</strong>
+      that survives greyscale and both dichromacies.
+    </div>
+  </section>
+
   <!-- ============================ feedback ============================ -->
   <section class="gal-sec">
     <h2>Feedback</h2>
@@ -628,6 +780,17 @@
   const modal = document.getElementById('demo-modal');
   document.getElementById('open-modal').onclick = () => modal.showModal();
   modal.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => modal.close()));
+
+  /* Org chart disclosure. Gallery chrome — the React <OrgNode> owns this state
+     in an app; here it is four lines so the stacked branch can actually be
+     opened and looked at in both themes. */
+  document.querySelectorAll('.jrk-org__toggle').forEach((btn) => {
+    btn.onclick = () => {
+      const open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!open));
+      document.getElementById(btn.getAttribute('aria-controls')).hidden = open;
+    };
+  });
 </script>
 </body>
 </html>

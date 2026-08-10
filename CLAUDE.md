@@ -12,19 +12,31 @@ first. So a change here is not live in the app until someone re-runs
 the next sync. Commit here before syncing — the script records the source SHA and
 warns when the tree is dirty.
 
-**That warning has already come true, and the casualty is still load-bearing.**
-`react/src/Org.tsx` + `css/components/org.css` — the `OrgChart` / `OrgNode` pair —
-exist **only inside the portal's vendored copy**. They are on no branch of this
-repo (checked `main`, `design/sso-login`, `design-sync/icon-list-sync`), yet
-`apps/portal/components/portfolio/OrgChart.tsx` imports them from `@jrk/design`
-and the org-chart page renders them. So **every `npm run sync:design` deletes them
-and breaks that page**; it happened on 2026-08-07 and was repaired by restoring
-the three files plus the `index.ts` / `css/index.css` / `dist/types` entries that
-name them, which leaves the vendored tree no longer a faithful copy of the SHA in
-`.synced-from`. Until `Org` is upstreamed into this library properly, treat a
-vendor sync as a two-step operation: sync, then check `git status` in the portal
-for **deletions** under `vendor/` and restore any that the library does not
-actually ship.
+**NEVER vendor from a stale branch, and `git fetch` before you believe anything
+about what this repo contains.** On 2026-08-10 a session on a feature branch that
+was **9 commits behind `main`** ran `npm run sync:design`. The sync wiped
+`react/src/Org.tsx` + `css/components/org.css` from the portal — the
+`OrgChart` / `OrgNode` pair that `apps/portal/components/portfolio/OrgChart.tsx`
+imports from `@jrk/design` and the org-chart page renders — because the branch
+genuinely did not have them. They were merged to `main` in PR #9 while that branch
+sat unfetched.
+
+Two failures, and the second is the one that turned a small mistake into a wrong
+conclusion recorded in this file:
+
+1. **The vendor script is a mirror, so a stale source silently deletes.** The
+   directory is wiped and re-copied; anything `main` has and your branch lacks is
+   gone from the app. `.synced-from` records the SHA — read it, and check the
+   portal's `git status` for **deletions** under `vendor/` after every sync.
+2. **`git ls-tree origin/<branch>` against a ref you never fetched reports
+   "absent", not "unknown".** That is how this file briefly claimed `Org.tsx` was
+   "on no branch of this repo" and had been hand-edited into the vendored copy.
+   It is on `main` and on `design/sso-login`, with docs stubs and authored
+   previews. **Fetch first; a missing local ref is not evidence.**
+
+Both were repaired the same day by re-vendoring from `main`, which left the
+portal's `vendor/` byte-identical to its committed state apart from the
+`.synced-from` SHA.
 
 **`jrk_agents`, `jrk-audit-platform` and `JRK_FORMS` are NOT consumers**, and the
 list that used to say so cost real design decisions. `jrk_agents` hand-rolls its
@@ -172,12 +184,18 @@ tint-filled marks.
 direction in text. Charts have a table view.
 
 **Hue only separates ADJACENT slots.** The order was searched to maximise the
-worst adjacent pair, which pushes similar hues four apart — so every pair that
-collapses under CVD is `(n, n+4)`, and orange/yellow is ΔE 0.8, i.e. the same
-color. Each slot therefore also carries a **dash** (`--jrk-chart-dash-N`, lines,
-opt-in via `data-encoding="redundant"` because a dash otherwise means
-threshold) and a **shape** (`seriesShape(i)`, mandatory on scatter). `validate`
-fails if a collapsing pair ever shares both.
+worst adjacent pair, which pushes similar hues apart — so **every pair that
+collapses under CVD is SAME-PARITY**, `(n, n+2)`, `(n, n+4)` or `(n, n+6)`, and
+every odd distance is clear (worst adjacent ΔE 16.5, floor 10). Orange/yellow is
+ΔE 0.8, i.e. the same color, and it sits at `(2, 4)`. `{orange, yellow, pink,
+brown}` collapse PAIRWISE — all six pairs. This used to be written as "every
+collapsing pair is `(n, n+4)`", which `validate` has always disproved in its own
+output; the parity form is the measured one, and anything walking the slots in
+order (org-chart rollup groups) takes its adjacent-pair safety from it. Each slot
+therefore also carries a **dash** (`--jrk-chart-dash-N`, lines, opt-in via
+`data-encoding="redundant"` because a dash otherwise means threshold) and a
+**shape** (`seriesShape(i)`, mandatory on scatter). `validate` fails if a
+collapsing pair ever shares both.
 
 **`--jrk-chart-*` and `--jrk-chart-tint-*` are not interchangeable.** The
 categorical set carries identity and is CVD-validated. Tints are pastel fills
