@@ -678,6 +678,22 @@ documents, and it is why it documents it that way.
   shim logic from prepare.mjs — the two will fight.
 - **Grouping depends entirely on `.design-sync/docs/`.** Add a component without
   adding its stub and it silently lands in `general`.
+- **The project holds four components this repo does not produce, and their cards
+  cannot render.** `list_files` on 2026-08-07 showed `components/layout/OrgChart`,
+  `components/layout/OrgNode`, `components/shell/AuthLayout` and
+  `components/shell/SsoButton` (plus their `_preview/*.js`), alongside
+  `templates/line-assignments/` and six `uploads/*.png`. **They are not from any
+  branch of this repo** — checked `origin/design/sso-login` and
+  `origin/design-sync/icon-list-sync`, neither has them in `react/src/` — so they
+  were authored inside Claude Design itself. Their `.jsx` stubs do
+  `window.JrkDesign.<Name>`, which `_ds_bundle.js` has never exported (the previous
+  anchor listed the same 43 names as the current one), so **those four cards were
+  already broken before this run and every re-sync leaves them broken**: they sit
+  outside the anchor, so the diff can neither refresh nor delete them, and
+  `upload.deletePaths` will always be empty for them. Do **not** hand-add them to a
+  plan's `deletes` without asking — they may be someone's in-progress design work.
+  The fix, if they are wanted, is to add the real components to `react/src/`; the
+  fix, if they are not, is a deliberate one-time cleanup in the pane.
 - **A competing sync mechanism exists in this repo.** `scripts/sync-manifest.mjs`
   + the `sync:check` npm script + a README section describe a *manual, one-way
   push of raw repo source* (`react/src/*.tsx`, `preview/*.html`, `package.json`)
