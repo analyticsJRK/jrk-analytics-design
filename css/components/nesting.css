@@ -1,10 +1,13 @@
 /* A nested tile draws the edge its fill step cannot.
    ==================================================
 
-   Every tile in this system is bounded by its FILL STEP off the page — white on
-   #f2f2f7 in light, #232326 on #141416 in dark. That works exactly once. A tile
-   nested inside another tile sits on the CARD plane, where its own
-   surface.default fill is identical to what it sits on and the step is 1.0:1: a
+   In DARK every tile is bounded by its fill step off the page — #232326 on
+   #141416 — and that works exactly once. In LIGHT the page is flat #ffffff, so
+   there is no step at all and .jrk-card draws a border.subtle hairline instead
+   (see card.css). Either way the problem this file solves is the same, and in
+   light it is simply more obvious: a tile nested inside another tile sits on the
+   CARD plane, where its own surface.default fill is identical to what it sits on
+   and the step is 1.0:1 — a
    Stat inside a Card, the "show table" view inside a ChartCard, a KPI band inside
    a report card. Those get a 1px neutral hairline, because there is no fill
    relationship left for them to use.

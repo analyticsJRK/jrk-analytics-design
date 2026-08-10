@@ -5,13 +5,13 @@
    and put aria-sort on the sorted header. */
 
 /* A bare table panel on the page IS a tile, so it is bounded the same way a card
-   is — by its fill step off the page. The 1px transparent border is reserved for
-   the nesting hairline; see card.css. */
+   is: it draws the border.subtle hairline, which on the flat white light page is
+   the only thing bounding it. See card.css. */
 .jrk-table-wrap {
   overflow: auto;
   max-width: 100%;
   background: var(--jrk-surface-default);
-  border: 1px solid transparent;
+  border: 1px solid var(--jrk-border-subtle);
   border-radius: var(--jrk-radius-xl);
 }
 

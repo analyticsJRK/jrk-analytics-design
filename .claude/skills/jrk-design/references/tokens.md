@@ -22,7 +22,7 @@ dark theme a swap rather than a rewrite.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--jrk-surface-canvas` | `#f2f2f7` | `#141416` | page plane, sidebar, topbar |
+| `--jrk-surface-canvas` | `#ffffff` | `#141416` | page plane, sidebar, topbar |
 | `--jrk-surface-default` | `#ffffff` | `#232326` | cards, panels, **chart surface** |
 | `--jrk-surface-tinted` | `#e0f6ff` | `#0e3543` | KPI band, highlighted tiles |
 | `--jrk-surface-subtle` | `#f2f2f7` | `#2c2c2e` | table header, inset wells, sheet toolbar |
@@ -31,24 +31,35 @@ dark theme a swap rather than a rewrite.
 | `--jrk-surface-card-hover` | `#ffffff` | `#2c2c2e` | fill of an INTERACTIVE card while hovered |
 | `--jrk-surface-hover` / `-active` / `-disabled` / `-inverse` | | | states |
 
-**A tile is bounded by its fill step off the page, in both themes, with no
-border.** 1.12:1 in light (`#ffffff` on `#f2f2f7`), 1.17:1 in dark (`#232326` on
-`#141416`) — the same Apple grouped mechanism on both sides. Chrome (sidebar,
-topbar) shares the canvas, so it is divided from the content by its hairline alone.
+**The light page is flat `#ffffff`, so a tile is bounded by a HAIRLINE.**
+`.jrk-card` draws `border.subtle`: 1.26:1 on the light page, where it does the
+whole job, and 1.24:1 in dark on top of the fill step that still bounds the tile
+there (`#232326` on `#141416`, 1.17:1). One mechanism in both themes, per-theme
+values — not hairline-in-light / fill-in-dark, because two mechanisms is what lets
+a change read correctly in one theme and vanish in the other. Chrome (sidebar,
+topbar) shares the canvas and is divided from the content by its own hairline.
 
-That symmetry is new, and the asymmetry it replaced is the thing to know about:
-light was briefly a flat `#ffffff` page bounded by a 2px brand edge, so a change
-that read correctly in dark could be invisible in light. `border.card` and
-`size.cardEdge` are gone. `.jrk-card--seamless` and `.jrk-content--document` both
-do real work in light again.
+**`canvas.light` and that edge are a pair — never move one alone.** The page has
+been `#ffffff` and `#f2f2f7` more than once. Flat page → the card needs its own
+edge; tinted page → the fill step is the edge and the border can go transparent.
+The one broken state was the half-finished revert, where the brand edge was
+removed and the page was left flat: light cards had a 1.000:1 step behind a
+transparent border. `border.card` and `size.cardEdge` are still gone for good.
 
-Two traps remain, neither caught by a gate:
-- **`--jrk-surface-subtle` now EQUALS the page in light.** It still recesses on a
-  card; it does nothing on the page.
-- **Never use `--jrk-surface-hover` on a whole tile in light.** It is `#f2f2f7`,
-  the page value, so it erases the step that bounds the card — the tile dissolves
-  exactly when it should respond. `--jrk-surface-card-hover` exists for this and is
-  a deliberate no-op in light, because the hover *shadow* carries that theme.
+Consequences worth knowing, none of them gated:
+- **`--jrk-surface-subtle` is a real recess in light again** (`#f2f2f7`, 1.12:1
+  below both the white page and the white card), so table headers and inset wells
+  read as set in. It does not replace `--jrk-surface-track`, which is recessed in
+  *both* themes where subtle is a recess in light and a lift in dark.
+- **`--jrk-surface-hover` on a whole tile is no longer the trap it was.** It is
+  `#f2f2f7`, which used to be the page value and erased the card's fill step;
+  with the flat page and a hairline it cannot dissolve the boundary.
+  `--jrk-surface-card-hover` is still the token for a hovered card and is still a
+  deliberate no-op in light, because the hover *shadow* carries that theme.
+- **`.jrk-content--document` is a no-op in light again**, because the plane it
+  paints (`surface.default`) is the same `#ffffff` as the page. It does real work
+  in dark. What still holds in light is the reason it exists: anything on that
+  plane has no fill step to separate with and needs its own edge.
 
 The card is what marks are measured against — `#ffffff` / `#232326`.
 
@@ -87,22 +98,22 @@ baselines, form controls) · `--jrk-border-accent` (active tab, selected input).
 
 **There is no `--jrk-border-card` and no `--jrk-card-edge`.** Both were removed
 with the brand edge; referencing either is a breaking change for a consumer that
-still does. A tile is bounded by its fill step.
+still does. The tile edge is `border.subtle`, drawn by the component.
 
-Every tile still declares `border: 1px solid transparent` — `.jrk-card`,
-`.jrk-stat`, `.jrk-stat-row`, `.jrk-chart-card`, `.jrk-table-wrap`. **Never change
-that to `border: 0`:** the reserved width means an edge appearing changes only a
+Every tile declares a 1px border — `.jrk-card` colours it `border.subtle`;
+`.jrk-stat`, `.jrk-stat-row`, `.jrk-chart-card` and `.jrk-table-wrap` reserve the
+width with `transparent`. **Never change any of them to `border: 0`:** the reserved width means an edge appearing changes only a
 colour and never reflows, and `border: 0` sets `border-style: none`, after which
 `border-color` paints nothing at all. Form controls use `border-strong` plus a
 contrasting fill.
 
 Where an edge IS drawn:
 
-- **A nested tile takes `--jrk-border-default`**, because a fill step only works
-  once — a tile inside a tile sits on the card plane, where its own fill matches
-  what it sits on. `nesting.css` is the single home for that rule. `--outlined`
-  asks for the same hairline at the top level; `--seamless` is now the only way to
-  suppress it when nested.
+- **A nested tile takes `--jrk-border-default`**, a step heavier than the base
+  card's `border.subtle`, because a tile inside a tile sits on the card plane where
+  its own fill matches what it sits on. `nesting.css` is the single home for that
+  rule. `--outlined` asks for that heavier weight at the top level — keep it above
+  the base card or it becomes a no-op; `--seamless` is the way to suppress an edge.
 - **`.jrk-sheet` draws it by default.** It is designed for
   `.jrk-content--document`, which *is* the card plane, so it has no step to inherit.
 
@@ -110,7 +121,7 @@ Where an edge IS drawn:
 mattered most for the removed brand edge and it still matters for
 `--jrk-border-accent`: a tab underline is a *signifier*, something depends on
 seeing it, so it needs WCAG 1.4.11's 3:1 and its numbers are recorded by hand on
-the token (`#0069d9`, 5.22:1 on the card, 4.68:1 on the page). Decorative
+the token (`#0069d9`, 5.22:1 on the card and on the flat white page). Decorative
 separation may sit below 3:1; the moment state rides on a border it may not. Note
 this token used to need a bespoke value to clear 3:1 at all; it now tracks
 `accent.text`, which is always safe because its floor is the higher one.
@@ -134,7 +145,7 @@ pressable. And `-wash-border` is kept far below `--jrk-border-accent` on purpose
 that one means *selected* on a segment or a tab, and the two must not converge.
 
 **The anchor is `#0069d9`, a saturated mid-tone, and every role takes it.**
-5.22:1 on the white card, 4.68:1 on the `#f2f2f7` page, white label at 5.22:1 —
+5.22:1 on the white card and on the flat white page, white label at 5.22:1 —
 so `-text`, `--jrk-text-link`, `--jrk-border-accent` and `--jrk-focus-ring` are
 all the anchor itself. Only `-wash-text` steps away, and only because its
 background does.

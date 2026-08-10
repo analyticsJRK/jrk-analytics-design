@@ -392,7 +392,21 @@ expected. Token count is now **220** in `jrk-tokens.css` (244 defined across the
 whole shipped closure), up from 212 — the colorblind dash set in 829ebab, not a
 regression.
 
-## The flat-white light page was a half-finished revert — READ THIS BEFORE TRUSTING A SURFACE VALUE
+## The page value and the card's edge are a PAIR — READ THIS BEFORE TRUSTING A SURFACE VALUE
+
+**Current state (2026-08-10): the light page is flat `#ffffff` BY DECISION, and
+`.jrk-card` draws a `border.subtle` hairline (1.26:1) as its boundary.** The
+hairline is drawn in dark too, where it is a 1.24:1 whisper on top of the 1.17:1
+fill step — one mechanism, per-theme values, deliberately not hairline-in-light /
+fill-in-dark. `surface.subtle.light` stayed at `#f2f2f7`, which makes it a genuine
+recess below both the white page and the white card for the first time in a while.
+
+So the rule, not the value: **flat page → the card needs its own edge; tinted page
+→ the fill step is the edge and the border can go transparent.** The section below
+is why that rule is written in capitals.
+
+### The half-finished revert that produced it
+
 
 **Found and fixed 2026-08-07, during the design-sync validation pass, not by any
 gate.** For one period `surface.canvas.light` and `surface.subtle.light` were
@@ -421,11 +435,24 @@ Two things make this worth a section of its own:
   prose gets rewritten in the same breath as the decision and the value needs a
   separate edit.
 
-`npm test` passed throughout, in both states, and it always will: the gate
-measures ink against surfaces, and a page that is too light only ever *raises*
-text contrast. **No gate anywhere checks that a surface still separates from its
-neighbour.** That is the standing hole this cost, and the reason to re-derive the
-1.12:1 / 1.17:1 steps by hand whenever a surface moves.
+`npm test` passed throughout, in every one of these states, and it always will:
+the gate measures ink against surfaces, and a page that is too light only ever
+*raises* text contrast. **No gate anywhere checks that a surface still separates
+from its neighbour.** That is the standing hole this cost, and the reason to
+re-derive the page-to-card relationship by hand whenever a surface moves.
+
+**Sequel, 2026-08-10.** The page was deliberately flattened to `#ffffff` again — a
+design decision, not a regression — and this time the other half moved in the same
+commit: `.jrk-card` gained the `border.subtle` hairline. Everything measured
+against the old tinted page moved with it, which is the part worth copying next
+time. The accent anchor was pinned against `#f2f2f7` at 4.68:1 and is 5.22:1 on the
+white page (a relaxation, so the anchor must NOT be lightened on the strength of
+it); `accent.wash` went from 1.04:1 to 1.16:1 against the page, so the tinted
+button is better bounded there; `accent.washBorder` from 1.58:1 to 1.76:1. Also
+flipped back: **`.jrk-content--document` is a no-op in light again**, because the
+plane it paints is the same `#ffffff` as the page. That modifier has now flipped
+three times with this value, which is the tell that it is downstream of
+`surface.canvas` rather than a decision of its own.
 
 ## conventions.md validation log
 

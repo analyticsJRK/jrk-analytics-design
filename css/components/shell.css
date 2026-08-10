@@ -26,12 +26,14 @@
   top: 0;
   /* Chrome sits on the page plane in both themes, so this hairline divides the
      sidebar from content of the SAME fill and is the only thing there. #e5e5ea on
-     the #f2f2f7 page is 1.12:1 — faint by design, because the cards floating on
-     the content side are what actually establish where content begins.
+     the #ffffff page is 1.26:1 — still faint by design, because the cards on the
+     content side are what actually establish where content begins, and they now
+     carry the same hairline.
 
      If the sidebar ever needs to read as chrome rather than as more page, give it
-     surface.DEFAULT, not surface.subtle: subtle is #f2f2f7 in light, which is now
-     the page value itself and would change nothing. Either way, do not thicken
+     surface.SUBTLE (#f2f2f7), which is a genuine step below the flat white page —
+     that advice is the reverse of what stood here during the tinted-page era,
+     when subtle WAS the page and changed nothing. Either way, do not thicken
      this rule. */
   background: var(--jrk-surface-canvas);
   border-inline-end: 1px solid var(--jrk-border-subtle);
@@ -415,10 +417,15 @@
 /* Document view: the content plane takes the CARD fill instead of the page fill,
    so a full-bleed report sits on the card surface rather than on the page plane.
 
-   This is load-bearing in BOTH themes again — #ffffff content on an #f2f2f7 page,
-   #232326 on #141416. For one period it was a no-op in light, because the page had
-   been flattened to #ffffff and there was nothing left for it to change; the page
-   is tinted again and the modifier does real work in light as it originally did.
+   **It is a NO-OP in light again** (2026-08-10): the page is flat #ffffff and the
+   card fill is #ffffff, so there is nothing for this rule to change there. It does
+   real work in dark — #232326 on #141416. This has now flipped three times with
+   the page value, which is the tell that it is downstream of surface.canvas rather
+   than a decision of its own. What still holds in light is the CONSEQUENCE the
+   rule exists for: anything placed on this plane has no fill step to separate
+   with, so it needs its own edge. The sheet draws one, and .jrk-card now draws a
+   hairline by default, so the plane is survivable in light even while the fill
+   change is invisible.
 
    The history is worth keeping, because it is a full round trip. This rule
    ORIGINALLY existed to give one full-bleed view a white plane locally, and warned
