@@ -18,6 +18,30 @@ const ExportIcon = () => (
   </svg>
 );
 
+/* THE PRIMARY CARD. A menu is a disclosure, so every static capture of one is
+   otherwise a picture of a closed button — and the panel is the whole
+   component. `defaultOpen` is an initial value for exactly this; in an app it
+   is usually the wrong prop. */
+export const Open = () => (
+  <div style={{ maxWidth: 520, minHeight: 300 }}>
+    <Card
+      title="Harbor Point"
+      subtitle="Southeast · 248 units"
+      actions={
+        <Menu label="Actions" trailingIcon={<Chevron />} defaultOpen>
+          <MenuLabel>This property</MenuLabel>
+          <MenuItem icon={<ExportIcon />} onSelect={() => {}}>Export CSV</MenuItem>
+          <MenuItem onSelect={() => {}}>Schedule report</MenuItem>
+          <MenuSeparator />
+          <MenuItem danger onSelect={() => {}}>Remove from portfolio</MenuItem>
+        </Menu>
+      }
+    >
+      Occupancy 93.8% · NOI +7.0% vs budget
+    </Card>
+  </div>
+);
+
 /* The overflow menu in a card header — the case this component was extracted
    for. `align="end"` is the default because the trigger sits at the right edge
    of an action row, where a start-anchored panel opens off the viewport. */

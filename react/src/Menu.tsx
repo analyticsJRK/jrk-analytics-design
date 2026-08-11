@@ -57,6 +57,16 @@ export interface MenuProps {
   className?: string;
   /** Panel class, for a consumer that needs to size or scroll it. */
   menuClassName?: string;
+  /** Start open. Uncontrolled — the component still owns the state after the
+   *  first render, so this is an initial value and not a way to drive it.
+   *
+   *  It exists for the same reason `NavMenu.defaultOpen` does: a menu is a
+   *  disclosure, so every static capture of one is a picture of a closed
+   *  button, and the panel is the whole component. The design-system cards and
+   *  the docs previews need it to show anything at all. In an app it is
+   *  usually the wrong prop — a panel that is open before the reader asked
+   *  covers content nobody chose to have covered. */
+  defaultOpen?: boolean;
 }
 
 export function Menu({
@@ -71,10 +81,11 @@ export function Menu({
   disabled,
   className,
   menuClassName,
+  defaultOpen = false,
 }: MenuProps) {
   const uid = useId();
   const panelId = `${uid}-panel`;
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   const box = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
 

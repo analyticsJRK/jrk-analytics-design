@@ -18,9 +18,9 @@ const ClockIcon = () => (
 export const Default = () => {
   const [last, setLast] = useState('nothing yet');
   return (
-    <div className="jrk-stack" style={{ maxWidth: 420 }}>
+    <div className="jrk-stack" style={{ maxWidth: 420, minHeight: 300 }}>
       <div className="jrk-row" style={{ justifyContent: 'flex-end' }}>
-        <Menu label="Actions">
+        <Menu label="Actions" defaultOpen>
           <MenuItem icon={<ExportIcon />} onSelect={() => setLast('Export CSV')}>Export CSV</MenuItem>
           <MenuItem icon={<ClockIcon />} onSelect={() => setLast('Schedule report')}>Schedule report</MenuItem>
         </Menu>
@@ -35,8 +35,8 @@ export const Default = () => {
 /* `danger` is for the destructive row. The LABEL has to say what it destroys —
    colour is never the only signal, so "Remove" alone would not be enough. */
 export const Danger = () => (
-  <div className="jrk-row" style={{ justifyContent: 'flex-end', maxWidth: 420 }}>
-    <Menu label="Actions">
+  <div className="jrk-row" style={{ justifyContent: 'flex-end', maxWidth: 420, minHeight: 260 }}>
+    <Menu label="Actions" defaultOpen>
       <MenuItem onSelect={() => {}}>Export CSV</MenuItem>
       <MenuSeparator />
       <MenuItem danger onSelect={() => {}}>Remove from portfolio</MenuItem>
@@ -47,8 +47,8 @@ export const Danger = () => (
 /* `disabled` for a row that is temporarily unavailable. A row that can NEVER
    apply on this screen should be omitted, not disabled. */
 export const Disabled = () => (
-  <div className="jrk-row" style={{ justifyContent: 'flex-end', maxWidth: 420 }}>
-    <Menu label="Actions">
+  <div className="jrk-row" style={{ justifyContent: 'flex-end', maxWidth: 420, minHeight: 260 }}>
+    <Menu label="Actions" defaultOpen>
       <MenuItem onSelect={() => {}}>Export CSV</MenuItem>
       <MenuItem disabled onSelect={() => {}}>Export XLSX — no July close</MenuItem>
       <MenuItem onSelect={() => {}}>Schedule report</MenuItem>
@@ -64,9 +64,9 @@ export const KeepOpen = () => {
   const toggle = (k: string) =>
     setOn((v) => (v.includes(k) ? v.filter((x) => x !== k) : [...v, k]));
   return (
-    <div className="jrk-stack" style={{ maxWidth: 420 }}>
+    <div className="jrk-stack" style={{ maxWidth: 420, minHeight: 300 }}>
       <div className="jrk-row" style={{ justifyContent: 'flex-end' }}>
-        <Menu label="Columns" width="240px">
+        <Menu label="Columns" width="240px" defaultOpen>
           <MenuLabel>Show columns</MenuLabel>
           {[
             ['occupancy', 'Occupancy'],

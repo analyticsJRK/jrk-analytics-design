@@ -62,6 +62,19 @@ function Figures() {
   );
 }
 
+/* THE PRIMARY CARD — the guide actually open on step 1.
+   Every other story starts closed, which photographs as a stat card and a
+   button and says nothing about the component. Here `open` is a plain prop, so
+   the card can show the scrim, the cutout ring, the callout and the derivation
+   at once. Note the ring: in dark mode it is the ONLY thing marking the hole,
+   because the scrim separates surfaces at just 1.17:1 there. */
+export const Open = () => (
+  <div className="jrk-stack" style={{ maxWidth: 620, minHeight: 520 }}>
+    <Figures />
+    <SpotlightGuide steps={STEPS} open stepId="noi" onClose={() => {}} />
+  </div>
+);
+
 /* The default. `open` and `stepId` are both owned by the app — see Addressable
    below for why controlling the step is the recommended shape. */
 export const Default = () => {

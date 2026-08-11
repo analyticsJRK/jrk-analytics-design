@@ -13,17 +13,59 @@
     "guides/*.md"
   ],
   "overrides": {
-    "NavMenu": { "cardMode": "single", "primaryStory": "Open", "viewport": "900x700" },
-    "BarList": { "cardMode": "column" },
-    "Tag": { "cardMode": "column" },
-    "Card": { "cardMode": "column" },
-    "ChartCard": { "cardMode": "column" },
-    "CellBarSigned": { "cardMode": "column" },
-    "HeatLegend": { "cardMode": "column" },
-    "OrgChart": { "cardMode": "column" },
-    "OrgNode": { "cardMode": "column" }
+    "NavMenu": {
+      "cardMode": "single",
+      "primaryStory": "Open",
+      "viewport": "900x700"
+    },
+    "BarList": {
+      "cardMode": "column"
+    },
+    "Tag": {
+      "cardMode": "column"
+    },
+    "Card": {
+      "cardMode": "column"
+    },
+    "ChartCard": {
+      "cardMode": "column"
+    },
+    "CellBarSigned": {
+      "cardMode": "column"
+    },
+    "HeatLegend": {
+      "cardMode": "column"
+    },
+    "OrgChart": {
+      "cardMode": "column"
+    },
+    "OrgNode": {
+      "cardMode": "column"
+    },
+    "Menu": {
+      "cardMode": "single",
+      "primaryStory": "Open",
+      "viewport": "760x420"
+    },
+    "MenuItem": {
+      "cardMode": "column"
+    },
+    "MenuLabel": {
+      "cardMode": "column"
+    },
+    "MenuSeparator": {
+      "cardMode": "column"
+    },
+    "SpotlightGuide": {
+      "cardMode": "single",
+      "primaryStory": "Open",
+      "viewport": "900x620"
+    }
   },
-  "runtimeFontPrefixes": ["SF Pro", "SF Mono"],
+  "runtimeFontPrefixes": [
+    "SF Pro",
+    "SF Mono"
+  ],
   "extraFonts": [
     ".ds-sync/node_modules/@fontsource/inter/latin-400.css",
     ".ds-sync/node_modules/@fontsource/inter/latin-500.css",
