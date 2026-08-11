@@ -619,7 +619,20 @@
  * ONE BRANCH PER CHART. Two --rollup branches both start at slot 1, so branch
  * B's first child can end up beside branch A's last child wearing the same
  * colour — the one case that breaks adjacency. <OrgNode> warns in development.
- * It is also the right IA answer: one organising principle, named on screen. */
+ * It is also the right IA answer: one organising principle, named on screen.
+ *
+ * THE ROOT LIST CAN CARRY IT TOO, and that is not a special case in the CSS —
+ * the rules below select `.jrk-org__branch--rollup > .jrk-org__node`, and
+ * `.jrk-org` holds `.jrk-org__node` children exactly as a branch does, so
+ * putting the class on the root <ul> colours the ROOTS. `<OrgChart rollup>` is
+ * the React spelling.
+ *
+ * That is the multi-root chart's only answer, and the rule above is why. A chart
+ * with several roots has no parent node to hang a rollup from; setting it on
+ * each root restarts the palette at slot 1 per root and stands two slot-1
+ * subtrees side by side, which is precisely the adjacency this whole scheme
+ * rests on not doing. The root list IS the single parent those roots lack. Still
+ * one rollup per chart — the root list or a node, never both. */
 
 /* THE KEYLINE CARRIES TWO CHANNELS, HUE AND TEXTURE, AND THE PAIRING IS DERIVED
    RATHER THAN CHOSEN. Hue alone tops out fast: measured against scripts/cvd.mjs

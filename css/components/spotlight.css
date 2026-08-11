@@ -1,0 +1,259 @@
+/* Spotlight — an anchored, step-through overlay that teaches a number in place.
+ *
+ * SCOPE (layer 1). This is deliberately NOT a product tour. philosophy.md is
+ * explicit that the interface must need no instruction and the domain will
+ * always need some, so a step that explains where the export button lives is a
+ * scope failure this component should not be used to paper over. What it is for
+ * is the gap that file names as unbuilt: teaching accrual vs cash, T12, CAGR or
+ * a cadence target AT the figure that depends on them. That is why
+ * __derivation exists and why it is the part worth keeping.
+ *
+ * BEHAVIOR (layer 3) comes from the platform, not from script. The root is a
+ * <dialog> opened with showModal(), which buys focus trapping, Esc-to-close and
+ * inertness of everything behind it — the same argument .jrk-modal makes in
+ * feedback.css. A modal dialog also paints in the TOP LAYER, which is the whole
+ * trick here: the page renders underneath it, so a hole in the scrim reveals
+ * the real element, already inert. Nothing has to be cloned, re-rendered or
+ * lifted out of the page to be spotlit.
+ *
+ * Geometry is the one thing CSS cannot know. JS writes --jrk-spotlight-x/y/w/h/r
+ * and --jrk-spotlight-callout-x/y as plain lengths; every colour stays here, so
+ * the theme still reaches all of it and no inline style carries a hex.
+ */
+
+/* ============================== root ============================== */
+
+.jrk-spotlight {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: hidden;
+  color: var(--jrk-text-primary);
+}
+
+/* Suppressed on purpose. The cutout's spread shadow IS the scrim, and it has a
+   hole in it; a wash here would paint over that hole and undo the component.
+   The dialog is still modal — inertness comes from showModal(), not from the
+   backdrop being painted. */
+.jrk-spotlight::backdrop {
+  background: transparent;
+}
+
+/* ============================== cutout ============================== */
+
+/* One element paints the entire scrim, as a 100vmax spread shadow around a
+   transparent box. The box is the hole. This is what lets the hole have a
+   radius that matches the tile underneath it — a four-rectangle scrim cannot
+   round its inner corners, and a mask would put the colour in a place the
+   theme has a harder time reaching.
+   Clipped to the viewport by overflow:hidden on the root. */
+.jrk-spotlight__cutout {
+  position: fixed;
+  top: var(--jrk-spotlight-y, 50%);
+  left: var(--jrk-spotlight-x, 50%);
+  width: var(--jrk-spotlight-w, 0px);
+  height: var(--jrk-spotlight-h, 0px);
+  border-radius: var(--jrk-spotlight-r, var(--jrk-radius-lg));
+  pointer-events: none;
+
+  /* TWO channels, and each one does the whole job in exactly one theme — the
+     same shape as .jrk-card--interactive:hover needing both a shadow and a
+     fill. Do not delete either as redundant; which one is doing nothing
+     depends on the theme.
+
+       the wash    separates the spotlit card from the page at 4.76:1 in LIGHT.
+                   In dark it manages 1.17:1 and CANNOT do better: scrimming to
+                   pure black tops out at 1.34:1, because the #232326 card is
+                   already nearly black. No alpha fixes this.
+       the ring    2px border.accent — 5.22:1 on the light page, 8.41:1 on the
+                   dark one. Additive in light, load-bearing in DARK, where it
+                   is the only thing that makes the hole findable.
+
+     Drawn in both themes rather than split light/dark, per the conflict
+     register: pay the redundant ink instead of running two mechanisms. The
+     numbers live on color.overlay.spotlight, because validate does not reach
+     this namespace and will not catch a regression here. */
+  box-shadow:
+    0 0 0 100vmax var(--jrk-overlay-spotlight),
+    inset 0 0 0 2px var(--jrk-border-accent);
+
+  transition:
+    top var(--jrk-transition),
+    left var(--jrk-transition),
+    width var(--jrk-transition),
+    height var(--jrk-transition),
+    border-radius var(--jrk-transition);
+}
+
+/* A step about the page as a whole, with no element to point at: the scrim
+   covers everything and the callout centres. The ring would otherwise draw a
+   2px accent rectangle around a zero-size box in the corner. */
+.jrk-spotlight--untethered .jrk-spotlight__cutout {
+  box-shadow: 0 0 0 100vmax var(--jrk-overlay-spotlight);
+}
+
+/* ============================== callout ============================== */
+
+/* Border AND shadow, both required. In light the panel is 5.12:1 against the
+   scrim and the hairline is trim; in DARK surface.raised on the scrimmed page
+   is 1.31:1, so the border.default hairline (1.37:1 on the panel) is what
+   states the panel's edge at all. Same recipe as .jrk-modal, deliberately —
+   this is the established "raised panel floating on a wash" pattern and a
+   second one would be a new thing to learn. */
+.jrk-spotlight__callout {
+  position: fixed;
+  top: var(--jrk-spotlight-callout-y, 50%);
+  left: var(--jrk-spotlight-callout-x, 50%);
+  display: flex;
+  flex-direction: column;
+  width: min(360px, calc(100vw - var(--jrk-space-8)));
+  max-height: calc(100vh - var(--jrk-space-8));
+  background: var(--jrk-surface-raised);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-xl);
+  box-shadow: var(--jrk-shadow-xl);
+  overflow: hidden;
+  transition:
+    top var(--jrk-transition),
+    left var(--jrk-transition);
+}
+
+.jrk-spotlight--untethered .jrk-spotlight__callout {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.jrk-spotlight__header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-1);
+  padding: var(--jrk-space-4) var(--jrk-space-4) var(--jrk-space-2);
+}
+
+/* "Step 2 of 5" in words. The progress bar in the footer is a second reading of
+   the same fact and cannot be the only one — it is a length, which is not a
+   label, and it says nothing at all to a screen reader. */
+.jrk-spotlight__step {
+  font-size: var(--jrk-text-2xs);
+  font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-caps);
+  text-transform: uppercase;
+  color: var(--jrk-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.jrk-spotlight__title {
+  font-size: var(--jrk-text-lg);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: var(--jrk-leading-snug);
+}
+
+/* The heading carries tabindex="-1" and is focused programmatically on every
+   step change, so a screen reader announces the new step. It is not operable,
+   so it takes no ring.
+   BOTH declarations are required and dropping either brings the ring back: the
+   system focus style in base.css is an outline AND a shadow.focus bloom, and
+   suppressing only the outline leaves a soft rounded box floating around the
+   title — which is exactly how this shipped in the first screenshot. */
+.jrk-spotlight__title:focus,
+.jrk-spotlight__title:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.jrk-spotlight__body {
+  padding: 0 var(--jrk-space-4) var(--jrk-space-4);
+  font-size: var(--jrk-text-sm);
+  line-height: var(--jrk-leading-normal);
+  color: var(--jrk-text-secondary);
+  overflow-y: auto;
+}
+
+/* ============================== derivation ============================== */
+
+/* Layer 5, and the reason this component is not a tour: "a number that cannot
+   show its inputs is not finished." The figure being explained expands to the
+   terms it was computed from.
+   A hairline rather than an inset well, because surface.subtle and
+   surface.raised are BOTH #2c2c2e in dark — a well here would be invisible on
+   the panel it sits in, which is the trap already recorded on .jrk-menu__item. */
+.jrk-spotlight__derivation {
+  margin: 0;
+  padding: var(--jrk-space-3) var(--jrk-space-4);
+  border-top: 1px solid var(--jrk-border-subtle);
+  font-size: var(--jrk-text-xs);
+}
+
+.jrk-spotlight__term {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--jrk-space-3);
+  padding: var(--jrk-space-0_5) 0;
+}
+
+.jrk-spotlight__term dt {
+  color: var(--jrk-text-muted);
+}
+
+.jrk-spotlight__term dd {
+  margin: 0;
+  color: var(--jrk-text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The result line — the figure the reader was looking at, restated as the
+   outcome of the terms above it. */
+.jrk-spotlight__term--total {
+  margin-top: var(--jrk-space-1);
+  padding-top: var(--jrk-space-1_5);
+  border-top: 1px solid var(--jrk-border-subtle);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-spotlight__term--total dt {
+  color: var(--jrk-text-primary);
+}
+
+/* Window, basis, population. The three things that make a finance figure
+   citable, and the three most often left off it. */
+.jrk-spotlight__basis {
+  padding: var(--jrk-space-2) var(--jrk-space-4) 0;
+  font-size: var(--jrk-text-2xs);
+  color: var(--jrk-text-muted);
+}
+
+/* ============================== footer ============================== */
+
+/* surface.subtle here is a light-mode fill and a deliberate no-op in dark,
+   where it equals surface.raised; the border-top carries the separation in
+   both. Inherited from .jrk-modal__footer on purpose rather than diverged. */
+.jrk-spotlight__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--jrk-space-3);
+  padding: var(--jrk-space-3) var(--jrk-space-4);
+  background: var(--jrk-surface-subtle);
+  border-top: 1px solid var(--jrk-border-subtle);
+}
+
+.jrk-spotlight__progress {
+  flex: 1;
+  min-width: 0;
+  max-width: 96px;
+}
+
+.jrk-spotlight__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+}

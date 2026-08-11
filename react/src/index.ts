@@ -26,6 +26,9 @@ export type { ListProps, ListRowProps } from './List';
 export { Card, Empty, Alert, Spinner } from './Card';
 export type { CardProps, EmptyProps, AlertProps } from './Card';
 
+export { Menu, MenuItem, MenuLabel, MenuSeparator } from './Menu';
+export type { MenuProps, MenuItemProps } from './Menu';
+
 export { Badge, Status, Tag } from './Badge';
 export type { BadgeProps, StatusProps, TagProps, StatusTone } from './Badge';
 
@@ -50,6 +53,14 @@ export type { OrgChartProps, OrgNodeProps } from './Org';
 
 export { AuthLayout, SsoButton } from './Auth';
 export type { AuthLayoutProps, SsoButtonProps } from './Auth';
+
+export { SpotlightGuide } from './Spotlight';
+export type {
+  SpotlightGuideProps,
+  SpotlightStep,
+  SpotlightTarget,
+  SpotlightTerm,
+} from './Spotlight';
 
 export {
   AppShell,

@@ -155,6 +155,36 @@
   z-index: var(--jrk-z-popover);
 }
 
+/* THE SURFACE ABOVE CARRIES NO POSITION, deliberately — the nav flyout composes
+   on it and places itself `fixed` against the rail. These rules are the OTHER
+   case: a panel anchored under the button that opened it, which is what <Menu>
+   renders. Without them every consumer re-derived the same
+   `position: absolute; inset-inline-end: 0; top: calc(100% + …)` and chose its
+   own offset, so two dropdowns in one header row hung at different distances
+   from their own triggers.
+
+   `inset-inline-end`, not `right`: under RTL the trailing edge is the left one,
+   and a panel that opens off the viewport in one direction is not a menu. */
+.jrk-menu-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+.jrk-menu--anchored {
+  position: absolute;
+  inset-inline-end: 0;
+  top: calc(100% + var(--jrk-space-1));
+  /* A long list scrolls rather than running off the bottom of the page. The
+     trigger cannot move, so the panel is what has to give. */
+  max-height: min(70vh, 560px);
+  overflow-y: auto;
+}
+
+.jrk-menu--anchored.jrk-menu--start {
+  inset-inline-end: auto;
+  inset-inline-start: 0;
+}
+
 .jrk-menu__item {
   display: flex;
   align-items: center;
@@ -230,8 +260,12 @@
   overflow: hidden;
 }
 
+/* The wash is a token now (overlay.scrim), holding the value this rule carried
+   inline — same colour, same alpha, so nothing moves. It is shared with nothing
+   yet: the spotlight deliberately takes its own, heavier token, because a modal
+   mutes the page and a spotlight has to make one hole in it findable. */
 .jrk-modal::backdrop {
-  background: rgba(16, 21, 28, 0.5);
+  background: var(--jrk-overlay-scrim);
   backdrop-filter: blur(2px);
 }
 

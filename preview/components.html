@@ -748,6 +748,75 @@
     </div>
   </section>
 
+  <!-- ============================ spotlight ============================ -->
+  <section class="gal-sec">
+    <h2>Spotlight guide</h2>
+
+    <div class="gal-demo gal-demo--stack">
+      <div class="jrk-card" style="max-width:520px">
+        <div class="jrk-card__body">
+          <div class="jrk-stat-row">
+            <div class="jrk-stat" id="spot-noi">
+              <span class="jrk-stat__label">NOI vs budget</span>
+              <span class="jrk-stat__value jrk-stat__value--sm">+7.0<span class="jrk-stat__unit">%</span></span>
+            </div>
+            <div class="jrk-stat" id="spot-delinq">
+              <span class="jrk-stat__label">Delinquency 30+</span>
+              <span class="jrk-stat__value jrk-stat__value--sm">4.7<span class="jrk-stat__unit">%</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="jrk-btn jrk-btn--secondary" id="open-spotlight" style="align-self:flex-start">
+        Explain these figures
+      </button>
+
+      <dialog class="jrk-spotlight" id="demo-spotlight" aria-labelledby="sp-title">
+        <div class="jrk-spotlight__cutout"></div>
+        <div class="jrk-spotlight__callout" id="sp-callout">
+          <div class="jrk-spotlight__header">
+            <p class="jrk-spotlight__step" id="sp-step">Step 1 of 3</p>
+            <h2 class="jrk-spotlight__title" id="sp-title" tabindex="-1">Net operating income</h2>
+          </div>
+          <div class="jrk-spotlight__body">
+            <p id="sp-body">…</p>
+            <p class="jrk-spotlight__basis" id="sp-basis"></p>
+          </div>
+          <dl class="jrk-spotlight__derivation" id="sp-derivation"></dl>
+          <div class="jrk-spotlight__footer">
+            <div class="jrk-progress jrk-spotlight__progress" role="presentation" aria-hidden="true">
+              <span class="jrk-progress__fill" id="sp-fill" style="width:33%"></span>
+            </div>
+            <div class="jrk-spotlight__actions">
+              <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" id="sp-skip">Skip</button>
+              <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" id="sp-back">Back</button>
+              <button class="jrk-btn jrk-btn--cta jrk-btn--sm" id="sp-next">Next</button>
+            </div>
+          </div>
+        </div>
+      </dialog>
+    </div>
+
+    <div class="gal-rule">
+      Not a product tour. The interface is supposed to need no instruction; the
+      <em>domain</em> always needs some, so this explains a figure where the figure is —
+      accrual vs cash, T12, what went into the number. The
+      <code class="jrk-mono">__derivation</code> block is the point of the component:
+      a number that cannot show its inputs is not finished.
+    </div>
+    <div class="gal-rule">
+      The hole is a <code class="jrk-mono">100vmax</code> spread shadow around a transparent
+      box, inside a native <code class="jrk-mono">&lt;dialog&gt;</code> opened with
+      <code class="jrk-mono">showModal()</code> — so the page renders underneath in the top
+      layer and the spotlit element is already inert, with focus trapping and Esc for free.
+      The cutout carries <strong>both</strong> a scrim and a 2px accent ring, and each does
+      the whole job in exactly one theme: the wash separates the tile at 4.76:1 in light but
+      only 1.17:1 in dark, where the card is already near-black and no alpha can do better
+      (pure black tops out at 1.34:1). In dark the ring is the only boundary. Check both.
+    </div>
+  </section>
+
   <!-- ============================ shell ============================ -->
   <section class="gal-sec">
     <h2>Navigation</h2>
@@ -780,6 +849,123 @@
   const modal = document.getElementById('demo-modal');
   document.getElementById('open-modal').onclick = () => modal.showModal();
   modal.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => modal.close()));
+
+  /* Spotlight driver. Gallery chrome — <SpotlightGuide> owns all of this in an
+     app. Kept here in plain JS because the CSS layer is the primary interface
+     and has to stand up without React: everything below is geometry, and every
+     colour stays in spotlight.css. */
+  (() => {
+    const STEPS = [
+      {
+        target: '#spot-noi',
+        title: 'NOI vs budget',
+        body: 'Net operating income against the approved budget for the same period. Accrual basis, so it counts rent billed rather than rent received — the cash figure sits lower whenever delinquency is rising.',
+        basis: 'T12 · accrual basis · 37 properties',
+        derivation: [
+          ['Actual NOI', '$1,580,906'],
+          ['Budgeted NOI', '$1,478,106'],
+          ['Variance', '+$102,800', true],
+        ],
+      },
+      {
+        target: '#spot-delinq',
+        title: 'Delinquency, 30+ days',
+        body: 'Share of billed rent unpaid 30 days past due. Falling is good here — direction and interpretation are separate facts, and this is the metric where assuming up-is-good gets it backwards.',
+        basis: 'As of 29 Jul 2026 · 37 properties',
+        derivation: [
+          ['Billed rent', '$4,486,300'],
+          ['Unpaid 30+ days', '$210,856'],
+          ['Delinquency', '4.70%', true],
+        ],
+      },
+      {
+        target: null,
+        title: 'Both figures share one cut',
+        body: 'Every number on this card is the same window, the same basis and the same 37 properties. When a tile mixes cuts it says so on the tile.',
+      },
+    ];
+
+    const dlg = document.getElementById('demo-spotlight');
+    const callout = document.getElementById('sp-callout');
+    const GAP = 12, MARGIN = 16, W = 360;
+    let i = 0;
+
+    function render() {
+      const s = STEPS[i];
+      document.getElementById('sp-step').textContent = `Step ${i + 1} of ${STEPS.length}`;
+      document.getElementById('sp-title').textContent = s.title;
+      document.getElementById('sp-body').textContent = s.body;
+      document.getElementById('sp-basis').textContent = s.basis || '';
+      document.getElementById('sp-fill').style.width = `${((i + 1) / STEPS.length) * 100}%`;
+      /* NOT .hidden: .jrk-btn sets display:inline-flex, which out-specifies the
+         UA's [hidden]{display:none} and the button stays on screen. org.css
+         records the same trap for .jrk-org__branch. */
+      document.getElementById('sp-back').style.display = i === 0 ? 'none' : '';
+      document.getElementById('sp-skip').style.display = i === STEPS.length - 1 ? 'none' : '';
+      document.getElementById('sp-next').textContent = i === STEPS.length - 1 ? 'Done' : 'Next';
+
+      const dl = document.getElementById('sp-derivation');
+      dl.hidden = !s.derivation;
+      dl.innerHTML = (s.derivation || [])
+        .map(([k, v, total]) =>
+          `<div class="jrk-spotlight__term${total ? ' jrk-spotlight__term--total' : ''}">` +
+          `<dt>${k}</dt><dd>${v}</dd></div>`)
+        .join('');
+
+      /* Bring the target into view first. The scrim is a spread shadow around
+         the hole, so a target far outside the viewport leaves the page
+         unscrimmed — see the onScreen() note in Spotlight.tsx. */
+      const t = s.target && document.querySelector(s.target);
+      if (t) t.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      position();
+      document.getElementById('sp-title').focus();
+    }
+
+    function position() {
+      const s = STEPS[i];
+      const el = s.target && document.querySelector(s.target);
+      const b = el && el.getBoundingClientRect();
+      /* Off-screen target -> untethered (full scrim, no hole) rather than a
+         torn scrim. Mirrors onScreen() in Spotlight.tsx. */
+      const on = !!b && b.top < innerHeight && b.bottom > 0 && b.left < innerWidth && b.right > 0;
+      dlg.classList.toggle('jrk-spotlight--untethered', !on);
+      if (!on) return;
+
+      const pad = 6;
+      const r = (parseFloat(getComputedStyle(el).borderTopLeftRadius) || 0) + pad;
+      const rect = { x: b.left - pad, y: b.top - pad, w: b.width + pad * 2, h: b.height + pad * 2 };
+      for (const [k, v] of Object.entries({ ...rect, r })) {
+        dlg.style.setProperty(`--jrk-spotlight-${k}`, `${v}px`);
+      }
+
+      const h = callout.offsetHeight || 260;
+      const below = window.innerHeight - (rect.y + rect.h) - GAP - MARGIN;
+      const above = rect.y - GAP - MARGIN;
+      let y = below >= h || below >= above ? rect.y + rect.h + GAP : rect.y - h - GAP;
+      let x = rect.x + rect.w / 2 - W / 2;
+      x = Math.min(Math.max(x, MARGIN), Math.max(MARGIN, window.innerWidth - W - MARGIN));
+      y = Math.min(Math.max(y, MARGIN), Math.max(MARGIN, window.innerHeight - h - MARGIN));
+      dlg.style.setProperty('--jrk-spotlight-callout-x', `${x}px`);
+      dlg.style.setProperty('--jrk-spotlight-callout-y', `${y}px`);
+    }
+
+    document.getElementById('open-spotlight').onclick = () => { i = 0; dlg.showModal(); render(); };
+    document.getElementById('sp-next').onclick = () =>
+      i === STEPS.length - 1 ? dlg.close() : (i++, render());
+    document.getElementById('sp-back').onclick = () => { i--; render(); };
+    document.getElementById('sp-skip').onclick = () => dlg.close();
+    /* Measure once and the hole goes stale the moment anything reflows under
+       it. <SpotlightGuide> watches the same four signals — see the note there.
+       The ResizeObserver takes the ROOT as well as the target, because a reflow
+       can move the target without resizing it. */
+    const repos = () => dlg.open && position();
+    addEventListener('scroll', repos, { capture: true, passive: true });
+    addEventListener('resize', repos);
+    const ro = new ResizeObserver(repos);
+    ro.observe(document.documentElement);
+    STEPS.forEach((s) => { const t = s.target && document.querySelector(s.target); if (t) ro.observe(t); });
+    document.fonts?.ready.then(repos);
+  })();
 
   /* Org chart disclosure. Gallery chrome — the React <OrgNode> owns this state
      in an app; here it is four lines so the stacked branch can actually be

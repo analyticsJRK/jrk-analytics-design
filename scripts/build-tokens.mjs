@@ -73,6 +73,10 @@ addThemed('border', T.color.border);
 addThemed('accent', T.color.accent);
 addThemed('status', T.color.status); // -> --jrk-status-good-mark / -text / -wash
 addThemed('focus', T.color.focus);
+// Full-viewport washes (modal backdrop, spotlight cutout). Themed, and NOT
+// reached by validate — see the $comment on the namespace for why the figures
+// are recorded on the tokens by hand.
+addThemed('overlay', T.color.overlay);
 
 // ---- chart
 T.chart.categorical.slots.forEach((s) => add(`chart-${s.slot}`, s.light, s.dark));

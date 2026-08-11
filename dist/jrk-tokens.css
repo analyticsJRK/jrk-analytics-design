@@ -88,6 +88,8 @@
   --jrk-status-neutral-wash: #f2f2f7;
   --jrk-focus-ring: #0069d9;
   --jrk-focus-offset: #ffffff;
+  --jrk-overlay-scrim: rgba(16, 21, 28, 0.5);
+  --jrk-overlay-spotlight: rgba(16, 21, 28, 0.6);
   --jrk-chart-1: #007aff;
   --jrk-chart-2: #fa9418;
   --jrk-chart-3: #00c7be;
@@ -300,6 +302,8 @@
     --jrk-status-neutral-wash: #2c2c2e;
     --jrk-focus-ring: #64b5ff;
     --jrk-focus-offset: #232326;
+    --jrk-overlay-scrim: rgba(16, 21, 28, 0.5);
+    --jrk-overlay-spotlight: rgba(16, 21, 28, 0.54);
     --jrk-chart-1: #0a84ff;
     --jrk-chart-2: #cb7d00;
     --jrk-chart-3: #15a7a2;
@@ -398,6 +402,8 @@
     --jrk-status-neutral-wash: #2c2c2e;
     --jrk-focus-ring: #64b5ff;
     --jrk-focus-offset: #232326;
+    --jrk-overlay-scrim: rgba(16, 21, 28, 0.5);
+    --jrk-overlay-spotlight: rgba(16, 21, 28, 0.54);
     --jrk-chart-1: #0a84ff;
     --jrk-chart-2: #cb7d00;
     --jrk-chart-3: #15a7a2;

@@ -12,6 +12,17 @@ export interface Column<Row> {
   /** Right-aligns on tabular figures. Use for every money and count column. */
   numeric?: boolean;
   align?: 'start' | 'center';
+  /** Render this column as `<th scope="row">` — the cell that NAMES the row.
+   *
+   *  Set it on the identity column of any table whose rows are things rather
+   *  than readings: a property, a unit, a person, a month. It is what makes a
+   *  screen reader announce "Cascades, 460 units" instead of reading out a row
+   *  of bare numbers, and it is most of the difference between a table and a
+   *  grid of figures.
+   *
+   *  A row header is a LABEL, so it also opts out of the centred default and
+   *  starts — see the leading-column rule in table.css. */
+  rowHeader?: boolean;
   /** Value used for sorting. Required to make the column sortable — a column
    *  with a custom `cell` has no sortable value otherwise. */
   sortValue?: (row: Row) => string | number;
@@ -26,11 +37,24 @@ export interface DataTableProps<Row> {
   density?: 'compact' | 'default' | 'comfortable';
   /** Freezes the first column while the table scrolls sideways. */
   stickyFirst?: boolean;
+  /** Caps the scroll port so the sticky header actually pins.
+   *
+   *  `thead th` is `position: sticky; top: 0` in every table this library
+   *  draws, and on a table that does not scroll VERTICALLY that rule does
+   *  nothing at all — sticky resolves against the nearest scrolling ancestor,
+   *  which is the wrapper, and an uncapped wrapper never scrolls; the page body
+   *  does. So a long table's header scrolls away while the CSS says it is
+   *  pinned. Pass a height (`'70vh'`, `'min(70vh, 820px)'`) and the header
+   *  stays put. Any CSS length. */
+  maxHeight?: string;
   zebra?: boolean;
   loading?: boolean;
   /** Shown when `rows` is empty and not loading. Always supply one. */
   empty?: ReactNode;
   onRowClick?: (row: Row, index: number) => void;
+  /** Per-row class, for state the table itself does not own — the row being
+   *  edited, the row a filter matched. Returning nothing is fine. */
+  rowClassName?: (row: Row, index: number) => string | undefined;
   selectedKeys?: ReadonlySet<string>;
   footer?: ReactNode;
   className?: string;
@@ -43,10 +67,12 @@ export function DataTable<Row>({
   caption,
   density = 'default',
   stickyFirst,
+  maxHeight,
   zebra,
   loading,
   empty,
   onRowClick,
+  rowClassName,
   selectedKeys,
   footer,
   className,
@@ -77,7 +103,10 @@ export function DataTable<Row>({
   const showEmpty = !loading && sorted.length === 0;
 
   return (
-    <div className={cx('jrk-table-wrap', className)}>
+    <div
+      className={cx('jrk-table-wrap', maxHeight && 'jrk-table-wrap--capped', className)}
+      style={maxHeight ? { maxHeight } : undefined}
+    >
       <table
         className={cx(
           'jrk-table',
@@ -97,7 +126,11 @@ export function DataTable<Row>({
                   key={col.key}
                   scope="col"
                   style={col.width ? { width: col.width } : undefined}
-                  className={cx(col.numeric && 'jrk-num', col.align === 'center' && 'jrk-col-center')}
+                  className={cx(
+                    col.numeric && !col.rowHeader && 'jrk-num',
+                    col.align === 'center' && 'jrk-col-center',
+                    col.align === 'start' && 'jrk-col-start',
+                  )}
                   aria-sort={isSorted ? sort!.dir : undefined}
                 >
                   {col.sortValue ? (
@@ -139,18 +172,36 @@ export function DataTable<Row>({
               return (
                 <tr
                   key={key}
+                  className={cx(rowClassName?.(row, i))}
                   aria-selected={selectedKeys?.has(key) || undefined}
                   onClick={onRowClick ? () => onRowClick(row, i) : undefined}
                   style={onRowClick ? { cursor: 'pointer' } : undefined}
                 >
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className={cx(col.numeric && 'jrk-num', col.align === 'center' && 'jrk-col-center')}
-                    >
-                      {col.cell ? col.cell(row, i) : String((row as Record<string, unknown>)[col.key] ?? '')}
-                    </td>
-                  ))}
+                  {columns.map((col) => {
+                    const content = col.cell
+                      ? col.cell(row, i)
+                      : String((row as Record<string, unknown>)[col.key] ?? '');
+                    const cls = cx(
+                      col.numeric && !col.rowHeader && 'jrk-num',
+                      col.align === 'center' && 'jrk-col-center',
+                      // `start` was in the type and in none of the output: the union
+                      // offers two alignments and the renderer emitted a class for
+                      // one, so a prose column that asked to start silently centred
+                      // and the caller had no way to tell the prop from a no-op.
+                      col.align === 'start' && 'jrk-col-start',
+                    );
+                    // `scope="row"` is the whole point of the flag — without it a
+                    // <th> in the body is just a bold cell and announces nothing.
+                    return col.rowHeader ? (
+                      <th key={col.key} scope="row" className={cls}>
+                        {content}
+                      </th>
+                    ) : (
+                      <td key={col.key} className={cls}>
+                        {content}
+                      </td>
+                    );
+                  })}
                 </tr>
               );
             })}

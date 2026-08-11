@@ -12,7 +12,24 @@
   height: var(--btn-h);
   padding-inline: var(--btn-px);
   font-size: var(--btn-fs);
-  font-weight: var(--jrk-weight-medium);
+  /* A CONTROL LABEL IS SET LIKE THE NAV, NOT LIKE BODY COPY — regular weight and
+     the tight tracking, which is the same pairing `.jrk-nav-item` uses. It was
+     medium at normal tracking, which made a row of buttons the widest and
+     heaviest type on a page whose sidebar sits beside it in the same size; two
+     treatments for the same kind of word (a destination, an action) read as two
+     type systems.
+
+     Narrow here means TRACKING, not a width axis. Inter is loaded with
+     `ital,opsz,wght` only, so `font-stretch: condensed` is a silent no-op —
+     see css/fonts.css.
+
+     THE ONE THING THIS MUST NOT DISTURB is the segmented control's weight step,
+     which is the only channel of its selected state that survives greyscale and
+     both dichromacies. That step is now regular -> semibold rather than medium
+     -> semibold, i.e. wider than before; the thumb's own `font-weight` rule at
+     the end of this file is what carries it and still must not be "cleaned up". */
+  font-weight: var(--jrk-weight-regular);
+  letter-spacing: var(--jrk-tracking-tight);
   line-height: 1;
   white-space: nowrap;
   text-decoration: none;

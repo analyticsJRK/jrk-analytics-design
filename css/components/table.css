@@ -102,23 +102,61 @@
 
 /* ---------- body ---------- */
 
-.jrk-table tbody td {
+/* `tbody th` IS A BODY CELL AND IS LISTED EVERYWHERE `td` IS. A row-identifying
+   first column should be `<th scope="row">` — that is what makes a screen reader
+   announce "Cascades" before each value in the row instead of reading a wall of
+   numbers — and for a long time this file styled `td` only. The consequences
+   were not subtle and were all found downstream, one at a time: a row header
+   with ZERO padding, text flush against the table edge and sitting 16px left of
+   its own `thead` cell; no row separator, so the leading column read as a
+   detached panel while the rest of the table had rules; no hover, so the pinned
+   column was the one that did not light up with its row.
+   `tfoot` had the identical hole and produced "12-month total$31,320".
+
+   Anything added below for `tbody td` gets checked against `tbody th`, `tfoot th`
+   and `tfoot td` before it is considered done. */
+.jrk-table tbody td,
+.jrk-table tbody th {
   padding: var(--jrk-space-2_5) var(--jrk-space-4);
   border-bottom: 1px solid var(--jrk-border-subtle);
   vertical-align: middle;
+}
+
+.jrk-table tbody td {
   text-align: center;
 }
 
-.jrk-table tbody tr:last-child td {
+.jrk-table tbody tr:last-child td,
+.jrk-table tbody tr:last-child th {
   border-bottom: 0;
 }
 
-.jrk-table tbody tr:hover td {
+.jrk-table tbody tr:hover td,
+.jrk-table tbody tr:hover th {
   background: var(--jrk-surface-hover);
 }
 
-.jrk-table tbody tr[aria-selected='true'] td {
+.jrk-table tbody tr[aria-selected='true'] td,
+.jrk-table tbody tr[aria-selected='true'] th {
   background: var(--jrk-accent-wash);
+}
+
+/* ---------- footer ---------- */
+
+/* A totals row. Same padding as the body, a rule to separate it from the data,
+   and its own recessed fill so it is not read as one more row that happens to
+   be bold. */
+.jrk-table tfoot th,
+.jrk-table tfoot td {
+  padding: var(--jrk-space-2_5) var(--jrk-space-4);
+  border-top: 1px solid var(--jrk-border-default);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-primary);
+  background: var(--jrk-surface-subtle);
+}
+
+.jrk-table tfoot td {
+  text-align: center;
 }
 
 /* ---------- column alignment ---------- */
@@ -155,6 +193,30 @@
   text-align: end;
 }
 
+/* THE LEADING COLUMN STARTS, and it is the one standing exception to the centred
+   default above. It is not a value — it is the row's NAME (a property code, a
+   month, a unit number, a person), and a name is scanned down its left edge.
+   Centred, a column of mixed-length labels has a ragged left edge and the
+   reader loses the scan line they use to find the row they came for. Every
+   other column is being COMPARED; this one is being LOOKED UP.
+
+   A rule rather than `.jrk-col-start` on every first cell, because the opt-in
+   was being forgotten one table at a time and a header centred over start-
+   aligned cells reads as a broken table rather than as a choice. `.jrk-col-
+   center` out-specifies this (0-2-0 against 0-1-2) and is the way back where a
+   first column really is a value.
+
+   `tbody th` carries no `:first-child`: a row header is a label wherever it
+   sits, and in a table with a second identifying column it is the second one
+   that would otherwise fall through to centre. */
+.jrk-table thead th:first-child,
+.jrk-table tbody th,
+.jrk-table tbody td:first-child,
+.jrk-table tfoot th:first-child,
+.jrk-table tfoot td:first-child {
+  text-align: start;
+}
+
 /* Row-identifying first column. Sticks horizontally so it stays visible while
    the reader scrolls a wide table sideways. */
 .jrk-table--sticky-first th:first-child,
@@ -178,19 +240,41 @@
 /* ---------- density ---------- */
 
 .jrk-table--compact thead th,
-.jrk-table--compact tbody td {
+.jrk-table--compact tbody td,
+.jrk-table--compact tbody th,
+.jrk-table--compact tfoot th,
+.jrk-table--compact tfoot td {
   padding-block: var(--jrk-space-1_5);
 }
 
 .jrk-table--comfortable thead th,
-.jrk-table--comfortable tbody td {
+.jrk-table--comfortable tbody td,
+.jrk-table--comfortable tbody th,
+.jrk-table--comfortable tfoot th,
+.jrk-table--comfortable tfoot td {
   padding-block: var(--jrk-space-3);
 }
 
 /* Zebra striping is off by default — the row hairline already separates rows,
    and stripes fight with the selected-row tint. Opt in for very wide tables. */
-.jrk-table--zebra tbody tr:nth-child(even) td {
+.jrk-table--zebra tbody tr:nth-child(even) td,
+.jrk-table--zebra tbody tr:nth-child(even) th {
   background: var(--jrk-surface-subtle);
+}
+
+/* ---------- vertical scroll, which is what pins the header ----------
+
+   `thead th` is `position: sticky; top: 0` above, and sticky resolves against
+   the nearest SCROLLING ancestor — this wrapper. With no height cap the wrapper
+   never scrolls vertically, the page body does, and the header scrolls away
+   while the CSS says it is pinned. That is not a bug you find by reading the
+   header rule, so the cap is a named modifier rather than something each
+   consumer rediscovers: `<DataTable maxHeight>` sets it.
+
+   The height itself is the consumer's, because it depends on what else is on
+   the page; this only supplies the `overflow` the cap needs to mean anything. */
+.jrk-table-wrap--capped {
+  overflow: auto;
 }
 
 .jrk-table--zebra tbody tr:hover td {

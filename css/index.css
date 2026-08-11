@@ -48,6 +48,7 @@
 @import './components/chart.css';
 @import './components/org.css';
 @import './components/auth.css';
+@import './components/spotlight.css';
 
 /* LAST, and it must stay last — the single home for the "one brand edge per
    enclosure" rule, which resolves the edge treatment of a tile nested inside

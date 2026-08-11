@@ -41,14 +41,36 @@ export interface OrgChartProps {
    *  the one thing here that legitimately scrolls sideways. Turn it off when the
    *  chart is known to fit, or when an ancestor already scrolls. */
   scroll?: boolean;
+  /** Colour the chart's ROOTS as rollup groups — the same palette, textures and
+   *  subtree cascade as `<OrgNode rollup>`, hung on the root list rather than on
+   *  a node.
+   *
+   *  This exists for the MULTI-ROOT chart, which is the one case the node-level
+   *  prop cannot reach. A chart with a single root hangs the rollup on that root
+   *  and colours the level below it. A chart with several roots — an org with no
+   *  single head, or one whose top level the reader filtered away — has no
+   *  parent node to hang it from, and putting `rollup` on each root instead
+   *  restarts the palette at slot 1 per root, which stands two slot-1 subtrees
+   *  side by side. That adjacency is the one thing the colouring does not
+   *  survive. The root list is the single parent those roots do not otherwise
+   *  have, so it carries the grouping.
+   *
+   *  Still ONE per chart: use this or a node's `rollup`, never both. Nesting
+   *  warns in development. */
+  rollup?: boolean;
   children: ReactNode;
   className?: string;
 }
 
-export function OrgChart({ label, nodeWidth, scroll = true, children, className }: OrgChartProps) {
+export function OrgChart({ label, nodeWidth, scroll = true, rollup, children, className }: OrgChartProps) {
   const tree = (
     <ul
-      className={cx('jrk-org', className)}
+      /* `jrk-org__branch--rollup` on the root <ul> rather than a modifier of its
+         own. The palette rules select `.jrk-org__branch--rollup >
+         .jrk-org__node`, and the root list's children ARE `.jrk-org__node`,
+         exactly like a branch's — a separate class would mean eight more
+         nth-child rules that had to stay in step with the branch's forever. */
+      className={cx('jrk-org', rollup && 'jrk-org__branch--rollup', className)}
       aria-label={label}
       style={
         nodeWidth
@@ -56,7 +78,10 @@ export function OrgChart({ label, nodeWidth, scroll = true, children, className 
           : undefined
       }
     >
-      {children}
+      {/* Seeds the nesting guard, so a node that also sets `rollup` inside a
+          root-grouped chart warns rather than quietly laying a second palette
+          over the first. */}
+      <InRollup.Provider value={Boolean(rollup)}>{children}</InRollup.Provider>
     </ul>
   );
 

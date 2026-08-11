@@ -184,11 +184,27 @@
 }
 
 /* Square at the baseline (inline-start), 4px round at the data-end. Capped at
-   24px — a bar that fills its band leaves no air. */
+   24px — a bar that fills its band leaves no air.
+
+   THE FALLBACK IN `--series` IS NOT DEFENSIVE, IT IS THE DEFAULT, and without it
+   this component drew nothing at all. `<BarList>` states the rule in its own
+   doc — "Nominal categories all take slot 1: bar length already encodes the
+   value, so spending the identity channel on it would be re-encoding" — and
+   nothing anywhere implemented slot 1. `--series` was set by the CONSUMER or not
+   at all, and an undefined custom property invalidates the whole declaration, so
+   a plain `<BarList>` rendered exactly its labels, its values, and an empty
+   track between them.
+
+   It shipped that way because the only consumer set `--series` inline on every
+   fill to colour bars by category: working around the missing default while
+   hiding it, and breaking the one-slot rule in the same stroke. The moment that
+   override was removed — as it should have been — the bars vanished. Same
+   fallback on the stacked segment below, which `:nth-child` covers to eight and
+   leaves undefined past it. */
 .jrk-bars__fill {
   height: 16px;
   max-height: 24px;
-  background: var(--series);
+  background: var(--series, var(--jrk-chart-1));
   border-start-end-radius: var(--jrk-radius-data-end);
   border-end-end-radius: var(--jrk-radius-data-end);
 }
@@ -214,7 +230,7 @@
 }
 
 .jrk-stack-bar__seg {
-  background: var(--series);
+  background: var(--series, var(--jrk-chart-1));
   min-width: 2px;
 }
 
