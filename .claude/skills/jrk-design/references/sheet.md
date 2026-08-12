@@ -124,6 +124,69 @@ A block is one grid so a single chart can span every row of it.
   the block's row count. Not `1 / -1`: the rows are implicit, so `-1` does not
   resolve to the end of them
 
+## Grouped blocks — `.jrk-sheet--grouped`
+
+Puts a recessed seam between metric blocks, so each block reads as a panel instead
+of the stack reading as one field of rows.
+
+```
+.jrk-sheet--grouped          seam between blocks; sheet fill becomes surface.subtle
+--jrk-sheet-group-gap        between blocks (default space-3 / 12px)
+--jrk-sheet-section-gap      above a band (default space-5 / 20px)
+```
+
+**It is a modifier because the two report shapes want opposite things.** The
+reference AM Report runs ~16 rows per block with a chart alongside, and there the
+block-head and the row hairlines already group it — continuous rows are also what
+let a reader follow one year down the whole report. The shape this is for is the
+inverse: twenty-odd blocks of two or three rows, no chart, where
+*head / row / row* repeats until the repeated month header stops reading as a
+header. The caller knows which they have; the component cannot.
+
+**The seam is a gap, not a frame.** The complaint that asks for this is "cluttered",
+and a border around each panel answers it with more ink — a dense sheet already
+draws a hairline under every row, a strong rule under every block-head, a 2px
+divide before the totals, and a rule per column under `--gridlines`. Space is the
+channel that is still free.
+
+**Never separate blocks with inline-axis geometry.** A border or inline padding on
+`.jrk-sheet__block` shifts that block's tracks relative to the letter bar — and
+because only the *filled* rows reveal their own width, it looks correct until
+someone measures it. `margin-block-start` moves a block down without touching its
+width or its inline origin. Measured on the current implementation: 0px drift
+across all 18 tracks, all blocks and bands one width, every frozen label on one x.
+
+**The seam is `surface.subtle`, and not `surface.default`, on purpose.** A seam in
+the row colour merges *downward* into the data, and a 12px gap the colour of a row
+reads as an empty row rather than as a break. It is the fill under the toolbar, the
+letter bar and the number gutter, so the seam reads as more of the sheet's chrome.
+
+The seam and the block-head under it were briefly the *same* fill, and the merge
+into one header zone per panel was recorded as a feature. It isn't the design any
+more — the header went one step deeper to `surface.track`, then to the solid accent
+— so the seam is now the quietest band in the sheet and the header the loudest. The
+seam never moved for any of it. The header did, twice.
+
+The fill goes on the **container**, which makes the sheet the recessed plane and
+its blocks the panels on it. One declaration, it also fills the slack under a
+short report, and it does not slide: a scroll container's background paints
+against its border box, so the seam stays filled however far right the reader has
+scrolled.
+
+**A band takes the wider gap; the first block under it takes none** — the band caps
+the group, and a seam between a band and the block it heads orphans the band from
+what it names. Written as "every band, then suppress the block after it" rather
+than `.jrk-sheet__block + .jrk-sheet__band`, because a report that wraps each
+section in a `display: contents` element (the portal does) leaves the band with no
+previous sibling to match: `contents` affects layout, not selectors, so the rule
+written the other way round silently does nothing there.
+
+One consequence to know in light: `surface.tinted` is flat `#ffffff`, so a primary
+band stands out against the seam while a `--sub` band shares its fill. What
+separates a subsection band there is its own `border-block` hairlines plus the
+wider gap above it — which is why the section gap exists rather than reusing the
+block gap.
+
 ## Bands and headers
 
 - `.jrk-sheet__title` / `__title-code` / `__title-name` — the strong banner
@@ -131,9 +194,54 @@ A block is one grid so a single chart can span every row of it.
 - `.jrk-sheet__band` (+ `--sub`) / `__band-label` — section and subsection
 - `.jrk-sheet__block-head` / `.jrk-sheet__block-num` — per-metric header
 
-Hierarchy is deliberate: title and metadata keep the heavy band, section headers
-step down to a tint, metric headers step down again. In the source workbook every
-band is the same navy, which flattens the hierarchy so nothing leads.
+**The metric head is a filled navy band** — `surface.bannerDeep` (`#14375e`, one
+value for both themes) with a `text.onBannerDeep` white label. It took three tries:
+
+| | |
+|---|---|
+| `surface.subtle` | the seam's own fill — announced nothing |
+| `surface.track` | a recess, 1.09:1 / 1.27:1 off the seam — too quiet |
+| `accent.solid` | unmistakable, and too **strong** |
+| `surface.bannerDeep` | where it landed |
+
+`#14375e` is Excel's "Blue, Accent 1, Darker 50%" — the navy the source workbook
+actually draws — and it sits at hue 211.6° against this library's anchor at 211.0°.
+The workbook's navy and the brand's blue are the same hue, which is the whole reason
+adopting it needs no apology. What it measures:
+
+```
+white on it                12.08:1     off the light seam    10.83:1
+below surface.banner        2.31:1     off the dark card      1.30:1
+```
+
+**That 2.31:1 is the point of the value, not just its taste.** Under `accent.solid`
+a 28-metric report drew 28 bands in the `.jrk-btn--cta` fill — at most one per view,
+the action that commits — and in light every metric header was the same value as the
+masthead, since `surface.banner` *is* `accent.solid` there. The navy puts the
+masthead a full step above and gives `accent.solid` back its one meaning. And 1.30:1
+off the `#232326` dark card is wider than the card's own 1.17:1 step off the page, so
+it is a band in dark rather than a smudge — `#0d2947` was tried and is 1.06:1 there,
+i.e. invisible.
+
+**What is still spent, in dark only:**
+
+- `surface.banner.dark` is `#2c2c2e`, a grey, so **the masthead sits 1.15:1 below
+  the band it leads**. Correcting it means moving that token to the anchor *and*
+  `text.onBannerMuted.dark` with it — `#a1a1a6` is a grey selected for the grey
+  band and is 2.50:1 on the anchor. Neither half works alone.
+- The **section band** (`surface.tinted`, `#0e3543` dark) and this are two dark
+  blues 1.20:1 apart with 16° of hue between them, so they read as siblings there.
+  In light the section band is flat `#ffffff` and the two could not be more
+  different.
+
+Everything in the head takes `text.onBannerDeep`, including the gutter's row number
+(`text.muted` is 1.85:1 on this fill). It is **its own ink token** rather than
+`text.onBanner` or `accent.onSolid` — all three are white today and they are not the
+same fact; see the note on `accent.onSolid`, which `.jrk-btn--danger-solid` once
+borrowed and paid for. Internal dividers take the title bar's
+`rgba(255,255,255,0.15)`, because `border.default` is a grey line drawn on navy. The
+ordinal chip is punched out — white fill, navy numeral — where tinting it stacked
+three blues in one 22px row.
 
 ## Density and gridlines
 

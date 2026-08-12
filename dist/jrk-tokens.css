@@ -42,6 +42,7 @@
   --jrk-surface-track: #e8e8ed;
   --jrk-surface-inverse: #1c1c1e;
   --jrk-surface-banner: #0069d9;
+  --jrk-surface-banner-deep: #14375e;
   --jrk-surface-hover: #f2f2f7;
   --jrk-surface-raised-hover: #f2f2f7;
   --jrk-surface-card-hover: #ffffff;
@@ -54,6 +55,7 @@
   --jrk-text-inverse: #ffffff;
   --jrk-text-link: #0069d9;
   --jrk-text-on-banner: #ffffff;
+  --jrk-text-on-banner-deep: #ffffff;
   --jrk-text-on-banner-muted: #e8f1fd;
   --jrk-border-subtle: #e5e5ea;
   --jrk-border-default: #d1d1d6;
@@ -256,6 +258,7 @@
     --jrk-surface-track: #18181a;
     --jrk-surface-inverse: #f2f2f7;
     --jrk-surface-banner: #2c2c2e;
+    --jrk-surface-banner-deep: #14375e;
     --jrk-surface-hover: #2c2c2e;
     --jrk-surface-raised-hover: #353538;
     --jrk-surface-card-hover: #2c2c2e;
@@ -268,6 +271,7 @@
     --jrk-text-inverse: #000000;
     --jrk-text-link: #64b5ff;
     --jrk-text-on-banner: #ffffff;
+    --jrk-text-on-banner-deep: #ffffff;
     --jrk-text-on-banner-muted: #a1a1a6;
     --jrk-border-subtle: #333336;
     --jrk-border-default: #414144;
@@ -356,6 +360,7 @@
     --jrk-surface-track: #18181a;
     --jrk-surface-inverse: #f2f2f7;
     --jrk-surface-banner: #2c2c2e;
+    --jrk-surface-banner-deep: #14375e;
     --jrk-surface-hover: #2c2c2e;
     --jrk-surface-raised-hover: #353538;
     --jrk-surface-card-hover: #2c2c2e;
@@ -368,6 +373,7 @@
     --jrk-text-inverse: #000000;
     --jrk-text-link: #64b5ff;
     --jrk-text-on-banner: #ffffff;
+    --jrk-text-on-banner-deep: #ffffff;
     --jrk-text-on-banner-muted: #a1a1a6;
     --jrk-border-subtle: #333336;
     --jrk-border-default: #414144;

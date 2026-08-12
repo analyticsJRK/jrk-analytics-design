@@ -31,7 +31,15 @@
  * TRACK LIST
  * Every row shares --jrk-sheet-cols. Override it on .jrk-sheet to change the
  * shape of the report; do not set it per row, or the column bar stops lining
- * up with the data underneath it. */
+ * up with the data underneath it.
+ *
+ * OVERRIDE --jrk-sheet-track-width WITH IT. It is the sum of the track MINIMUMS,
+ * and it is what makes the filled rows (title, meta, band, colbar) reach the far
+ * edge of a report that is wider than its viewport — see the note above the rule
+ * that reads it. CSS cannot sum a track list, so this is stated rather than
+ * derived, and the two going out of step is the one thing to watch: too small and
+ * the navy strip stops short again, too large and every row scrolls past the last
+ * column. Both are visible immediately on any report that overflows. */
 
 .jrk-sheet {
   /* gutter · label · 12 months · total · ytd · yoy · cagr · chart */
@@ -44,6 +52,19 @@
     var(--jrk-sheet-wide)
     var(--jrk-sheet-wide)
     minmax(var(--jrk-sheet-chart), 1.6fr);
+
+  --jrk-sheet-track-width: calc(
+    var(--jrk-sheet-gutter)
+    + var(--jrk-sheet-label)
+    + 12 * var(--jrk-sheet-cell)
+    + 2 * var(--jrk-sheet-total)
+    + 2 * var(--jrk-sheet-wide)
+    + var(--jrk-sheet-chart));
+
+  /* Read only under `--grouped`; declared here so both are overridable per sheet
+     alongside the track list. See the grouped-blocks section at the bottom. */
+  --jrk-sheet-group-gap: var(--jrk-space-3);
+  --jrk-sheet-section-gap: var(--jrk-space-5);
 
   position: relative;
   display: flex;
@@ -70,6 +91,47 @@
   line-height: 1.25;
   font-variant-numeric: tabular-nums;
   color: var(--jrk-text-primary);
+}
+
+/* EVERY FULL-WIDTH ROW SIZES TO THE TRACKS, NOT TO THE VIEWPORT.
+ *
+ * `.jrk-sheet` is a column flex container with `overflow: auto`, so its children
+ * are flex items and `align-self: stretch` sizes each one to the container's
+ * CONTENT box — the visible width — not to the scrollable content width. The
+ * track list is wider than that whenever the report has more columns than fit,
+ * which for the reference case (12 months + 4 totals + a chart) is most of the
+ * time.
+ *
+ * The tracks resolve identically in every row either way, so the columns stayed
+ * aligned and this never looked like a grid bug. What it looked like was "the top
+ * bar doesn't render all the way": the title bar, the metadata strip and the
+ * section band are the only rows carrying a filled background, so they were the
+ * only place a box narrower than its own content was visible — the navy ran out
+ * partway across the report and the remainder was page. The column bar lost its
+ * fill at the same x.
+ *
+ * The width comes from --jrk-sheet-track-width, NOT from `max-content`. That was
+ * the first fix and it is wrong in a way worth recording: `max-content` on a grid
+ * re-resolves every `minmax(px, 1fr)` track against its own cells' content, so
+ * each row sized to ITS OWN widest figure. The sheet went from 1700px to 3149px,
+ * the rows disagreed with each other, and the column bar came away from the data —
+ * the exact failure the track-list note above warns about, arrived at from the
+ * other direction.
+ *
+ * `max()` and not two declarations: the row must be the wider of the track total
+ * and the viewport, and expressing that as `width` plus `min-width` lets the flex
+ * container's stretch win one of the two cases.
+ *
+ * The toolbar is deliberately NOT in this list: it is sticky on both axes, so it
+ * parks against the left edge and is meant to stay viewport-wide. */
+.jrk-sheet__colbar,
+.jrk-sheet__title,
+.jrk-sheet__meta,
+.jrk-sheet__band,
+.jrk-sheet__block,
+.jrk-sheet > .jrk-sheet__row,
+.jrk-sheet > .jrk-sheet__block-head {
+  min-width: max(100%, var(--jrk-sheet-track-width));
 }
 
 /* ============================== toolbar ============================== */
@@ -322,35 +384,121 @@
 
 /* ============================== metric block ============================== */
 
+/* A DEEPER RECESS THAN THE REST OF THE CHROME, so a metric header breaks from
+ * whatever sits above it — the section band, or the previous block's last row.
+ *
+ * It was surface.subtle, the same fill as the toolbar, the letter bar, the number
+ * gutter and (under `--grouped`) the seam between blocks. Sharing that value made
+ * the seam and the header read as one 34px header zone, which is legible but does
+ * not announce anything: at the top of a report of two-row blocks every band in
+ * sight was the same grey.
+ *
+ * A FILLED NAVY BAND, which is the workbook's own idiom — in the source AM Report
+ * every metric header is navy with white labels — and which took three tries to
+ * land. surface.subtle was the seam's own fill and announced nothing. surface.track
+ * was a recess, 1.09:1 off the seam in light, and was too quiet. accent.solid was
+ * unmistakable and too STRONG, in a way worth keeping written down: 28 metric bands
+ * in the CTA's own fill spend a signifier that is supposed to mean "the one action
+ * that commits", and in light it made every metric header the same value as the
+ * masthead, because surface.banner IS accent.solid there.
+ *
+ * surface.bannerDeep is #14375e in both themes — Excel's "Blue, Accent 1, Darker
+ * 50%", i.e. the navy the workbook draws, which lands at hue 211.6° against this
+ * library's anchor at 211.0°. The same hue, so it is the brand's own navy rather
+ * than a borrowed one. What it measures:
+ *
+ *   white on it            12.08:1   (its own ink token, room to spare)
+ *   off the light seam      10.83:1
+ *   off the dark card        1.30:1   wider than the card's own 1.17:1 step, so it
+ *                                     is a band in dark, not a smudge
+ *   below surface.banner     2.31:1   in light — the masthead leads on COLOUR again
+ *
+ * That last line is the point of the change beyond taste: accent.solid means one
+ * thing again, and the light ladder is masthead → metric head → data.
+ *
+ * WHAT IS STILL SPENT. In DARK, surface.banner is #2c2c2e, a grey, so the masthead
+ * sits 1.15:1 BELOW the band it leads. Correcting it means moving banner.dark to
+ * the anchor AND text.onBannerMuted.dark with it — that ink is #a1a1a6, a grey
+ * selected for the grey band, and it is 2.50:1 on the anchor. Two token moves that
+ * only work together, so they are not folded in here. Also in dark the SECTION band
+ * (surface.tinted, #0e3543) and this are two dark blues 1.20:1 apart with 16° of
+ * hue between them; they read as siblings there, where in light the section band is
+ * flat white and the two could not be more different.
+ *
+ * The ink is text.onBannerDeep, its own token — NOT accent.onSolid, which the note
+ * on that token explicitly refuses to be a generic "label on a filled control", and
+ * not text.onBanner, which measures against the masthead. All three are white today
+ * and they are not the same fact. Everything in the row takes it, including the
+ * gutter's row number, which cannot stay text.muted (1.85:1 on this fill). The
+ * internal dividers take the same rgba white the title bar uses, because
+ * border.default is a grey line drawn on navy. */
 .jrk-sheet__block-head {
   display: grid;
   grid-template-columns: var(--jrk-sheet-cols);
   min-height: var(--jrk-sheet-row);
-  background: var(--jrk-surface-subtle);
+  background: var(--jrk-surface-banner-deep);
   border-bottom: 1px solid var(--jrk-border-strong);
   font-size: 9px;
   font-weight: var(--jrk-weight-semibold);
   letter-spacing: var(--jrk-tracking-caps);
   text-transform: uppercase;
-  color: var(--jrk-text-muted);
+  color: var(--jrk-text-on-banner-deep);
 }
 
-.jrk-sheet__block-head .jrk-sheet__gutter { background: var(--jrk-surface-subtle); }
+/* The frozen columns take the row's own fill or the data slides under them — and
+   they have to move in the same edit as the row, or the sticky gutter and label
+   sit a step off the header they belong to, which is visible immediately. */
+.jrk-sheet__block-head .jrk-sheet__gutter {
+  background: var(--jrk-surface-banner-deep);
+  color: var(--jrk-text-on-banner-deep);
+  border-inline-end-color: rgba(255, 255, 255, 0.15);
+}
 
 .jrk-sheet__block-head .jrk-sheet__cell--label {
-  background: var(--jrk-surface-subtle);
-  color: var(--jrk-text-primary);
+  background: var(--jrk-surface-banner-deep);
+  color: var(--jrk-text-on-banner-deep);
+  border-inline-end-color: rgba(255, 255, 255, 0.15);
   font-size: var(--jrk-text-xs);
   font-weight: var(--jrk-weight-bold);
   letter-spacing: 0;
   text-transform: none;
 }
 
-.jrk-sheet__block-head .jrk-sheet__cell {
+/* Workbook gridlines inside the head, for the same reason — a border.subtle grey
+   drawn across a saturated blue band reads as dirt, not as a rule. */
+.jrk-sheet--gridlines .jrk-sheet__block-head .jrk-sheet__cell {
+  border-inline-end-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Column headers right-align over their figures — but NOT the label cell, which
+   is a row header and reads left like the names beneath it.
+ *
+ * It used to catch the label too, and the symptom was specific enough to be worth
+ * recording: a metric name longer than the label column was pushed against the
+ * cell's trailing edge and clipped from the FRONT, so "Controllable Expenses"
+ * rendered as "llable Expenses". Every short name was unaffected, so the column
+ * looked correct until a long one appeared. */
+.jrk-sheet__block-head .jrk-sheet__cell:not(.jrk-sheet__cell--label) {
   justify-content: flex-end;
 }
 
-/* The small ordinal beside a metric name. */
+/* The rule between the last month and the totals — the workbook's own divider
+   between what happened and what it adds up to. Heavier than the hairline
+   between columns, because it is the one vertical the reader navigates by. */
+.jrk-sheet__cell--divide {
+  border-inline-start: 2px solid var(--jrk-border-strong);
+}
+
+/* The small ordinal beside a metric name — which only ever appears in a block-head,
+   so it is specified against that band rather than in the abstract.
+ *
+ * PUNCHED OUT of the blue, not tinted on top of it. It used to be accent.wash +
+ * accent.washText, which on the old grey header was a pale blue chip with a blue
+ * numeral. On the accent band that became three blues stacked in a 22px row —
+ * legible, since the chip fill still steps hard off the band, but muddy. Inverting
+ * it uses the same gated pair the row already uses for its labels (5.22:1), the
+ * other way round, and matches how the library draws a status glyph: filled, with
+ * the inner mark punched out. */
 .jrk-sheet__block-num {
   display: inline-flex;
   align-items: center;
@@ -361,8 +509,8 @@
   padding-inline: 3px;
   font-size: 9px;
   font-weight: var(--jrk-weight-bold);
-  color: var(--jrk-accent-wash-text);
-  background: var(--jrk-accent-wash);
+  color: var(--jrk-surface-banner-deep);
+  background: var(--jrk-text-on-banner-deep);
   border-radius: var(--jrk-radius-sm);
 }
 
@@ -474,6 +622,78 @@
   width: 100%;
 }
 
+/* ============================== grouped blocks ============================== */
+
+/* `--grouped` puts a recessed seam between metric blocks, so each one reads as a
+ * panel instead of the stack reading as one undifferentiated field of rows.
+ *
+ * WHY A MODIFIER AND NOT THE DEFAULT. The reference AM Report runs ~16 rows per
+ * block with a chart riding alongside, and there the block-head and the row
+ * hairlines already group it — continuous rows are also what let a reader follow
+ * one year down the whole report. This is for the opposite shape: twenty-odd
+ * blocks of two or three rows each, where head/row/row/head/row/row repeats until
+ * the repeated month header stops reading as a header at all. Same component,
+ * different report, and the caller is the one who knows which they have.
+ *
+ * SPACE, NOT MORE RULES. The complaint this answers is "cluttered", and a frame
+ * around each panel answers that with more ink — a dense sheet already carries a
+ * hairline under every row, a strong rule under every block-head, a 2px divide
+ * before the totals, and a rule per column under `--gridlines`. So the seam is a
+ * GAP, and it introduces no colour the component was not already using.
+ *
+ * NOTHING HERE TOUCHES THE INLINE AXIS. A border or inline padding on the block
+ * would shift that block's tracks relative to the letter bar, which is the one
+ * failure this component cannot absorb — see the track-list note at the top of
+ * the file, and note that only the filled rows would show it, so it would look
+ * fine until someone measured. `margin-block-start` moves a block down without
+ * changing its width or its inline origin, so every track stays where the letter
+ * bar says it is. Flex items never margin-collapse, so the gaps are also exactly
+ * the width they say they are. */
+
+/* The seam is a hole in the sheet, which makes the sheet the recessed plane and
+   its blocks the panels on it — so the fill goes on the container and one
+   declaration does the whole job. It also then fills the slack under a report
+   shorter than the sheet's max-height, and it does not slide: a scroll
+   container's background paints against its border box, so the seam stays filled
+   however far right the reader has scrolled.
+
+   surface.subtle and not surface.default, for a reason worth keeping: a seam in
+   the row colour merges with the DATA rows, and a 12px gap the same colour as a
+   row is an empty row, not a break. This is the fill under the toolbar, the letter
+   bar and the number gutter, so the seam reads as more of the sheet's chrome.
+
+   It used to be the block-head's fill too, and the two merging into one header
+   zone was recorded here as a feature. It isn't the design any more: the header was
+   asked to break distinctly from the section above it, went one step deeper to
+   surface.track, and then — the quiet answer having been rejected twice — went to
+   the solid accent. So the seam is now the quietest band in the sheet and the
+   header the loudest, with the full step between them. The seam never moved for
+   any of it. The header did, twice. */
+.jrk-sheet--grouped {
+  background: var(--jrk-surface-subtle);
+}
+
+.jrk-sheet--grouped .jrk-sheet__block {
+  margin-block-start: var(--jrk-sheet-group-gap);
+}
+
+/* A section band opens a group, so it takes the wider gap — and the first block
+   under it takes none, because the band caps that group and a seam between a band
+   and the block it heads orphans the band from what it names.
+ *
+ * Stated as "every band, then suppress the block after it" rather than as
+ * `.jrk-sheet__block + .jrk-sheet__band`, because a report that wraps each section
+ * in a `display: contents` element (the portal does) leaves the band with no
+ * previous sibling to match against — contents affects layout, not selectors, so
+ * a rule written the other way round silently does nothing there. */
+.jrk-sheet--grouped .jrk-sheet__band {
+  margin-block-start: var(--jrk-sheet-section-gap);
+}
+
+.jrk-sheet--grouped .jrk-sheet__band + .jrk-sheet__block {
+  margin-block-start: 0;
+}
+
 /* ============================== print ============================== */
 
 @media print {
@@ -495,4 +715,10 @@
 
   .jrk-sheet__row { break-inside: avoid; }
   .jrk-sheet__band { break-after: avoid; }
+
+  /* A grouped block is one panel on screen, so it is one unit on paper too. A
+     block too tall for a page breaks anyway — the UA drops `avoid` rather than
+     leaving a page blank — so this costs nothing on the tall reference shape and
+     keeps a three-row panel whole on the shape it is for. */
+  .jrk-sheet--grouped .jrk-sheet__block { break-inside: avoid; }
 }

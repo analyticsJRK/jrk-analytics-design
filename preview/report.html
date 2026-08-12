@@ -88,6 +88,82 @@
     </div>
   </section>
 
+  <section class="gal-sec" id="grouped">
+    <h2>Grouped blocks</h2>
+    <p class="gal-sec__note">
+      <code class="jrk-mono">.jrk-sheet--grouped</code> puts a recessed seam between metric
+      blocks. The report above does not need it — sixteen rows and a chart already make a
+      block read as one object. This is the shape that does: two years per metric, no chart,
+      a couple of dozen metrics, where <em>head / row / row</em> repeats until the reader
+      cannot tell where one metric ends and the next begins. Turn the switch off and the same
+      report goes back to being one undifferentiated field of rows.
+    </p>
+    <div class="jrk-row" style="gap:var(--jrk-space-4);flex-wrap:wrap">
+      <label class="jrk-switch"><input type="checkbox" role="switch" id="t-group" checked><span class="jrk-check__label">Group blocks</span></label>
+    </div>
+    <div class="jrk-content jrk-content--document">
+      <div class="jrk-sheet jrk-sheet--grouped" id="kpi" role="grid" aria-label="Summary KPIs — 150 Summit"></div>
+    </div>
+    <div class="gal-rule">
+      <strong>Space, not more rules.</strong> The problem a dense report of short blocks has
+      is clutter, and a frame around each panel answers that with more ink — the sheet is
+      already drawing a hairline under every row, a strong rule under every block-head and a
+      2px divide before the totals. So the seam is a gap, and the only fill it uses is the
+      <code class="jrk-mono">surface.subtle</code> already under the toolbar, the letter bar,
+      the number gutter and every block-head.
+      <br><br>
+      It is <em>not</em> <code class="jrk-mono">surface.default</code>, because a seam in the
+      row colour merges downward into the data — and a 12px gap the same colour as a row
+      reads as an empty row rather than as a break.
+    </div>
+    <div class="gal-rule">
+      <strong>The metric header is a navy band.</strong>
+      <code class="jrk-mono">.jrk-sheet__block-head</code> takes
+      <code class="jrk-mono">surface.bannerDeep</code> (<code class="jrk-mono">#14375e</code>,
+      one value for both themes) with a <code class="jrk-mono">text.onBannerDeep</code> white
+      label. Three fills were tried: the seam's own
+      <code class="jrk-mono">surface.subtle</code> announced nothing,
+      <code class="jrk-mono">surface.track</code> was a recess at 1.09:1 off the seam and too
+      quiet, and <code class="jrk-mono">accent.solid</code> was unmistakable and too strong.
+      <br><br>
+      <code class="jrk-mono">#14375e</code> is Excel's "Blue, Accent 1, Darker 50%" — the navy
+      the source workbook draws — at hue 211.6° against this library's anchor at 211.0°. The
+      workbook's navy and the brand's blue are the same hue. White is 12.08:1 on it, it is
+      10.83:1 off the light seam, and 1.30:1 off the dark card, which is a wider step than the
+      card's own 1.17:1 off the page — so it is a band in dark, not a smudge.
+      <code class="jrk-mono">#0d2947</code> was tried and is 1.06:1 there, i.e. invisible.
+      <br><br>
+      <strong>It sits 2.31:1 below the masthead, and that is the point.</strong> Under the
+      solid accent a 28-metric report drew 28 bands in the
+      <code class="jrk-mono">.jrk-btn--cta</code> fill — at most one per view, the action that
+      commits — and in light every header was the same value as the masthead, since
+      <code class="jrk-mono">surface.banner</code> <em>is</em>
+      <code class="jrk-mono">accent.solid</code> there. Still spent in dark:
+      <code class="jrk-mono">surface.banner</code> is a grey there, so the masthead is 1.15:1
+      <em>below</em> the band it leads. Correcting it means moving
+      <code class="jrk-mono">surface.banner.dark</code> and
+      <code class="jrk-mono">text.onBannerMuted.dark</code> together — that ink is a grey
+      selected for the grey band and is 2.50:1 on the anchor.
+      <br><br>
+      Everything in the row takes the white, including the gutter's row number —
+      <code class="jrk-mono">text.muted</code> is 1.85:1 on this fill. Dividers switch to the
+      title bar's <code class="jrk-mono">rgba(255,255,255,0.15)</code>, because
+      <code class="jrk-mono">border.default</code> is a grey line drawn on navy. And the
+      ordinal chip is punched out — white fill, navy numeral — where tinting it stacked three
+      blues inside one 22px row.
+    </div>
+    <div class="gal-rule">
+      <strong>Vertical margins only, and that is a hard constraint.</strong> A border or
+      inline padding on a block would shift that block's tracks relative to the letter bar —
+      and because only the filled rows show their own width, it would look correct until
+      someone measured it. <code class="jrk-mono">margin-block-start</code> moves a block
+      down without touching its width or its inline origin. Override
+      <code class="jrk-mono">--jrk-sheet-group-gap</code> and
+      <code class="jrk-mono">--jrk-sheet-section-gap</code> on
+      <code class="jrk-mono">.jrk-sheet</code> to retune them.
+    </div>
+  </section>
+
   <section class="gal-sec">
     <h2>Markup contract</h2>
     <p class="gal-sec__note">
@@ -170,9 +246,10 @@ const sum = (a) => a.reduce((x, y) => x + y, 0);
    does — the gutter is a coordinate, not a per-block index. */
 let ROW = 0;
 const gutter = () => `<div class="jrk-sheet__gutter" aria-hidden="true">${++ROW}</div>`;
+const resetRows = () => { ROW = 0; };
 
 function metricBlock(num, label, data, opts = {}) {
-  const { inverted = false, budget = null, thresholds = true } = opts;
+  const { inverted = false, budget = null, thresholds = true, chart = true } = opts;
   const years = Object.keys(data).map(Number);
   let html = `<div class="jrk-sheet__block">`;
 
@@ -249,8 +326,10 @@ function metricBlock(num, label, data, opts = {}) {
   }
 
   // Chart rides the last track, spanning every row of the block.
-  const spark = years.map(yr => sum(data[yr]));
-  html += `<div class="jrk-sheet__chart" style="--span:${years.length + (budget ? 3 : 1)}">${miniChart(spark, years)}</div>`;
+  if (chart) {
+    const spark = years.map(yr => sum(data[yr]));
+    html += `<div class="jrk-sheet__chart" style="--span:${years.length + (budget ? 3 : 1)}">${miniChart(spark, years)}</div>`;
+  }
   html += `</div>`;
   return html;
 }
@@ -333,6 +412,70 @@ const tb = sheet.querySelector('.jrk-sheet__toolbar');
 const syncToolbar = () => sheet.style.setProperty('--jrk-sheet-toolbar-h', `${tb.offsetHeight}px`);
 new ResizeObserver(syncToolbar).observe(tb);
 syncToolbar();
+
+/* ---------------- the short-block shape ----------------
+   The case `--grouped` exists for: two years per metric, no chart, many metrics.
+   Its own track list, with no chart track — so the letter count is derived from
+   that list and not from the one above, and --jrk-sheet-track-width is overridden
+   in the same place, which is the pairing the track-list note in sheet.css asks
+   for. */
+const KPI_TRACKS = 1 /* label */ + 12 /* months */ + 4 /* total, ytd, yoy, cagr */;
+
+/* Every metric here is dollar-denominated, because the block renderer formats as
+   USD — a preview that showed occupancy as "$96,431" would be teaching the wrong
+   thing about the component while demonstrating the right thing about the gap. */
+const KPI_GROUPS = [
+  ['Summary KPIs', false, [
+    [1, 'AM NOI', series(11, 221000, 0.06, 0.10)],
+    [2, 'AM Cash Flow', series(12, 218000, 0.05, 0.11)],
+    [3, 'NOI', series(13, 189000, 0.055, 0.09)],
+  ]],
+  ['Revenue', true, [
+    [4, 'Rental Income', series(14, 470000, 0.04, 0.06)],
+    [5, 'Other Income', series(15, 14000, 0.03, 0.22)],
+    [6, 'Total Income', series(16, 484000, 0.04, 0.06)],
+  ]],
+  /* The long label is deliberate: it is the one that used to clip from the front
+     in a block-head, so it stays in the preview that renders block-heads. */
+  ['Expenses', true, [
+    [7, 'Controllable Expenses', series(17, 132000, 0.045, 0.09)],
+  ]],
+];
+
+/* Two years, which is what makes each block three rows tall including its head. */
+const twoYears = (data) => ({ 2025: data[2025], 2026: data[2026] });
+
+resetRows();
+let kpiHtml = `<div class="jrk-sheet__colbar" aria-hidden="true">
+  <span class="jrk-sheet__col"></span>${Array.from({ length: KPI_TRACKS }, (_, i) =>
+    `<span class="jrk-sheet__col">${String.fromCharCode(65 + i)}</span>`).join('')}
+</div>`;
+
+kpiHtml += KPI_GROUPS.map(([label, sub, metrics]) =>
+  `<div class="jrk-sheet__band${sub ? ' jrk-sheet__band--sub' : ''}" role="row">${gutter()}
+    <div class="jrk-sheet__band-label" role="rowheader">${label}</div></div>`
+  + metrics.map(([n, l, d]) => metricBlock(n, l, twoYears(d), {
+      chart: false, thresholds: false, inverted: label === 'Expenses',
+    })).join('')
+).join('');
+
+const kpi = document.getElementById('kpi');
+/* Wider labels than the default 98px, which is what the consumer does — a metric
+   name plus its ordinal chip does not fit 98px, and a sheet cell is a flex box, so
+   the overflow clips flat instead of showing the ellipsis the cell asks for.
+   Both the track list and the width sum below read the token rather than the
+   number, so this one line moves the pair together. */
+kpi.style.setProperty('--jrk-sheet-label', '168px');
+kpi.style.setProperty('--jrk-sheet-cols', `var(--jrk-sheet-gutter) var(--jrk-sheet-label)
+  repeat(12, minmax(var(--jrk-sheet-cell), 1fr))
+  var(--jrk-sheet-total) var(--jrk-sheet-total) var(--jrk-sheet-wide) var(--jrk-sheet-wide)`);
+kpi.style.setProperty('--jrk-sheet-track-width', `calc(var(--jrk-sheet-gutter)
+  + var(--jrk-sheet-label) + 12 * var(--jrk-sheet-cell)
+  + 2 * var(--jrk-sheet-total) + 2 * var(--jrk-sheet-wide))`);
+kpi.innerHTML = kpiHtml;
+
+document.getElementById('t-group').onchange =
+  e => kpi.classList.toggle('jrk-sheet--grouped', e.target.checked);
 
 document.getElementById('t-grid').onchange = e => sheet.classList.toggle('jrk-sheet--gridlines', e.target.checked);
 document.getElementById('t-cols').onchange = e =>

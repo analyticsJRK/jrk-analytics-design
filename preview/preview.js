@@ -60,10 +60,23 @@ export function initChrome() {
     });
   });
 
-  const saved = localStorage.getItem(STORAGE_KEY) ?? 'system';
-  applyTheme(saved);
+  /* `?theme=dark` beats the stored choice, because every UI change here has to be
+     checked in both themes and a headless screenshot can reach neither localStorage
+     nor the OS setting.
+     applyTheme persists whatever it is given, so the reader's own choice is read
+     first and written back afterwards — restored, not removed. Clearing the key
+     instead would silently reset a reader who had picked Light or Dark back to
+     System the next time they opened the gallery. */
+  const param = new URLSearchParams(location.search).get('theme');
+  const stored = localStorage.getItem(STORAGE_KEY);
+  const active = param ?? stored ?? 'system';
+  applyTheme(active);
+  if (param) {
+    stored === null ? localStorage.removeItem(STORAGE_KEY)
+                    : localStorage.setItem(STORAGE_KEY, stored);
+  }
   nav.querySelectorAll('[data-theme-btn]').forEach((o) =>
-    o.setAttribute('aria-selected', String(o.dataset.themeBtn === saved)),
+    o.setAttribute('aria-selected', String(o.dataset.themeBtn === active)),
   );
 }
 

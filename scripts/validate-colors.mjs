@@ -80,6 +80,30 @@ for (const key of ['primary', 'secondary', 'muted', 'link']) {
   }
 }
 
+// CHROME SURFACES CARRY TEXT TOO, and the loop above cannot see it: it measures
+// every ink against the card and the page, so a label on a recessed header fill
+// is gated by nothing. That is not hypothetical — the sheet's block-head carried
+// text.muted on surface.subtle (4.54:1, fine), and the same ink on surface.track
+// would have been 4.15:1, under the body floor, with the gate still green. That
+// header has since gone to the solid accent, where accent.onSolid IS gated, but the
+// hole it exposed is real. Each pair below is a pairing the CSS actually draws.
+//
+// It gates the TOKENS, not the CSS: it catches either value being re-stepped, and
+// cannot catch a component swapping its own ink back. Add the pair when a
+// component starts drawing text on a fill that is neither the card nor the page.
+const CHROME_INK = [
+  ['muted', 'subtle', 'the letter bar and the row-number gutter'],
+  ['secondary', 'subtle', 'the sheet subsection band label'],
+  ['secondary', 'track', 'an unselected segment in a segmented control'],
+];
+for (const [ink, bg, where] of CHROME_INK) {
+  for (const mode of ['light', 'dark']) {
+    const c = contrast(T.color.text[ink][mode], T.color.surface[bg][mode]);
+    const msg = `text.${ink} on surface.${bg} ${mode} ${c.toFixed(2)}:1 — ${where}`;
+    c >= 4.5 ? pass(msg) : fail(`${msg} — needs 4.5:1 for body text`);
+  }
+}
+
 // Status: `text` steps are read as text (4.5:1). `mark` steps are non-text
 // marks (3:1) — warning/serious sit below on light BY DESIGN, mitigated by the
 // mandatory icon + label pairing, so those are warnings, not failures.
@@ -109,6 +133,19 @@ for (const mode of ['light', 'dark']) {
   const c = contrast(T.color.accent.onSolid[mode], T.color.accent.solid[mode]);
   c >= 4.5 ? pass(`accent.solid + accent.onSolid ${mode} ${c.toFixed(2)}:1`)
            : fail(`accent.solid + accent.onSolid ${mode} ${c.toFixed(2)}:1 — needs 4.5:1`);
+
+  // The sheet's per-metric header band. Its own ink token rather than a borrowed
+  // white, so it is gated as its own pair — and the STEP off the card is checked
+  // too, because a filled band that does not separate from the surface it sits on
+  // is not a band. Dark is the binding side: the same navy is 10.83:1 off the light
+  // seam and only 1.30:1 off the #232326 card.
+  const cbd = contrast(T.color.text.onBannerDeep[mode], T.color.surface.bannerDeep[mode]);
+  cbd >= 4.5 ? pass(`surface.bannerDeep + text.onBannerDeep ${mode} ${cbd.toFixed(2)}:1`)
+             : fail(`surface.bannerDeep + text.onBannerDeep ${mode} ${cbd.toFixed(2)}:1 — needs 4.5:1`);
+
+  const cbs = contrast(T.color.surface.bannerDeep[mode], SURFACE[mode]);
+  cbs >= 1.2 ? pass(`surface.bannerDeep steps off the card ${mode} ${cbs.toFixed(2)}:1`)
+             : fail(`surface.bannerDeep steps off the card ${mode} ${cbs.toFixed(2)}:1 — needs 1.2:1 to read as a band`);
 
   const ci = contrast(T.color.text.inverse[mode], T.color.surface.inverse[mode]);
   ci >= 4.5 ? pass(`text.inverse on surface.inverse ${mode} ${ci.toFixed(2)}:1`)

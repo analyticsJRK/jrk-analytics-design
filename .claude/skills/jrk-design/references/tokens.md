@@ -50,7 +50,14 @@ Consequences worth knowing, none of them gated:
 - **`--jrk-surface-subtle` is a real recess in light again** (`#f2f2f7`, 1.12:1
   below both the white page and the white card), so table headers and inset wells
   read as set in. It does not replace `--jrk-surface-track`, which is recessed in
-  *both* themes where subtle is a recess in light and a lift in dark.
+  *both* themes where subtle is a recess in light and a lift in dark. `track` still
+  has exactly one consumer, the segmented-control well. The sheet's block-head used
+  it for part of 2026-08-12 and then went to `accent.solid`; the note left on the
+  token records what a second consumer would have cost, because the two would have
+  been coupled through one value. **Anything textual on `track` needs
+  `text.secondary`, not `text.muted`** — muted is 4.15:1 there in light, under the
+  body floor, and `validate` measures ink against the card and the page, so it could
+  not see it. The chrome pairings the library actually draws are gated now.
 - **`--jrk-surface-hover` on a whole tile is no longer the trap it was.** It is
   `#f2f2f7`, which used to be the page value and erased the card's fill step;
   with the flat page and a hairline it cannot dissolve the boundary.

@@ -15,6 +15,7 @@
   --color-surface-track: var(--jrk-surface-track);
   --color-surface-inverse: var(--jrk-surface-inverse);
   --color-surface-banner: var(--jrk-surface-banner);
+  --color-surface-banner-deep: var(--jrk-surface-bannerDeep);
   --color-surface-hover: var(--jrk-surface-hover);
   --color-surface-raised-hover: var(--jrk-surface-raisedHover);
   --color-surface-card-hover: var(--jrk-surface-cardHover);
@@ -27,6 +28,7 @@
   --color-ink-inverse: var(--jrk-text-inverse);
   --color-ink-link: var(--jrk-text-link);
   --color-ink-on-banner: var(--jrk-text-onBanner);
+  --color-ink-on-banner-deep: var(--jrk-text-onBannerDeep);
   --color-ink-on-banner-muted: var(--jrk-text-onBannerMuted);
   --color-border-subtle: var(--jrk-border-subtle);
   --color-border-default: var(--jrk-border-default);
