@@ -3,7 +3,20 @@
 .jrk-btn {
   --btn-h: var(--jrk-control-md);
   --btn-px: var(--jrk-space-3);
-  --btn-fs: var(--jrk-text-md);
+  /* A CONTROL LABEL IS ONE STEP BELOW BODY COPY — `sm` (13px), not `md` (14px).
+     This is the same argument the weight and tracking below already make, carried
+     to size: a button is a word you act on, not a word you read, and at `md` a row
+     of them was the largest type on screens whose body copy sits at the same step.
+     Dropping one step settles them under the prose without making them small.
+
+     WHAT THIS COSTS, STATED SO IT IS NOT REDISCOVERED AS A BUG: `.jrk-btn--sm`
+     also resolves to `--jrk-text-sm`, so the default and the small button are no
+     longer distinguished BY TYPE SIZE. They remain distinct sizes — `--sm` steps
+     the height (`control-sm`) and the padding (`space-2`) — which is what the
+     modifier is for; the type scale here only ever had 1px between those two
+     steps and it was never the channel carrying the difference. `--lg` is
+     untouched and still steps size, height and padding together. */
+  --btn-fs: var(--jrk-text-sm);
 
   display: inline-flex;
   align-items: center;
