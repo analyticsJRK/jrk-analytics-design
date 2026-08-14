@@ -315,12 +315,26 @@ export interface TopbarProps {
    *  to white; the search field and a `--secondary` button are left alone,
    *  because each is measured against its own fill. */
   vivid?: boolean;
+  /** Ramp for a `vivid` bar. Omitted is the three-hue ribbon; `'blue'` is the
+   *  brand anchor deepening across the bar and nothing else, which is what to
+   *  use when the bar sits above a row of blue `<VividStat>`s — it is literally
+   *  the same ramp, so the two read as one masthead. Ignored unless `vivid`. */
+  tone?: 'blue';
   className?: string;
 }
 
-export function Topbar({ children, vivid, className }: TopbarProps) {
+export function Topbar({ children, vivid, tone, className }: TopbarProps) {
   return (
-    <header className={cx('jrk-topbar', vivid && 'jrk-topbar--vivid', className)}>{children}</header>
+    <header
+      className={cx(
+        'jrk-topbar',
+        vivid && 'jrk-topbar--vivid',
+        vivid && tone && `jrk-topbar--${tone}`,
+        className,
+      )}
+    >
+      {children}
+    </header>
   );
 }
 

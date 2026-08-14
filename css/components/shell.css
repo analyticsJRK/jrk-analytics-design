@@ -456,15 +456,23 @@
    otherwise re-apply a translucent card fill over this and erase it in every
    browser that supports backdrop-filter. Matching 0-2-0 beats both. */
 .jrk-topbar.jrk-topbar--vivid {
+  /* The three stops are variables so a tone modifier can restate the RAMP
+     without restating the geometry — same split stat.css uses for the tile, and
+     for the same reason: angle and stop positions stay owned by the single
+     `background` declaration below, so a change to them happens once. */
+  --jrk-topbar-from: var(--jrk-gradient-teal-from);
+  --jrk-topbar-via: var(--jrk-gradient-blue-from);
+  --jrk-topbar-to: var(--jrk-gradient-violet-from);
+
   /* focus.ring is the brand anchor, which is literally this bar's middle stop.
      Same hole the vivid tile had, same one-line fix. */
   --jrk-focus-ring: var(--jrk-gradient-focus);
 
   background: linear-gradient(
     90deg,
-    var(--jrk-gradient-teal-from) 0%,
-    var(--jrk-gradient-blue-from) 52%,
-    var(--jrk-gradient-violet-from) 100%
+    var(--jrk-topbar-from) 0%,
+    var(--jrk-topbar-via) 52%,
+    var(--jrk-topbar-to) 100%
   );
   color: var(--jrk-gradient-ink);
   /* The bar bounds itself — 4.86:1 off the white page, 3.52:1 off the dark one —
@@ -473,6 +481,43 @@
   border-bottom-color: transparent;
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+}
+
+/* Single-hue variant: the brand blue deepening across the bar, with white doing
+   all of the second colour's work — the ink, the marks, and the --secondary
+   pill's fill. A blue-and-white masthead in the only sense that is available to
+   a bar carrying white text: a literal ramp TO white would put gradient.ink at
+   1.00:1 over the right-hand third, which is where the user menu and sign-out
+   live, so the white belongs on top of the ramp and not at the end of it.
+
+   Both endpoints are the EXISTING blue tone, unchanged. That is the whole point
+   — see the $note on gradient.blue.from: deriving a fresh blue for this landed
+   on #0a6ce5, the anchor with a rounding error on it, and two brand blues one
+   delta apart is a collision this library already carries once. Reusing the
+   tile's own tone also means the bar and the KPI band below it are literally the
+   same ramp, which is what makes them read as one masthead rather than two blues.
+
+   White is 5.22:1 at the light end and 7.14:1 at the deep end, both already
+   gated (accent.solid / accent.onSolid for the first). The interior needs no
+   separate check for the same convexity reason the three-tone default relies on:
+   sRGB interpolation cannot exceed its endpoints in luminance, so the worst
+   point of the sweep is the 0% stop. The midpoint is stated as a color-mix of
+   the two endpoints rather than a fourth hex precisely so it cannot drift into
+   being a new selected value that nothing gates.
+
+   0-3-0, and that is load-bearing: the base rule above sets these three custom
+   properties as DEFAULTS at 0-2-0, and a custom property is won by the ordinary
+   cascade. At 0-2-0 this would lose to the fallback it is meant to replace and
+   the bar would silently render the teal->violet ribbon — the modifier looking
+   like it did nothing. Same trap stat.css documents for its four tones. */
+.jrk-topbar.jrk-topbar--vivid.jrk-topbar--blue {
+  --jrk-topbar-from: var(--jrk-gradient-blue-from);
+  --jrk-topbar-via: color-mix(
+    in srgb,
+    var(--jrk-gradient-blue-from),
+    var(--jrk-gradient-blue-to)
+  );
+  --jrk-topbar-to: var(--jrk-gradient-blue-to);
 }
 
 /* Everything on the bar that was inked for white chrome. text.muted and
