@@ -60,6 +60,9 @@
       "cardMode": "single",
       "primaryStory": "Open",
       "viewport": "900x620"
+    },
+    "Topbar": {
+      "cardMode": "column"
     }
   },
   "runtimeFontPrefixes": [

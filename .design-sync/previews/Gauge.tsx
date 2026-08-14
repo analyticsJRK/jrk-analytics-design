@@ -26,9 +26,12 @@ export const Default = () => (
   </div>
 );
 
-/* Values clamp to 0–1, so an over-100% ratio fills the ring rather than wrapping
-   past its own start — a second lap is indistinguishable from the first and
-   would read as a smaller number than it is. State the overage in the value. */
+/* The ARC clamps to 0–1; the LABEL does not. An over-100% ratio fills the ring
+   rather than wrapping past its own start, because a second lap is
+   indistinguishable from the first and would read as a smaller number than it
+   is — but the printed figure still says 118%, because that figure is the whole
+   reason the low-contrast remainder arc is legal. Printing the clamped value was
+   a bug: the ring said "100%" next to a headline saying 118%. */
 export const Bounds = () => (
   <div className="jrk-stat-row jrk-stat-row--split">
     <VividStat tone="teal" label="Budget used" value="12" unit="%" caption="FY26 to date" gauge={0.12} />

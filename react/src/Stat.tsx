@@ -202,7 +202,15 @@ export function MiniBars({ values, className }: { values: number[]; className?: 
 /** Ring gauge, 0–1. The percentage is PRINTED inside the ring, and that is what
  *  makes the 1.6:1 remainder arc legal — nothing depends on reading the arc's
  *  extent. `<text>` rather than aria-hidden for the same reason: the figure is
- *  the accessible value here, not decoration. */
+ *  the accessible value here, not decoration.
+ *
+ *  Which is exactly why the ARC clamps and the LABEL does not. Only the arc has
+ *  a reason to stop at 100%: a second lap is indistinguishable from the first
+ *  and would read as a smaller number than it is. Printing the clamped figure
+ *  too was a bug — at 118% the ring said "100%" beside a tile headline saying
+ *  118%, two numbers disagreeing on one tile, and it undercut the one property
+ *  the low-contrast arc depends on. The label is the truth; the arc is a capped
+ *  picture of it. */
 export function Gauge({ value, className }: { value: number; className?: string }) {
   const r = 22;
   const c = 2 * Math.PI * r;
@@ -222,7 +230,7 @@ export function Gauge({ value, className }: { value: number; className?: string 
         transform="rotate(-90 26 26)"
       />
       <text x="26" y="26" textAnchor="middle" dominantBaseline="central">
-        {Math.round(pct * 100)}%
+        {Math.round(value * 100)}%
       </text>
     </svg>
   );

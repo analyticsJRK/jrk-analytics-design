@@ -392,6 +392,50 @@ expected. Token count is now **220** in `jrk-tokens.css` (244 defined across the
 whole shipped closure), up from 212 — the colorblind dash set in 829ebab, not a
 regression.
 
+**`[DTS_STYLE_SYSTEM]` joined that list on 2026-08-13 and is EXPECTED.** It reads
+`filtering @types/react props (>15 CSS-shorthand-named props)` and fires once for
+the run, not per component — it is the converter dropping `@types/react`'s
+HTML/SVG attribute surface from components that spread it (`Icon` extends
+`SVGProps`, and the form controls extend their HTML element props). It is not a
+regression and it hides no real API: the check is that `Icon.d.ts` generated
+locally is BYTE-IDENTICAL to the copy already in the project, so the filter
+behaved the same way on the sync before it. It appeared because the toolchain
+gained the notice, not because this library changed. If it ever names a component
+whose props are genuinely CSS-shorthand-shaped, that is when `cfg.dtsPropsFor`
+earns its keep.
+
+## `prepare.mjs` DOES NOT RUN ITSELF — and skipping it proposes deletions
+
+**`cfg.buildCmd` is documentation, not a hook.** Nothing in `package-build.mjs`
+or `resync.mjs` executes it; grep the toolchain and the string appears only in
+`lib/common.mjs`'s list of allowed config keys. The build sequence above lists
+`node .design-sync/prepare.mjs` as step 1 for exactly that reason, and
+`resync.mjs`'s own header says the agent must "run the repo's own build when
+source may have changed."
+
+On 2026-08-13 a re-sync was run WITHOUT it. `dist/types/` was a stale emit from
+that morning, and because the converter derives its component list from the
+`.d.ts` tree, the verdict came back proposing to **delete Menu, MenuItem,
+MenuLabel, MenuSeparator and SpotlightGuide** — 30 paths in `upload.deletePaths`
+— while reporting `added: []` for three components that genuinely were new. Every
+mechanical stage that could still run said `ok`. Running `prepare.mjs` and
+re-running produced `0 delete(s)`, `3 new, 6 changed, 0 removed`.
+
+So the durable rule: **a `removed:` list you did not expect means a stale
+`dist/types/`, not a deleted component.** Check the mtime on
+`dist/types/react/src/index.d.ts` before believing it. The same stale tree had
+already leaked into the portal's `vendor/` through the design-sync path that day;
+see the third failure mode in the repo's CLAUDE.md.
+
+**Two process notes from the same run, both about not seeing failure:**
+- Do NOT pipe `resync.mjs` through `tail`/`head`. The pipeline's exit status is
+  the pager's, so a run that exited 1 reports 0. Redirect to a file instead. The
+  verdict's own `ok` field is the reliable signal, not `$?` through a pipe.
+- `validate` fails with `[RENDER_SKIPPED]` when Playwright's chromium is absent,
+  and `capture` then skips as `prior_failure`. There is a `--no-render-check`
+  escape; it accepts an unverified bundle and should not be used to get past a
+  missing browser. `cd .ds-sync && npx playwright install chromium`.
+
 ## The page value and the card's edge are a PAIR — READ THIS BEFORE TRUSTING A SURFACE VALUE
 
 **Current state (2026-08-10): the light page is flat `#ffffff` BY DECISION, and
