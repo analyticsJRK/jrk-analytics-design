@@ -439,6 +439,65 @@
   flex: 1;
 }
 
+/* The search bar wears the ACCENT WASH — the same fill/ink/hairline trio as
+   .jrk-btn--primary, and for the same reason it works there: on white chrome a
+   neutral filled field is a lightness step and nothing else, where a tinted one
+   is a hue the eye finds without looking for it.
+
+   DESCENDANT SELECTORS, because `.jrk-topbar__search` lands on a different element
+   depending on how the search is built. The plain-HTML form puts it on the
+   `.jrk-input-group` wrapper; React's `<Input className>` forwards to the
+   `.jrk-field` shell, not to the control. Neither is the input, so a rule written
+   as `.jrk-topbar__search.jrk-input` would silently match nothing in both.
+
+   These beat `.jrk-input--filled` on specificity, which is deliberate — the
+   modifier stays the neutral default for every other white-chrome field and this
+   is the one place the accent is spent. */
+.jrk-topbar__search .jrk-input:not(:disabled) {
+  background: var(--jrk-accent-wash);
+  /* accent.washBorder, not transparent. The fill cannot bound this control: the
+     wash is 1.16:1 on the light topbar and 1.06:1 on the dark one, and form.css's
+     own rule is that an input has to show the reader the target they are about to
+     type into. Same call, same token, same numbers as the tinted button — 1.76:1
+     on white, 2.03:1 on the dark card.
+
+     It DOES leave the field sharing an anatomy with .jrk-btn--primary, which sits
+     a few hundred pixels away in the same bar. What separates them is everything
+     except the palette: 420px of width, a left-aligned placeholder, and a leading
+     glyph. Worth knowing rather than worth solving — but if a third wash-filled
+     control ever joins them in this bar, that is the point where the trio stops
+     meaning anything and one of them has to give up the wash. */
+  border-color: var(--jrk-accent-wash-border);
+}
+
+.jrk-topbar__search .jrk-input:hover:not(:disabled) {
+  background: var(--jrk-accent-wash-hover);
+  border-color: var(--jrk-accent-wash-border);
+}
+
+/* The magnifying glass takes the wash ink, so the glyph and its field are one
+   object rather than a grey icon sitting on a blue field. */
+.jrk-topbar__search .jrk-input-group__icon {
+  color: var(--jrk-accent-wash-text);
+}
+
+/* THE PLACEHOLDER HAD TO MOVE WITH THE FILL, and this is the part that is a
+   measurement rather than a preference. `.jrk-input::placeholder` is text.muted,
+   a value whose own token note records that it was darkened off systemGray
+   specifically to clear 4.5:1 — and it clears it against the surfaces it was
+   chosen for, not against this one. On accent.wash it lands at 4.36:1 in light,
+   under the floor. (Dark is fine at 5.13:1, so this is the usual shape: one theme
+   fails and the fix is applied to both.)
+
+   accent.washText is the value that measures — 5.31:1 light, 6.73:1 dark — and it
+   is also the ink the glyph beside it now carries, so the field reads as one
+   tinted control. The alternative was text.secondary at 8.88:1, rejected because
+   at that weight a placeholder stops looking like a prompt and starts looking like
+   a value somebody already typed. */
+.jrk-topbar__search .jrk-input::placeholder {
+  color: var(--jrk-accent-wash-text);
+}
+
 .jrk-content {
   flex: 1;
   padding: var(--jrk-space-6) var(--jrk-space-5);
