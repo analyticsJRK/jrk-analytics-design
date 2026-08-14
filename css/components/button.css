@@ -2,7 +2,13 @@
 
 .jrk-btn {
   --btn-h: var(--jrk-control-md);
-  --btn-px: var(--jrk-space-3);
+  /* A PILL NEEDS MORE SIDE AIR THAN A RECTANGLE, because its corners curve away
+     from the label rather than running past it — the same padding that framed a
+     6px-radius box leaves the first and last glyph sitting in the curve. space-3
+     -> space-4 at md, and the two size modifiers below step with it. This is most
+     of what makes a row of these read as the reference look; the radius alone
+     just rounds a cramped button. */
+  --btn-px: var(--jrk-space-4);
   /* A CONTROL LABEL IS ONE STEP BELOW BODY COPY — `sm` (13px), not `md` (14px).
      This is the same argument the weight and tracking below already make, carried
      to size: a button is a word you act on, not a word you read, and at `md` a row
@@ -47,7 +53,16 @@
   white-space: nowrap;
   text-decoration: none;
   border: 1px solid transparent;
-  border-radius: var(--jrk-radius-md);
+  /* FULLY ROUNDED. The pill is the reference look's signature control and it is
+     the one geometry change here that is not just a step on the existing ladder.
+     radius-full rather than a large fixed value so the shape holds at every
+     height — 24px, 32px and 40px buttons all read as the same control, and
+     --icon below becomes a circle for free rather than needing its own value.
+
+     The segmented control follows it (see the bottom of this file); the INPUTS in
+     form.css deliberately do not — a text field is a container you put something
+     in, and a pill-shaped one fights the left-aligned text it holds. */
+  border-radius: var(--jrk-radius-full);
   cursor: pointer;
   user-select: none;
   transition:
@@ -72,7 +87,7 @@
 
 .jrk-btn--sm {
   --btn-h: var(--jrk-control-sm);
-  --btn-px: var(--jrk-space-2);
+  --btn-px: var(--jrk-space-3);
   --btn-fs: var(--jrk-text-sm);
 }
 
@@ -83,7 +98,7 @@
 
 .jrk-btn--lg {
   --btn-h: var(--jrk-control-lg);
-  --btn-px: var(--jrk-space-4);
+  --btn-px: var(--jrk-space-6);
   --btn-fs: var(--jrk-text-lg);
 }
 
@@ -106,9 +121,34 @@
 
 /* ---------- variants ---------- */
 
-/* macOS push button. The anatomy: a hairline bezel, a very soft drop shadow,
-   and a small radius. Flat borderless rectangles read as Material; the bezel is
-   what makes it a Mac control. */
+/* The anatomy is now a PILL: a hairline bezel, a soft ambient shadow, and a fully
+   rounded edge. What replaced the macOS push button is the shape and the padding,
+   not the structure — the bezel is still what keeps a pale variant from reading as
+   a floating label, and every variant below still states its own boundary.
+
+   The hand-rolled `0 0.5px 1.5px` bezels are gone in favour of shadow-sm and
+   shadow-md, which is a de-duplication as much as a restyle: five variants were
+   each carrying their own rgba() literal, so the button's elevation could not be
+   moved from the token layer and did not follow the page tint. */
+
+/* THE FILLED FAMILY TAKES `medium`, THE REST STAY AT `regular`, and that split is
+   load-bearing rather than fussy. A saturated pill wants a slightly heavier label
+   to hold its own against the fill; a ghost or secondary button does not, and the
+   base rule's comment above explains why regular is right there.
+
+   THE REASON IT IS A SPLIT AND NOT A NEW BASE WEIGHT: the segmented control's
+   selected thumb is separated from its unselected siblings by a WEIGHT STEP, and
+   that step is the only channel of its state that survives greyscale and both
+   dichromacies (see the note on the thumb rule at the bottom of this file). The
+   segments are unfilled, so they keep the regular base and the step stays the full
+   regular -> semibold. Moving the BASE to medium would have narrowed it to
+   medium -> semibold — which this library has shipped before and which is exactly
+   the thing that note says not to erode. */
+.jrk-btn--primary,
+.jrk-btn--cta,
+.jrk-btn--danger-solid {
+  font-weight: var(--jrk-weight-medium);
+}
 
 /* TINTED, not solid: a pale accent wash carrying accent ink. This is the
    everyday button — the one that appears several times on a page.
@@ -133,9 +173,9 @@
   background: var(--jrk-accent-wash);
   color: var(--jrk-accent-wash-text);
   border-color: var(--jrk-accent-wash-border);
-  /* The same faint bezel as --secondary, not --cta's heavier one: a 0.16 shadow
-     under a pale fill reads as a grey smudge. */
-  box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.08);
+  /* shadow-sm, the same faint one --secondary takes, rather than --cta's
+     shadow-md: a heavier shadow under a pale fill reads as a grey smudge. */
+  box-shadow: var(--jrk-shadow-sm);
 }
 
 .jrk-btn--primary:hover:not(:disabled) {
@@ -157,7 +197,7 @@
 .jrk-btn--cta {
   background: var(--jrk-accent-solid);
   color: var(--jrk-accent-on-solid);
-  box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.16);
+  box-shadow: var(--jrk-shadow-md);
 }
 
 .jrk-btn--cta:hover:not(:disabled) {
@@ -174,7 +214,7 @@
   background: var(--jrk-surface-raised);
   color: var(--jrk-text-primary);
   border-color: var(--jrk-border-default);
-  box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--jrk-shadow-sm);
 }
 
 .jrk-btn--secondary:hover:not(:disabled) {
@@ -207,7 +247,7 @@
   background: var(--jrk-surface-raised);
   color: var(--jrk-status-critical-text);
   border-color: var(--jrk-border-default);
-  box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--jrk-shadow-sm);
 }
 
 .jrk-btn--danger:hover:not(:disabled) {
@@ -226,7 +266,7 @@
 .jrk-btn--danger-solid {
   background: var(--jrk-status-critical-solid);
   color: var(--jrk-status-critical-on-solid);
-  box-shadow: 0 0.5px 1.5px rgba(0, 0, 0, 0.16);
+  box-shadow: var(--jrk-shadow-md);
 }
 
 .jrk-btn--danger-solid:hover:not(:disabled) {
@@ -345,7 +385,11 @@
   gap: 0;
   padding: 2px;
   background: var(--jrk-surface-track);
-  border-radius: var(--jrk-radius-md);
+  /* The well is a pill because the thumb inside it is one. These two radii are a
+     PAIR — a rounded thumb in a squarer well leaves four visible slivers of track
+     at the ends of the control, which is the tell that the two were changed
+     separately. */
+  border-radius: var(--jrk-radius-full);
   isolation: isolate;
 }
 
@@ -361,7 +405,11 @@
   color: var(--jrk-text-secondary);
   border-color: transparent;
   box-shadow: none;
-  border-radius: calc(var(--jrk-radius-md) - 2px);
+  /* radius-full, not `calc(radius - 2px)`. The calc existed to inset a rounded
+     rectangle inside a rounded rectangle so the two curves stayed concentric; with
+     a pill there is no curve to match, and the calc would resolve to 9997px and
+     mean the same thing anyway. */
+  border-radius: var(--jrk-radius-full);
 }
 
 .jrk-btn-group > .jrk-btn:hover:not(:disabled) {

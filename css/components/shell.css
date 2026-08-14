@@ -24,18 +24,23 @@
   height: 100vh;
   position: sticky;
   top: 0;
-  /* Chrome sits on the page plane in both themes, so this hairline divides the
-     sidebar from content of the SAME fill and is the only thing there. #e5e5ea on
-     the #ffffff page is 1.26:1 — still faint by design, because the cards on the
-     content side are what actually establish where content begins, and they now
-     carry the same hairline.
+  /* The rail READS AS CHROME now: it takes the card fill and the content plane
+     keeps the tinted page, so the shell is a white frame around a tinted work
+     area, matching the topbar it meets at the corner. Those two must agree —
+     .jrk-topbar moved to surface.default in the same change, and a white bar
+     meeting a page-coloured rail puts a visible notch at their junction.
 
-     If the sidebar ever needs to read as chrome rather than as more page, give it
-     surface.SUBTLE (#f2f2f7), which is a genuine step below the flat white page —
-     that advice is the reverse of what stood here during the tinted-page era,
-     when subtle WAS the page and changed nothing. Either way, do not thicken
-     this rule. */
-  background: var(--jrk-surface-canvas);
+     This supersedes the advice that used to sit here, which said to reach for
+     surface.SUBTLE if the rail ever needed to read as chrome. That was written
+     against a flat white page, where subtle was the only available step DOWN;
+     with a tinted page the step available is UP, to the card fill, and up is the
+     better direction because it makes the rail the same material as every other
+     floating surface in the product rather than a third plane.
+
+     The hairline stays and still must not thicken: it is now separating two
+     different fills rather than being the only divider, so it has less to do, not
+     more. */
+  background: var(--jrk-surface-default);
   border-inline-end: 1px solid var(--jrk-border-subtle);
   transition: width var(--jrk-duration-base) var(--jrk-ease-standard);
   overflow: hidden;
@@ -92,7 +97,13 @@
   text-decoration: none;
   background: none;
   border: 0;
-  border-radius: var(--jrk-radius-md);
+  /* A PILL, matching the buttons and the segmented thumb. The current-page state
+     fills this shape with accent.wash, so it is the same "this is the one" object
+     the rest of the library draws — a rounded-rectangle nav row beside a
+     pill-shaped selected segment reads as two different widgets answering the
+     same question. On the square icon-only .jrk-sidebar__action this resolves to
+     a circle, which is what the reference look does with a bare icon button. */
+  border-radius: var(--jrk-radius-full);
   cursor: pointer;
   transition:
     background-color var(--jrk-transition),
@@ -164,13 +175,14 @@
   align-items: center;
   gap: var(--jrk-space-2);
   width: 100%;
-  /* 32px, up from the 28px macOS row. The note above about 40px being "a touch
-     ergonomic" still stands and is not being undone — this is the next step on
-     the existing control scale, not a return to a touch target. Height is the
-     real constraint on a 1080px display, so this is spent deliberately: the rail
-     holds ~12 destinations, and 4px each is affordable where a content grid's
-     would not be. */
-  height: var(--jrk-control-lg);
+  /* PINNED AT 32px, and the token it names changed to keep it there. This was
+     `control-lg` when lg meant 32px; the 2026-08-13 refresh moved lg to 40px, and
+     40px is precisely the height this rail's own history records as tried and
+     rejected — "a touch ergonomic on a mouse-driven 1080px-tall display". So the
+     row moved to `control-md`, which is 32px now, rather than following lg up.
+     Height is the real constraint on a 1080px display and the rail holds ~12
+     destinations; 8px each is not affordable. */
+  height: var(--jrk-control-md);
   padding-inline: var(--jrk-space-2);
   font-family: inherit;
   /* Lighter and one step larger together. Either alone reads as a mistake —
@@ -184,7 +196,13 @@
   white-space: nowrap;
   background: none;
   border: 0;
-  border-radius: var(--jrk-radius-md);
+  /* A PILL, matching the buttons and the segmented thumb. The current-page state
+     fills this shape with accent.wash, so it is the same "this is the one" object
+     the rest of the library draws — a rounded-rectangle nav row beside a
+     pill-shaped selected segment reads as two different widgets answering the
+     same question. On the square icon-only .jrk-sidebar__action this resolves to
+     a circle, which is what the reference look does with a bare icon button. */
+  border-radius: var(--jrk-radius-full);
   cursor: pointer;
   transition:
     background-color var(--jrk-transition),
@@ -387,8 +405,21 @@
   position: sticky;
   top: 0;
   z-index: var(--jrk-z-sticky);
-  background: var(--jrk-surface-canvas);
-  border-bottom: 1px solid var(--jrk-border-default);
+  /* The bar takes the CARD fill, not the page fill, and floats on shadow.card.
+     While the page was flat white those were the same value and this was a
+     distinction without a difference; the page is #f5f5f7 now, so the topbar reads
+     as a white plane over a tinted one — which is the reference look's chrome, and
+     the same relationship every card on the page below it has.
+
+     The hard border.default rule steps down to border.subtle, because it is no
+     longer the only thing separating the bar from the content: the fill step and
+     the shadow do most of that work now, and a full-width 1.52:1 rule under a
+     floating white bar reads as a seam drawn on it. It is kept rather than dropped
+     so the separation survives the moment content scrolls right up under the bar,
+     where a shadow cast onto a same-coloured card is invisible. */
+  background: var(--jrk-surface-default);
+  border-bottom: 1px solid var(--jrk-border-subtle);
+  box-shadow: var(--jrk-shadow-card);
 }
 
 /* Vibrancy. The topbar is the one piece of chrome that content actually scrolls
@@ -397,7 +428,7 @@
    Behind @supports so the opaque fill stays the fallback. */
 @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .jrk-topbar {
-    background: color-mix(in srgb, var(--jrk-surface-canvas) 72%, transparent);
+    background: color-mix(in srgb, var(--jrk-surface-default) 72%, transparent);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
     backdrop-filter: saturate(180%) blur(20px);
   }
@@ -564,8 +595,12 @@
   background: none;
   border: 0;
   /* Transparent underline reserves the space, so selecting a tab does not
-     shift the row by 2px. */
-  border-bottom: 2px solid transparent;
+     shift the row. 3px rather than 2px as of 2026-08-13: the reference look marks
+     the current top-level destination with a distinctly heavy rule, and at 2px
+     under a 14px label it reads as a hairline. It is still a border rather than a
+     pseudo-element, so it cannot take the rounded ends that mockup draws — not
+     worth an ::after and the stacking that comes with it. */
+  border-bottom: 3px solid transparent;
   /* base.css rounds EVERY anchor by radius-sm so the focus ring has soft
      corners, and on the link form that 4px lands on the 2px selected underline
      and curls both of its ends upward into little ticks. Only the bottom pair is
@@ -627,7 +662,9 @@
   padding: 2px;
   border-bottom: 0;
   background: var(--jrk-surface-track);
-  border-radius: var(--jrk-radius-md);
+  /* Pill well, tracking .jrk-btn-group. The two segmented controls are the same
+     widget in two markup contracts and a geometry change to one belongs in both. */
+  border-radius: var(--jrk-radius-full);
   isolation: isolate;
 }
 
@@ -645,7 +682,10 @@
      shorthand, which also resets the border-style that `border: 0` left as `none`;
      that is the quiet way a later border-color paints nothing. */
   border: 1px solid transparent;
-  border-radius: calc(var(--jrk-radius-md) - 2px);
+  /* radius-full, tracking .jrk-btn-group > .jrk-btn. The old `calc(radius - 2px)`
+     kept an inner rounded rectangle concentric with its well; a pill has no curve
+     to match. */
+  border-radius: var(--jrk-radius-full);
   margin-bottom: 0;
   transition:
     background-color var(--jrk-transition),

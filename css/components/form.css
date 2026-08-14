@@ -77,12 +77,36 @@
     background-color var(--jrk-transition);
 }
 
-/* Soft filled field for the topbar and other white-chrome contexts, where a
-   white input would disappear into its surroundings. */
+/* Soft filled field for the topbar and other white-chrome contexts, where a white
+   input would disappear into its surroundings.
+
+   It now fills with surface.SUBTLE rather than surface.default, and that is a fix
+   rather than a restyle: surface.default is the white card fill, and .jrk-topbar
+   moved onto that same fill on 2026-08-13, so this modifier was about to paint a
+   white field on a white bar — precisely the disappearance its own comment says it
+   exists to prevent. The correct fill is one step DOWN from whatever chrome it sits
+   in, which is what subtle is (1.12:1 under the bar in light, and a lift in dark,
+   where it is #2c2c2e on the #232326 bar).
+
+   This is the same class of bug as surface.raisedHover: a token that names a plane
+   silently becoming equal to the plane it is supposed to separate from, with
+   nothing to catch it because a validator measures text and marks, never a fill
+   against the fill beneath it. */
 .jrk-input--filled,
 .jrk-select--filled {
-  background: var(--jrk-surface-default);
+  background: var(--jrk-surface-subtle);
   border-color: transparent;
+}
+
+/* The reference look's search field: a soft-filled pill with no visible edge. Its
+   own modifier rather than a change to the base input, because the base is a
+   CONTAINER for left-aligned text and a fully-rounded one curls in on the first
+   glyph — the buttons went to radius-full and the fields deliberately did not.
+   A short single-line search box is the exception that survives it. */
+.jrk-input--pill,
+.jrk-select--pill {
+  border-radius: var(--jrk-radius-full);
+  padding-inline: var(--jrk-space-4);
 }
 
 .jrk-input--filled:hover:not(:disabled),
@@ -174,6 +198,27 @@
 
 .jrk-input-group:has(.jrk-input-group__icon:last-child) .jrk-input {
   padding-inline-end: calc(var(--jrk-space-2_5) * 2 + var(--jrk-icon-md));
+}
+
+/* An adornment in a PILL has to clear the curve, the same problem the buttons
+   solved with more side padding. space-2_5 puts a search glyph inside the round
+   end; space-4 sits it on the straight. These four rules mirror the four above
+   exactly and must stay in step with them — they win on specificity by one class,
+   so a change up there is silently ignored down here. */
+.jrk-input-group:has(.jrk-input--pill) .jrk-input-group__icon:first-child {
+  inset-inline-start: var(--jrk-space-4);
+}
+
+.jrk-input-group:has(.jrk-input--pill) .jrk-input-group__icon:last-child {
+  inset-inline-end: var(--jrk-space-4);
+}
+
+.jrk-input-group__icon:first-child ~ .jrk-input--pill {
+  padding-inline-start: calc(var(--jrk-space-4) * 2 + var(--jrk-icon-md));
+}
+
+.jrk-input-group:has(.jrk-input-group__icon:last-child) .jrk-input--pill {
+  padding-inline-end: calc(var(--jrk-space-4) * 2 + var(--jrk-icon-md));
 }
 
 /* ============================== select ============================== */

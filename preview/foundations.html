@@ -112,10 +112,16 @@
     <div class="gal-demo" id="radius-demo"></div>
     <div class="gal-demo" style="background:var(--jrk-surface-canvas)" id="shadow-demo"></div>
     <p class="gal-sec__note">
-      Elevation is opt-in. A dashboard of many tiles reads calmer flat — shadow is for
-      things that genuinely float. In dark mode the lightened surface does nearly all
-      the work: against a true black page a drop shadow is invisible, so the grey tile
-      itself is the elevation cue and the shadow only tightens the edge.
+      Elevation is a LADDER, not a switch, and it runs rest → hover → popover:
+      <code>shadow.card</code> on every resting tile, <code>shadow.lg</code> when an
+      interactive one is hovered, <code>shadow.lg</code>/<code>xl</code> for things in the
+      top layer. It used to be opt-in — a dashboard of tiles read calmer flat — and the
+      2026-08-13 refresh reversed that, so the rule to protect now is the GAP between the
+      steps: grow the resting shadow without growing the hover one and a card stops
+      responding to the pointer. In dark mode the lightened surface does all of the work:
+      a drop shadow on a <code>#141416</code> page is invisible, which is why
+      <code>shadow.card</code> is <code>none</code> there and a dark tile is still bounded
+      by its fill step and its hairline alone.
     </p>
   </section>
 

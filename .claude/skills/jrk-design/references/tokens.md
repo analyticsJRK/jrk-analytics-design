@@ -22,7 +22,7 @@ dark theme a swap rather than a rewrite.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--jrk-surface-canvas` | `#ffffff` | `#141416` | page plane, sidebar, topbar |
+| `--jrk-surface-canvas` | `#f5f5f7` | `#141416` | page plane (the CONTENT area only — chrome takes `surface-default`) |
 | `--jrk-surface-default` | `#ffffff` | `#232326` | cards, panels, **chart surface** |
 | `--jrk-surface-tinted` | `#e0f6ff` | `#0e3543` | KPI band, highlighted tiles |
 | `--jrk-surface-subtle` | `#f2f2f7` | `#2c2c2e` | table header, inset wells, sheet toolbar |
@@ -31,25 +31,39 @@ dark theme a swap rather than a rewrite.
 | `--jrk-surface-card-hover` | `#ffffff` | `#2c2c2e` | fill of an INTERACTIVE card while hovered |
 | `--jrk-surface-hover` / `-active` / `-disabled` / `-inverse` | | | states |
 
-**The light page is flat `#ffffff`, so a tile is bounded by a HAIRLINE.**
-`.jrk-card` draws `border.subtle`: 1.26:1 on the light page, where it does the
-whole job, and 1.24:1 in dark on top of the fill step that still bounds the tile
-there (`#232326` on `#141416`, 1.17:1). One mechanism in both themes, per-theme
-values — not hairline-in-light / fill-in-dark, because two mechanisms is what lets
-a change read correctly in one theme and vanish in the other. Chrome (sidebar,
-topbar) shares the canvas and is divided from the content by its own hairline.
+**The light page is TINTED `#f5f5f7` and a tile is bounded THREE ways** — a fill
+step, a hairline, and a resting shadow. `.jrk-card` draws `border.subtle` (1.26:1
+light, 1.24:1 dark on top of the 1.17:1 fill step) and rests on `shadow.card`
+(light only — a black shadow on `#141416` renders nothing). One mechanism in both
+themes, per-theme values — not hairline-in-light / fill-in-dark, because two
+mechanisms is what lets a change read correctly in one theme and vanish in the
+other.
+
+**Chrome no longer shares the canvas.** `.jrk-sidebar` and `.jrk-topbar` moved to
+`surface-default` on 2026-08-13, so the shell is a white frame around a tinted work
+area. Those two must agree: a white bar meeting a page-coloured rail puts a visible
+notch at their junction.
 
 **`canvas.light` and that edge are a pair — never move one alone.** The page has
 been `#ffffff` and `#f2f2f7` more than once. Flat page → the card needs its own
-edge; tinted page → the fill step is the edge and the border can go transparent.
-The one broken state was the half-finished revert, where the brand edge was
-removed and the page was left flat: light cards had a 1.000:1 step behind a
-transparent border. `border.card` and `size.cardEdge` are still gone for good.
+edge; tinted page → the fill step *may* be the edge and the border *may* go
+transparent — and here that permission is declined, because the tint is shallow
+(1.06:1 to the white card) and the step alone would bound less than the hairline
+does. **The safe direction is the one that leaves a tile more bounded, never
+less.** The one broken state on record was the half-finished revert, where the
+brand edge was removed and the page was left flat: light cards had a 1.000:1 step
+behind a transparent border. `border.card` and `size.cardEdge` are still gone for
+good.
+
+**The page is `#f5f5f7` rather than `#f2f2f7` because `surface-subtle` is pinned
+and cannot move down** — `text.muted` is 4.59:1 on it and 4.23:1 one step deeper,
+so a table header's own label would fail. Other surfaces are chosen around it.
 
 Consequences worth knowing, none of them gated:
-- **`--jrk-surface-subtle` is a real recess in light again** (`#f2f2f7`, 1.12:1
-  below both the white page and the white card), so table headers and inset wells
-  read as set in. It does not replace `--jrk-surface-track`, which is recessed in
+- **`--jrk-surface-subtle` is a 1.12:1 recess off the CARD** (`#f2f2f7`), so table
+  headers and inset wells read as set in — but it is only 1.02:1 off the page, so
+  it is **not usable as a wash laid directly on the page plane**. It does not
+  replace `--jrk-surface-track`, which is recessed in
   *both* themes where subtle is a recess in light and a lift in dark. `track` still
   has exactly one consumer, the segmented-control well. The sheet's block-head used
   it for part of 2026-08-12 and then went to `accent.solid`; the note left on the
@@ -60,13 +74,15 @@ Consequences worth knowing, none of them gated:
   not see it. The chrome pairings the library actually draws are gated now.
 - **`--jrk-surface-hover` on a whole tile is no longer the trap it was.** It is
   `#f2f2f7`, which used to be the page value and erased the card's fill step;
-  with the flat page and a hairline it cannot dissolve the boundary.
+  with a tinted page, a hairline and a resting shadow it cannot dissolve the
+  boundary.
   `--jrk-surface-card-hover` is still the token for a hovered card and is still a
   deliberate no-op in light, because the hover *shadow* carries that theme.
-- **`.jrk-content--document` is a no-op in light again**, because the plane it
-  paints (`surface.default`) is the same `#ffffff` as the page. It does real work
-  in dark. What still holds in light is the reason it exists: anything on that
-  plane has no fill step to separate with and needs its own edge.
+- **`.jrk-content--document` does real work in both themes again.** The plane it
+  paints (`surface.default`) is `#ffffff` on an `#f5f5f7` page in light and
+  `#232326` on `#141416` in dark; it was a no-op in light for as long as the page
+  was flat white. What holds either way is the reason it exists: anything placed on
+  that plane has no fill step to separate with and needs its own edge.
 
 The card is what marks are measured against — `#ffffff` / `#232326`.
 
@@ -128,7 +144,7 @@ Where an edge IS drawn:
 mattered most for the removed brand edge and it still matters for
 `--jrk-border-accent`: a tab underline is a *signifier*, something depends on
 seeing it, so it needs WCAG 1.4.11's 3:1 and its numbers are recorded by hand on
-the token (`#0069d9`, 5.22:1 on the card and on the flat white page). Decorative
+the token (`#0069d9`, 5.22:1 on the card and 4.79:1 on the `#f5f5f7` page). Decorative
 separation may sit below 3:1; the moment state rides on a border it may not. Note
 this token used to need a bespoke value to clear 3:1 at all; it now tracks
 `accent.text`, which is always safe because its floor is the higher one.
@@ -152,7 +168,7 @@ pressable. And `-wash-border` is kept far below `--jrk-border-accent` on purpose
 that one means *selected* on a segment or a tab, and the two must not converge.
 
 **The anchor is `#0069d9`, a saturated mid-tone, and every role takes it.**
-5.22:1 on the white card and on the flat white page, white label at 5.22:1 —
+5.22:1 on the white card and 4.79:1 on the `#f5f5f7` page, white label at 5.22:1 —
 so `-text`, `--jrk-text-link`, `--jrk-border-accent` and `--jrk-focus-ring` are
 all the anchor itself. Only `-wash-text` steps away, and only because its
 background does.
@@ -237,21 +253,30 @@ Apply a series color by setting `--series` on the mark's container, or use the
 - **Leading** `--jrk-leading-tight|snug|normal|relaxed`
 - **Tracking** `--jrk-tracking-tight|normal|wide|caps`
 - **Space** `--jrk-space-0_5` … `--jrk-space-24` on a 4px grid
-- **Radius** `--jrk-radius-sm|md|lg|xl|2xl|full` (4/6/10/12/16px) plus
-  `--jrk-radius-data-end` (4px, bar tips). Apple corners are TIGHTER than most
-  web systems — macOS controls sit near 6px and cards near 10-12px.
-- **Shadow** `--jrk-shadow-sm|md|lg|xl|focus`
-- **Controls** `--jrk-control-sm|md|lg` (24/28/32px, macOS-compact non-touch), `--jrk-icon-sm|md|lg` (13/15/18px). `--jrk-min-touch` is 24px — the WCAG 2.2 AA floor. Never lower.
+- **Radius** `--jrk-radius-sm|md|lg|xl|2xl|full` (6/10/14/18/24px) plus
+  `--jrk-radius-data-end` (4px, bar tips). Softened from the tight Apple ladder
+  (4/6/10/12/16) on 2026-08-13. Controls take `full`; **fields do not** — see
+  `.jrk-input--pill` for the one exception.
+- **Shadow** `--jrk-shadow-sm|card|md|lg|xl|focus`. `card` is the resting
+  elevation of every tile and is `none` in dark.
+- **Controls** `--jrk-control-sm|md|lg` (24/32/40px; md and lg stepped up 2026-08-13 for the softer look, sm held at the floor), `--jrk-icon-sm|md|lg` (13/15/18px). `--jrk-min-touch` is 24px — the WCAG 2.2 AA floor. Never lower. `.jrk-nav-item` is pinned to `control-md` rather than following `lg`, and `size.sheet.*` is a separate ladder that did not move.
 - **Layout** `--jrk-sidebar-collapsed|expanded`, `--jrk-topbar-default`,
   `--jrk-container-sm|md|lg|xl`
 - **Sheet** `--jrk-sheet-row|row-banner|row-meta|gutter|label|cell|total|wide|chart`
 - **Motion** `--jrk-duration-*`, `--jrk-ease-*`, and `--jrk-transition`
 - **Z** `--jrk-z-base|raised|sticky|overlay|modal|popover|toast|tooltip`
 
-Radii are deliberately TIGHT — Apple corners are smaller than most web systems,
-and an over-rounded card is the fastest way to stop reading as Apple.
-`radius-data-end` stays smallest: a heavily rounded bar tip makes the endpoint
-ambiguous, and reading the bar against the axis is its job.
+Radii are deliberately SOFT, and that reverses what stood here — "tight, because
+Apple corners are smaller than most web systems and an over-rounded card is the
+fastest way to stop reading as Apple". Reading as Apple is no longer the brief.
+`radius-data-end` did **not** move and stays smallest: it rounds the loaded end of
+a bar, where the corner eats length off the encoding, so a heavily rounded tip
+makes the endpoint ambiguous and reading the bar against the axis is its job. It
+will look like an oversight beside the softened ladder; it is not.
+
+Elevation is a LADDER: rest (`shadow-card`) → hover (`shadow-lg`) → popover
+(`shadow-lg`/`xl`). Protect the GAP between the steps — point rest and hover at the
+same token and an interactive card stops responding to the pointer.
 
 ## Motion
 

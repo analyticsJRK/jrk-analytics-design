@@ -1,11 +1,22 @@
 /* Card / panel — the container every dashboard tile and chart sits in. */
 
-/* The card draws a HAIRLINE, in both themes: border.subtle, 1.26:1 on the white
-   page in light and 1.24:1 on the card fill in dark. That pairs with a FLAT
-   #ffffff light page — see the $lightNote on surface.canvas, which carries the
-   rule this file exists to obey: a flat page has no fill step to the white card,
-   so the card must bound itself, and moving one without the other is the bug this
-   library has already shipped once.
+/* The card draws a HAIRLINE in both themes — border.subtle, 1.26:1 in light and
+   1.24:1 on the card fill in dark — and, as of 2026-08-13, a RESTING SHADOW in
+   light as well.
+
+   Read the $lightNote on surface.canvas for the rule this file exists to obey. The
+   light page is TINTED again (#f5f5f7), which by that rule permits the fill step to
+   be the edge and the hairline to go transparent. The permission is declined here,
+   on purpose: the tint is shallow (1.06:1 to the white card, against the 1.12:1 the
+   old #f2f2f7 page gave) so the step alone would be a weaker boundary than what
+   this card had yesterday. Keeping the hairline means the page move can only leave
+   a tile MORE bounded, never less — which is the safe direction through the one
+   transition this library has historically got wrong.
+
+   So a light card is now bounded three ways: a shallow fill step, the hairline, and
+   shadow.card. That is redundant and it is the point — the shadow is what makes it
+   read as FLOATING rather than merely as delimited, and the fill step is too
+   shallow to do that alone.
 
    In dark the hairline is additive rather than load-bearing — the 1.17:1 fill step
    off #141416 still does the work, and 1.24:1 is a whisper on top of it. That is
@@ -24,14 +35,26 @@
 
    Historical note, because it explains the modifiers: the brand-edge era put a
    2px #48a9df line here and flattened the page to go with it. The brand is gone
-   for good — it lives on fills now, not on a rectangle — but the flat page is
-   back, so the neutral hairline is what replaces the fill step. */
+   for good — it lives on fills now, not on a rectangle. */
 .jrk-card {
   display: flex;
   flex-direction: column;
   background: var(--jrk-surface-default);
   border: 1px solid var(--jrk-border-subtle);
   border-radius: var(--jrk-radius-xl);
+  /* Resting elevation, which reverses the rule that used to be written on
+     shadow.lg — "elevation is opt-in AT REST ... every tile carrying a resting
+     shadow was the look this system was built to avoid". That look is the brief
+     now. shadow.card is its own token rather than a reach for shadow.sm so that
+     REST and HOVER stay two separate values: --interactive:hover steps up to
+     shadow.lg below, and it can only read as a raise while the resting shadow is
+     visibly smaller. Do not point them at the same token, and do not grow this one
+     to make tiles pop without moving shadow.lg with it.
+
+     `none` in dark, by construction — a black ambient shadow on a #141416 page
+     renders nothing. The dark card is bounded by its fill step and hairline exactly
+     as it was before, so this whole declaration is a light-mode change. */
+  box-shadow: var(--jrk-shadow-card);
 }
 
 /* Truly borderless, for a card whose surroundings already bound it. It is a real
@@ -41,6 +64,11 @@
    boundary, which is the point, but it means the content has to do the grouping. */
 .jrk-card--seamless {
   border-color: transparent;
+  /* The shadow has to go with the border or the modifier does not do what it says.
+     Hairline and shadow are two boundaries now, and removing one leaves the tile
+     still plainly bounded — "seamless" would silently mean "slightly less
+     bounded". Same reason --flush drops it below. */
+  box-shadow: none;
 }
 
 /* Brand wash, for tiles that lead a page. */
@@ -60,10 +88,14 @@
   border-color: var(--jrk-border-default);
 }
 
-/* Elevation is opt-in. A dashboard of many tiles reads calmer flat — reserve
-   shadow for things that genuinely float (menus, modals, toasts). */
+/* A tile lifted ABOVE the resting plane. It used to be the only way a card got a
+   shadow at all, back when elevation was opt-in; now that every card rests on
+   shadow.card, this modifier's job changed from "has elevation" to "has MORE
+   elevation than its siblings", and its value moved from shadow-md to shadow-lg to
+   keep saying that. shadow-md would now be roughly the resting value and the
+   modifier would be a near-no-op — which is the quiet way a modifier dies. */
 .jrk-card--raised {
-  box-shadow: var(--jrk-shadow-md);
+  box-shadow: var(--jrk-shadow-lg);
 }
 
 /* No container at all — the card dissolves into whatever plane it sits on.
@@ -72,6 +104,9 @@
 .jrk-card--flush {
   border-color: transparent;
   background: transparent;
+  /* A transparent tile casting a shadow would draw a rectangle in mid-air where
+     there is deliberately no object. */
+  box-shadow: none;
 }
 
 .jrk-card__header {

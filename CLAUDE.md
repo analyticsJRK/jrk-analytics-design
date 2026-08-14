@@ -105,25 +105,67 @@ themes, real surfaces. If a color fails, re-step it; do not lower the gate. The
 full run needs the `dataviz` skill's validator:
 `JRK_DATAVIZ=/path/to/skills/dataviz npm run validate`.
 
-**The light page is FLAT `#ffffff`, so a tile is bounded by a HAIRLINE, and the
-two move together.** `.jrk-card` draws `border.subtle` — 1.26:1 on the white page
-in light, 1.24:1 on the card fill in dark. Dark also keeps its fill step
-(`#232326` on `#141416`, 1.17:1), so there the hairline is additive and the step
-still does the work. **One mechanism, both themes, per-theme values** — that is
-the point, and it is why the hairline is drawn in dark too rather than only in
-light. A light-hairline/dark-fill split is the shape the conflict register calls
-the most expensive thing in the file to forget, because a change that reads
-correctly in one theme goes invisible in the other.
+**`validate` only sees NAMED colour tokens, so a colour hidden inside a string is
+unreachable to it.** `shadow.focus.light` carried `rgba(3, 0, 192, …)` — the
+systemIndigo accent from two accents ago — for that entire time, so every focus
+ring in the product bloomed a violet that appears nowhere else in the file around a
+`#0069d9` core, and the dark half was still the dead `#9ee4ff` pastel. Both are now
+the theme's own `focus.ring`. The same blind spot covers the `border` and `overlay`
+namespaces, whose figures are hand-recorded on their tokens. **If you put a colour
+in a shadow, a gradient or a `data:` URL, nothing will check it — measure by hand
+and write the number down.**
+
+**THE LOOK IS A SOFT WEB UI ON AN APPLE COLOUR FOUNDATION** (since 2026-08-13).
+White cards floating on a `#f5f5f7` page, pill controls, generous radii, tall
+chrome. **Geometry, elevation and the page plane changed; not one measured colour
+did.** Several notes in this repo still argue for tight radii, a flat page and
+no-resting-shadow using "Apple does it this way" as the premise — those are marked
+where they stand, and the premise is what expired, not the measurement. **Anything
+justified by a contrast ratio, a CVD ΔE or a WCAG floor is untouched and is not up
+for restyling.**
+
+**The light page is TINTED `#f5f5f7` and the card is bounded three ways.**
+`.jrk-card` draws `border.subtle` (1.26:1 light, 1.24:1 dark), sits on a fill step,
+and rests on `shadow.card`. The tint permits dropping the hairline — see the pair
+rule below — and that permission is **declined**, because the tint is shallow
+(1.06:1 to the white card, against the 1.12:1 the old `#f2f2f7` page gave) so the
+step alone is a *weaker* boundary than yesterday's. Dark is unchanged: `#232326` on
+`#141416` (1.17:1) plus the same hairline, and `shadow.card` is `none` there
+because a black shadow on `#141416` renders nothing. **One mechanism, both themes,
+per-theme values** — a light-hairline/dark-fill split is the shape the conflict
+register calls the most expensive thing in the file to forget.
 
 **`surface.canvas.light` and the card's edge are a PAIR. Never move one alone.**
 This has been got wrong once, expensively: the flat page originally shipped with a
 2px brand edge doing the bounding, the edge was later removed, the page was not
 un-flattened with it, and light cards sat at a 1.00:1 step behind a transparent
-border — no boundary at all — and shipped that way. The page then went tinted so
-the fill step could bound the tile, and it is flat again now with a hairline. Every
-one of those states was coherent; the only broken one was the half-finished
-revert. So: **page flat → the card needs its own edge; page tinted → the fill step
-is the edge and the border can go transparent.**
+border — no boundary at all — and shipped that way. So: **page flat → the card
+needs its own edge; page tinted → the fill step *may* be the edge and the border
+*may* go transparent.** Note the direction of that permission — the safe move
+through this transition is the one that leaves a tile MORE bounded, never less,
+which is why the current page tint kept every edge it had.
+
+**Why the page is `#f5f5f7` and not the obvious `#f2f2f7`:** because `#f2f2f7` is
+`surface.subtle`, and **`surface.subtle.light` cannot move.** `text.muted` is
+4.59:1 on it and 4.23:1 on the next step down, so the first deepening puts a table
+header's own label under the floor. It is a fixed point that other surfaces are
+chosen around. The live cost: subtle is 1.02:1 on the page, i.e. **invisible as a
+wash laid directly on the page plane** — it is still a 1.12:1 recess off the white
+card, which is where headers and wells actually live. Want a recess on the page?
+`surface.track`, or put the thing in a card.
+
+**Elevation is a LADDER now, not a switch: rest → hover → popover.** Every card
+rests on `shadow.card`; `--interactive:hover` steps up to `shadow.lg`;
+`--raised` moved from `md` to `lg` so it still means "more than resting". This
+reverses the old "elevation is opt-in at rest, a dashboard of tiles reads calmer
+flat" rule. **What must be protected is the GAP** — point rest and hover at the
+same token, or grow one without the other, and a card stops responding to the
+pointer. `--seamless` and `--flush` drop the shadow with the border, or they stop
+meaning what they say.
+
+**Controls are pills (`radius.full`) and fields are not.** A text field is a
+container for left-aligned text and a fully-rounded one curls in on the first
+glyph. `.jrk-input--pill` is the opt-in for a short search box.
 
 Because the card is the chart surface, marks are validated against `#ffffff` /
 `#232326`.
@@ -147,17 +189,22 @@ tiles — and the selectors did not change, only their reason.
 to sit on `.jrk-content--document`, which IS the card plane, so it has no fill
 step to inherit and draws `border.default` itself.
 
-**`surface.subtle` is a real recess in light again** (`#f2f2f7`, 1.12:1 below both
-the flat white page and the white card), so table headers and inset wells read as
-set into whatever they sit on. It spent one period EQUAL to the page, where it
-receded from a card but was invisible on the page itself — do not re-derive it from
-the page value, the point is that it sits below whatever the page is. It still does
-not replace `surface.track`, which is recessed in both themes where this one is a
+**`surface.subtle` is a recess off the CARD** (`#f2f2f7`, 1.12:1) and is
+effectively invisible on the page — see the pinning note above. It still does not
+replace `surface.track`, which is recessed in both themes where this one is a
 recess in light and a lift in dark (`#2c2c2e` is lighter than the `#232326` card).
-`surface.hover` is the same value and its old trap is gone with the flat page — a
-`#f2f2f7` wash no longer erases a boundary, because the card carries a hairline —
-but interactive cards still use `surface.cardHover`, because that is the token that
-means "hover on a card" and the shadow is the better lift signal in light.
+`surface.hover` is the same value; interactive cards still use
+`surface.cardHover`, because that is the token that means "hover on a card" and the
+shadow is the better lift signal in light.
+
+**A token that names a plane goes wrong when it becomes EQUAL to the plane it sits
+on, and nothing gates that** — the validator measures text and marks, never a fill
+against the fill beneath it. Three instances are on record: `surface.raisedHover`
+equalling `surface.raised` in dark (menus had no hover at all), `surface.disabled`
+equalling the card twice after the card moved, and `.jrk-input--filled` filling
+`surface.default` on a topbar that had just moved onto `surface.default` — fixed to
+`surface.subtle` in the same commit. **When you move a plane, grep for what fills
+against it.**
 
 **The dark page is not `#000000`, and that is deliberate.** iOS grouped dark is
 true black; at 1920x1080 it halates against near-white text and reads as a void.
@@ -314,8 +361,14 @@ Apple color; the neutrals, status colors and chart palette still are.
 **Dark values are selected, not flipped.** Every themed token has an explicit
 `light` and `dark` entry chosen for that surface.
 
-**Non-touch, 1920x1080.** Controls are 24/28/32 and `minTouch` is 24px — the
-WCAG 2.2 AA floor (2.5.8). Height is the real constraint. Never go below 24px.
+**Non-touch, 1920x1080.** Controls are **24/32/40** (md and lg both stepped up on
+2026-08-13 for the airier look) and `minTouch` is 24px — the WCAG 2.2 AA floor
+(2.5.8), which is why `sm` did not move. Height is still the real constraint, so
+two callers were **pinned rather than allowed to follow**: `.jrk-nav-item` moved
+from `control-lg` to `control-md` to hold 32px, because 40px is the height the
+rail's own history records as tried and rejected; and the sheet takes `size.sheet.*`,
+a separate ladder that did not move at all. **A dense report is still dense — it is
+the chrome around it that grew.** Never go below 24px.
 
 **`.jrk-sheet` is a grid, not a table.** One shared `--jrk-sheet-cols` track list
 is the only way a single Excel-style column bar can align with stacked metric

@@ -71,17 +71,22 @@
     The card is forced to carry a hairline by <code class="jrk-mono">.jrk-auth .jrk-card</code>
     rather than waiting for an author to remember <code class="jrk-mono">--outlined</code>. Two
     reasons: a lone centred card has no sibling tiles to be read against, and
-    <code class="jrk-mono">surface.canvas.light</code> is currently
-    <code class="jrk-mono">#ffffff</code> — identical to the card — so in light the fill step is
-    1.000:1 and this screen is where that defect shows most.
+    <code class="jrk-mono">surface.canvas.light</code> is a shallow
+    <code class="jrk-mono">#f5f5f7</code> tint against the card's
+    <code class="jrk-mono">#ffffff</code> — a 1.06:1 fill step, which is the weakest boundary any
+    tile in the library gets. This screen is where that shows most, because there is nothing else
+    on it. The step was 1.000:1 during the flat-white-page period, i.e. no boundary at all, which
+    is the failure this rule was originally written against.
   </div>
 
   <div class="gal-rule">
-    <strong>This is deliberately flatter than the login page in production.</strong> That one paints
-    a radial gradient behind the card and a two-layer drop shadow on it. Both are ink this library
-    spends nowhere else — elevation is opt-in and reserved for things that genuinely float, and a
-    tile is bounded by its surface relationship rather than by a glow. Matching it would import
-    decoration; this keeps the flat treatment on purpose.
+    <strong>This is still flatter than the login page in production, but by less than it was.</strong>
+    That one paints a radial gradient behind the card and a two-layer drop shadow on it. The
+    <em>shadow</em> half is no longer ink this library refuses to spend — every card rests on
+    <code class="jrk-mono">shadow.card</code> since the 2026-08-13 refresh, and this one does too.
+    What is still declined is the <em>gradient</em>: a tile is bounded by its surface relationship
+    and its edge, not by a glow behind it, and a radial wash on the page plane is decoration with
+    no state to report.
   </div>
 
   <div class="gal-rule">

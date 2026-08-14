@@ -75,13 +75,14 @@ An error is never signalled by the red border alone. `<Input error="...">` sets
 
 ## Card / Section
 
-`.jrk-card` (white fill, **no border** — bounded by its fill step off the page)
-with `__header` `__title` `__subtitle` `__actions` `__body` `__footer`. Modifiers:
-`--raised` (elevation is opt-in — a dashboard of many tiles reads calmer flat),
-`--tinted`, `--outlined` (an explicit neutral hairline, for a card with no fill
-step to use: one on the card plane or on a tinted surface), `--seamless`
-(transparent edge — a no-op at the top level, and the only way to suppress the
-nested-tile hairline), `--interactive`, `--flush`.
+`.jrk-card` (white fill, a `border.subtle` hairline, and a resting `shadow.card`
+in light) with `__header` `__title` `__subtitle` `__actions` `__body` `__footer`.
+Modifiers: `--raised` (**more** elevation than resting — `shadow.lg`; it used to
+mean "has elevation at all", back when rest was flat), `--tinted`, `--outlined`
+(a heavier neutral hairline, for a card with no fill step to use: one on the card
+plane or on a tinted surface), `--seamless` (drops the hairline **and** the
+shadow — both, or the modifier does not do what it says), `--interactive`,
+`--flush` (drops fill, hairline and shadow).
 
 The card declares `border: 1px solid transparent`. **Never change that to
 `border: 0`** — the reserved width keeps an appearing edge from reflowing the

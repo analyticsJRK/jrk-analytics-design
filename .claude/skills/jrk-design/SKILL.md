@@ -78,23 +78,37 @@ not Apple's — it is a blue at hue 212° anchored on `#0069d9`, one step deeper
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#ffffff` | `#141416` |
-| card | `#ffffff` | `#232326` |
+| page plane | `#f5f5f7` | `#141416` |
+| card / chrome | `#ffffff` | `#232326` |
 | popover / input | `#ffffff` | `#2c2c2e` |
 
-**The light page is flat `#ffffff`, so a tile is bounded by a HAIRLINE.**
-`.jrk-card` draws `border.subtle` in both themes: 1.26:1 on the light page where it
-does the whole job, 1.24:1 in dark on top of the fill step that already bounds the
-tile there (1.17:1). One mechanism across themes with per-theme values — deliberately
-not hairline-in-light / fill-in-dark, because two mechanisms is what lets a change
-read correctly in one theme and vanish in the other.
+The GEOMETRY on top of that is not Apple's and stopped pretending to be on
+2026-08-13: pill controls, 6/10/14/18/24 radii, tall chrome, and a resting shadow
+on every card. **The colour layer did not move with it** — nothing measured
+changed, and notes across the repo that argue for tight radii or a flat page from
+an "Apple does it this way" premise are marked stale in their premise only.
+
+**The light page is TINTED and a tile is bounded three ways** — a fill step, a
+hairline, and `shadow.card`. `.jrk-card` draws `border.subtle` in both themes:
+1.26:1 in light, 1.24:1 in dark on top of the 1.17:1 fill step. One mechanism
+across themes with per-theme values — deliberately not hairline-in-light /
+fill-in-dark, because two mechanisms is what lets a change read correctly in one
+theme and vanish in the other.
 
 **`canvas.light` and that edge are a PAIR.** Flat page → the card needs its own
-edge; tinted page → the fill step is the edge and the border can go transparent.
-The library has shipped the broken combination once: the 2px `#48a9df` brand edge
-that justified the flat page was removed and the page was not un-flattened with it,
-leaving light cards at a 1.000:1 step behind a transparent border. `border.card`
-and `size.cardEdge` no longer exist.
+edge; tinted page → the fill step *may* be the edge and the border *may* go
+transparent. That permission is declined here: the current tint is shallow
+(1.06:1 to the white card) so the step alone would bound *less* than the hairline
+did. **The safe direction through this transition is the one that leaves a tile
+more bounded, never less** — the library has shipped the broken combination once,
+when the 2px `#48a9df` brand edge that justified the flat page was removed and the
+page was not un-flattened with it, leaving light cards at a 1.000:1 step behind a
+transparent border. `border.card` and `size.cardEdge` no longer exist.
+
+**The page is `#f5f5f7`, not the `#f2f2f7` the palette would suggest, because
+`surface.subtle` cannot move.** `text.muted` is 4.59:1 on `#f2f2f7` and 4.23:1 on
+the next step down, so subtle is pinned from below and other surfaces are chosen
+around it.
 
 Three follow-on rules:
 - **Tiles keep a 1px border, never `border: 0`.** `.jrk-card` colours it
@@ -108,12 +122,16 @@ Three follow-on rules:
 - **`.jrk-sheet` is the exception** and draws `border.default` by default: it is
   built to sit on `.jrk-content--document`, which *is* the card plane.
 
-In light, `surface.subtle` (`#f2f2f7`) is a genuine recess again — 1.12:1 below
-both the flat white page and the white card — so table headers and inset wells read
-as set in. `surface.hover` is the same value, and its old trap (washing a white card
-with the page colour and erasing the step that bounded it) is gone now that the card
-carries a hairline. Interactive cards still use `surface.cardHover`, because that is
-the token that means "hover on a card" and the shadow is the better lift in light.
+In light, `surface.subtle` (`#f2f2f7`) is a 1.12:1 recess off the **card** — table
+headers and inset wells read as set in. It is only 1.02:1 off the page, so it is
+**not usable as a wash laid directly on the page plane**; reach for `surface.track`
+there, or put the thing in a card. `surface.hover` is the same value. Interactive
+cards still use `surface.cardHover`, because that is the token that means "hover on
+a card" and the shadow is the better lift in light.
+
+**Elevation is a ladder: rest (`shadow.card`) → hover (`shadow.lg`) → popover.**
+Protect the gap between the steps; collapse it and a card stops responding to the
+pointer. `shadow.card` is `none` in dark, where a black shadow renders nothing.
 
 Two consequences that bite:
 - **The card, not the page, is the chart surface.** Marks are validated against
@@ -148,7 +166,7 @@ accessibility-clean: `systemGray` is 2.92:1 as body text and `systemIndigo` is
 Apple hex; deviations are noted on each token.
 
 **The accent anchor is used in every accent role.** `#0069d9` measures 5.22:1 on
-the white card and 5.22:1 on the flat white page, so `accent.text`, `text.link`,
+the white card and 4.79:1 on the `#f5f5f7` page, so `accent.text`, `text.link`,
 `border.accent` and `focus.ring` are all the anchor itself, and `accent.onSolid`
 is plain `#ffffff` (5.22:1). The **page** is the binding surface and it is what
 pins the anchor — a blue tuned only to the card can sit a step lighter and fail
@@ -169,7 +187,10 @@ inner mark is punched out so they work on any badge wash. SF Symbols cannot be
 shipped (no webfont, outlines are Apple's) — use Phosphor (MIT) with
 `className="jrk-icon"` beyond the built-in set.
 
-**Non-touch density.** Controls are 24/28/32 and `minTouch` is 24px, the WCAG 2.2
+**Non-touch density.** Controls are 24/32/40 — md and lg stepped up on 2026-08-13
+for the airier look, with `.jrk-nav-item` **pinned** to `control-md` so the rail
+held its 32px row rather than following lg to a height it had already rejected,
+and `size.sheet.*` untouched so a dense report stays dense. `minTouch` is 24px, the WCAG 2.2
 AA floor (2.5.8). Height is the real constraint on a 1080px display.
 
 ## Before you finish

@@ -34,7 +34,7 @@
   --jrk-indigo-650: #5856d6;
   --jrk-indigo-700: #4a49b3;
   --jrk-indigo-750: #3f3e96;
-  --jrk-surface-canvas: #ffffff;
+  --jrk-surface-canvas: #f5f5f7;
   --jrk-surface-default: #ffffff;
   --jrk-surface-tinted: #ffffff;
   --jrk-surface-subtle: #f2f2f7;
@@ -190,22 +190,22 @@
   --jrk-space-1_5: 6px;
   --jrk-space-2_5: 10px;
   --jrk-radius-none: 0;
-  --jrk-radius-sm: 4px;
-  --jrk-radius-md: 6px;
-  --jrk-radius-lg: 10px;
-  --jrk-radius-xl: 12px;
-  --jrk-radius-2xl: 16px;
+  --jrk-radius-sm: 6px;
+  --jrk-radius-md: 10px;
+  --jrk-radius-lg: 14px;
+  --jrk-radius-xl: 18px;
+  --jrk-radius-2xl: 24px;
   --jrk-radius-full: 9999px;
   --jrk-radius-data-end: 4px;
   --jrk-control-sm: 24px;
-  --jrk-control-md: 28px;
-  --jrk-control-lg: 32px;
+  --jrk-control-md: 32px;
+  --jrk-control-lg: 40px;
   --jrk-icon-sm: 13px;
   --jrk-icon-md: 15px;
   --jrk-icon-lg: 18px;
   --jrk-sidebar-collapsed: 52px;
   --jrk-sidebar-expanded: 216px;
-  --jrk-topbar-default: 44px;
+  --jrk-topbar-default: 56px;
   --jrk-container-sm: 640px;
   --jrk-container-md: 960px;
   --jrk-container-lg: 1280px;
@@ -237,11 +237,12 @@
   --jrk-z-toast: 500;
   --jrk-z-tooltip: 600;
   --jrk-shadow-none: none;
-  --jrk-shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
-  --jrk-shadow-md: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.03);
-  --jrk-shadow-lg: 0 4px 16px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
-  --jrk-shadow-xl: 0 12px 40px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.05);
-  --jrk-shadow-focus: 0 0 0 3px rgba(3, 0, 192, 0.38);
+  --jrk-shadow-sm: 0 1px 3px rgba(16,21,28,0.05);
+  --jrk-shadow-card: 0 1px 2px rgba(16,21,28,0.04), 0 6px 16px -4px rgba(16,21,28,0.06);
+  --jrk-shadow-md: 0 2px 6px rgba(16,21,28,0.06), 0 1px 2px rgba(16,21,28,0.04);
+  --jrk-shadow-lg: 0 10px 30px -6px rgba(16,21,28,0.12), 0 2px 6px rgba(16,21,28,0.05);
+  --jrk-shadow-xl: 0 24px 60px -12px rgba(16,21,28,0.18), 0 4px 12px rgba(16,21,28,0.06);
+  --jrk-shadow-focus: 0 0 0 3px rgba(0,105,217,0.32);
 }
 
 /* Dark values are SELECTED for the dark surface, not an automatic flip.
@@ -343,10 +344,11 @@
     --jrk-chart-delta-down: #ff6961;
     --jrk-shadow-none: none;
     --jrk-shadow-sm: 0 1px 2px rgba(0,0,0,0.6);
+    --jrk-shadow-card: none;
     --jrk-shadow-md: 0 1px 4px rgba(0,0,0,0.65);
     --jrk-shadow-lg: 0 4px 18px rgba(0,0,0,0.7);
     --jrk-shadow-xl: 0 12px 44px rgba(0,0,0,0.8);
-    --jrk-shadow-focus: 0 0 0 3px rgba(158,228,255,0.45);
+    --jrk-shadow-focus: 0 0 0 3px rgba(100,181,255,0.4);
   }
 }
 
@@ -445,8 +447,9 @@
     --jrk-chart-delta-down: #ff6961;
     --jrk-shadow-none: none;
     --jrk-shadow-sm: 0 1px 2px rgba(0,0,0,0.6);
+    --jrk-shadow-card: none;
     --jrk-shadow-md: 0 1px 4px rgba(0,0,0,0.65);
     --jrk-shadow-lg: 0 4px 18px rgba(0,0,0,0.7);
     --jrk-shadow-xl: 0 12px 44px rgba(0,0,0,0.8);
-    --jrk-shadow-focus: 0 0 0 3px rgba(158,228,255,0.45);
+    --jrk-shadow-focus: 0 0 0 3px rgba(100,181,255,0.4);
 }

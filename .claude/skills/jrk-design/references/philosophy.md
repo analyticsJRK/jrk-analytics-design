@@ -140,35 +140,53 @@ there is no in-place domain-teaching pattern. Both are buildable.
 This layer is the library's existing strength, and the two sources genuinely
 agree here: both want ink removed until only meaning is left.
 
-- **Ink must be data or structure. Never decoration.** Hairline solid gridlines,
-  no chart borders, no drop shadows doing a hairline's job, 2px surface gaps
-  instead of strokes between marks. **A tile spends exactly one hairline on its own
-  boundary** — `border.subtle`, because the light page is flat `#ffffff` and there
-  is no fill step to inherit; in dark the step does the work and the hairline is a
-  whisper on top of it.
+- **Ink must be data or structure. Never decoration** — *inside the budget the
+  brief sets.* Hairline solid gridlines, no chart borders, 2px surface gaps instead
+  of strokes between marks. **A tile spends one hairline on its own boundary**
+  (`border.subtle`) plus, since 2026-08-13, a resting `shadow.card` in light.
 
-  **This line has been argued three ways and the argument is the lesson.** A 2px
+  **This line has now been argued four ways and the argument is the lesson.** A 2px
   brand edge was defended here as *structure* while the light page was flat and
   nothing else bounded a tile. When the page went tinted, the fill step bounded the
   tile, so the same line became ink carrying nothing — decoration, banned by this
   layer's own rule — and deleting it was briefly "the cleanest possible answer".
-  The page is flat again, so a boundary has to be paid for again, and the cheapest
-  honest thing is one neutral hairline rather than 2px of brand.
+  Then the page went flat again and a neutral hairline paid for the boundary. Now
+  the page is tinted, the hairline is *kept anyway*, and a resting shadow is added
+  on top: three channels where this layer's instinct says one.
 
-  The durable form: **ink is structural only relative to a surface relationship, so
-  when a surface moves, every "this is structure" claim has to be re-argued rather
-  than inherited.** Note which way the ratchet turns — restraint is not a fixed
-  amount of ink. On a flat page, spending none *is* the failure.
-- **A state may spend ink that a resting element may not.** The one shadow on a
-  dashboard tile is `.jrk-card--interactive:hover`, and it is legal because at
-  rest the tile is still flat: the ink appears only while the reader is pointing at
-  it, which makes it a layer-3 signifier rather than layer-4 decoration. It also
-  had no cheaper alternative — with no border to brighten, and a fill wash that
+  **That fourth turn is the one that does not follow from layer 4, and pretending
+  otherwise would be dishonest.** The shadow is not carrying a surface
+  relationship the hairline was failing to carry; it was directed, because floating
+  tiles are the look being asked for. What layer 4 legitimately still governs is
+  everything downstream of that decision — `shadow.card` is the *faintest* shadow
+  that reads as a float, `radius.dataEnd` refused the softening because a rounded
+  bar tip eats the encoding, and the dark theme spends none of it because a black
+  shadow on `#141416` renders nothing.
+
+  The durable forms, both of which survived the turn: **ink is structural only
+  relative to a surface relationship, so when a surface moves, every "this is
+  structure" claim has to be re-argued rather than inherited** — and **restraint is
+  not a fixed amount of ink.** On a flat page, spending none *is* the failure. When
+  the brief asks for a look, layer 4's job is to make it cost as little as possible,
+  not to refuse it — but say plainly which of the two is happening.
+- **A state may spend ink that a resting element may not** — and once the resting
+  element spends some too, what matters is the GAP. `.jrk-card--interactive:hover`
+  used to be the only shadow on a dashboard tile, legal because at rest the tile was
+  flat, so the ink appeared only while the reader was pointing at it: a layer-3
+  signifier rather than layer-4 decoration. Rest is no longer flat, so the hover no
+  longer reads by *existing* — it reads by being visibly larger than resting
+  (`shadow.lg` over `shadow.card`). **A state signal that survives on contrast with
+  the resting state has to be re-checked whenever the resting state moves.** The
+  hover also had no cheaper alternative — with no border to brighten, and a fill wash that
   would *dissolve* a white card's boundary by pulling it toward the page, the
   shadow was the only channel that adds definition instead of removing it.
 - **Density is a virtue, and height is the binding constraint.** 1920x1080,
-  non-touch, 24/28/32 controls. Tufte's density argument and a 1080px viewport
-  point the same way: earn every vertical pixel. **Resolve overflow by
+  non-touch, 24/32/40 controls. Tufte's density argument and a 1080px viewport
+  point the same way: earn every vertical pixel. The 2026-08-13 refresh spent some
+  of that budget on purpose (md and lg both stepped up), which makes the *pins*
+  the interesting part: `.jrk-nav-item` was held at 32px and `size.sheet.*` did not
+  move at all, so the chrome grew and the dense report did not. **When a scale
+  moves, decide per-caller whether it should follow.** **Resolve overflow by
   disclosure, not by scrolling** — a reader who must scroll to compare two
   numbers cannot compare them.
 - **Ive's craftsmanship is measurable, not vibes.** Negative tracking that
@@ -252,7 +270,7 @@ decisions most likely to be re-litigated, so they are written down.
 | "Dashed means reference value" vs colorblind series separation | Pick one — either dashes mean threshold or they mean series | Both, scoped. Solid is the default and the dash keeps meaning *reference*. Under an explicit `data-encoding="redundant"` the author trades that signifier for an identity channel, and the threshold still reads by colour and weight. The alternative was worse: hue alone leaves `(n, n+4)` pairs at ΔE 0.8, and a reader who cannot tell two series apart has lost more than a signifier. |
 | Ive/Tufte restraint vs branding the tile | Put the brand on the enclosure | **Settled by removal, and the history is the lesson.** For one period every tile carried a 2px `#48a9df` edge, defended here as *structure* rather than decoration — legitimately, because the light page had been flattened to `#ffffff` and nothing else bounded a tile. That defence was conditional on a fact, and when the page went back to `#f2f2f7` the fact expired: the fill step bounds the tile, so the same line became ink that no longer carries structure, i.e. decoration, i.e. banned by this layer's own rule. The brand now lives on fills (`accent.solid`, wash, banner) where it states identity without bounding anything. Generalise: an argument that a piece of ink is structural is only as durable as the surface relationship it cites — when a surface moves, re-audit every rule that was justified by it. |
 | A brand color the gate never measures | Treat it like any other token — the validator will catch it | It will not, and the border namespace is still unchecked. `border.card` was the standing example and it is gone, but the hole it exposed is not: `border.accent` is a tab underline, something does depend on seeing it, and no gate measures it — so its figures (`#0069d9`, 5.22:1 card and page while the page is flat white — 4.68:1 when it was tinted; `#64b5ff`, 6.37:1 dark) are recorded by hand on the token. **The segmented control is the live case, and it went the other way.** Its selection signal was a fill the validator measures, then `border.accent` at 5.22:1/6.37:1 which it does not, and now a tinted thumb in a well whose every channel is under 3:1 — fill 1.05:1 on the track, hairline 1.44:1, shadow invisible in dark. Two things generalise. Moving a signal onto a border moves it out of the gate's reach, so the number has to be written down in the same change. And a fill that is *present but unmeasurable* is the worst case of all: it looks like a channel and cannot be counted as one, so ask what a signal measures **against**, never whether one exists. What is holding that control up is the weight step, medium to semibold — the only channel that survives greyscale, dichromacy and both themes at once. When a rendering instruction spends a measured signal, find the channel that cannot be spent and make it explicit, in the code and in the note. It used to need a bespoke value just to reach 3:1, which is how easy it was to miss. The rule that survives the removal: decorative separation may sit under 1.4.11's 3:1; the moment a state, a selection, or a validity signal rides on a border, it needs a value that measures, and you must record the number yourself because nothing else will. |
-| Two themes that bound their tiles differently | Pick the better mechanism and force both themes onto it | Settled, and it took three passes to earn. The failure shape was: light flattened to `#ffffff` and bounded by a heavy brand edge while dark kept Apple's fill hierarchy — two mechanisms, which the entry that used to sit here called *the most expensive decision in the file to forget*, because a change that read correctly in dark could be invisible in light. Then both themes were grouped-fill (1.12:1 / 1.17:1). Now the light page is flat again by decision, and the resolution held: rather than reintroducing hairline-in-light / fill-in-dark, **`.jrk-card` draws `border.subtle` in BOTH themes** — 1.26:1 in light where it is the only boundary, 1.24:1 in dark where it is additive on top of the 1.17:1 step. One mechanism, two values. Three rules earned: **undo a pair together** — the flat page and the heavy edge were each other's justification, and removing either alone leaves tiles unbounded; **prefer one mechanism across themes**, spending per-theme difference on the VALUES (`surface.cardHover` is a no-op in light and load-bearing in dark) rather than on the mechanism; and, from the flat-page decision, **when a per-theme mechanism split is the tempting fix, pay the redundant ink instead** — a hairline that is invisible in dark costs nothing and keeps the two themes on one rule. |
+| Two themes that bound their tiles differently | Pick the better mechanism and force both themes onto it | Settled, and it took three passes to earn. The failure shape was: light flattened to `#ffffff` and bounded by a heavy brand edge while dark kept Apple's fill hierarchy — two mechanisms, which the entry that used to sit here called *the most expensive decision in the file to forget*, because a change that read correctly in dark could be invisible in light. Then both themes were grouped-fill (1.12:1 / 1.17:1), then the light page went flat again, and on 2026-08-13 it went back to a shallow `#f5f5f7` tint. Through all of it the resolution held: rather than reintroducing hairline-in-light / fill-in-dark, **`.jrk-card` draws `border.subtle` in BOTH themes** — 1.26:1 in light, 1.24:1 in dark on top of the 1.17:1 step — and it now rests on `shadow.card` as well, which IS light-only and is the one place this entry's rule is knowingly bent (a black shadow on `#141416` renders nothing, so the token is `none` there and the dark tile keeps exactly the two channels it always had). One mechanism, two values, plus one light-only channel that adds and never substitutes. The tinted page also re-earned a rule the register had only implied: a tint *permits* dropping the hairline, and taking that permission would have left the tile bounded by a 1.06:1 step where a 1.26:1 hairline had been, so **through a paired move, prefer the state that leaves the thing MORE bounded** — the direction of the permission is not the direction of the safe change. Three rules earned: **undo a pair together** — the flat page and the heavy edge were each other's justification, and removing either alone leaves tiles unbounded; **prefer one mechanism across themes**, spending per-theme difference on the VALUES (`surface.cardHover` is a no-op in light and load-bearing in dark) rather than on the mechanism; and, from the flat-page decision, **when a per-theme mechanism split is the tempting fix, pay the redundant ink instead** — a hairline that is invisible in dark costs nothing and keeps the two themes on one rule. |
 | A reference IA (Snowsight's rail) vs the rules already settled here | Copy the rail wholesale — it is the thing being asked for | Adopt the **structure**, re-decide the **rendering**. The structure is what the request is actually about and it is taken entire: verbs split from destinations above a hairline, named groups, and depth held in flyouts so the rail stays one screenful instead of scrolling — which is the density-by-disclosure rule arriving from the outside. Three details are then overruled, each by a rule that predates the reference. Snowsight paints "current page" and "menu open" the same quiet grey; here they stay two treatments, because they answer different questions and light has no fill hierarchy to make grey carry where-am-I. **What those two treatments are has since moved, and the distinction got thinner.** Current-page was a filled `accent.solid` pill with a white label, 5.22:1 against every neighbour; it is now the tinted button — `accent.wash` + `accent.washText` + semibold — which is 1.04:1 against a hovered row and 1.08:1 against an open one. Hue and weight separate them now, not lightness. Hue holds under both dichromacies and dies in greyscale, so semibold is what is actually keeping where-am-I answerable, and it is not optional ink. Snowsight ships no caret on a parent row, so you find the second level by hovering and hoping; the caret is added back — restraint in decoration, generosity in signifiers. And Snowsight opens on hover, which this does not: a panel that appears because the pointer crossed a row on its way somewhere else covers content nobody asked to have covered. The general form: a reference answers layer 2 well and does not get a vote on layers 3-4. |
 | "Add a colorblind palette" | Ship a second palette behind a toggle | There is no second palette to ship. The default **is** the CVD-derived one, and no eight hues in sRGB clear the all-pairs floor under three dichromacies — so a swap cannot fix what breaks. The fix is a second *channel* (dash, shape), not a second palette, plus the cap of 3 for colour-only marks. A toggle would also fork the token source and require the reader to self-identify. |
 
