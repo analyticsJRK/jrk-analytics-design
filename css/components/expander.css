@@ -1,0 +1,550 @@
+/* Expandable card — a summary tile that opens to reveal a table.
+ *
+ * Markup contract, and BOTH classes are required on the block:
+ *
+ *   <section class="jrk-card jrk-expander" data-expanded="false">
+ *     <h3 class="jrk-expander__heading">
+ *       <button class="jrk-expander__summary" aria-expanded="false" aria-controls="p1">
+ *         <span class="jrk-expander__icon">…</span>          optional
+ *         <span class="jrk-expander__text">
+ *           <span class="jrk-expander__tag">operational</span>
+ *           <span class="jrk-expander__title">93 properties below cadence target</span>
+ *           <span class="jrk-expander__desc">Units with fewer than 2 visits…</span>
+ *         </span>
+ *         <svg class="jrk-expander__caret" …>
+ *       </button>
+ *     </h3>
+ *     <div class="jrk-expander__panel" id="p1" role="region" aria-labelledby="…">
+ *       <div class="jrk-expander__panel-inner">
+ *         <div class="jrk-table-wrap">…</div>
+ *         <p class="jrk-expander__footer">+87 more…</p>
+ *       </div>
+ *     </div>
+ *   </section>
+ *
+ * IT COMPOSES ON .jrk-card RATHER THAN REPLACING IT, and that is a structural
+ * decision, not a shorthand. An expander IS a card — so it inherits the resting
+ * shadow, the hairline, the radius and, more importantly, every rule elsewhere in
+ * the library that is written as `.jrk-card <something>`. nesting.css gives the
+ * table inside one its neutral hairline for free, and table.css drops the table
+ * panel's own resting shadow for free, because both of those match on `.jrk-card`.
+ * Declaring `.jrk-expander` as a fifth tile block would have meant editing two
+ * other files to teach them about it, and would have left a sixth to be found
+ * later. If the React wrapper ever stops emitting `jrk-card`, a nested table
+ * silently gains a shadow and loses its edge, in that order.
+ *
+ * The panel content is a table by intent but not by rule — anything that wants
+ * the card plane works. What is a rule is that the panel is ALWAYS the card
+ * plane, in all three tones; see the tone section.
+ *
+ * Everything inside .jrk-expander__summary is a <span>, because the summary is a
+ * <button> and a button's content model is phrasing content. The spans that need
+ * to stack are given `display: block` explicitly — the same load-bearing
+ * declaration the bar fills need, and for the same reason.
+ */
+
+.jrk-expander {
+  /* Clips the summary's fill — the tone fills below are plain rectangles and the
+     card's own 18px corners are what round them. Two things follow and both are
+     worth knowing. (1) The panel's collapse animation needs an overflow clip
+     anyway, so this is one declaration doing both jobs. (2) It clips the summary
+     button's focus BLOOM (base.css draws `outline` plus a shadow halo), which is
+     why the summary pulls its ring inside with a negative outline-offset below. */
+  overflow: hidden;
+  /* .jrk-expander-row places these in a grid. A grid item defaults to
+     `min-width: auto`, so a wide table inside would refuse to shrink and push the
+     track past its share instead of scrolling in .jrk-table-wrap. */
+  min-width: 0;
+  padding: 0;
+}
+
+/* The heading exists for the document outline — a screen reader lists these as
+   headings and jumps between them — and carries no visual weight of its own.
+
+   `flex: 1` and the flex display are what let the summary FILL a stretched tile.
+   .jrk-card is a column flex container, so without this the heading is its natural
+   height and a tone fill stops partway down the tallest card in a row, leaving a
+   band of bare card below the wash. Only visible when descriptions wrap to
+   different line counts, which is most real rows. */
+.jrk-expander__heading {
+  display: flex;
+  flex: 1;
+  margin: 0;
+  font: inherit;
+}
+
+.jrk-expander__summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--jrk-space-3);
+  flex: 1;
+  width: 100%;
+  padding: var(--jrk-space-4) var(--jrk-space-5);
+  font: inherit;
+  text-align: start;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  transition: background-color var(--jrk-transition);
+}
+
+/* INSIDE the clip, not outside it. base.css draws the ring at `outline-offset:
+   1px`, which .jrk-expander's `overflow: hidden` would shave off on three sides —
+   the summary meets the card's edges, so the ring has nowhere to go. -3px puts a
+   complete ring just inside the tile. The bloom is still clipped and that is
+   accepted: the outline is the signifier, the halo is decoration. */
+.jrk-expander__summary:focus-visible {
+  outline-offset: -3px;
+}
+
+/* ---------- the summary's parts ---------- */
+
+/* Optional leading glyph. A tile, not a bare icon, so a 16px glyph still occupies
+   a predictable column and the three text rows keep one left axis whether or not
+   the icon is present. */
+.jrk-expander__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--jrk-min-touch);
+  height: var(--jrk-min-touch);
+  border-radius: var(--jrk-radius-md);
+  background: var(--jrk-surface-subtle);
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-expander__text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--jrk-space-1);
+  /* The flex item that is allowed to shrink, so a long title wraps instead of
+     shoving the caret off the tile. */
+  flex: 1;
+  min-width: 0;
+}
+
+/* A CATEGORY chip, deliberately not .jrk-badge. A badge in this library carries a
+   status tone, and a status tone means something — it ships a mandatory icon and
+   a reserved colour. The chips on these cards name a domain ("operational",
+   "financial"), which is not a status, and rendering it as one would put a
+   warning-orange wash on a card that is reporting nothing of the kind. If a real
+   status belongs on an expander, put a .jrk-badge in the panel where it can keep
+   its icon and its measured wash — but see the tone section first, because on a
+   vivid summary neither survives.
+
+   BRAND-INKED, NOT NEUTRAL, by direction. It was surface.subtle + text.secondary
+   + a grey hairline, which read as dead chrome on a white card. The ink is
+   accent.washText in the plain AND pastel tones — ONE ink, so the chip reads as
+   the same object across the row rather than as a per-tone decoration. What
+   changes per tone is the FILL, and it changes by a single rule: step away from
+   what you sit on. On the white card the chip needs a wash to be visible; on a
+   coloured wash it steps back to the card plane. Same mechanism, opposite
+   direction, which is the house pattern rather than two unrelated treatments.
+
+   Measured, both themes. Ink accent.washText on accent.wash is 5.31:1 light and
+   6.73:1 dark. The fill step is deliberately weak — 1.16:1 light, 1.06:1 dark —
+   so the hairline is not decoration you can drop, exactly as accent.washBorder is
+   load-bearing on .jrk-btn--primary for the same reason.
+
+   The consequence to respect: this is now the .jrk-btn--primary triple exactly.
+   A tinted button must not sit in an expander summary — height is the only thing
+   separating a 18px label pill from a 32px control, and that is not enough to say
+   "this is a label" against "this commits an action". */
+.jrk-expander__tag {
+  display: inline-block;
+  padding: 0 var(--jrk-space-2);
+  font-size: var(--jrk-text-2xs);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: 18px;
+  letter-spacing: var(--jrk-tracking-normal);
+  color: var(--jrk-accent-wash-text);
+  background: var(--jrk-accent-wash);
+  border: 1px solid var(--jrk-accent-wash-border);
+  border-radius: var(--jrk-radius-full);
+}
+
+.jrk-expander__title {
+  display: block;
+  font-size: var(--jrk-text-lg);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-primary);
+}
+
+.jrk-expander__desc {
+  display: block;
+  font-size: var(--jrk-text-sm);
+  line-height: var(--jrk-leading-normal);
+  color: var(--jrk-text-muted);
+}
+
+/* IT ROTATES, and shell.css's caret deliberately does not — the two are not
+   inconsistent, they are the same rule pointed at different geometry. That note
+   says a chevron swinging down "is the accordion gesture and it promises the
+   panel will appear BELOW the row", which is why the nav rail's caret stays put:
+   its flyout appears beside it. This panel does appear below, so the promise is
+   the true one and the rotation is the honest signal.
+
+   The transform is on the glyph and never on the card. A transform makes an
+   element a containing block for fixed-position descendants, which would silently
+   break a .jrk-nav-flyout or popover rendered inside the panel — the same trap
+   card.css records for why its hover has no translate. */
+.jrk-expander__caret {
+  flex-shrink: 0;
+  margin-block-start: 2px;
+  color: var(--jrk-text-muted);
+  transition:
+    transform var(--jrk-transition),
+    color var(--jrk-transition);
+}
+
+.jrk-expander[data-expanded='true'] .jrk-expander__caret {
+  transform: rotate(180deg);
+}
+
+/* ---------- the panel ---------- */
+
+/* 0fr -> 1fr on a grid row, which is the one way to animate to a content height
+   without measuring it in JS. The inner element must carry `overflow: hidden` and
+   `min-height: 0` or the row cannot actually reach zero.
+
+   `visibility` is the accessibility half and is not optional. A collapsed panel is
+   0px tall but its content is still in the tab order — a reader tabbing past a
+   closed card would land inside an invisible table. `visibility: hidden` removes
+   it from the tree and from the tab order; it is transitioned with `allow-discrete`
+   so the content stays visible for the duration of the CLOSING animation instead
+   of vanishing before the height finishes. Browsers without `allow-discrete` snap
+   it away immediately, which is abrupt but never wrong. */
+.jrk-expander__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--jrk-transition);
+}
+
+.jrk-expander__panel-inner {
+  overflow: hidden;
+  min-height: 0;
+  visibility: hidden;
+  transition:
+    visibility var(--jrk-transition) allow-discrete,
+    content-visibility var(--jrk-transition) allow-discrete;
+}
+
+.jrk-expander[data-expanded='true'] .jrk-expander__panel {
+  grid-template-rows: 1fr;
+}
+
+.jrk-expander[data-expanded='true'] .jrk-expander__panel-inner {
+  visibility: visible;
+}
+
+/* THE SEPARATOR IS STRUCTURAL IN EVERY TONE, and the reason is measured. On the
+   plain tone the summary and the panel are the same fill, so without this the
+   panel just runs on from the summary. On the pastel tone the fill step does most
+   of the work in light (1.37:1 for the blue wash against the white panel) but as
+   little as 1.11:1 in dark, because two of the four dark tints sit very close to
+   the #232326 card — so in dark this hairline is the boundary, not a garnish. On
+   the vivid tone it is invisible under the gradient and costs nothing.
+
+   One rule for all three, per the house preference for one mechanism with
+   per-theme values over a tone-by-tone split. Only drawn when open: a collapsed
+   card has no panel to be separated from, and a hairline across a closed tile
+   reads as a divider promising content that is not there. */
+.jrk-expander[data-expanded='true'] .jrk-expander__summary {
+  border-bottom: 1px solid var(--jrk-border-default);
+}
+
+/* A table meets the card's edges. It is the card's own content — the enclosure is
+   already drawn around it — so its side and bottom edges go TRANSPARENT rather
+   than to zero width, which keeps the 1px reserved and matches the rule the whole
+   library follows for tile edges. Its top edge is transparent too, because the
+   summary's border-bottom above is already the separator and two hairlines 1px
+   apart read as a seam.
+
+   0-3-0 deliberately. nesting.css is imported LAST and gives `.jrk-card
+   .jrk-table-wrap` its neutral hairline at 0-2-0, so a matching 0-2-0 here would
+   lose on source order no matter what this file does. The extra class is what
+   makes the override survive the import order rather than depend on it. */
+.jrk-expander .jrk-expander__panel .jrk-table-wrap {
+  border-color: transparent;
+  border-radius: var(--jrk-radius-none);
+}
+
+/* Padded, because it is prose rather than a grid. Sits below the table and inside
+   the card's clip, so it needs no edge of its own. */
+.jrk-expander__footer {
+  padding: var(--jrk-space-3) var(--jrk-space-5);
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-muted);
+}
+
+/* ============================== tones ==============================
+ *
+ * THREE, and the one fact they share is the important one: THE TONE IS A
+ * TREATMENT OF THE SUMMARY, AND THE PANEL IS ALWAYS THE CARD PLANE.
+ *
+ * That is not a stylistic preference, it is what makes one table renderer work
+ * under all three. Every token a table reaches for — border.subtle on the row
+ * rules, text.muted in the caption, surface.hover on a row, accent.text on the
+ * header labels, and every chart mark in a .jrk-cell-bar — was selected against
+ * surface.default and measured there. Fill the panel with a gradient and all of
+ * them are wrong at once, and NOTHING in the library would report it: validate
+ * iterates named tokens against named surfaces, and a table on a tone is neither.
+ * It is the same hole stat.css found when a vivid tile had to rebind its ink, its
+ * focus ring and its delta colours one at a time.
+ *
+ * So the tones colour the header band and stop there. A vivid expander is a
+ * gradient header on a white card, not a gradient card.
+ */
+
+/* ---------- pastel ---------- */
+
+/* A soft wash header. Fills come from chart.tint, which is legal here for exactly
+   the reason $hueIsNotIdentity gives for the vivid tones: identity is carried by
+   the tag and the title, both mandatory and both in the tile, so the hue is
+   decoration. ASSIGN A TONE BY THE CARD'S POSITION IN THE ROW, never by what the
+   card is about. The moment "rose = compliance" becomes a convention, colour is
+   doing identity work these fills cannot do.
+
+   One caveat that no gate will catch: chart.tint slots are also mark fills. A
+   pastel expander whose wash is tint-1 sitting beside a chart whose bars are
+   tint-1 puts the same colour on a container and on a datum. Give the chart its
+   own tile, or take a tone the chart is not using.
+
+   Deliberately NOT accent.wash, which is the obvious reach. Two reasons: it means
+   "selected" on a row, a segment and a tab, and a card that is merely blue would
+   claim to be chosen; and it is #e3efff against tint-1's #c7deff, so the default
+   tone and the blue tone would be two blues one step apart in one component —
+   the collision the chart palette already carries once and did not need again. */
+.jrk-expander--pastel {
+  --jrk-expander-wash: var(--jrk-chart-tint-1);
+}
+
+/* 0-2-0, so a tone beats the default the base rule sets. A custom property is won
+   by the ordinary cascade, so a 0-1-0 tone would lose to the 0-1-0 default above
+   on source order alone — it would look like the class did nothing. */
+.jrk-expander--pastel.jrk-expander--rose {
+  --jrk-expander-wash: var(--jrk-chart-tint-6);
+}
+
+.jrk-expander--pastel.jrk-expander--violet {
+  --jrk-expander-wash: var(--jrk-chart-tint-5);
+}
+
+.jrk-expander--pastel.jrk-expander--blue {
+  --jrk-expander-wash: var(--jrk-chart-tint-1);
+}
+
+.jrk-expander--pastel.jrk-expander--teal {
+  --jrk-expander-wash: var(--jrk-chart-tint-3);
+}
+
+.jrk-expander--pastel .jrk-expander__summary {
+  background: var(--jrk-expander-wash);
+}
+
+/* THE DESCRIPTION IS text.secondary HERE, NOT text.muted, and this is the one
+   measured correction the pastel tone forced. text.muted is #6e6e73, selected
+   against the white card at 4.59:1; on the tint-1 wash it is 3.70:1 and fails the
+   body floor. text.secondary is 7.99:1 on the palest light tint and 5.58:1 on the
+   lightest dark one, so it clears in both themes on all four tones. This is the
+   failure mode "when you move a plane, grep for what fills against it" describes,
+   arriving from the ink side: the wash is a new surface and every ink on it had to
+   be re-measured, not inherited. */
+.jrk-expander--pastel .jrk-expander__desc {
+  color: var(--jrk-text-secondary);
+}
+
+/* THE CHIP STEPS BACK TO THE CARD PLANE, which is the same rule as on the plain
+   tone pointed the other way — the chip's job is to separate from its ground, and
+   here the ground is already coloured. It keeps accent.washText, so a chip is one
+   recognisable object whatever tone it lands on.
+
+   Why not keep accent.wash here: on the BLUE tone it is #e3efff on #c7deff, the
+   same colour, which is the collision the chart palette already carries once. The
+   card plane cannot collide with any tone by construction, so this one fill serves
+   all four rather than needing a bespoke chip per hue.
+
+   Measured across all four tones: the chip's step off the wash is 1.27-1.37:1 in
+   light and 1.34-1.36:1 on the blue and teal darks. The violet and rose DARKS are
+   the weak pair at 1.12:1 and 1.11:1, because those two tints sit very close to
+   the #232326 card — the same fact that makes the summary's border-bottom
+   structural. Accepted for an 18px pill carrying 7.16:1 ink: nothing here depends
+   on finding the chip's edge, only on reading its label.
+
+   The border goes TRANSPARENT rather than to zero width, so the chip does not
+   reflow by 2px between tones. */
+.jrk-expander--pastel .jrk-expander__tag {
+  background: var(--jrk-surface-default);
+  border-color: transparent;
+}
+
+.jrk-expander--pastel .jrk-expander__icon {
+  background: var(--jrk-surface-default);
+}
+
+.jrk-expander--pastel .jrk-expander__caret {
+  color: var(--jrk-text-secondary);
+}
+
+/* ---------- vivid ---------- */
+
+/* The saturated gradient header — the loudest thing this library draws, and the
+   same ramp geometry as .jrk-stat--vivid so the two read as one system. Treat it
+   the way that tile is treated: one per view, leading a page. A column of four is
+   four mastheads and no page.
+
+   The tile brings its own surface, so every token selected against the card is
+   wrong inside it. Three are rebound below and each one is a hole that measuring
+   against the card would have hidden — ink, focus ring, and the chip. */
+.jrk-expander--vivid {
+  --jrk-expander-from: var(--jrk-gradient-blue-from);
+  --jrk-expander-to: var(--jrk-gradient-blue-to);
+}
+
+.jrk-expander--vivid.jrk-expander--rose {
+  --jrk-expander-from: var(--jrk-gradient-rose-from);
+  --jrk-expander-to: var(--jrk-gradient-rose-to);
+}
+
+.jrk-expander--vivid.jrk-expander--violet {
+  --jrk-expander-from: var(--jrk-gradient-violet-from);
+  --jrk-expander-to: var(--jrk-gradient-violet-to);
+}
+
+.jrk-expander--vivid.jrk-expander--blue {
+  --jrk-expander-from: var(--jrk-gradient-blue-from);
+  --jrk-expander-to: var(--jrk-gradient-blue-to);
+}
+
+.jrk-expander--vivid.jrk-expander--teal {
+  --jrk-expander-from: var(--jrk-gradient-teal-from);
+  --jrk-expander-to: var(--jrk-gradient-teal-to);
+}
+
+.jrk-expander--vivid .jrk-expander__summary {
+  /* focus.ring is the brand anchor, which IS gradient.blue.from — a 1.00:1 ring on
+     the blue tone, i.e. a keyboard path with a hole in it. Rebinding the variable
+     rather than restating the outline leaves base.css owning the ring's geometry
+     and changes only the colour. Same one-line fix .jrk-stat--vivid needs. */
+  --jrk-focus-ring: var(--jrk-gradient-focus);
+
+  background-image: linear-gradient(135deg, var(--jrk-expander-from), var(--jrk-expander-to));
+  color: var(--jrk-gradient-ink);
+}
+
+/* All of it, at full strength. There is deliberately no dimmed ink on a vivid
+   surface: the lightest tone holds white at 4.85:1, so the entire budget is 0.35
+   above the floor and white at 85% alpha already measures 3.92:1. Hierarchy here
+   is SIZE and WEIGHT only, which is why the description keeps its smaller size and
+   gets no colour of its own.
+
+   EVERY SELECTOR HERE IS INSIDE THE SUMMARY, and that is the rule this list has to
+   keep. __footer was in it once and it was wrong: the footer lives in the PANEL,
+   which is the card plane, so it rendered white on white and the line vanished in
+   light mode entirely. It survived a dark-mode check because white on the #232326
+   card reads perfectly well — a one-theme look would have shipped it. The general
+   form: a `--vivid` rule may only name a descendant of __summary, because that is
+   the only part of this component the tone owns. */
+.jrk-expander--vivid .jrk-expander__title,
+.jrk-expander--vivid .jrk-expander__desc,
+.jrk-expander--vivid .jrk-expander__caret {
+  color: var(--jrk-gradient-ink);
+}
+
+/* The chip is drawn from the gradient namespace and from nothing else — the same
+   rule that governs .jrk-stat__action. surface.subtle on a saturated ground reads
+   as a hole punched in the tile, and border.default is a grey line nobody can see
+   on it. A STATUS badge must not be substituted here: its wash is a pale tint that
+   fails the same way, and its reserved hue is the one channel it cannot afford to
+   lose. */
+.jrk-expander--vivid .jrk-expander__tag {
+  color: var(--jrk-gradient-ink);
+  background: var(--jrk-gradient-mark-soft);
+  border-color: transparent;
+}
+
+.jrk-expander--vivid .jrk-expander__icon {
+  color: var(--jrk-gradient-ink);
+  background: var(--jrk-gradient-mark-soft);
+}
+
+/* ---------- hover ----------
+ *
+ * THREE TONES, THREE MECHANISMS, and they are not interchangeable — each is the
+ * only one that works on its own fill.
+ *
+ *   plain   surface.hover. A plane stepping to the next plane, which is what that
+ *           token is for.
+ *   pastel  overlay.hoverVeil. A tint has no next plane to step to, and a single
+ *           white veil would lift a dark tint 1.34:1 and a light one 1.03:1 — the
+ *           same gesture strong at night and absent by day. The veil is
+ *           directional: it darkens a light tint and lightens a dark one, landing
+ *           at 1.10-1.17:1 light and 1.19-1.26:1 dark.
+ *   vivid   gradient.hover. Theme-independent, because the ramp is. 1.19-1.26:1.
+ *
+ * None of the three is a shadow, and that is the point worth carrying: the card
+ * ladder's raise is spent on the card, not on the header band inside it. A shadow
+ * on the summary would draw a rectangle inside an enclosure that is already
+ * elevated. Nor do any of them reach 3:1 — a hover is feedback, not a state, and
+ * the state that matters (open or closed) is carried by the caret's rotation and
+ * by the panel itself, both of which survive greyscale.
+ *
+ * The veils are laid as a FIRST background layer over the fill rather than
+ * replacing it, so one tone declaration keeps serving the colour. */
+.jrk-expander__summary:hover {
+  background-color: var(--jrk-surface-hover);
+}
+
+.jrk-expander--pastel .jrk-expander__summary:hover {
+  background-image: linear-gradient(var(--jrk-overlay-hover-veil), var(--jrk-overlay-hover-veil));
+}
+
+.jrk-expander--vivid .jrk-expander__summary:hover {
+  background-image:
+    linear-gradient(var(--jrk-gradient-hover), var(--jrk-gradient-hover)),
+    linear-gradient(135deg, var(--jrk-expander-from), var(--jrk-expander-to));
+}
+
+/* ============================== the row ==============================
+ *
+ * THIS IS THE COMPONENT'S REAL WORK, and it is worth saying why it is a layout
+ * rule rather than a decoration.
+ *
+ * The failure it exists to fix: three of these side by side, one opened, and the
+ * table renders into a ~410px column. "947 of 982 units" wraps to three lines,
+ * "96% below target" wraps to three lines, every row grows to four lines tall,
+ * and a six-row table fills a screen while saying almost nothing. The table is
+ * not badly styled there — it is correctly styled at a width no table can use.
+ *
+ * So an open card takes the whole row. `grid-column: 1 / -1` is the mechanism and
+ * it is also the fallback; the `:has()` rule below is what keeps the row from
+ * leaving holes, because a full-width item cannot start mid-row and auto-placement
+ * skips the rest of the line it was on. Collapsing to one column while anything is
+ * open turns the row into an accordion, which is what it behaves like anyway. In a
+ * browser without :has() the span still applies and the layout is merely gappy —
+ * degraded, never broken.
+ *
+ * The tiles STRETCH to a common height, which is grid's default and is left alone
+ * deliberately. `align-items: start` is the tempting alternative — every tile its
+ * natural height — and it looks ragged the moment two descriptions wrap to
+ * different line counts, which is most real rows. Stretching costs nothing here
+ * because an open card is on its own row anyway, so nothing is ever stretched to
+ * match a tile that has a table in it. The summary is what fills the extra height;
+ * see the note on __heading. */
+.jrk-expander-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--jrk-space-4);
+}
+
+.jrk-expander-row > .jrk-expander[data-expanded='true'] {
+  grid-column: 1 / -1;
+}
+
+.jrk-expander-row:has(> .jrk-expander[data-expanded='true']) {
+  grid-template-columns: 1fr;
+}

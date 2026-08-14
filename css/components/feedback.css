@@ -1,4 +1,4 @@
-/* Feedback — alert, empty state, spinner, tooltip, modal, toast, menu. */
+/* Feedback — alert, empty state, spinner, tooltip, hover card, modal, toast, menu. */
 
 /* ============================== alert ============================== */
 
@@ -141,6 +141,181 @@
   border-radius: var(--jrk-radius-md);
   box-shadow: var(--jrk-shadow-lg);
   pointer-events: none;
+}
+
+/* ============================== hover card ==============================
+ *
+ * The breakdown behind a headline number, revealed on hover. A stat tile says
+ * "3% treatment coverage"; this says what the 3% is made of — on cadence 886,
+ * visited once 1,889, not visited 25,918 — without spending a click or a row of
+ * the dashboard on it.
+ *
+ * Markup:
+ *   <div class="jrk-hovercard-anchor">
+ *     <button class="jrk-card jrk-card--interactive" aria-describedby="hc1"> … </button>
+ *     <div class="jrk-hovercard" id="hc1" role="tooltip">
+ *       <p class="jrk-hovercard__header">Treatment coverage</p>
+ *       <p class="jrk-hovercard__row">
+ *         <span class="jrk-hovercard__label">On cadence (≥2/yr)</span>
+ *         <span class="jrk-hovercard__value">886</span>
+ *       </p>
+ *       …
+ *     </div>
+ *   </div>
+ *
+ * WHY THIS IS NOT .jrk-tooltip: that one carries PROSE, caps at 260px, and sits
+ * on surface.inverse. This carries a label/value table, and the two differ in the
+ * thing that matters — a hint can be re-read from the interface if it is missed,
+ * a set of figures cannot. It is much closer to .jrk-chart-tooltip, whose row
+ * grammar this deliberately mirrors (header, then label/value rows on a grid so
+ * the numbers align regardless of label length). They are not literally shared
+ * because the chart's row carries a third column for the series swatch and its
+ * placement is owned by the chart's own hover JS; if a fourth label/value panel
+ * ever appears, merge all three rather than adding to the pile.
+ *
+ * ON surface.raised RATHER THAN surface.inverse, and the reference screenshot
+ * this came from does the opposite — a dark panel over a light card. That reads
+ * well in light and inverts in dark to a near-white slab, which would be the
+ * brightest object on the page and would carry a table of numbers on it. The
+ * popover plane is what the library already uses for exactly this content, it is
+ * theme-consistent by construction, and shadow.lg is still the popover rung: the
+ * 2026-08-14 elevation split moved the CARD ladder and deliberately left this one
+ * where it was, so a hover card sits above the card it belongs to without either
+ * of them being restyled.
+ *
+ * IT OPENS ON FOCUS AS WELL AS HOVER, and that is not a nicety — it is the whole
+ * difference between a disclosure and a decoration. `:focus-within` on the anchor
+ * means a keyboard reader tabbing to the trigger gets the same figures a mouse
+ * reader gets by hovering; without it the breakdown exists only for people using
+ * a pointer. Which is why the trigger must be FOCUSABLE — a <button> or a link,
+ * never a bare <div> — and must name the panel with aria-describedby.
+ *
+ * THE CLIPPING TRAP, which is the one that will bite. This panel is positioned
+ * `absolute` and escapes its anchor by design, so ANY ancestor with `overflow:
+ * hidden` cuts it off at the box edge. Three in this library do: the joined
+ * `.jrk-stat-row` (the split row is `overflow: visible` and is fine),
+ * `.jrk-expander`, and `.jrk-table-wrap`. Inside a joined KPI band the panel
+ * simply does not appear below the band, and nothing errors. Put the anchor
+ * outside the clip, or use the split row.
+ */
+
+.jrk-hovercard-anchor {
+  position: relative;
+  /* Not `inline-flex` like .jrk-menu-anchor: this wraps a tile, which is a block
+     that has to keep filling its grid track. An inline-flex wrapper would shrink
+     to content and every tile in a row would size to its own text. */
+  display: block;
+}
+
+.jrk-hovercard {
+  position: absolute;
+  z-index: var(--jrk-z-tooltip);
+  inset-inline-start: 0;
+  top: calc(100% + var(--jrk-space-2));
+  min-width: 220px;
+  max-width: 320px;
+  padding: var(--jrk-space-2_5) var(--jrk-space-3);
+  font-size: var(--jrk-text-xs);
+  background: var(--jrk-surface-raised);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-lg);
+  box-shadow: var(--jrk-shadow-lg);
+
+  /* Never a hover target itself. Without this the panel sits under the pointer
+     the moment it appears below a short tile, which takes the pointer off the
+     anchor, which hides the panel, which puts the pointer back on the anchor —
+     a flicker loop at the frame rate. It also means the panel can never swallow
+     a click meant for whatever is behind it. */
+  pointer-events: none;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-4px);
+  transition:
+    opacity var(--jrk-transition),
+    transform var(--jrk-transition),
+    visibility var(--jrk-transition) allow-discrete;
+}
+
+/* The delay is on SHOW only, and asymmetry is the point: a panel that fires
+   instantly turns a sweep across a KPI row into four flashes, while a panel that
+   lingers on the way out follows the pointer around. Dwell to open, leave at
+   once. base.css zeroes --jrk-transition under reduced motion, which removes the
+   fade and the rise; the delay is written as its own property so it survives
+   that and the panel still waits rather than strobing. */
+.jrk-hovercard {
+  transition-delay: 0s;
+}
+
+.jrk-hovercard-anchor:hover .jrk-hovercard,
+.jrk-hovercard-anchor:focus-within .jrk-hovercard {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 220ms;
+}
+
+/* Placement escapes. There is no auto-flip — that needs measurement, and a
+   measured position goes stale the moment anything reflows under it, which is
+   the failure the spotlight's own note records. An author who knows the tile is
+   at the end of a row or the bottom of a page says so. */
+.jrk-hovercard--end {
+  inset-inline-start: auto;
+  inset-inline-end: 0;
+}
+
+.jrk-hovercard--above {
+  top: auto;
+  bottom: calc(100% + var(--jrk-space-2));
+  transform: translateY(4px);
+}
+
+.jrk-hovercard-anchor:hover .jrk-hovercard--above,
+.jrk-hovercard-anchor:focus-within .jrk-hovercard--above {
+  transform: translateY(0);
+}
+
+.jrk-hovercard__header {
+  padding-bottom: var(--jrk-space-1_5);
+  margin-bottom: var(--jrk-space-1_5);
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-primary);
+  border-bottom: 1px solid var(--jrk-border-subtle);
+}
+
+/* A grid, so the values land in one column whatever the labels do. `auto` on the
+   value column rather than a fixed width: these are counts of wildly different
+   magnitude (886 next to 25,918) and a fixed column either clips the long one or
+   strands the short one. */
+.jrk-hovercard__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: var(--jrk-space-3);
+  padding: 2px 0;
+}
+
+.jrk-hovercard__label {
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-hovercard__value {
+  font-weight: var(--jrk-weight-semibold);
+  /* Tabular here and NOT on a stat's hero figure, which is the distinction
+     stat.css draws: these are a column of numbers being compared down its
+     length, which is the one case that needs the digits to line up. */
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-primary);
+}
+
+/* A closing line — the denominator, the as-of date, the thing the reader needs
+   to not misread the figures above. */
+.jrk-hovercard__note {
+  padding-top: var(--jrk-space-1_5);
+  margin-top: var(--jrk-space-1_5);
+  color: var(--jrk-text-muted);
+  border-top: 1px solid var(--jrk-border-subtle);
 }
 
 /* ============================== popover / menu ============================== */

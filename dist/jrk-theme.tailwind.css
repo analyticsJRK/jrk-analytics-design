@@ -116,6 +116,7 @@
   --shadow-none: var(--jrk-shadow-none);
   --shadow-sm: var(--jrk-shadow-sm);
   --shadow-card: var(--jrk-shadow-card);
+  --shadow-cardRaise: var(--jrk-shadow-cardRaise);
   --shadow-md: var(--jrk-shadow-md);
   --shadow-lg: var(--jrk-shadow-lg);
   --shadow-xl: var(--jrk-shadow-xl);

@@ -37,6 +37,10 @@
 @import './components/button.css';
 @import './components/form.css';
 @import './components/card.css';
+/* After card.css — .jrk-expander composes ON .jrk-card and overrides its padding.
+   Before nesting.css, like every other component; the one rule in it that has to
+   beat nesting.css does so on specificity rather than order, and says so. */
+@import './components/expander.css';
 @import './components/badge.css';
 @import './components/icon.css';
 @import './components/stat.css';

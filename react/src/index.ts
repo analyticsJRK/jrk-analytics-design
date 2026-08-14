@@ -23,8 +23,11 @@ export type { InputProps, SelectProps, TextareaProps, CheckboxProps, SwitchProps
 export { List, ListRow } from './List';
 export type { ListProps, ListRowProps } from './List';
 
-export { Card, Empty, Alert, Spinner } from './Card';
-export type { CardProps, EmptyProps, AlertProps } from './Card';
+export { Card, Empty, Alert, Spinner, HoverCard, HoverCardAnchor } from './Card';
+export type { CardProps, EmptyProps, AlertProps, HoverCardProps, HoverCardRow } from './Card';
+
+export { Expander, ExpanderRow } from './Expander';
+export type { ExpanderProps, ExpanderRowProps, ExpanderTone, ExpanderHue } from './Expander';
 
 export { Menu, MenuItem, MenuLabel, MenuSeparator } from './Menu';
 export type { MenuProps, MenuItemProps } from './Menu';

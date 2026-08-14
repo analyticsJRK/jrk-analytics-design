@@ -89,6 +89,76 @@ export function Alert({ tone = 'neutral', title, children, icon, className }: Al
   );
 }
 
+export interface HoverCardRow {
+  label: ReactNode;
+  value: ReactNode;
+}
+
+export interface HoverCardProps {
+  /** Names what the rows break down — usually the tile's own metric. */
+  header?: ReactNode;
+  rows?: HoverCardRow[];
+  /** A closing line: the denominator, the as-of date. */
+  note?: ReactNode;
+  /** Free-form panel content instead of `rows`. */
+  children?: ReactNode;
+  /** Which corner the panel hangs from. There is no auto-flip — a measured
+   *  position goes stale the moment anything reflows under it — so an author who
+   *  knows the tile is at the end of a row or the foot of a page says so. */
+  align?: 'start' | 'end';
+  side?: 'below' | 'above';
+  className?: string;
+}
+
+/** The breakdown behind a headline number, revealed on hover **and on focus**.
+ *
+ *  The trigger must be focusable — a `<button>` or a link, never a bare `<div>` —
+ *  and should name the panel with `aria-describedby`. Opening on hover alone
+ *  makes the figures reachable only with a pointer, which is the difference
+ *  between a disclosure and a decoration.
+ *
+ *  Watch for clipping: the panel escapes its anchor, so any ancestor with
+ *  `overflow: hidden` cuts it off. In this library that is the joined
+ *  `.jrk-stat-row` (the split row is fine), `.jrk-expander`, and
+ *  `.jrk-table-wrap`. */
+export function HoverCard({
+  header,
+  rows,
+  note,
+  children,
+  align = 'start',
+  side = 'below',
+  className,
+}: HoverCardProps) {
+  return (
+    <div
+      className={cx(
+        'jrk-hovercard',
+        align === 'end' && 'jrk-hovercard--end',
+        side === 'above' && 'jrk-hovercard--above',
+        className,
+      )}
+      role="tooltip"
+    >
+      {header && <p className="jrk-hovercard__header">{header}</p>}
+      {rows?.map((r, i) => (
+        <p className="jrk-hovercard__row" key={i}>
+          <span className="jrk-hovercard__label">{r.label}</span>
+          <span className="jrk-hovercard__value">{r.value}</span>
+        </p>
+      ))}
+      {children}
+      {note && <p className="jrk-hovercard__note">{note}</p>}
+    </div>
+  );
+}
+
+/** Wraps a tile and its <HoverCard>. Block, not inline-flex: it holds a tile that
+ *  has to keep filling its grid track. */
+export function HoverCardAnchor({ children, className }: { children?: ReactNode; className?: string }) {
+  return <div className={cx('jrk-hovercard-anchor', className)}>{children}</div>;
+}
+
 export function Spinner({ size = 'md', label = 'Loading' }: { size?: 'sm' | 'md' | 'lg'; label?: string }) {
   return (
     <>

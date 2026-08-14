@@ -36,7 +36,7 @@
   --jrk-indigo-750: #3f3e96;
   --jrk-surface-canvas: #ffffff;
   --jrk-surface-default: #ffffff;
-  --jrk-surface-tinted: #ffffff;
+  --jrk-surface-tinted: #eef4fd;
   --jrk-surface-subtle: #f2f2f7;
   --jrk-surface-raised: #ffffff;
   --jrk-surface-track: #e8e8ed;
@@ -84,6 +84,7 @@
   --jrk-gradient-mark: #ffffff;
   --jrk-gradient-mark-soft: rgba(255, 255, 255, 0.28);
   --jrk-gradient-mark-soft-hover: rgba(255, 255, 255, 0.4);
+  --jrk-gradient-hover: rgba(255, 255, 255, 0.10);
   --jrk-gradient-focus: #ffffff;
   --jrk-status-good-mark: #34c759;
   --jrk-status-good-text: #1e7a34;
@@ -104,6 +105,7 @@
   --jrk-status-neutral-wash: #f2f2f7;
   --jrk-focus-ring: #0069d9;
   --jrk-focus-offset: #ffffff;
+  --jrk-overlay-hover-veil: rgba(0, 0, 0, 0.045);
   --jrk-overlay-scrim: rgba(16, 21, 28, 0.5);
   --jrk-overlay-spotlight: rgba(16, 21, 28, 0.6);
   --jrk-chart-1: #007aff;
@@ -252,7 +254,8 @@
   --jrk-z-tooltip: 600;
   --jrk-shadow-none: none;
   --jrk-shadow-sm: 0 1px 3px rgba(16,21,28,0.05);
-  --jrk-shadow-card: 0 1px 2px rgba(16,21,28,0.04), 0 6px 16px -4px rgba(16,21,28,0.06);
+  --jrk-shadow-card: 0 1px 2px rgba(16,21,28,0.05), 0 9px 22px -5px rgba(16,21,28,0.09);
+  --jrk-shadow-card-raise: 0 2px 5px rgba(16,21,28,0.06), 0 18px 40px -10px rgba(16,21,28,0.15);
   --jrk-shadow-md: 0 2px 6px rgba(16,21,28,0.06), 0 1px 2px rgba(16,21,28,0.04);
   --jrk-shadow-lg: 0 10px 30px -6px rgba(16,21,28,0.12), 0 2px 6px rgba(16,21,28,0.05);
   --jrk-shadow-xl: 0 24px 60px -12px rgba(16,21,28,0.18), 0 4px 12px rgba(16,21,28,0.06);
@@ -267,7 +270,7 @@
     color-scheme: dark;
     --jrk-surface-canvas: #141416;
     --jrk-surface-default: #232326;
-    --jrk-surface-tinted: #0e3543;
+    --jrk-surface-tinted: #0f2b4b;
     --jrk-surface-subtle: #2c2c2e;
     --jrk-surface-raised: #2c2c2e;
     --jrk-surface-track: #18181a;
@@ -315,6 +318,7 @@
     --jrk-gradient-mark: #ffffff;
     --jrk-gradient-mark-soft: rgba(255, 255, 255, 0.28);
     --jrk-gradient-mark-soft-hover: rgba(255, 255, 255, 0.4);
+    --jrk-gradient-hover: rgba(255, 255, 255, 0.10);
     --jrk-gradient-focus: #ffffff;
     --jrk-status-good-mark: #30d158;
     --jrk-status-good-text: #4cd964;
@@ -335,6 +339,7 @@
     --jrk-status-neutral-wash: #2c2c2e;
     --jrk-focus-ring: #64b5ff;
     --jrk-focus-offset: #232326;
+    --jrk-overlay-hover-veil: rgba(255, 255, 255, 0.06);
     --jrk-overlay-scrim: rgba(16, 21, 28, 0.5);
     --jrk-overlay-spotlight: rgba(16, 21, 28, 0.54);
     --jrk-chart-1: #0a84ff;
@@ -373,6 +378,7 @@
     --jrk-shadow-none: none;
     --jrk-shadow-sm: 0 1px 2px rgba(0,0,0,0.6);
     --jrk-shadow-card: none;
+    --jrk-shadow-card-raise: 0 4px 18px rgba(0,0,0,0.7);
     --jrk-shadow-md: 0 1px 4px rgba(0,0,0,0.65);
     --jrk-shadow-lg: 0 4px 18px rgba(0,0,0,0.7);
     --jrk-shadow-xl: 0 12px 44px rgba(0,0,0,0.8);
@@ -384,7 +390,7 @@
   color-scheme: dark;
     --jrk-surface-canvas: #141416;
     --jrk-surface-default: #232326;
-    --jrk-surface-tinted: #0e3543;
+    --jrk-surface-tinted: #0f2b4b;
     --jrk-surface-subtle: #2c2c2e;
     --jrk-surface-raised: #2c2c2e;
     --jrk-surface-track: #18181a;
@@ -432,6 +438,7 @@
     --jrk-gradient-mark: #ffffff;
     --jrk-gradient-mark-soft: rgba(255, 255, 255, 0.28);
     --jrk-gradient-mark-soft-hover: rgba(255, 255, 255, 0.4);
+    --jrk-gradient-hover: rgba(255, 255, 255, 0.10);
     --jrk-gradient-focus: #ffffff;
     --jrk-status-good-mark: #30d158;
     --jrk-status-good-text: #4cd964;
@@ -452,6 +459,7 @@
     --jrk-status-neutral-wash: #2c2c2e;
     --jrk-focus-ring: #64b5ff;
     --jrk-focus-offset: #232326;
+    --jrk-overlay-hover-veil: rgba(255, 255, 255, 0.06);
     --jrk-overlay-scrim: rgba(16, 21, 28, 0.5);
     --jrk-overlay-spotlight: rgba(16, 21, 28, 0.54);
     --jrk-chart-1: #0a84ff;
@@ -490,6 +498,7 @@
     --jrk-shadow-none: none;
     --jrk-shadow-sm: 0 1px 2px rgba(0,0,0,0.6);
     --jrk-shadow-card: none;
+    --jrk-shadow-card-raise: 0 4px 18px rgba(0,0,0,0.7);
     --jrk-shadow-md: 0 1px 4px rgba(0,0,0,0.65);
     --jrk-shadow-lg: 0 4px 18px rgba(0,0,0,0.7);
     --jrk-shadow-xl: 0 12px 44px rgba(0,0,0,0.8);

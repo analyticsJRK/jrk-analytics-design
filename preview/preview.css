@@ -330,3 +330,13 @@
   width: 44px;
   height: 8px;
 }
+
+/* Gallery chrome: pins a .jrk-hovercard open so it is visible in a static
+   screenshot. Not part of the library — the real panel is revealed by :hover
+   and :focus-within on its anchor, neither of which a headless capture has. */
+.gal-force-open.jrk-hovercard {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition: none;
+}

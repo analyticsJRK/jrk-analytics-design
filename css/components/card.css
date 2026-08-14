@@ -45,11 +45,19 @@
   /* Resting elevation, which reverses the rule that used to be written on
      shadow.lg — "elevation is opt-in AT REST ... every tile carrying a resting
      shadow was the look this system was built to avoid". That look is the brief
-     now. shadow.card is its own token rather than a reach for shadow.sm so that
-     REST and HOVER stay two separate values: --interactive:hover steps up to
-     shadow.lg below, and it can only read as a raise while the resting shadow is
-     visibly smaller. Do not point them at the same token, and do not grow this one
-     to make tiles pop without moving shadow.lg with it.
+     now, and it was deepened again on 2026-08-14: the resting float is a bit over
+     twice what it was. shadow.card is its own token rather than a reach for
+     shadow.sm so that REST and HOVER stay two separate values: --interactive:hover
+     steps up to shadow.cardRaise below, and it can only read as a raise while the
+     resting shadow is visibly smaller. Do not point them at the same token, and do
+     not grow this one without moving shadow.cardRaise with it.
+
+     Those two tokens are THE CARD LADDER, and it is deliberately separate from the
+     popover ladder (shadow.lg -> shadow.xl) as of the same date. They used to share
+     shadow.lg, so a hovered card and an open menu were one elevation and neither
+     could move without the other. That is why the hover rule below no longer names
+     shadow.lg — it is not a rename, it is the reason a deeper resting card is
+     expressible at all.
 
      `none` in dark, by construction — a black ambient shadow on a #141416 page
      renders nothing. The dark card is bounded by its fill step and hairline exactly
@@ -91,11 +99,14 @@
 /* A tile lifted ABOVE the resting plane. It used to be the only way a card got a
    shadow at all, back when elevation was opt-in; now that every card rests on
    shadow.card, this modifier's job changed from "has elevation" to "has MORE
-   elevation than its siblings", and its value moved from shadow-md to shadow-lg to
-   keep saying that. shadow-md would now be roughly the resting value and the
-   modifier would be a near-no-op — which is the quiet way a modifier dies. */
+   elevation than its siblings". Its value has chased the resting one twice for
+   that reason — shadow-md, then shadow-lg, now shadow-cardRaise — because each
+   time the rest deepened, the old value drifted back toward it and the modifier
+   became a near-no-op, which is the quiet way a modifier dies. It takes the same
+   rung as the interactive hover on purpose: "raised" and "hovered" are one height,
+   and a card that is both does not stack two lifts. */
 .jrk-card--raised {
-  box-shadow: var(--jrk-shadow-lg);
+  box-shadow: var(--jrk-shadow-card-raise);
 }
 
 /* No container at all — the card dissolves into whatever plane it sits on.
@@ -197,7 +208,7 @@
    which would silently break any .jrk-nav-flyout or popover rendered inside one. */
 .jrk-card--interactive:hover {
   background: var(--jrk-surface-card-hover);
-  box-shadow: var(--jrk-shadow-lg);
+  box-shadow: var(--jrk-shadow-card-raise);
 }
 
 /* Keyboard parity, and both shadows are listed on purpose. base.css draws the
@@ -207,7 +218,7 @@
    above the elevation. */
 .jrk-card--interactive:focus-visible {
   background: var(--jrk-surface-card-hover);
-  box-shadow: var(--jrk-shadow-focus), var(--jrk-shadow-lg);
+  box-shadow: var(--jrk-shadow-focus), var(--jrk-shadow-card-raise);
 }
 
 /* ============================== section ============================== */

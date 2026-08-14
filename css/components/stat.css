@@ -158,14 +158,33 @@
   background: var(--jrk-surface-tinted);
 }
 
-.jrk-stat-row > .jrk-stat {
+/* THE `:not()` IS LOAD-BEARING ON BOTH RULES, and it was missing from both.
+   A split row carries BOTH classes — `class="jrk-stat-row jrk-stat-row--split"` —
+   so these matched split tiles too. The first rule lost to
+   `.jrk-stat-row--split > .jrk-stat` further down on source order and looked
+   harmless. The SECOND one did not: `:first-child` makes it 0-2-1, which
+   out-specifies the split rule's 0-2-0, so `border-inline-start: 0` won and the
+   LEFTMOST TILE OF EVERY SPLIT ROW HAD NO LEFT EDGE. Three sides of a rectangle,
+   in both themes, on the dashboard.
+
+   Two things kept it alive. It is invisible to `npm test`, which never measures
+   layout. And it reads as a rendering artifact rather than a bug — a 1px hairline
+   missing on one side of one tile looks like a screenshot compression artifact
+   until you notice it is always the same tile.
+
+   `border-inline-start: 0` is also the `border: 0` trap arriving through a
+   longhand: it sets `border-inline-start-style: none`, after which the split
+   rule's `border-color` would paint nothing even if specificity had gone the
+   other way. nesting.css already carries the same `:not()` on its own stat-row
+   rule, for exactly this reason. */
+.jrk-stat-row:not(.jrk-stat-row--split) > .jrk-stat {
   background: none;
   border: 0;
   border-radius: 0;
   border-inline-start: 1px solid var(--jrk-border-subtle);
 }
 
-.jrk-stat-row > .jrk-stat:first-child {
+.jrk-stat-row:not(.jrk-stat-row--split) > .jrk-stat:first-child {
   border-inline-start: 0;
 }
 

@@ -595,6 +595,165 @@
     </div>
   </section>
 
+  <!-- ========================= expandable cards ========================= -->
+  <section class="gal-sec">
+    <h2>Expandable cards</h2>
+
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">Three tones — click any card to open it</span>
+
+      <div class="jrk-expander-row" id="exp-row">
+
+        <!-- plain -->
+        <section class="jrk-card jrk-expander" data-expanded="false">
+          <h3 class="jrk-expander__heading" id="exp-1-h">
+            <button class="jrk-expander__summary" aria-expanded="false" aria-controls="exp-1">
+              <span class="jrk-expander__icon">
+                <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chartBar"></svg>
+              </span>
+              <span class="jrk-expander__text">
+                <span class="jrk-expander__tag">operational</span>
+                <span class="jrk-expander__title">93 properties below cadence target</span>
+                <span class="jrk-expander__desc">Units with fewer than 2 visits in the trailing year — schedule rotation.</span>
+              </span>
+              <svg class="jrk-icon jrk-expander__caret" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg>
+            </button>
+          </h3>
+          <div class="jrk-expander__panel" id="exp-1" role="region" aria-labelledby="exp-1-h">
+            <div class="jrk-expander__panel-inner">
+              <div class="jrk-table-wrap">
+                <table class="jrk-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Property</th>
+                      <th scope="col">Units below</th>
+                      <th scope="col">% of units</th>
+                      <th scope="col">vs portfolio</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><th scope="row">Independence Green Apts <span class="jrk-text-muted">ING</span></th><td class="jrk-num">947 of 982</td><td class="jrk-num">96%</td><td class="jrk-num">+1 pt</td></tr>
+                    <tr><th scope="row">Residences at Arlington Heights <span class="jrk-text-muted">TNG</span></th><td class="jrk-num">747 of 838</td><td class="jrk-num">89%</td><td class="jrk-num">−8 pt</td></tr>
+                    <tr><th scope="row">Boulders at Puget Sound <span class="jrk-text-muted">WST</span></th><td class="jrk-num">705 of 714</td><td class="jrk-num">99%</td><td class="jrk-num">+2 pt</td></tr>
+                    <tr><th scope="row">Park Place Northville <span class="jrk-text-muted">PPN</span></th><td class="jrk-num">691 of 736</td><td class="jrk-num">94%</td><td class="jrk-num">−3 pt</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="jrk-expander__footer">+89 more — the full list is in the detailed sections below.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- pastel -->
+        <section class="jrk-card jrk-expander jrk-expander--pastel jrk-expander--teal" data-expanded="false">
+          <h3 class="jrk-expander__heading" id="exp-2-h">
+            <button class="jrk-expander__summary" aria-expanded="false" aria-controls="exp-2">
+              <span class="jrk-expander__icon">
+                <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="clock"></svg>
+              </span>
+              <span class="jrk-expander__text">
+                <span class="jrk-expander__tag">operational</span>
+                <span class="jrk-expander__title">80 properties with recurring infestations</span>
+                <span class="jrk-expander__desc">Same pest, same unit, 2+ work orders — needs a treatment strategy.</span>
+              </span>
+              <svg class="jrk-icon jrk-expander__caret" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg>
+            </button>
+          </h3>
+          <div class="jrk-expander__panel" id="exp-2" role="region" aria-labelledby="exp-2-h">
+            <div class="jrk-expander__panel-inner">
+              <div class="jrk-table-wrap">
+                <table class="jrk-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Property</th>
+                      <th scope="col">Repeat units</th>
+                      <th scope="col">Work orders</th>
+                      <th scope="col">Top pest</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><th scope="row">Montage Apartments <span class="jrk-text-muted">MON</span></th><td class="jrk-num">62</td><td class="jrk-num">184</td><td>Roach</td></tr>
+                    <tr><th scope="row">Concierge <span class="jrk-text-muted">CON</span></th><td class="jrk-num">48</td><td class="jrk-num">139</td><td>Bed bug</td></tr>
+                    <tr><th scope="row">Cascades at Kent <span class="jrk-text-muted">CSK</span></th><td class="jrk-num">31</td><td class="jrk-num">96</td><td>Roach</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="jrk-expander__footer">+77 more — the full list is in the detailed sections below.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- vivid -->
+        <section class="jrk-card jrk-expander jrk-expander--vivid jrk-expander--violet" data-expanded="false">
+          <h3 class="jrk-expander__heading" id="exp-3-h">
+            <button class="jrk-expander__summary" aria-expanded="false" aria-controls="exp-3">
+              <span class="jrk-expander__icon">
+                <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="doc"></svg>
+              </span>
+              <span class="jrk-expander__text">
+                <span class="jrk-expander__tag">financial</span>
+                <span class="jrk-expander__title">38 properties over pest budget</span>
+                <span class="jrk-expander__desc">Year-to-date pest opex above the live budget.</span>
+              </span>
+              <svg class="jrk-icon jrk-expander__caret" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg>
+            </button>
+          </h3>
+          <div class="jrk-expander__panel" id="exp-3" role="region" aria-labelledby="exp-3-h">
+            <div class="jrk-expander__panel-inner">
+              <div class="jrk-table-wrap">
+                <table class="jrk-table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Property</th>
+                      <th scope="col">YTD spend</th>
+                      <th scope="col">Budget</th>
+                      <th scope="col">Variance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><th scope="row">Park Place Northville <span class="jrk-text-muted">PPN</span></th><td class="jrk-num">$41,280</td><td class="jrk-num">$28,000</td><td class="jrk-num">+$13,280</td></tr>
+                    <tr><th scope="row">Independence Green Apts <span class="jrk-text-muted">ING</span></th><td class="jrk-num">$38,910</td><td class="jrk-num">$31,500</td><td class="jrk-num">+$7,410</td></tr>
+                    <tr><th scope="row">Boulders at Puget Sound <span class="jrk-text-muted">WST</span></th><td class="jrk-num">$22,140</td><td class="jrk-num">$19,800</td><td class="jrk-num">+$2,340</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <p class="jrk-expander__footer">+35 more — the full list is in the detailed sections below.</p>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>The tone treats the summary; the panel is always the card plane.</strong>
+      Every token a table reaches for — the row hairlines, the muted caption, the
+      <code class="jrk-mono">accent.text</code> header labels, every chart mark in a cell bar —
+      was measured against <code class="jrk-mono">surface.default</code>. Fill the panel with
+      a gradient and all of them are wrong at once, and nothing in the library would report it.
+      A vivid expander is a gradient header on a white card, not a gradient card.
+    </div>
+
+    <div class="gal-rule">
+      <strong>An open card takes the whole row.</strong> That is the point of
+      <code class="jrk-mono">.jrk-expander-row</code>, not a nicety: three tiles side by side
+      puts a table in a ~410px column, where “947 of 982 units” wraps to three lines and every
+      row grows four lines tall. The table is not badly styled there — it is correctly styled at
+      a width no table can use.
+    </div>
+
+    <div class="gal-rule">
+      Three tones, three hover mechanisms, and none is interchangeable. The plain tone steps to
+      <code class="jrk-mono">surface.hover</code> — a plane to the next plane. A tint has no next
+      plane, so pastel takes <code class="jrk-mono">overlay.hoverVeil</code>, which
+      <em>darkens a light tint and lightens a dark one</em> (1.10–1.17:1 light, 1.19–1.26:1 dark);
+      a single white veil would lift a dark tint 1.34:1 and a light one 1.03:1 — the same gesture
+      strong at night and absent by day. Vivid takes <code class="jrk-mono">gradient.hover</code>,
+      theme-independent because the ramp is. Hue is decoration on both toned variants:
+      <strong>assign a tone by position in the row, never by what the card is about.</strong>
+    </div>
+  </section>
+
   <!-- ============================ org chart ============================ -->
   <section class="gal-sec">
     <h2>Org chart</h2>
@@ -744,6 +903,83 @@
       Dana carries <code class="jrk-mono">aria-current</code>, whose tinted wash is
       1.16:1 on the light card, so the <strong>semibold name is the channel</strong>
       that survives greyscale and both dichromacies.
+    </div>
+  </section>
+
+  <!-- ============================ feedback ============================ -->
+  <section class="gal-sec">
+    <h2>Hover card</h2>
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">Hover or tab to the first tile. The second is pinned open so it is visible in a screenshot.</span>
+      <div class="jrk-stat-row jrk-stat-row--split">
+
+        <div class="jrk-hovercard-anchor">
+          <button class="jrk-stat jrk-card--interactive" style="width:100%" aria-describedby="hc-cov">
+            <span class="jrk-stat__label">Treatment coverage</span>
+            <span class="jrk-stat__value">3<span class="jrk-stat__unit">%</span></span>
+            <span class="jrk-stat__meta">of units on a 2×/yr cadence</span>
+          </button>
+          <div class="jrk-hovercard" id="hc-cov" role="tooltip">
+            <p class="jrk-hovercard__header">Treatment coverage</p>
+            <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">On cadence (&ge;2/yr)</span><span class="jrk-hovercard__value">886</span></p>
+            <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">Visited once (below target)</span><span class="jrk-hovercard__value">1,889</span></p>
+            <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">Not visited in 12 mo</span><span class="jrk-hovercard__value">25,918</span></p>
+            <p class="jrk-hovercard__note">28,693 units · as of 29 Jul 2026</p>
+          </div>
+        </div>
+
+        <div class="jrk-hovercard-anchor">
+          <button class="jrk-stat jrk-card--interactive" style="width:100%" aria-describedby="hc-occ">
+            <span class="jrk-stat__label">Occupancy</span>
+            <span class="jrk-stat__value">93.8<span class="jrk-stat__unit">%</span></span>
+            <span class="jrk-stat__meta">portfolio, weighted by units</span>
+          </button>
+          <div class="jrk-hovercard gal-force-open" id="hc-occ" role="tooltip">
+            <p class="jrk-hovercard__header">Occupancy by region</p>
+            <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">Southeast</span><span class="jrk-hovercard__value">96.1%</span></p>
+            <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">Midwest</span><span class="jrk-hovercard__value">92.4%</span></p>
+            <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">Northeast</span><span class="jrk-hovercard__value">89.8%</span></p>
+          </div>
+        </div>
+
+        <div class="jrk-hovercard-anchor">
+          <button class="jrk-stat jrk-card--interactive" style="width:100%" aria-describedby="hc-del">
+            <span class="jrk-stat__label">Delinquency rate</span>
+            <span class="jrk-stat__value">4.7<span class="jrk-stat__unit">%</span></span>
+            <span class="jrk-stat__meta">tile at the row edge — <code class="jrk-mono">--end</code></span>
+          </button>
+          <div class="jrk-hovercard jrk-hovercard--end" id="hc-del" role="tooltip">
+            <p class="jrk-hovercard__header">Delinquent balance</p>
+            <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">0–30 days</span><span class="jrk-hovercard__value">$612,470</span></p>
+            <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">31–60 days</span><span class="jrk-hovercard__value">$289,100</span></p>
+            <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">60+ days</span><span class="jrk-hovercard__value">$98,240</span></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>It opens on focus as well as hover</strong>, which is the whole difference between a
+      disclosure and a decoration — hover alone makes the figures reachable only with a pointer.
+      So the trigger is a real <code class="jrk-mono">&lt;button&gt;</code> and names the panel with
+      <code class="jrk-mono">aria-describedby</code>. Tab into the row above to see it.
+    </div>
+
+    <div class="gal-rule">
+      On <code class="jrk-mono">surface.raised</code>, not <code class="jrk-mono">surface.inverse</code>
+      like <code class="jrk-mono">.jrk-tooltip</code>. A dark-on-light panel reads well in light and
+      inverts at night to a near-white slab carrying a table of numbers. This is the popover plane the
+      chart tooltip already uses for exactly this content, and <code class="jrk-mono">shadow.lg</code>
+      is still the popover rung — the card ladder moved on 2026-08-14 and this one deliberately did not.
+    </div>
+
+    <div class="gal-rule">
+      <strong>The clipping trap:</strong> the panel escapes its anchor, so any ancestor with
+      <code class="jrk-mono">overflow: hidden</code> cuts it off — the <em>joined</em>
+      <code class="jrk-mono">.jrk-stat-row</code> (the split row above is fine),
+      <code class="jrk-mono">.jrk-expander</code>, and <code class="jrk-mono">.jrk-table-wrap</code>.
+      Nothing errors; the panel just does not appear.
     </div>
   </section>
 
@@ -1065,6 +1301,18 @@
     STEPS.forEach((s) => { const t = s.target && document.querySelector(s.target); if (t) ro.observe(t); });
     document.fonts?.ready.then(repos);
   })();
+
+  /* Expandable cards. Gallery chrome — <Expander> owns this state in an app.
+     data-expanded and aria-expanded carry the same fact: the attribute on the
+     button is the accessible truth, and CSS cannot reach up from it to the card
+     that has to restyle. Set together so they cannot disagree. */
+  document.querySelectorAll('.jrk-expander__summary').forEach((btn) => {
+    btn.onclick = () => {
+      const open = btn.getAttribute('aria-expanded') === 'true';
+      btn.setAttribute('aria-expanded', String(!open));
+      btn.closest('.jrk-expander').dataset.expanded = String(!open);
+    };
+  });
 
   /* Org chart disclosure. Gallery chrome — the React <OrgNode> owns this state
      in an app; here it is four lines so the stacked branch can actually be
