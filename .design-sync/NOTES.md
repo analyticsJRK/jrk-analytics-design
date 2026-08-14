@@ -1109,3 +1109,63 @@ script must do it, open with `newline=''`.
 
 `.gitattributes`, `.gitignore` and `LICENSE` are CRLF in this repo and always
 have been — no extension rule covers them and nothing hashes them. Leave them.
+
+## A hover-only panel is INVISIBLE in a capture, and no gate says so (2026-08-14)
+
+**Found while publishing `HoverCard` and `Expander` for the first time. This is
+the sharpest form of "authored previews are not gated on placeholder content"
+recorded above: here the words were right, the harness was right, the reserved
+space was right, and the component still did not appear.**
+
+`.jrk-hovercard` is revealed by `.jrk-hovercard-anchor:hover` /
+`:focus-within`, and `package-capture.mjs` does neither. So all three of that
+preview's cells rendered a stat tile above the ~180px gap the author had reserved
+for the panel, and `render-check` reported `thin: false`, `blank: false`,
+`bad: false` for every one of them — correctly, by its own definition: the panel's
+text is in the DOM, so the extracted `texts` array contained the full breakdown
+("Occupancy by region Southeast 96.1% …") that the PNG does not show. **Every
+mechanical signal agrees with a screenshot of nothing.** Only opening the sheet
+catches it.
+
+Fix, and it is the existing house pattern rather than a new one — a preview-scoped
+class that forces the revealed state, exactly what `NavMenuSeparator.tsx` does to
+neutralise a `position: fixed` flyout:
+
+```tsx
+const openCss = `.pv-open .jrk-hovercard { opacity: 1; visibility: visible;
+  transform: translateY(0); transition-delay: 0s; }`;
+// <style dangerouslySetInnerHTML={{ __html: openCss }} /> + <HoverCardAnchor className="pv-open">
+```
+
+The generalisation to carry: **any component whose visible state is reachable only
+through a pointer or focus needs a story that forces that state.** `Menu` and
+`NavMenu` already do it through the API (`defaultOpen`, `cfg.overrides.NavMenu
+.primaryStory = 'Open'`); a CSS-only reveal has no API to reach for, so it takes
+the harness. Check the sheet of anything hover-driven before grading it.
+
+**Same run, two floor cards nobody would have looked for.** `ExpanderRow` and
+`HoverCardAnchor` are exported sub-components, so the converter gives each its own
+card — and with no `previews/<Name>.tsx` they compiled to the "Preview not yet
+authored" placeholder, which would have been the only two among 59. `validate`
+raised `[DOCS_UNMAPPED]` for both, which is a **grouping** complaint (no
+`docs/<Name>.md`, so they land in `general`), and it is worth knowing that the
+missing PREVIEW raised nothing at all. The two warnings are not the same fact:
+
+- `[DOCS_UNMAPPED] <Name>` → no `docs/<Name>.md` stub → wrong group.
+- no `previews/<Name>.tsx` → floor card → **silent**. Only the sheet shows it.
+
+So when a commit adds an export, check `ls .design-sync/{docs,previews}` against
+`react/src/index.ts` rather than trusting the verdict's warn list.
+
+**Anchor note.** `.cache/remote-anchor.json` was three days stale (52 components,
+`styleSha e917bdff…`) against a project that had moved to 55 and `615686ef…`. A
+stale anchor is not a build failure and the driver reports `anchor: ok` on it, so
+**re-fetch `_ds_sync.json` with `DesignSync get_file` every run** and write it to a
+dated file rather than reusing whatever is in `.cache`.
+
+Verdict, final run: all four stages ok, `55 unchanged / 0 changed / 4 added /
+0 removed`, `0 delete(s)`, upload = 6 components (the four new ones plus `Menu` and
+`Topbar`, whose compiled bytes moved with commits that had never been synced) +
+bundle + styling + aux. Build ⊃ anchor was checked by set difference before
+uploading, per the orphaning rule above. Only the two documented warns:
+`[DTS_STYLE_SYSTEM]` and `[FONT_REMOTE] "Inter var"`.
