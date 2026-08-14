@@ -17,6 +17,7 @@ import {
   Status,
   StatRow,
   Stat,
+  VividStat,
 } from '@jrk/design';
 
 /* The topbar is the first child of .jrk-main, and that is what gives it its
@@ -185,6 +186,65 @@ export const Default = () => (
           <StatRow className="jrk-stat-row--split">
             <Stat label="Collected rent" value="$4.21" unit="M" delta={{ value: 3.1, vs: 'vs last quarter' }} />
             <Stat label="Occupancy" value="93.8" unit="%" delta={{ value: -0.6, vs: 'vs last quarter' }} />
+          </StatRow>
+        </Content>
+      </Main>
+    </AppShell>
+  </Frame>
+);
+
+/* Vivid variant: the gradient masthead bar, a teal -> blue -> violet sweep
+   across three of the four <VividStat> tones, with the brand anchor in the
+   middle. Every stop is white-safe by construction (4.88 / 5.22 / 4.86:1) and
+   sRGB interpolation cannot exceed its endpoints in luminance, so white clears
+   4.5:1 at every pixel of the ramp — the ink is one declaration, not a per-stop
+   problem.
+
+   90deg rather than the tile's 135deg: on a 56px-tall, full-width bar a diagonal
+   ramp spends itself on the vertical axis and reads as a banded horizontal one.
+
+   Two controls are deliberately unchanged, because each is measured against its
+   OWN fill and so does not care what is behind it. The search field keeps
+   accent.wash + accent.washText, and it gains here — that wash is 1.16:1 on
+   white chrome and 4.18 to 4.49:1 on this bar, so the borderless pill its own
+   note calls a directed exception is genuinely bounded for once. A `secondary`
+   button keeps its fill and text.primary label and reads as a raised pill.
+
+   What DID have to move is everything inked for white chrome: the sync status,
+   the ghost button's label, and the focus ring — which is the brand anchor, i.e.
+   literally this bar's middle stop, so a keyboard path across it had a hole in
+   it until the ring went white. Pair a vivid bar with a vivid stat row, or with
+   neither; a gradient bar over a page of gradient tiles is all masthead. */
+export const Vivid = () => (
+  <Frame>
+    <AppShell>
+      <Sidebar brand={<Brand />}>
+        <PortfolioNav active="am-report" />
+      </Sidebar>
+      <Main>
+        <Topbar vivid>
+          <Input
+            size="sm"
+            className="jrk-topbar__search"
+            aria-label="Search"
+            placeholder="Search properties, units, tenants"
+            leadingIcon={<SearchIcon />}
+          />
+          <Status tone="good" pulse>
+            Synced 4m ago
+          </Status>
+          <Button variant="ghost" size="sm" iconOnly aria-label="Notifications">
+            <BellIcon />
+          </Button>
+          <Button variant="secondary" size="sm" leadingIcon={<DownloadIcon />}>
+            Export
+          </Button>
+        </Topbar>
+        <Content>
+          <PageHeader title="AM Report" description="Asset-management roll-up · July 2026 close." />
+          <StatRow className="jrk-stat-row--split">
+            <VividStat tone="rose" label="Commission earned" value="$3,840" unit=".00" caption="Jan 1 – Dec 31" />
+            <VividStat tone="teal" label="Total sales" value="$320" unit=".00" caption="Jan 1 – Dec 31" />
           </StatRow>
         </Content>
       </Main>

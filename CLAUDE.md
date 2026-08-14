@@ -38,6 +38,25 @@ Both were repaired the same day by re-vendoring from `main`, which left the
 portal's `vendor/` byte-identical to its committed state apart from the
 `.synced-from` SHA.
 
+**A third source of `vendor/` deletions has nothing to do with branches, and
+`git fetch` cannot catch it: an UNTRACKED artifact inside a directory the mirror
+copies wholesale.** `dist/` is committed here, but `dist/types/` is gitignored —
+it is design-sync's API-contract declarations from
+`tsc -p .ds-sync/tsconfig.dts.json`, and `.gitignore` says outright it is "not
+part of the library's committed dist/". The sync script copied the whole `dist`,
+so the portal's `vendor/` carried whatever that scratch happened to hold in the
+syncing developer's checkout. **Two people at the same SHA produced different
+vendor trees**, and a sync from a copy predating `Menu` and `Spotlight` deleted
+their `.d.ts` files from the portal on 2026-08-13. Nothing broke — the portal
+resolves `@jrk/design` to `react/src/index.ts` and never referenced `dist/types`
+— but the `D` lines were indistinguishable from the real failure above, and a
+check that cries wolf stops being run. Fixed in the portal's `sync-design.mjs`
+with a `SKIP` set and a `cpSync` filter, and `dist/types/` is gone from
+`vendor/`. The durable rule: **the mirror copies directories, not git — anything
+gitignored that lives inside `dist/`, `css/`, `react/src/` or `tokens/` ships to
+the app as local scratch.** If you add generated output under those paths, either
+commit it or add it to that `SKIP` set.
+
 **`jrk_agents`, `jrk-audit-platform` and `JRK_FORMS` are NOT consumers**, and the
 list that used to say so cost real design decisions. `jrk_agents` hand-rolls its
 CSS and never wired the library at all; the two Jinja apps are out by decision.

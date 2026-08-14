@@ -131,7 +131,7 @@
   </nav>
 
   <div class="jrk-main">
-    <header class="jrk-topbar">
+    <header class="jrk-topbar jrk-topbar--vivid">
       <span class="jrk-input-group jrk-topbar__search">
         <span class="jrk-input-group__icon">
           <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="search"></svg>
@@ -180,8 +180,65 @@
           </div>
         </div>
 
-        <!-- KPI band -->
+        <!-- Vivid masthead band. ONE of these, leading the page — the quiet KPI
+             band below is what a second row is supposed to look like. Four
+             gradients stacked on four more would be four mastheads and no page.
+             Tone goes by position in the row, never by what the metric means. -->
         <div class="jrk-stat-row jrk-stat-row--split">
+          <div class="jrk-stat jrk-stat--vivid jrk-stat--rose">
+            <span class="jrk-stat__label">Commission earned</span>
+            <button type="button" class="jrk-stat__action">
+              <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="ellipsis"></svg>
+              <span class="jrk-sr-only">Commission earned options</span>
+            </button>
+            <span class="jrk-stat__value">$3,840<span class="jrk-stat__unit">.00</span></span>
+            <span class="jrk-stat__caption">Jan 1 – Dec 31</span>
+            <svg class="jrk-stat__spark" viewBox="0 0 96 40" preserveAspectRatio="none" aria-hidden="true" id="dspark1"></svg>
+          </div>
+          <div class="jrk-stat jrk-stat--vivid jrk-stat--violet">
+            <span class="jrk-stat__label">Payout released</span>
+            <button type="button" class="jrk-stat__action">
+              <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="ellipsis"></svg>
+              <span class="jrk-sr-only">Payout released options</span>
+            </button>
+            <span class="jrk-stat__value">$3,840<span class="jrk-stat__unit">.00</span></span>
+            <span class="jrk-stat__caption">Jan 1 – Dec 31</span>
+            <span class="jrk-stat__bars" aria-hidden="true">
+              <span style="height:42%"></span><span style="height:66%"></span><span style="height:34%"></span>
+              <span style="height:88%"></span><span style="height:58%"></span><span style="height:74%"></span>
+              <span style="height:46%"></span><span style="height:96%"></span>
+            </span>
+          </div>
+          <div class="jrk-stat jrk-stat--vivid jrk-stat--blue">
+            <span class="jrk-stat__label">Payout pending</span>
+            <button type="button" class="jrk-stat__action">
+              <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="ellipsis"></svg>
+              <span class="jrk-sr-only">Payout pending options</span>
+            </button>
+            <span class="jrk-stat__value">$3,840<span class="jrk-stat__unit">.00</span></span>
+            <span class="jrk-stat__caption">Jan 1 – Dec 31</span>
+            <!-- The remainder arc is 1.6:1, legal only because the figure is
+                 printed inside the ring. -->
+            <svg class="jrk-stat__gauge" viewBox="0 0 52 52" focusable="false">
+              <circle class="jrk-gauge-track" cx="26" cy="26" r="22"></circle>
+              <circle class="jrk-gauge-arc" cx="26" cy="26" r="22" stroke-dasharray="94.00 138.23" transform="rotate(-90 26 26)"></circle>
+              <text x="26" y="26" text-anchor="middle" dominant-baseline="central">68%</text>
+            </svg>
+          </div>
+          <div class="jrk-stat jrk-stat--vivid jrk-stat--teal">
+            <span class="jrk-stat__label">Total sales</span>
+            <button type="button" class="jrk-stat__action">
+              <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="ellipsis"></svg>
+              <span class="jrk-sr-only">Total sales options</span>
+            </button>
+            <span class="jrk-stat__value">$320<span class="jrk-stat__unit">.00</span></span>
+            <span class="jrk-stat__caption">Jan 1 – Dec 31</span>
+            <svg class="jrk-stat__spark" viewBox="0 0 96 40" preserveAspectRatio="none" aria-hidden="true" id="dspark2"></svg>
+          </div>
+        </div>
+
+        <!-- KPI band -->
+        <div class="jrk-stat-row jrk-stat-row--split" style="margin-top:var(--jrk-space-4)">
           <div class="jrk-stat">
             <span class="jrk-stat__label">Collected rent</span>
             <span class="jrk-stat__value">$4.21<span class="jrk-stat__unit">M</span></span>
@@ -364,6 +421,18 @@ $('bar-list').innerHTML=BARS.map(([l,v])=>`<div class="jrk-bars__row">
   const sx=i=>p+i*(w-p*2)/(S.length-1), sy=v=>h-p-((v-mn)/(mx-mn))*(h-p*2);
   const d=S.map((v,i)=>`${i?'L':'M'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
   $('spark').innerHTML=`<path class="jrk-spark-area" d="${d} L${sx(S.length-1)},${h} L${sx(0)},${h} Z"/><path d="${d}"/>`;
+}
+
+/* Sparklines on the two vivid masthead tiles. Same geometry — <Sparkline> owns
+   this in an app; shape only, and the number beside it is the accessible value. */
+for (const [id,S] of [
+  ['dspark1',[12,15,13,19,17,24,22,29,27,34,38]],
+  ['dspark2',[22,14,26,18,31,21,35,28,41,33,44]],
+]) {
+  const w=96,h=40,p=3,mn=Math.min(...S),mx=Math.max(...S),span=mx-mn||1;
+  const sx=i=>p+i*(w-p*2)/(S.length-1), sy=v=>h-p-((v-mn)/span)*(h-p*2);
+  const d=S.map((v,i)=>`${i?'L':'M'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+  $(id).innerHTML=`<path class="jrk-spark-area" d="${d} L${sx(S.length-1)},${h} L${sx(0)},${h} Z"/><path d="${d}"/>`;
 }
 
 /* ---------------- table rows ---------------- */

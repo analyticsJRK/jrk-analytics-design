@@ -406,17 +406,18 @@
   top: 0;
   z-index: var(--jrk-z-sticky);
   /* The bar takes the CARD fill, not the page fill, and floats on shadow.card.
-     While the page was flat white those were the same value and this was a
-     distinction without a difference; the page is #f5f5f7 now, so the topbar reads
-     as a white plane over a tinted one — which is the reference look's chrome, and
-     the same relationship every card on the page below it has.
+     The page went back to flat #ffffff on 2026-08-13, so those are the same value
+     again and the fill step under this bar is 1.00:1 — the distinction is real but
+     it currently buys nothing in light. It held for one day at #f5f5f7, where the
+     topbar read as a white plane over a tinted one.
 
-     The hard border.default rule steps down to border.subtle, because it is no
-     longer the only thing separating the bar from the content: the fill step and
-     the shadow do most of that work now, and a full-width 1.52:1 rule under a
-     floating white bar reads as a seam drawn on it. It is kept rather than dropped
-     so the separation survives the moment content scrolls right up under the bar,
-     where a shadow cast onto a same-coloured card is invisible. */
+     Which is exactly why the hairline below is not optional now. It steps down
+     from border.default to border.subtle because a full-width 1.52:1 rule under a
+     floating bar reads as a seam drawn on it — but it is the ONLY thing separating
+     this bar from a white page, and the shadow cannot help: shadow.card is
+     invisible cast onto the same colour. Do not drop it as redundant with the
+     fill step; on a white page there is no fill step. See the $lightNote on
+     surface.canvas for the pairing rule this is an instance of. */
   background: var(--jrk-surface-default);
   border-bottom: 1px solid var(--jrk-border-subtle);
   box-shadow: var(--jrk-shadow-card);
@@ -433,6 +434,81 @@
     backdrop-filter: saturate(180%) blur(20px);
   }
 }
+
+/* ---------- vivid topbar ---------- */
+
+/* The gradient masthead bar. Same idea as .jrk-stat--vivid and built from the
+   same namespace: a horizontal sweep across three of the four tones, teal ->
+   blue -> violet, so the brand anchor sits in the middle and the bar reads as one
+   ribbon rather than as three colours.
+
+   90deg, not the tile's 135deg. On a 56px-tall, ~1900px-wide bar a diagonal ramp
+   is spent almost entirely on the vertical axis and reads as a horizontal one
+   anyway, except banded — so the angle is stated honestly instead of copied.
+
+   Every stop is white-safe by construction (4.88 / 5.22 / 4.86:1), and sRGB
+   interpolation cannot exceed its endpoints in luminance, so white clears 4.5:1
+   at EVERY pixel of the sweep — including the two interior segments. That is what
+   makes the ink below a single declaration rather than a per-stop problem.
+
+   Doubled selector for two reasons: the base rule's `background` shorthand is
+   0-1-0, and so is the @supports vibrancy override further down, which would
+   otherwise re-apply a translucent card fill over this and erase it in every
+   browser that supports backdrop-filter. Matching 0-2-0 beats both. */
+.jrk-topbar.jrk-topbar--vivid {
+  /* focus.ring is the brand anchor, which is literally this bar's middle stop.
+     Same hole the vivid tile had, same one-line fix. */
+  --jrk-focus-ring: var(--jrk-gradient-focus);
+
+  background: linear-gradient(
+    90deg,
+    var(--jrk-gradient-teal-from) 0%,
+    var(--jrk-gradient-blue-from) 52%,
+    var(--jrk-gradient-violet-from) 100%
+  );
+  color: var(--jrk-gradient-ink);
+  /* The bar bounds itself — 4.86:1 off the white page, 3.52:1 off the dark one —
+     so the neutral hairline would only draw a grey line under a saturated band.
+     Colour only; the 1px width stays reserved, per the house rule. */
+  border-bottom-color: transparent;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* Everything on the bar that was inked for white chrome. text.muted and
+   text.secondary were both selected against the card and the page, and neither
+   surface is what this bar is — the same blind spot the vivid tile has, arriving
+   through a different component. */
+.jrk-topbar--vivid .jrk-caption,
+.jrk-topbar--vivid .jrk-text-muted,
+.jrk-topbar--vivid .jrk-status,
+.jrk-topbar--vivid .jrk-btn--ghost {
+  color: var(--jrk-gradient-ink);
+}
+
+/* A ghost button's hover is surface.hover, a near-white wash that on a saturated
+   band reads as a hole punched in it rather than as feedback. markSoft is the
+   wash that composites onto the tone instead of replacing it — and unlike a card,
+   there is no shadow/fill theme split to honour here, because a shadow does not
+   read on a saturated ground in either theme. */
+.jrk-topbar--vivid .jrk-btn--ghost:hover:not(:disabled) {
+  background: var(--jrk-gradient-mark-soft);
+  color: var(--jrk-gradient-ink);
+}
+
+/* Two controls are deliberately left ALONE, because each is self-contained — its
+   ink is measured against its own fill, so what is behind it does not matter.
+   .jrk-topbar__search keeps accent.wash + accent.washText (5.31:1 on itself), and
+   it gains rather than loses here: the wash is 1.16:1 on white chrome and 4.18 to
+   4.49:1 on this bar, so the borderless pill the search field's own note calls a
+   directed exception is genuinely bounded for once. .jrk-btn--secondary keeps its
+   white fill and text.primary label, reading as a raised pill at 4.86:1+.
+
+   The status dot is the one thing on this bar under 3:1 — status.good.mark is
+   2.19 to 2.35:1 across the sweep. That is NOT a regression the gradient caused:
+   the same dot is 2.22:1 on the white card and is already one of validate's five
+   standing warnings, mitigated the same way here as everywhere else, by the label
+   beside it. */
 
 .jrk-topbar__search {
   max-width: 420px;

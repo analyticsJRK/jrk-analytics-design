@@ -84,6 +84,7 @@ export type {
   SidebarActionProps,
   NavItemProps,
   NavMenuProps,
+  TopbarProps,
   PageHeaderProps,
   TabsProps,
 } from './Shell';

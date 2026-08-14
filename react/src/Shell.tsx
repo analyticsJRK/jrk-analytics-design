@@ -308,8 +308,20 @@ export function Main({ children }: { children: ReactNode }) {
   return <div className="jrk-main">{children}</div>;
 }
 
-export function Topbar({ children }: { children: ReactNode }) {
-  return <header className="jrk-topbar">{children}</header>;
+export interface TopbarProps {
+  children: ReactNode;
+  /** Gradient masthead bar — a teal/blue/violet sweep built from the same
+   *  white-safe stops as `<VividStat>`. Everything inked for white chrome flips
+   *  to white; the search field and a `--secondary` button are left alone,
+   *  because each is measured against its own fill. */
+  vivid?: boolean;
+  className?: string;
+}
+
+export function Topbar({ children, vivid, className }: TopbarProps) {
+  return (
+    <header className={cx('jrk-topbar', vivid && 'jrk-topbar--vivid', className)}>{children}</header>
+  );
 }
 
 export function Content({ children }: { children: ReactNode }) {
