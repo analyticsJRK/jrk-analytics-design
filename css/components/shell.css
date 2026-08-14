@@ -515,9 +515,36 @@
   --jrk-topbar-via: color-mix(
     in srgb,
     var(--jrk-gradient-blue-from),
-    var(--jrk-gradient-blue-to)
+    var(--jrk-gradient-bar-deep)
   );
-  --jrk-topbar-to: var(--jrk-gradient-blue-to);
+  --jrk-topbar-to: var(--jrk-gradient-bar-deep);
+}
+
+/* The hairline, back again, and ONLY under this variant in dark.
+ *
+ * `.jrk-topbar--vivid` drops it on the stated grounds that "the bar bounds itself".
+ * That holds for every ramp whose deep end is a saturated tone. It does not hold
+ * here: gradient.barDeep is surface.canvas in dark, so the trailing half of this bar
+ * is the page colour and there is nothing separating the two. Blue -> black is the
+ * look that was asked for, and the hairline is what makes it a bar dissolving into
+ * the page rather than a bar that appears to have been cut short.
+ *
+ * Colour only — the 1px width was never given up, per the house rule — so this
+ * restores what the base rule zeroed and moves nothing.
+ *
+ * Stated twice because the token layer resolves dark two ways: an explicit
+ * `[data-theme='dark']` and the media query for readers who never chose. Same pair
+ * form.css uses for `.jrk-select`, and the `:where()` keeps the media-query copy at
+ * the same specificity as the attribute one so neither silently outranks the other.
+ * Both are 0-4-0 against the base rule's 0-2-0. */
+[data-theme='dark'] .jrk-topbar.jrk-topbar--vivid.jrk-topbar--blue {
+  border-bottom-color: var(--jrk-border-subtle);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme='light'])) .jrk-topbar.jrk-topbar--vivid.jrk-topbar--blue {
+    border-bottom-color: var(--jrk-border-subtle);
+  }
 }
 
 /* Everything on the bar that was inked for white chrome. text.muted and

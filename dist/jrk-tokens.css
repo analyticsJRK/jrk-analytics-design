@@ -79,6 +79,7 @@
   --jrk-gradient-blue-to: #0055b2;
   --jrk-gradient-teal-from: #047d8a;
   --jrk-gradient-teal-to: #046459;
+  --jrk-gradient-bar-deep: #0055b2;
   --jrk-gradient-ink: #ffffff;
   --jrk-gradient-mark: #ffffff;
   --jrk-gradient-mark-soft: rgba(255, 255, 255, 0.28);
@@ -309,6 +310,7 @@
     --jrk-gradient-blue-to: #0055b2;
     --jrk-gradient-teal-from: #047d8a;
     --jrk-gradient-teal-to: #046459;
+    --jrk-gradient-bar-deep: #141416;
     --jrk-gradient-ink: #ffffff;
     --jrk-gradient-mark: #ffffff;
     --jrk-gradient-mark-soft: rgba(255, 255, 255, 0.28);
@@ -425,6 +427,7 @@
     --jrk-gradient-blue-to: #0055b2;
     --jrk-gradient-teal-from: #047d8a;
     --jrk-gradient-teal-to: #046459;
+    --jrk-gradient-bar-deep: #141416;
     --jrk-gradient-ink: #ffffff;
     --jrk-gradient-mark: #ffffff;
     --jrk-gradient-mark-soft: rgba(255, 255, 255, 0.28);

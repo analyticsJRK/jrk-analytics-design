@@ -228,6 +228,25 @@ console.log('\n== vivid gradient tiles ==');
     ? pass(`gradient tones are lightness-matched — white spread ${spread.toFixed(2)} (${detail})`)
     : fail(`gradient tones drifted apart — white spread ${spread.toFixed(2)} over 0.60 (${detail}); a darker tone reads as a magnitude claim`);
 
+  // gradient.barDeep is the .jrk-topbar--blue deep stop. The tone loop above skips
+  // it — it has no from/to — so without this it would be the one colour in the
+  // namespace nothing measured.
+  //
+  // Deliberately NOT held to the 1.2:1 page step the tones are: in dark it IS
+  // surface.canvas, on purpose, so the bar dissolves into the page. That is why
+  // shell.css restores the bar's bottom hairline under dark, and the token carries
+  // a $hairlineNote saying the two move together. What IS gated is the ink, and the
+  // light bar's parity with the tile — a stray theme value here would repaint the
+  // masthead in light while looking like a dark-mode-only edit.
+  for (const mode of ['light', 'dark']) {
+    const c = contrast(INK[mode], G.barDeep[mode]);
+    c >= 4.5 ? pass(`gradient.barDeep + gradient.ink ${mode} ${c.toFixed(2)}:1`)
+             : fail(`gradient.barDeep + gradient.ink ${mode} ${c.toFixed(2)}:1 — needs 4.5:1 (the bar carries 13px labels)`);
+  }
+  G.barDeep.light === G.blue.to.light
+    ? pass('gradient.barDeep light is gradient.blue.to verbatim — the light masthead is unchanged')
+    : fail(`gradient.barDeep light is ${G.barDeep.light}, not gradient.blue.to (${G.blue.to.light}) — the light bar was changed by what should be a dark-only value`);
+
   // gradient.focus exists because focus.ring does NOT work here, and this is the
   // check that says so out loud: the ring is the brand anchor, which is the blue
   // tone's own light stop. Assert the replacement clears 3:1 and that the base
