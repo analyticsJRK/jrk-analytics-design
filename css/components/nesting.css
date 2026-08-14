@@ -107,6 +107,29 @@
   border-color: transparent;
 }
 
+/* A VIVID tile is exempt at every depth, and it is the cleanest case in this file
+   of the rule the whole file is built on.
+
+   The hairline exists because a fill step only works once: a tile nested on the
+   card plane has the same surface.default as what it sits on, so there is no step
+   left and an edge has to be drawn. A vivid tile has not spent its step — it
+   carries a saturated gradient that is 2.6:1 to 4.9:1 off every plane in the
+   library, in both themes. It is not on the card plane, it is its own plane. So
+   the premise the rules above rest on is simply absent, and a neutral grey
+   hairline around a magenta gradient would be a line drawn for a reason that does
+   not apply here.
+
+   0-3-0 and 0-4-0, matching the two blocks it has to beat. The doubled class is
+   what carries the specificity, so this stays a border-COLOR change and the 1px
+   width the tile reserves is untouched — the same contract every other rule in
+   this file keeps. */
+.jrk-card .jrk-stat.jrk-stat--vivid,
+.jrk-chart-card .jrk-stat.jrk-stat--vivid,
+.jrk-card .jrk-stat-row--split > .jrk-stat.jrk-stat--vivid,
+.jrk-chart-card .jrk-stat-row--split > .jrk-stat.jrk-stat--vivid {
+  border-color: transparent;
+}
+
 /* And --outlined stays meaningful at depth: it is already the neutral hairline, so
    this is a no-op by value and a documented one by intent — the modifier is how
    an author asks for the hairline at the TOP level, where a tile does have a fill

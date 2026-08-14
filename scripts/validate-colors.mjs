@@ -174,6 +174,88 @@ for (const mode of ['light', 'dark']) {
   }
 }
 
+// ---------- vivid gradient tiles ----------
+// A namespace nothing above can see: these stops are not the card, not the page
+// and not a wash, so every loop so far measures around them. The tile brings its
+// own surface, which means the ONLY thing holding it up is the white ink on it —
+// so that is what is gated, at both stops of every ramp.
+//
+// Checking the two stops is sufficient for the whole ramp. sRGB gradient
+// interpolation runs through the gamma-encoded values, and the decode is convex,
+// so lum(mix) <= mix(lum) — no interior point can be lighter than the lighter
+// endpoint. Verified by sampling all four ramps at 101 points during derivation:
+// the worst white contrast was at 0% every time.
+console.log('\n== vivid gradient tiles ==');
+{
+  const G = T.color.gradient;
+  const tones = Object.entries(G).filter(([k, v]) => !k.startsWith('$') && v.from && v.to);
+  const INK = G.ink;
+  const lightest = [];
+
+  for (const [name, tone] of tones) {
+    for (const stop of ['from', 'to']) {
+      for (const mode of ['light', 'dark']) {
+        const fill = tone[stop][mode];
+
+        // The tile carries a 12px caption, so this is a body-text floor, not a
+        // large-text one. It is the constraint the entire namespace was derived
+        // from and the only thing standing between these tiles and unreadable.
+        const c = contrast(INK[mode], fill);
+        c >= 4.5 ? pass(`gradient.${name}.${stop} + gradient.ink ${mode} ${c.toFixed(2)}:1`)
+                 : fail(`gradient.${name}.${stop} + gradient.ink ${mode} ${c.toFixed(2)}:1 — needs 4.5:1 (the tile carries a 12px caption)`);
+
+        // A filled band that does not separate from what it sits on is not a
+        // band. Same 1.2:1 floor surface.bannerDeep is held to, but measured
+        // against the PAGE — a vivid tile leads a dashboard, so it sits on the
+        // canvas, not on a card.
+        const cs = contrast(fill, CANVAS[mode]);
+        cs >= 1.2 ? pass(`gradient.${name}.${stop} steps off the ${mode} page ${cs.toFixed(2)}:1`)
+                  : fail(`gradient.${name}.${stop} steps off the ${mode} page ${cs.toFixed(2)}:1 — needs 1.2:1 to read as a band`);
+      }
+    }
+    lightest.push([name, contrast(INK.light, tone.from.light)]);
+  }
+
+  // The four tones must stay LIGHTNESS-MATCHED. Hue is the only variable a vivid
+  // row is allowed to carry, because hue here is decorative; a tone stepped
+  // darker than its neighbours reads as "this tile matters more", which is a
+  // magnitude claim the data does not make. Nothing else in this file would
+  // catch a single re-stepped tone — each one would still pass its own ink check.
+  const ratios = lightest.map(([, c]) => c);
+  const spread = Math.max(...ratios) - Math.min(...ratios);
+  const detail = lightest.map(([n, c]) => `${n} ${c.toFixed(2)}`).join(', ');
+  spread <= 0.6
+    ? pass(`gradient tones are lightness-matched — white spread ${spread.toFixed(2)} (${detail})`)
+    : fail(`gradient tones drifted apart — white spread ${spread.toFixed(2)} over 0.60 (${detail}); a darker tone reads as a magnitude claim`);
+
+  // gradient.focus exists because focus.ring does NOT work here, and this is the
+  // check that says so out loud: the ring is the brand anchor, which is the blue
+  // tone's own light stop. Assert the replacement clears 3:1 and that the base
+  // ring genuinely fails, so nobody "simplifies" the two back together.
+  for (const [name, tone] of tones) {
+    const cf = contrast(T.color.gradient.focus.light, tone.from.light);
+    cf >= 3 ? pass(`gradient.focus on ${name} ${cf.toFixed(2)}:1`)
+            : fail(`gradient.focus on ${name} ${cf.toFixed(2)}:1 — needs 3:1`);
+  }
+  const ringOnBlue = contrast(T.color.focus.ring.light, G.blue.from.light);
+  ringOnBlue < 3
+    ? pass(`focus.ring is ${ringOnBlue.toFixed(2)}:1 on gradient.blue.from — gradient.focus is load-bearing, not a duplicate`)
+    : warn(`focus.ring now reads ${ringOnBlue.toFixed(2)}:1 on gradient.blue.from — re-check whether gradient.focus is still needed`);
+
+  // The categorical floor is deliberately NOT applied. These four tones collapse
+  // under CVD and are documented as doing so ($hueIsNotIdentity) — the white-safe
+  // slice of sRGB is too narrow to hold eight-way separation as well. Printed so
+  // the register stays measured rather than asserted, and so that anyone tempted
+  // to walk these like chart slots sees the numbers first.
+  for (let i = 0; i < tones.length; i++) {
+    for (let j = i + 1; j < tones.length; j++) {
+      const w = worstSeparation(tones[i][1].from.light, tones[j][1].from.light);
+      const msg = `gradient ${tones[i][0]}|${tones[j][0]} dE ${w.deltaE.toFixed(1)} (${w.kind})`;
+      console.log(`  ..    ${msg} — ${w.deltaE >= CVD_FLOOR ? 'separable' : 'COLLAPSES'}; hue is not the identity channel here, the label is`);
+    }
+  }
+}
+
 // Focus ring is a non-text UI indicator: 3:1 against every surface it lands on.
 for (const mode of ['light', 'dark']) {
   for (const [n, bg] of [['surface', SURFACE[mode]], ['canvas', CANVAS[mode]], ['subtle', T.color.surface.subtle[mode]]]) {

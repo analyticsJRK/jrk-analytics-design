@@ -338,6 +338,79 @@
         <span class="jrk-stat__value jrk-stat__value--sm">4.7<span class="jrk-stat__unit">%</span></span>
       </div>
     </div>
+
+    <p class="gal-sec__note" style="margin-top:var(--jrk-space-6)">
+      The <strong>vivid</strong> row is a dashboard masthead — one band, at the top, leading a
+      page. Every stop is deep enough to carry white at 4.5:1, which is why these read
+      heavier than the pastel gradients the pattern usually ships with: at pastel depth the
+      12px caption is illegible. The four tones are <em>lightness-matched</em>, so hue is the
+      only thing that varies down the row — and hue here is decoration, not identity. Half
+      these pairs collapse under simulated colour-blindness, so the label carries the tile.
+    </p>
+
+    <div class="jrk-stat-row jrk-stat-row--split" style="margin-top:var(--jrk-space-4)">
+      <div class="jrk-stat jrk-stat--vivid jrk-stat--rose">
+        <span class="jrk-stat__label">Commission earned</span>
+        <button type="button" class="jrk-stat__action">
+          <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="ellipsis"></svg>
+          <span class="jrk-sr-only">Commission earned options</span>
+        </button>
+        <span class="jrk-stat__value">$3,840<span class="jrk-stat__unit">.00</span></span>
+        <span class="jrk-stat__caption">Jan 1 – Dec 31</span>
+        <svg class="jrk-stat__spark" viewBox="0 0 96 40" preserveAspectRatio="none" aria-hidden="true" id="vspark"></svg>
+      </div>
+
+      <div class="jrk-stat jrk-stat--vivid jrk-stat--violet">
+        <span class="jrk-stat__label">Payout released</span>
+        <button type="button" class="jrk-stat__action">
+          <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="ellipsis"></svg>
+          <span class="jrk-sr-only">Payout released options</span>
+        </button>
+        <span class="jrk-stat__value">$3,840<span class="jrk-stat__unit">.00</span></span>
+        <span class="jrk-stat__caption">Jan 1 – Dec 31</span>
+        <span class="jrk-stat__bars" aria-hidden="true">
+          <span style="height:42%"></span><span style="height:66%"></span><span style="height:34%"></span>
+          <span style="height:88%"></span><span style="height:58%"></span><span style="height:74%"></span>
+          <span style="height:46%"></span><span style="height:96%"></span>
+        </span>
+      </div>
+
+      <div class="jrk-stat jrk-stat--vivid jrk-stat--blue">
+        <span class="jrk-stat__label">Payout pending</span>
+        <button type="button" class="jrk-stat__action">
+          <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="ellipsis"></svg>
+          <span class="jrk-sr-only">Payout pending options</span>
+        </button>
+        <span class="jrk-stat__value">$3,840<span class="jrk-stat__unit">.00</span></span>
+        <span class="jrk-stat__caption">Jan 1 – Dec 31</span>
+        <!-- The remainder arc is 1.6:1 and that is legal ONLY because the figure is
+             printed inside the ring — nothing depends on reading the arc's extent. -->
+        <svg class="jrk-stat__gauge" viewBox="0 0 52 52" focusable="false">
+          <circle class="jrk-gauge-track" cx="26" cy="26" r="22"></circle>
+          <circle class="jrk-gauge-arc" cx="26" cy="26" r="22"
+                  stroke-dasharray="94.00 138.23" transform="rotate(-90 26 26)"></circle>
+          <text x="26" y="26" text-anchor="middle" dominant-baseline="central">68%</text>
+        </svg>
+      </div>
+
+      <div class="jrk-stat jrk-stat--vivid jrk-stat--teal">
+        <span class="jrk-stat__label">Total sales</span>
+        <button type="button" class="jrk-stat__action">
+          <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="ellipsis"></svg>
+          <span class="jrk-sr-only">Total sales options</span>
+        </button>
+        <span class="jrk-stat__value">$320<span class="jrk-stat__unit">.00</span></span>
+        <span class="jrk-stat__caption">Jan 1 – Dec 31</span>
+        <svg class="jrk-stat__spark" viewBox="0 0 96 40" preserveAspectRatio="none" aria-hidden="true" id="vspark2"></svg>
+      </div>
+    </div>
+
+    <p class="gal-sec__note" style="margin-top:var(--jrk-space-5)">
+      A vivid tile is its own surface, so it takes no button of any volume: <code>--cta</code>
+      is filled with the accent anchor, which <em>is</em> the blue tile's own light stop. The
+      corner control is <code>.jrk-stat__action</code>, drawn from the gradient namespace, and
+      its focus ring is white — the brand ring would be invisible on blue.
+    </p>
   </section>
 
   <!-- ============================ table ============================ -->
@@ -860,6 +933,21 @@
   const modal = document.getElementById('demo-modal');
   document.getElementById('open-modal').onclick = () => modal.showModal();
   modal.querySelectorAll('[data-close]').forEach((b) => (b.onclick = () => modal.close()));
+
+  /* Sparklines on the vivid tiles. Same geometry as <Sparkline> — shape only,
+     no axes, no labels; the number beside it is the accessible value. */
+  for (const [id, S] of [
+    ['vspark', [12, 15, 13, 19, 17, 24, 22, 29, 27, 34, 38]],
+    ['vspark2', [22, 14, 26, 18, 31, 21, 35, 28, 41, 33, 44]],
+  ]) {
+    const w = 96, h = 40, pad = 3;
+    const min = Math.min(...S), max = Math.max(...S), span = max - min || 1;
+    const sx = (i) => pad + (i * (w - pad * 2)) / (S.length - 1);
+    const sy = (v) => h - pad - ((v - min) / span) * (h - pad * 2);
+    const d = S.map((v, i) => `${i ? 'L' : 'M'}${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+    document.getElementById(id).innerHTML =
+      `<path class="jrk-spark-area" d="${d} L${sx(S.length - 1)},${h} L${sx(0)},${h} Z"/><path d="${d}"/>`;
+  }
 
   /* Spotlight driver. Gallery chrome — <SpotlightGuide> owns all of this in an
      app. Kept here in plain JS because the CSS layer is the primary interface

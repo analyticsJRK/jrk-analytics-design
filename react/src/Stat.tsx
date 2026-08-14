@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { cx } from './utils';
+import { Icon } from './Icon';
 
 /* Stat tile — the right answer when the data is a single headline number.
    A one-bar chart is never better than a tile. */
@@ -102,4 +103,127 @@ export function Sparkline({ points, className }: { points: number[]; className?:
 
 export function StatRow({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={cx('jrk-stat-row', className)}>{children}</div>;
+}
+
+/* ---------- vivid tile ---------- */
+
+/** The four gradient tones. Pick one by the tile's POSITION in the row, never by
+ *  what the metric means.
+ *
+ *  Half these pairs collapse under simulated CVD — violet and blue are dE 1.9
+ *  apart under protanopia, i.e. the same colour — which is unavoidable at the
+ *  depth white text requires and is why `label` is required below. The moment
+ *  "rose = revenue" becomes a house convention, hue is doing identity work it
+ *  measurably cannot do. See $hueIsNotIdentity in tokens.json. */
+export type VividTone = 'rose' | 'violet' | 'blue' | 'teal';
+
+export interface VividStatProps {
+  /** Required, and load-bearing: it is the tile's only identity channel. */
+  label: string;
+  value: ReactNode;
+  unit?: string;
+  /** Defaults to the brand blue. A four-hue row is something you ask for. */
+  tone?: VividTone;
+  /** The period or scope line — "Jan 1 – Dec 31". Sized down, never dimmed:
+   *  a vivid tile has no muted ink to dim it with. */
+  caption?: ReactNode;
+  delta?: DeltaProps;
+  /** Corner action. Give it an accessible name; there is no visible label. */
+  action?: { label: string; icon?: string; onClick?: () => void };
+  /** Exactly one mini visualisation. All three are decorative by contract —
+   *  the number beside them is the accessible value. */
+  spark?: number[];
+  bars?: number[];
+  /** 0–1. Renders a ring with the percentage printed inside it, which is what
+   *  makes the low-contrast remainder arc legal. */
+  gauge?: number;
+  className?: string;
+}
+
+/** The saturated gradient KPI tile — a dashboard masthead.
+ *
+ *  It is the loudest thing this library draws, so use it the way the sheet
+ *  banner is used: one band, at the top, leading a page. It is also its own
+ *  surface, which is why it takes no `<Button>` of any volume — `--cta` is
+ *  filled with the accent anchor, which IS this tile's blue stop. */
+export function VividStat({
+  label,
+  value,
+  unit,
+  tone = 'blue',
+  caption,
+  delta,
+  action,
+  spark,
+  bars,
+  gauge,
+  className,
+}: VividStatProps) {
+  return (
+    <div className={cx('jrk-stat', 'jrk-stat--vivid', `jrk-stat--${tone}`, className)}>
+      <span className="jrk-stat__label">{label}</span>
+      {action && (
+        <button type="button" className="jrk-stat__action" onClick={action.onClick}>
+          <Icon name={action.icon ?? 'ellipsis'} />
+          <span className="jrk-sr-only">{action.label}</span>
+        </button>
+      )}
+      <span className="jrk-stat__value">
+        {value}
+        {unit && <span className="jrk-stat__unit">{unit}</span>}
+      </span>
+      {(caption || delta) && (
+        <span className="jrk-stat__caption">
+          {delta && <Delta {...delta} />}
+          {caption}
+        </span>
+      )}
+      {spark && spark.length > 1 && <Sparkline points={spark} />}
+      {bars && bars.length > 0 && <MiniBars values={bars} />}
+      {gauge != null && <Gauge value={gauge} />}
+    </div>
+  );
+}
+
+/** Decorative by contract — aria-hidden, like the sparkline. The bars are
+ *  `<span>`s inside a flex row, which blockifies them; an inline box would
+ *  ignore height and the column would render as nothing. */
+export function MiniBars({ values, className }: { values: number[]; className?: string }) {
+  const max = Math.max(...values) || 1;
+  return (
+    <span className={cx('jrk-stat__bars', className)} aria-hidden="true">
+      {values.map((v, i) => (
+        <span key={i} style={{ height: `${Math.max(6, (v / max) * 100)}%` }} />
+      ))}
+    </span>
+  );
+}
+
+/** Ring gauge, 0–1. The percentage is PRINTED inside the ring, and that is what
+ *  makes the 1.6:1 remainder arc legal — nothing depends on reading the arc's
+ *  extent. `<text>` rather than aria-hidden for the same reason: the figure is
+ *  the accessible value here, not decoration. */
+export function Gauge({ value, className }: { value: number; className?: string }) {
+  const r = 22;
+  const c = 2 * Math.PI * r;
+  const pct = Math.min(1, Math.max(0, value));
+
+  return (
+    <svg className={cx('jrk-stat__gauge', className)} viewBox="0 0 52 52" focusable="false">
+      <circle className="jrk-gauge-track" cx="26" cy="26" r={r} />
+      <circle
+        className="jrk-gauge-arc"
+        cx="26"
+        cy="26"
+        r={r}
+        strokeDasharray={`${(c * pct).toFixed(2)} ${c.toFixed(2)}`}
+        // Start at 12 o'clock. Rotating the element rather than the whole SVG
+        // keeps the <text> upright.
+        transform="rotate(-90 26 26)"
+      />
+      <text x="26" y="26" textAnchor="middle" dominantBaseline="central">
+        {Math.round(pct * 100)}%
+      </text>
+    </svg>
+  );
 }

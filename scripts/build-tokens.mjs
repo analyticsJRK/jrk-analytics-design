@@ -71,6 +71,10 @@ addThemed('surface', T.color.surface);
 addThemed('text', T.color.text);
 addThemed('border', T.color.border);
 addThemed('accent', T.color.accent);
+// Vivid gradient tiles. Every stop is authored {light, dark} with the SAME value
+// rather than as a bare scalar, so it goes through addThemed and the `use` /
+// `$note` siblings are skipped the way they are everywhere else. -> --jrk-gradient-rose-from
+addThemed('gradient', T.color.gradient);
 addThemed('status', T.color.status); // -> --jrk-status-good-mark / -text / -wash
 addThemed('focus', T.color.focus);
 // Full-viewport washes (modal backdrop, spotlight cutout). Themed, and NOT

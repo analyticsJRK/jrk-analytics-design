@@ -210,3 +210,274 @@
 .jrk-stat-row--split > .jrk-stat--tinted {
   background: var(--jrk-surface-tinted);
 }
+
+/* ---------- vivid tile ---------- */
+
+/* The saturated gradient KPI tile — a dashboard masthead, not a general tile.
+   It is the loudest thing this library draws, so treat it the way the sheet
+   banner is treated: one band, at the top, leading a page. A grid of them below
+   the fold is four mastheads and no page.
+
+   It is its OWN SURFACE, and that is the fact everything else here follows from.
+   The tile does not step off the page or borrow the card's hairline — it brings a
+   fill that is 3.5:1 to 4.9:1 off the light page and 2.6:1 to 3.8:1 off the dark
+   one, so the boundary is the fill and the border goes transparent. The 1px width
+   is still RESERVED, never `border: 0` — see card.css for why that distinction is
+   not pedantry.
+
+   Because it is its own surface, every token that was selected against the page
+   or the card is wrong inside it, and none of the gates above this file would
+   notice. Three are rebound below — ink, focus ring, delta colour — and each one
+   is a hole that measuring against the card would have hidden.
+
+   The selector is DOUBLED deliberately. `.jrk-stat-row--split > .jrk-stat` above
+   is 0-2-0 and sets the `background` SHORTHAND, which resets background-image to
+   none — so a plain `.jrk-stat--vivid` at 0-1-0 would lose its gradient the moment
+   the tile went into the row it is designed for, silently and in that one context
+   only. Matching specificity and leaning on source order within this single file
+   is what keeps one background declaration serving every case. */
+.jrk-stat.jrk-stat--vivid {
+  /* Default tone is the brand. A four-hue row is something an author asks for;
+     one vivid tile is blue. */
+  --jrk-gradient-from: var(--jrk-gradient-blue-from);
+  --jrk-gradient-to: var(--jrk-gradient-blue-to);
+
+  /* focus.ring is the brand anchor, which IS gradient.blue.from — a 1.00:1 ring
+     on the blue tile, i.e. a keyboard path with a hole in it. Rebinding the
+     variable rather than restating the outline means base.css's single ring rule
+     keeps ownership of the geometry and only the colour changes here. */
+  --jrk-focus-ring: var(--jrk-gradient-focus);
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 1fr auto;
+  gap: var(--jrk-space-1) var(--jrk-space-3);
+  padding: var(--jrk-space-4);
+  background-image: linear-gradient(135deg, var(--jrk-gradient-from), var(--jrk-gradient-to));
+  border-color: transparent;
+  color: var(--jrk-gradient-ink);
+}
+
+/* The tones. Each rule sets only the two stops — one background declaration
+   above serves all four, so a change to the ramp geometry (angle, stop
+   positions) happens in exactly one place.
+
+   0-3-0, and that is not decoration. A custom property is won by the ordinary
+   cascade, so a tone at 0-1-0 loses to the `--jrk-gradient-from` DEFAULT set on
+   the 0-2-0 base rule above, and every tile in a four-hue row silently renders
+   blue. It looks like the tone class did nothing; what actually happened is that
+   a modifier lost to its own component's fallback. The doubled `.jrk-stat` here
+   is what puts the tone back above the default it is meant to replace.
+
+   Assign a tone by the tile's POSITION in the row, never by what the metric
+   means. Half these pairs collapse under simulated CVD — violet|blue is dE 1.9
+   under protanopia, the same colour — which is unavoidable at the depth white
+   text needs and is why the label is mandatory. See $hueIsNotIdentity. */
+.jrk-stat.jrk-stat--vivid.jrk-stat--rose {
+  --jrk-gradient-from: var(--jrk-gradient-rose-from);
+  --jrk-gradient-to: var(--jrk-gradient-rose-to);
+}
+
+.jrk-stat.jrk-stat--vivid.jrk-stat--violet {
+  --jrk-gradient-from: var(--jrk-gradient-violet-from);
+  --jrk-gradient-to: var(--jrk-gradient-violet-to);
+}
+
+.jrk-stat.jrk-stat--vivid.jrk-stat--blue {
+  --jrk-gradient-from: var(--jrk-gradient-blue-from);
+  --jrk-gradient-to: var(--jrk-gradient-blue-to);
+}
+
+.jrk-stat.jrk-stat--vivid.jrk-stat--teal {
+  --jrk-gradient-from: var(--jrk-gradient-teal-from);
+  --jrk-gradient-to: var(--jrk-gradient-teal-to);
+}
+
+/* The base tile centres its stack; this one is left-aligned like a masthead, so
+   the three text rows share a left axis instead of a centre one. Overriding
+   justify-content AND text-align because __label and __meta are flex rows and
+   __value is not — the same split the base tile's comment describes. */
+.jrk-stat--vivid .jrk-stat__label,
+.jrk-stat--vivid .jrk-stat__meta {
+  justify-content: flex-start;
+}
+
+.jrk-stat--vivid .jrk-stat__value {
+  text-align: start;
+}
+
+.jrk-stat--vivid .jrk-stat__label {
+  grid-column: 1;
+  grid-row: 1;
+  /* Semibold, not medium. On a saturated ground a medium 13px label at 4.85:1
+     is legible but thin, and weight is the only hierarchy channel this tile has
+     — there is no muted ink to fall back on. See $noMutedInkNote. */
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-gradient-ink);
+}
+
+.jrk-stat--vivid .jrk-stat__value {
+  grid-column: 1;
+  grid-row: 2;
+  align-self: end;
+  font-size: var(--jrk-text-3xl);
+  color: var(--jrk-gradient-ink);
+}
+
+.jrk-stat--vivid .jrk-stat__unit,
+.jrk-stat--vivid .jrk-stat__meta {
+  color: var(--jrk-gradient-ink);
+}
+
+.jrk-stat--vivid .jrk-stat__meta {
+  grid-column: 1;
+  grid-row: 3;
+}
+
+/* A period caption — "Jan 1 – Dec 31". Its own element rather than a muted
+   __meta, because there is no muted ink here to make one with: the lightest tone
+   holds white at 4.85:1 and anything dimmer than white fails (85% alpha is
+   3.92:1). So the step down is SIZE and nothing else. */
+.jrk-stat__caption {
+  font-size: var(--jrk-text-xs);
+  line-height: var(--jrk-leading-normal);
+}
+
+.jrk-stat--vivid .jrk-stat__caption {
+  grid-column: 1;
+  grid-row: 3;
+  color: var(--jrk-gradient-ink);
+}
+
+/* A delta on a vivid tile loses its colour and keeps its meaning. The
+   chart.delta-up / -down greens and reds were selected against the card and are
+   unreadable on a saturated ground — but nothing is lost, because this library
+   already requires a delta to carry its direction in the arrow glyph and in
+   sr-only text. This rule removes the redundant channel, never the primary one.
+   If a future delta ever drops the glyph, it must not be used here. */
+.jrk-stat--vivid .jrk-delta,
+.jrk-stat--vivid .jrk-delta--good,
+.jrk-stat--vivid .jrk-delta--bad,
+.jrk-stat--vivid .jrk-delta--flat,
+.jrk-stat--vivid .jrk-text-muted {
+  color: var(--jrk-gradient-ink);
+}
+
+/* ---------- the corner action ---------- */
+
+/* The one control a vivid tile carries. Not a .jrk-btn of any volume: --cta is
+   filled accent.solid, which is this tile's own blue stop, and --primary is a
+   pale wash that reads as a hole on a saturated ground. See $noControlsNote.
+
+   24px is minTouch exactly — the WCAG 2.2 AA floor. Do not shrink it to match
+   the reference screenshot's smaller glyph. */
+.jrk-stat__action {
+  grid-column: 2;
+  grid-row: 1;
+  /* Column 2 is `auto`, so it is sized by the mini visualisation below — 96px for
+     a sparkline, 88 for bars, 52 for a gauge. Without this the 24px button sits
+     at the START of whatever that column happens to be, and its distance from the
+     tile's right edge changes per tile: 89px, 81px, 45px across one row. It reads
+     as three different paddings and it is one unset property. */
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--jrk-min-touch);
+  height: var(--jrk-min-touch);
+  padding: 0;
+  background: var(--jrk-gradient-mark-soft);
+  border: 0;
+  border-radius: var(--jrk-radius-full);
+  color: var(--jrk-gradient-ink);
+  cursor: pointer;
+  transition: background var(--jrk-transition);
+}
+
+/* A wash step, not a shadow. .jrk-card--interactive needs both because each
+   works in exactly one theme; here neither theme has a shadow that reads on a
+   saturated fill, so the split does not apply and the fill does the whole job. */
+.jrk-stat__action:hover {
+  background: var(--jrk-gradient-mark-soft-hover);
+}
+
+/* ---------- the mini visualisations ---------- */
+
+/* All three sit in column 2 spanning the value and caption rows, so the tile's
+   text column keeps its own width regardless of which one is used. */
+.jrk-stat--vivid .jrk-stat__spark,
+.jrk-stat__bars,
+.jrk-stat__gauge {
+  grid-column: 2;
+  grid-row: 2 / -1;
+  align-self: end;
+}
+
+/* White, at full strength. It is the only value that clears the 3:1 non-text
+   floor on all four tones, and there is no reason to spend the margin on a 2px
+   line that is already the thinnest mark on the tile. */
+.jrk-stat--vivid .jrk-stat__spark path {
+  stroke: var(--jrk-gradient-mark);
+}
+
+.jrk-stat--vivid .jrk-stat__spark .jrk-spark-area {
+  fill: var(--jrk-gradient-mark);
+  opacity: 0.22;
+}
+
+/* Mini bar column. Decorative shape, same contract as the sparkline — the
+   number beside it is the accessible value. The bars are <span>s, so the
+   `display: block` that flex blockification supplies is doing real work; an
+   inline box would ignore both width and height and the whole thing would
+   render as nothing. This is the layout gotcha that has already bitten twice. */
+.jrk-stat__bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  width: 88px;
+  height: 40px;
+}
+
+.jrk-stat__bars > span {
+  display: block;
+  flex: 1 1 0;
+  min-width: 2px;
+  background: var(--jrk-gradient-mark);
+  border-radius: 1px;
+}
+
+/* Ring gauge. The arc is white and its remainder is markSoft at 1.6:1 — legal
+   only because the percentage is PRINTED inside the ring, so nothing depends on
+   reading the arc's extent. Solid white is 3.11:1 against that remainder, so the
+   two are still separable as shapes. */
+.jrk-stat__gauge {
+  width: 52px;
+  height: 52px;
+}
+
+.jrk-stat__gauge circle {
+  fill: none;
+  stroke-width: 4;
+}
+
+.jrk-stat__gauge .jrk-gauge-track {
+  stroke: var(--jrk-gradient-mark-soft);
+}
+
+.jrk-stat__gauge .jrk-gauge-arc {
+  stroke: var(--jrk-gradient-mark);
+  stroke-linecap: round;
+}
+
+.jrk-stat__gauge text {
+  fill: var(--jrk-gradient-ink);
+  font-size: 13px;
+  font-weight: var(--jrk-weight-semibold);
+}
+
+/* A vivid row is a band of mastheads, so it takes the SPLIT row — discrete tiles
+   with a gap, each its own enclosure. The joined `.jrk-stat-row` sets
+   `background: none` on its children to make them share one fill, which erases a
+   gradient completely; there is no override for it here because there should not
+   be one. Four gradients butted together with hairlines between them is not a
+   band, it is a stripe. */
