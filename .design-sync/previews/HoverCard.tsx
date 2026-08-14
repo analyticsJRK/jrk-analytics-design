@@ -1,12 +1,28 @@
 import { HoverCard, HoverCardAnchor, Stat, StatRow } from '@jrk/design';
 
+/* A capture harness, not a component API. The panel is revealed by
+   `.jrk-hovercard-anchor:hover` / `:focus-within`, and a screenshot does neither
+   — so without this every card below shows a stat tile above an empty gap, which
+   documents the trigger and not the component. It forces the revealed state on
+   and touches nothing else. Same move NavMenuSeparator's preview makes for a
+   `position: fixed` panel. */
+const openCss = `
+.pv-open .jrk-hovercard {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  transition-delay: 0s;
+}
+`;
+
 /* The breakdown behind a headline number, revealed on hover AND on focus.
    The trigger is a real <button> and names the panel with aria-describedby —
    opening on hover alone makes the figures reachable only with a pointer, which
    is the difference between a disclosure and a decoration. */
 export const Default = () => (
   <div style={{ paddingBottom: 180, maxWidth: 280 }}>
-    <HoverCardAnchor>
+    <style dangerouslySetInnerHTML={{ __html: openCss }} />
+    <HoverCardAnchor className="pv-open">
       <button className="jrk-stat jrk-card--interactive" style={{ width: '100%' }} aria-describedby="hc-default">
         <span className="jrk-stat__label">Treatment coverage</span>
         <span className="jrk-stat__value">
@@ -33,8 +49,9 @@ export const Default = () => (
    tile sits says so. */
 export const Placement = () => (
   <div style={{ paddingBottom: 200 }}>
+    <style dangerouslySetInnerHTML={{ __html: openCss }} />
     <StatRow className="jrk-stat-row--split">
-      <HoverCardAnchor>
+      <HoverCardAnchor className="pv-open">
         <button className="jrk-stat jrk-card--interactive" style={{ width: '100%' }} aria-describedby="hc-a">
           <span className="jrk-stat__label">Collected rent</span>
           <span className="jrk-stat__value">
@@ -50,7 +67,7 @@ export const Placement = () => (
           ]}
         />
       </HoverCardAnchor>
-      <HoverCardAnchor>
+      <HoverCardAnchor className="pv-open">
         <button className="jrk-stat jrk-card--interactive" style={{ width: '100%' }} aria-describedby="hc-b">
           <span className="jrk-stat__label">Delinquency rate</span>
           <span className="jrk-stat__value">
@@ -78,8 +95,9 @@ export const Placement = () => (
    or put the anchor outside the clip. */
 export const ClippedByAJoinedBand = () => (
   <div style={{ paddingBottom: 120 }}>
+    <style dangerouslySetInnerHTML={{ __html: openCss }} />
     <StatRow>
-      <HoverCardAnchor>
+      <HoverCardAnchor className="pv-open">
         <button className="jrk-stat jrk-card--interactive" style={{ width: '100%' }} aria-describedby="hc-clip">
           <span className="jrk-stat__label">Occupancy</span>
           <span className="jrk-stat__value">
