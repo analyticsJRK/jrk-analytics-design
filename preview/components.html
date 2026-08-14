@@ -105,6 +105,17 @@
             Exceeds the approved variance.
           </span>
         </div>
+
+        <!-- The textarea is the ONE field that is not a pill, and it is here so
+             that exception is visible rather than only written down. radius-full
+             resolves against the shorter side, so on a multi-line box it would
+             draw half-height caps and push the first and last character of every
+             line into curving ink. It takes radius-lg instead. -->
+        <div class="jrk-field">
+          <label class="jrk-field__label" for="f-note">Close note</label>
+          <textarea class="jrk-textarea" id="f-note" rows="2" placeholder="Why this period was adjusted"></textarea>
+          <span class="jrk-field__help">Not a pill — a fully rounded multi-line box eats its own text.</span>
+        </div>
       </div>
 
       <div class="jrk-row" style="gap:var(--jrk-space-6);flex-wrap:wrap">

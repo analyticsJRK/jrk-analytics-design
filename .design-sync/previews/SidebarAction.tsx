@@ -178,7 +178,7 @@ export const WithTopbarSearch = () => (
               <SearchIcon />
             </span>
             <input
-              className="jrk-input jrk-input--sm jrk-input--filled jrk-input--pill"
+              className="jrk-input jrk-input--sm jrk-input--filled"
               placeholder="Search properties, units, tenants"
               aria-label="Search"
             />

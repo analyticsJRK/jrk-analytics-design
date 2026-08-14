@@ -61,17 +61,35 @@
    Note: WCAG 1.4.11 wants 3:1 for a control boundary. border-strong measures
    ~1.4:1 on the card, so this leans on the fill difference plus the border
    together. Use .jrk-input--filled on white chrome, where the fill flips. */
+/* FIELDS ARE PILLS, and `--field-px` is what makes that survivable rather than
+   just round. It mirrors `--btn-px` in button.css deliberately: same problem, same
+   mechanism, so the two control families stay legible as one system.
+
+   THE RULE IT ENCODES: on a pill, the straight edge does not begin until
+   `height / 2`, so anything set at less than that — a first glyph, a leading icon,
+   a select chevron — sits inside the cap and reads as crowded against curving ink.
+   So the side padding is HALF THE CONTROL HEIGHT at every size: 12px on the 24px
+   field, 16px on 32px, 20px on 40px. It is not a taste value; re-derive it if
+   `size.control` moves.
+
+   Everything that positions against a horizontal edge reads this one property
+   rather than hardcoding a space token — the select's chevron and its padding-end,
+   and the input-group's leading and trailing icons. That is the whole reason it is
+   a custom property: before this there were five literals that all had to be
+   changed together and nothing said so. */
 .jrk-input,
 .jrk-select,
 .jrk-textarea {
+  --field-px: var(--jrk-space-4);
+
   width: 100%;
   height: var(--jrk-control-md);
-  padding-inline: var(--jrk-space-3);
+  padding-inline: var(--field-px);
   font-size: var(--jrk-text-md);
   color: var(--jrk-text-primary);
   background: var(--jrk-surface-raised);
   border: 1px solid var(--jrk-border-strong);
-  border-radius: var(--jrk-radius-md);
+  border-radius: var(--jrk-radius-full);
   transition:
     border-color var(--jrk-transition),
     background-color var(--jrk-transition);
@@ -98,26 +116,36 @@
   border-color: transparent;
 }
 
-/* The reference look's search field: a soft-filled pill with no visible edge. Its
-   own modifier rather than a change to the base input, because the base is a
-   CONTAINER for left-aligned text and a fully-rounded one curls in on the first
-   glyph — the buttons went to radius-full and the fields deliberately did not.
-   A short single-line search box is the exception that survives it. */
-.jrk-input--pill,
-.jrk-select--pill {
-  border-radius: var(--jrk-radius-full);
-  padding-inline: var(--jrk-space-4);
-}
+/* `.jrk-input--pill` / `.jrk-select--pill` are GONE, having existed for about an
+   hour. They were the opt-in for a pill-shaped search box back when the base field
+   was a rounded rectangle; the base is a pill now, so the modifier described the
+   default and its only remaining effect would have been to look meaningful. A dead
+   modifier in a library is an invitation to put it on something. Removed rather
+   than left as a no-op, for the same reason `border.card` was. */
 
 .jrk-input--filled:hover:not(:disabled),
 .jrk-select--filled:hover:not(:disabled) {
   background: var(--jrk-surface-hover);
 }
 
+/* THE TEXTAREA IS NOT A PILL, and this is a functional limit rather than a
+   stylistic exception. `radius-full` resolves against the SHORTER side, so on a
+   64px-tall box it draws 32px caps — a lozenge, with the first and last character
+   of every line but the middle one pushed into curving ink, and a resize handle
+   sitting in the corner that no longer exists. The pill works on the other fields
+   precisely because they are one line tall, so their cap radius is small and their
+   text sits on the centerline where the cap is widest. Nothing about that survives
+   a second line.
+
+   radius-lg (14px) rather than the old radius-md, so it still reads as part of the
+   softened family — the largest radius that is unambiguously a rounded rectangle
+   at this height. */
 .jrk-textarea {
   height: auto;
   min-height: calc(var(--jrk-control-md) * 2);
   padding-block: var(--jrk-space-2);
+  padding-inline: var(--jrk-space-3);
+  border-radius: var(--jrk-radius-lg);
   line-height: var(--jrk-leading-normal);
   resize: vertical;
 }
@@ -147,15 +175,19 @@
   border-color: var(--jrk-status-critical-mark);
 }
 
+/* Each size sets --field-px to half its own height — see the base rule. */
 .jrk-input--sm,
 .jrk-select--sm {
+  --field-px: var(--jrk-space-3);
+
   height: var(--jrk-control-sm);
   font-size: var(--jrk-text-sm);
-  padding-inline: var(--jrk-space-2);
 }
 
 .jrk-input--lg,
 .jrk-select--lg {
+  --field-px: var(--jrk-space-5);
+
   height: var(--jrk-control-lg);
   font-size: var(--jrk-text-lg);
 }
@@ -168,10 +200,30 @@
 
 /* ---------- input with leading/trailing adornment ---------- */
 
+/* The group has to carry `--field-px` as well as the input, because a custom
+   property inherits DOWN the tree and `.jrk-input-group__icon` is the input's
+   SIBLING, not its child — a value set on the input is invisible to it. Declaring
+   it here puts one value on the common ancestor that both read, and the input's own
+   declaration still wins on itself, so a standalone field with no group is
+   unaffected.
+
+   The size has to be detected rather than passed, hence `:has()`. Without these two
+   lines a small field would sit its search glyph at the 32px field's 16px inset,
+   i.e. two thirds of the way across a 24px control. */
 .jrk-input-group {
+  --field-px: var(--jrk-space-4);
+
   position: relative;
   display: flex;
   align-items: center;
+}
+
+.jrk-input-group:has(.jrk-input--sm, .jrk-select--sm) {
+  --field-px: var(--jrk-space-3);
+}
+
+.jrk-input-group:has(.jrk-input--lg, .jrk-select--lg) {
+  --field-px: var(--jrk-space-5);
 }
 
 .jrk-input-group__icon {
@@ -184,55 +236,44 @@
   pointer-events: none;
 }
 
+/* All four position against `--field-px`, so an adornment clears the cap at every
+   size and the text clears the adornment. This replaces a `--pill`-scoped copy of
+   these same four rules that existed while the pill was a modifier — one set now,
+   parameterised, rather than two sets that had to be kept in step. */
 .jrk-input-group__icon:first-child {
-  inset-inline-start: var(--jrk-space-2_5);
+  inset-inline-start: var(--field-px);
 }
 
 .jrk-input-group__icon:last-child {
-  inset-inline-end: var(--jrk-space-2_5);
+  inset-inline-end: var(--field-px);
 }
 
 .jrk-input-group__icon:first-child ~ .jrk-input {
-  padding-inline-start: calc(var(--jrk-space-2_5) * 2 + var(--jrk-icon-md));
+  padding-inline-start: calc(var(--field-px) * 2 + var(--jrk-icon-md));
 }
 
 .jrk-input-group:has(.jrk-input-group__icon:last-child) .jrk-input {
-  padding-inline-end: calc(var(--jrk-space-2_5) * 2 + var(--jrk-icon-md));
-}
-
-/* An adornment in a PILL has to clear the curve, the same problem the buttons
-   solved with more side padding. space-2_5 puts a search glyph inside the round
-   end; space-4 sits it on the straight. These four rules mirror the four above
-   exactly and must stay in step with them — they win on specificity by one class,
-   so a change up there is silently ignored down here. */
-.jrk-input-group:has(.jrk-input--pill) .jrk-input-group__icon:first-child {
-  inset-inline-start: var(--jrk-space-4);
-}
-
-.jrk-input-group:has(.jrk-input--pill) .jrk-input-group__icon:last-child {
-  inset-inline-end: var(--jrk-space-4);
-}
-
-.jrk-input-group__icon:first-child ~ .jrk-input--pill {
-  padding-inline-start: calc(var(--jrk-space-4) * 2 + var(--jrk-icon-md));
-}
-
-.jrk-input-group:has(.jrk-input-group__icon:last-child) .jrk-input--pill {
-  padding-inline-end: calc(var(--jrk-space-4) * 2 + var(--jrk-icon-md));
+  padding-inline-end: calc(var(--field-px) * 2 + var(--jrk-icon-md));
 }
 
 /* ============================== select ============================== */
 
+/* The chevron is the reason a pill select is harder than a pill input: it is
+   painted as a background image against the RIGHT edge, which is exactly where the
+   cap now is. At the old `right space-2_5` it sat 10px in, inside the curve on a
+   32px control, touching ink on a 40px one. It moves to `--field-px` like every
+   other edge-anchored thing here, and the text's padding-end follows so a long
+   option label cannot run under it. */
 .jrk-select {
   appearance: none;
-  padding-inline-end: calc(var(--jrk-space-2_5) * 2 + var(--jrk-icon-sm));
+  padding-inline-end: calc(var(--field-px) * 2 + var(--jrk-icon-sm));
   cursor: pointer;
   /* Chevron is inlined so the control needs no extra markup. currentColor is
      not available inside a data: URL, so the muted ink value is written in
      literally for each mode. */
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%235f5f73' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right var(--jrk-space-2_5) center;
+  background-position: right var(--field-px) center;
   background-size: var(--jrk-icon-sm);
 }
 
@@ -315,7 +356,12 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--jrk-space-2);
-    padding-inline-end: var(--jrk-space-2_5);
+    /* --field-px, not space-2_5: in this branch the chevron is a real
+       ::picker-icon laid out by flex rather than a background image, so this
+       padding is what holds it off the right edge — the same cap it has to clear
+       in the background-image branch above. The two were 10px and stayed in step
+       only by coincidence. */
+    padding-inline-end: var(--field-px);
     background-image: none;
     text-align: start;
     white-space: nowrap;
