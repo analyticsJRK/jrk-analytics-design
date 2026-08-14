@@ -283,6 +283,13 @@ library that draws a real hairline by default** (`1px solid border.default`) for
 exactly this reason, and it is the exception to "a tile has no border". Anything
 else placed here needs `.jrk-card--outlined`.
 
+**The frame is SQUARE** (`radius.none`), the same exception `.jrk-table-wrap`
+takes — the two rectangular tiles are a pair. The sheet is the worse case of the
+two because its full-width rows carry FILLS: a rounded frame clips the banner's
+navy into a curve while every column rule beneath it stays square. Interior chrome
+keeps its own radii; the `__block-num` chip is still `radius.sm`, because the
+exception is about the frame meeting the grid, not about corners in general.
+
 The sheet's **internal** rules use the same neutral namespace (`border.subtle` /
 `border.default` / `border.strong`): column, group and total rules are structure
 the reader parses. One hairline value doing both the frame and the internals is

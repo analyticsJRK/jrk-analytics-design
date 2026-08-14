@@ -85,7 +85,19 @@
      are structure the reader parses. With one hairline value doing both the frame
      and the internals, nothing in a dense report is louder than the data. */
   border: 1px solid var(--jrk-border-default);
-  border-radius: var(--jrk-radius-xl);
+  /* SQUARE, the same exception .jrk-table-wrap takes and for the same reason: this
+     is a grid of straight rules that run to its own edges, and a corner radius cuts
+     across the first and last cell of every full-width row — the title bar, the
+     metadata strip, the column bar, the section bands, the totals — so the outer
+     curve never agrees with the geometry inside it. The sheet is the worse case of
+     the two, because those rows carry FILLS: a rounded frame clips the banner's
+     navy into a curve while the column rules beneath it stay square.
+     radius.none rather than a literal 0, so the value is still a token. The two
+     rectangular tiles are a pair now; if one goes back to the radius ladder, ask
+     why the other did not. Interior chrome keeps its own radii — the
+     `__block-num` chip is still radius.sm — because the exception is about the
+     FRAME meeting the grid, not about corners in general. */
+  border-radius: var(--jrk-radius-none);
   /* Dense reports want crisp edges, not the app's soft type. */
   font-size: var(--jrk-text-2xs);
   line-height: 1.25;

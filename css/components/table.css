@@ -5,14 +5,39 @@
    and put aria-sort on the sorted header. */
 
 /* A bare table panel on the page IS a tile, so it is bounded the same way a card
-   is: it draws the border.subtle hairline, which on the flat white light page is
-   the only thing bounding it. See card.css. */
+   is — border.subtle hairline, fill step, shadow.card at rest. See card.css.
+
+   RECTANGULAR, by explicit direction: this is the one tile in the library that
+   does not take the softened radius ladder. A table is a grid of straight rules
+   that run to its edges, and an 18px corner cuts across the first and last cell
+   of the header and footer rows, so the outer curve never agrees with the
+   geometry inside it. radius.none rather than a literal 0 so the value is still
+   a token; do not "restore consistency" by pointing it back at radius.xl.
+
+   The shadow is the RESTING step of the ladder (rest -> hover -> popover), the
+   same token .jrk-card uses, so a table panel floats exactly as much as the
+   cards beside it and no more. It is `none` in dark by construction — a black
+   ambient shadow on #141416 renders nothing there, and the fill step plus the
+   hairline do the bounding, as they always have. */
 .jrk-table-wrap {
   overflow: auto;
   max-width: 100%;
   background: var(--jrk-surface-default);
   border: 1px solid var(--jrk-border-subtle);
-  border-radius: var(--jrk-radius-xl);
+  border-radius: var(--jrk-radius-none);
+  box-shadow: var(--jrk-shadow-card);
+}
+
+/* NESTED, the shadow goes. A wrap inside a card is most often the card's own
+   content — the "show table" view of a ChartCard, a table filling a flush body —
+   and a resting shadow there paints a smudge just inside an enclosure that is
+   already drawn. nesting.css swaps the hairline for the heavier border.default in
+   the same situation and only ever touches a border COLOR by contract, so the
+   elevation half of the answer lives here, with the component that owns it.
+   0-2-0, and nothing in nesting.css sets box-shadow, so file order is irrelevant. */
+.jrk-card .jrk-table-wrap,
+.jrk-chart-card .jrk-table-wrap {
+  box-shadow: none;
 }
 
 /* A table nested inside a card drops to a neutral hairline — see
@@ -50,8 +75,21 @@
      broken table rather than as a deliberate alignment. */
   text-align: center;
   white-space: nowrap;
-  color: var(--jrk-text-muted);
-  background: var(--jrk-surface-subtle);
+  /* ACCENT LABELS ON THE CARD PLANE, by explicit direction. Both halves matter:
+     the fill left surface.subtle for surface.default, so the header no longer
+     reads as a recess off the table body, and the label left text.muted for
+     accent.text. Measured, both themes, on the surface it actually sits on:
+     #0069d9 on #ffffff is 5.22:1, #64b5ff on #232326 is 7.16:1. accent.text is
+     already the token whose dark value IS #64b5ff, so this is one declaration
+     rather than a per-theme override — do not hard-code either hex here.
+
+     `border-bottom` is now the ONLY thing separating the header from the first
+     data row, where the fill step used to help, so it is structural and cannot be
+     dropped or softened to border.subtle. Same for the explicit background: these
+     cells are `position: sticky`, and a transparent sticky header lets the rows
+     scroll through it. */
+  color: var(--jrk-accent-text);
+  background: var(--jrk-surface-default);
   border-bottom: 1px solid var(--jrk-border-default);
 }
 
@@ -71,9 +109,13 @@
   cursor: pointer;
 }
 
-.jrk-table__sort:hover {
-  color: var(--jrk-text-primary);
-}
+/* The label does NOT change colour on hover or when sorted, and that is a
+   consequence of the accent header rather than an omission. Both states used to go
+   text.primary, which was a step UP in ink from a muted grey label; from an accent
+   label it would be a step sideways in hue and read as the column losing its
+   emphasis. The arrow carries all three states on its own — hidden, 0.4 on hover,
+   full when the column is the sorted one — which is a shape channel and survives
+   greyscale and both dichromacies, so nothing is lost by not doubling it in colour. */
 
 .jrk-table__sort svg:not(.jrk-icon) {
   width: 12px;
@@ -87,11 +129,7 @@
   opacity: 0.4;
 }
 
-/* The active sort column keeps its arrow visible and its label at full ink. */
-.jrk-table th[aria-sort] .jrk-table__sort {
-  color: var(--jrk-text-primary);
-}
-
+/* The active sort column keeps its arrow visible. */
 .jrk-table th[aria-sort] .jrk-table__sort svg {
   opacity: 1;
 }
@@ -228,9 +266,12 @@
   border-inline-end: 1px solid var(--jrk-border-default);
 }
 
+/* The corner cell is sticky in both directions and needs its own fill, which has
+   to be the HEADER's fill — it was surface.subtle while the header was, and left
+   behind it would be a single grey cell in an otherwise white header row. */
 .jrk-table--sticky-first thead th:first-child {
   z-index: 3;
-  background: var(--jrk-surface-subtle);
+  background: var(--jrk-surface-default);
 }
 
 .jrk-table--sticky-first tbody tr:hover td:first-child {

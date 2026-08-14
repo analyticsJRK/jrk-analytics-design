@@ -77,8 +77,8 @@ An error is never signalled by the red border alone. `<Input error="...">` sets
 
 `.jrk-card` (white fill, a `border.subtle` hairline, and a resting `shadow.card`
 in light) with `__header` `__title` `__subtitle` `__actions` `__body` `__footer`.
-Modifiers: `--raised` (**more** elevation than resting — `shadow.lg`; it used to
-mean "has elevation at all", back when rest was flat), `--tinted`, `--outlined`
+Modifiers: `--raised` (**more** elevation than resting — `shadow.cardRaise`; it
+used to mean "has elevation at all", back when rest was flat), `--tinted`, `--outlined`
 (a heavier neutral hairline, for a card with no fill step to use: one on the card
 plane or on a tinted surface), `--seamless` (drops the hairline **and** the
 shadow — both, or the modifier does not do what it says), `--interactive`,
@@ -89,15 +89,81 @@ The card declares `border: 1px solid transparent`. **Never change that to
 layout, and `border: 0` sets `border-style: none`, after which `border-color`
 paints nothing.
 
-`--interactive:hover` sets **both** `surface-card-hover` and `shadow-lg`, and
-neither is redundant: the shadow carries light mode and is invisible in dark (a
+`--interactive:hover` sets **both** `surface-card-hover` and `shadow-card-raise`,
+and neither is redundant: the shadow carries light mode and is invisible in dark (a
 black shadow on `#141416`), while the fill lifts 1.125:1 in dark and is a
 deliberate no-op in light. Do not "simplify" it to the fill alone with
 `surface-hover` — that token is the page colour in light and would erase the step
 that bounds the tile. `:focus-visible` lists `shadow-focus` first, because setting
 only the lift would replace base.css's focus bloom rather than add to it.
 
+**There are TWO elevation ladders and they were split on 2026-08-14.** Cards rest
+on `shadow.card` and raise to `shadow.cardRaise`; popovers sit at `shadow.lg` and
+modals at `shadow.xl`. They used to share `shadow.lg` — a hovered card and an open
+menu were one elevation — which meant the resting card could not be deepened
+without restyling every menu in the product. If the ask is "make the cards float
+more", move **both** card rungs and leave `shadow.lg` alone; the gap to hold is
+3.3x by ambient weight (y-offset × alpha).
+
 `.jrk-section` + `__header` + `__title` groups several cards under one heading.
+
+## Expandable card
+
+`.jrk-card.jrk-expander` — **both classes, always.** It composes on the card
+rather than replacing it, which is what makes `nesting.css` and `table.css` give
+the table inside its hairline and drop its resting shadow for free; those rules
+match on `.jrk-card`. Parts: `__heading` (an `<h3>` wrapping the button, for the
+document outline) `__summary` (a `<button>` — everything inside it is a `<span>`,
+because a button takes phrasing content only) `__icon` `__text` `__tag` `__title`
+`__desc` `__caret` `__panel` `__panel-inner` `__footer`.
+
+State lives in two places on purpose: `aria-expanded` on the button is the
+accessible truth, `data-expanded` on the block is what CSS can reach. `<Expander>`
+sets both.
+
+Tones: default (plain), `--pastel`, `--vivid`; hues `--rose` `--violet` `--blue`
+`--teal` on either toned variant. **The tone treats the SUMMARY and the panel is
+always the card plane** — every token a table uses (row hairlines, `text.muted`
+captions, the `accent.text` header labels, every chart mark in a cell bar) was
+measured against `surface.default`, so a toned panel would break all of them at
+once and nothing in the library would report it. A vivid expander is a gradient
+header on a white card, not a gradient card.
+
+`__tag` is brand-inked, not neutral: **`accent.washText` in both the plain and
+pastel tones** — one ink, so the chip is the same object across a row — with the
+FILL doing the per-tone work by a single rule, *step away from what you sit on*.
+On the white card that means `accent.wash` + the `accent.washBorder` hairline
+(5.31:1 light / 6.73:1 dark ink; the fill step is 1.16:1 / 1.06:1, so the hairline
+is load-bearing). On a pastel wash it steps back to `surface.default`, which
+cannot collide with any tone — `accent.wash` there would be `#e3efff` on `#c7deff`
+on the blue tone, the same colour. Chip-vs-wash steps run 1.27–1.37:1 light and
+1.34–1.36:1 dark on blue/teal, dropping to 1.12:1 and 1.11:1 on the violet and
+rose darks; accepted for an 18px pill whose label is 7.16:1, since nothing depends
+on finding the chip's edge. **This is now the `.jrk-btn--primary` triple exactly,
+so a tinted button must not sit in an expander summary** — 18px of pill against a
+32px control is not enough to separate "label" from "commits an action".
+
+Two more consequences worth carrying. On the pastel tone `__desc` is
+**`text.secondary`, not `text.muted`** — muted is 3.70:1 on the light blue wash and fails the body
+floor, where secondary is 7.99:1 light / 5.58:1 dark across all four tones. And the
+summary's `border-bottom` when open is **structural**: in dark, two of the four
+tints step only 1.11:1 off the card, so the hairline is the boundary rather than a
+garnish.
+
+Hover is three mechanisms, one per tone, none interchangeable: plain steps to
+`surface.hover` (a plane to the next plane); pastel takes `overlay.hoverVeil`,
+which darkens a light tint and lightens a dark one because a single white veil
+would lift a dark tint 1.34:1 and a light one 1.03:1; vivid takes `gradient.hover`,
+theme-independent because the ramp is.
+
+`.jrk-expander-row` lays them side by side and gives an **open** card the full row
+width, collapsing to one column while anything is open. That is the point of the
+component, not a nicety — three tiles across puts a table in a ~410px column where
+"947 of 982 units" wraps to three lines and every row grows four lines tall.
+
+Assign a hue by **position in the row**, never by what the card is about: half
+these pairs collapse under simulated CVD on both toned variants, and identity is
+carried by the tag and the title.
 
 ## Stat / KPI
 
@@ -138,8 +204,10 @@ Real `<table>` inside `.jrk-table-wrap` (the wrapper owns the scroll, so a wide
 table never scrolls the page body).
 
 - `.jrk-table` + `--compact` `--comfortable` `--zebra` `--sticky-first`
-- `.jrk-num` on every money/count cell **and** its header — right-aligns on
-  tabular figures so digits stack
+- `.jrk-num` on every money/count cell **and** its header — tabular figures, so a
+  column of equal-length values stacks. Cells are **centred** by design direction,
+  which throws away the scan line on mixed-magnitude columns; `.jrk-col-end` is
+  the way back where comparing magnitudes matters. First column starts.
 - `.jrk-table__sort` — sortable headers are real `<button>`s; put `aria-sort` on
   the `<th>`
 - `.jrk-cell-bar` + `__track` `__fill` `__value` — in-cell magnitude with the
@@ -151,6 +219,18 @@ table never scrolls the page body).
 `display: block` on `__fill` is load-bearing: these are `<span>`s, and an inline
 box ignores width and height, so the bar renders as an empty track. This shipped
 broken once.
+
+**The wrap is RECTANGULAR** (`radius.none`) — one of two, with `.jrk-sheet`, and
+for the same reason: a grid of straight rules that run to its own edges has no
+corner a radius can round without cutting the first and last cell of every row.
+They are a pair; if one returns to the radius ladder, ask why the other did not.
+Its header is
+**white with `accent.text` labels** — 5.22:1 light, 7.16:1 dark. Both by explicit
+direction. Consequences: the header's `border-bottom` is now the only separation
+from the first row, since the fill step went with the grey; the sorted column is
+marked by its arrow alone, because an accent label has nowhere brighter to go; and
+the wrap rests on `shadow.card` like a card, **suppressed when nested** inside a
+card or chart-card, where a shadow inside an existing enclosure reads as a smudge.
 
 For workbook-style financial reports use the **sheet** layer instead — see
 `sheet.md`.
@@ -328,6 +408,29 @@ keyline inside the card.
   their own parent does not.
 - **One `--rollup` per chart.** Two both start at slot 1, so B's first child can
   land beside A's last in the same colour. `<OrgNode>` warns on nesting.
+
+## Hover card
+
+The breakdown behind a headline number. `.jrk-hovercard-anchor` (a **block**
+wrapper, so the tile keeps filling its grid track) holding the trigger and
+`.jrk-hovercard` + `__header` `__row` `__label` `__value` `__note`. Modifiers
+`--end` and `--above`; there is no auto-flip, because a measured position goes
+stale the moment anything reflows under it.
+
+**Opens on `:focus-within` as well as `:hover`.** That is the difference between
+a disclosure and a decoration — hover alone makes the figures reachable only with
+a pointer. The trigger must therefore be focusable (a `<button>` or a link, never
+a bare `<div>`) and should carry `aria-describedby`.
+
+On `surface.raised` with `shadow.lg`, not `.jrk-tooltip`'s `surface.inverse`: a
+dark-on-light panel inverts at night to a near-white slab carrying a table of
+numbers. It mirrors `.jrk-chart-tooltip`'s row grammar deliberately — if a fourth
+label/value panel ever appears, merge all three rather than adding to the pile.
+
+**Clipping trap:** the panel is `absolute` and escapes its anchor, so any ancestor
+with `overflow: hidden` cuts it off — the **joined** `.jrk-stat-row` (the split
+row is `overflow: visible` and is fine), `.jrk-expander`, and `.jrk-table-wrap`.
+Nothing errors; the panel just does not appear.
 
 ## Feedback
 
