@@ -453,26 +453,51 @@
    These beat `.jrk-input--filled` on specificity, which is deliberate — the
    modifier stays the neutral default for every other white-chrome field and this
    is the one place the accent is spent. */
+/* NO EDGE — THE FILL IS THE WHOLE CONTROL, by instruction, and the cost is stated
+   here rather than discovered later.
+
+   The wash is 1.16:1 against the light topbar and 1.06:1 against the dark one, and
+   BOTH FIELDS READ FINE, which is the part worth understanding rather than the
+   ratios. WCAG contrast is a LUMINANCE formula, and what separates this fill from
+   the bar behind it is mostly HUE — a navy on a neutral grey in dark, a blue tint
+   on white in light. The formula scores that at nothing and the eye does not.
+   Check a screenshot before trusting 1.06:1 to mean invisible; it does not mean
+   that here.
+
+   WHAT THE NUMBER *DOES* CORRECTLY PREDICT is where this fails: anything that
+   strips the hue. Greyscale, a monochrome print path, and low-vision users with
+   reduced chroma discrimination all collapse this field into its background, and
+   in dark there is nothing underneath it to catch that. Both dichromacies are
+   survivable, since blue is the safe end of the spectrum, but greyscale is not.
+
+   So this is a deliberate exception to two rules the library otherwise holds:
+   form.css's ("an input cannot be borderless — the reader has to see the target
+   they are about to type into") and accent.wash's own note ("a wash is a fill
+   STEP, not a boundary"). It was directed, it buys the borderless soft pill of the
+   reference look, and it is NOT a precedent — a wash-filled control that is not a
+   large, left-aligned, glyph-bearing search field still draws accent.washBorder.
+   The glyph matters more than it looks: it is the one channel on this control that
+   survives greyscale, the same role semibold plays on the segmented thumb.
+
+   THE FIX IS ONE LINE if the dark field is ever judged too faint in use:
+   `border-color: var(--jrk-accent-wash-border)` here, which is 1.76:1 on white and
+   2.03:1 on the dark card. Nothing else has to move with it.
+
+   The 1px width stays reserved with `transparent` rather than dropping to
+   `border: 0`, per the house rule — `border: 0` sets border-style to `none`, after
+   which the one-line fix above would paint nothing at all, and the field would not
+   reflow by a pixel when it is restored. */
 .jrk-topbar__search .jrk-input:not(:disabled) {
   background: var(--jrk-accent-wash);
-  /* accent.washBorder, not transparent. The fill cannot bound this control: the
-     wash is 1.16:1 on the light topbar and 1.06:1 on the dark one, and form.css's
-     own rule is that an input has to show the reader the target they are about to
-     type into. Same call, same token, same numbers as the tinted button — 1.76:1
-     on white, 2.03:1 on the dark card.
-
-     It DOES leave the field sharing an anatomy with .jrk-btn--primary, which sits
-     a few hundred pixels away in the same bar. What separates them is everything
-     except the palette: 420px of width, a left-aligned placeholder, and a leading
-     glyph. Worth knowing rather than worth solving — but if a third wash-filled
-     control ever joins them in this bar, that is the point where the trio stops
-     meaning anything and one of them has to give up the wash. */
-  border-color: var(--jrk-accent-wash-border);
+  border-color: transparent;
 }
 
+/* Hover is the only channel this field has left to respond with, which makes the
+   wash step load-bearing here in a way it is not on the tinted button — that one
+   also has a hairline and an ink change to fall back on. */
 .jrk-topbar__search .jrk-input:hover:not(:disabled) {
   background: var(--jrk-accent-wash-hover);
-  border-color: var(--jrk-accent-wash-border);
+  border-color: transparent;
 }
 
 /* The magnifying glass takes the wash ink, so the glyph and its field are one
