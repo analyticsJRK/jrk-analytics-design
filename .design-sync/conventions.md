@@ -90,7 +90,8 @@ surfaces `--jrk-surface-canvas|default|tinted|subtle|raised` · text
 · accent `--jrk-accent-solid|wash` · status
 `--jrk-status-{good|warning|serious|critical|neutral}-{mark|text|wash}` · series
 `--jrk-chart-1..8` · spacing `--jrk-space-0_5…--jrk-space-24` (4px grid) · radius
-`--jrk-radius-sm|md|lg|xl|2xl|full` · type `--jrk-text-2xs…--jrk-text-5xl` ·
+`--jrk-radius-none|sm|md|lg|xl|2xl|full` (`none` for tiles, `full` for pill
+controls) · type `--jrk-text-2xs…--jrk-text-5xl` ·
 motion `var(--jrk-transition)` (never hand-roll a duration).
 
 ## Rules this library enforces — breaking them is a bug, not a style choice
@@ -100,11 +101,25 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
 - **`Delta` requires `vs`** (a percentage with no comparison window is
   meaningless), and `good`/`bad` mean *interpretation*, not sign — pass
   `upIsGood={false}` for delinquency, churn, turnover, error rate.
-- **A card's edge is a colour change, never a width change.** `.jrk-card` and
-  friends ship `border: 1px solid transparent` and the modifiers only repaint it
-  (`--outlined` → `--jrk-border-default`, `--seamless`/`--flush` → transparent),
-  so an edge appearing never reflows the layout by a pixel. Elevation (`raised`)
-  stays opt-in — a dashboard of many tiles reads calmer flat.
+- **A card's edge is a colour change, never a width change.** `.jrk-card` and the
+  other tiles ship a real 1px `--jrk-border-subtle` edge and the modifiers only
+  repaint it (`--outlined` → `--jrk-border-default`, `--seamless`/`--flush` →
+  transparent), so an edge appearing or disappearing never reflows the layout by a
+  pixel. Never write `border: 0` — it sets `border-style: none`, after which a
+  `border-color` paints nothing at all.
+- **Elevation is a ladder, not an opt-in.** Every card *rests* on
+  `--jrk-shadow-card`; `--raised` and `--interactive:hover` both step up to
+  `--jrk-shadow-card-raise`. What matters is the **gap** between the two — if you
+  build your own hovering tile, move the shadow and the fill together, because in
+  dark `shadow-card` is `none` (a black shadow on `#141416` renders nothing) and
+  `--jrk-surface-card-hover` is the channel that carries the hover instead. Each
+  one does nothing in the theme the other works in.
+- **Tiles are SQUARE; only things that float are rounded.** `jrk-card`, `jrk-stat`,
+  `jrk-stat-row`, `jrk-chart-card`, `jrk-table-wrap`, `jrk-sheet` and `jrk-expander`
+  are all `--jrk-radius-none`. Anything that floats *above* the page keeps its
+  radius — modals, menus, hovercards, tooltips, nav flyouts, spotlights — as do
+  controls, badges, tags and the chrome *inside* a tile. The radius ladder is a
+  **control** ladder now; do not round a tile to make it look friendlier.
 - **A tile inside another tile takes a hairline automatically.** A fill step only
   works once per plane, so a Card/Stat/table nested in a Card gets
   `--jrk-border-default` from the library. Do not add your own.

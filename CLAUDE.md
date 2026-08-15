@@ -135,7 +135,7 @@ in a shadow, a gradient or a `data:` URL, nothing will check it — measure by h
 and write the number down.**
 
 **THE LOOK IS A SOFT WEB UI ON AN APPLE COLOUR FOUNDATION** (since 2026-08-13).
-White cards floating on a `#f5f5f7` page, pill controls, tall chrome.
+White cards on a flat `#ffffff` page, pill controls, tall chrome.
 **Geometry, elevation and the page plane changed; not one measured colour
 did.** Several notes in this repo still argue for tight radii, a flat page and
 no-resting-shadow using "Apple does it this way" as the premise — those are marked
@@ -152,20 +152,26 @@ its radius — `.jrk-modal`, `.jrk-menu`, `.jrk-hovercard`, `.jrk-tooltip`,
 interior chrome inside a tile. This supersedes "generous radii" in the paragraph
 above for tiles only; the ladder is a CONTROL ladder now. Two consequences worth
 carrying: `radius.xl` is referenced by exactly one component and is not dead, and
-the enclosure is carried entirely by the hairline, the fill step and the shadow —
-which is why none of those three may be dropped on the grounds that a tile "looks
-bounded enough".
+the enclosure is carried entirely by the hairline, the shadow and — in dark only —
+the fill step, which is why none of those may be dropped on the grounds that a
+tile "looks bounded enough". In light there are just the two.
 
-**The light page is TINTED `#f5f5f7` and the card is bounded three ways.**
-`.jrk-card` draws `border.subtle` (1.26:1 light, 1.24:1 dark), sits on a fill step,
-and rests on `shadow.card`. The tint permits dropping the hairline — see the pair
-rule below — and that permission is **declined**, because the tint is shallow
-(1.06:1 to the white card, against the 1.12:1 the old `#f2f2f7` page gave) so the
-step alone is a *weaker* boundary than yesterday's. Dark is unchanged: `#232326` on
-`#141416` (1.17:1) plus the same hairline, and `shadow.card` is `none` there
-because a black shadow on `#141416` renders nothing. **One mechanism, both themes,
-per-theme values** — a light-hairline/dark-fill split is the shape the conflict
-register calls the most expensive thing in the file to forget.
+**The light page is FLAT `#ffffff`, so in light the card is bounded TWO ways and
+the fill step is one of them only in dark.** `.jrk-card` draws `border.subtle`
+(1.26:1 light, 1.24:1 dark) and rests on `shadow.card`. In light the card-on-page
+step is **1.000:1** — it does nothing. Dark is unchanged: `#232326` on `#141416`
+(1.17:1) plus the same hairline, and `shadow.card` is `none` there because a black
+shadow on `#141416` renders nothing. **One mechanism, both themes, per-theme
+values** — a light-hairline/dark-fill split is the shape the conflict register
+calls the most expensive thing in the file to forget.
+
+**The standing cost of the flat page is future-tense, and it is the thing to
+carry: a new top-level tile must bring its own edge or it will not exist at all.**
+Flattening was safe only because the soft-UI restyle left every plane
+self-bounding on the way past — `.jrk-card`, `.jrk-topbar` and `.jrk-sidebar` all
+carry `border.subtle`, and the first two carry `shadow.card` as well — so going to
+`#ffffff` removed nothing a tile was actually leaning on. It does mean you cannot
+add one that leans on a fill step.
 
 **`surface.canvas.light` and the card's edge are a PAIR. Never move one alone.**
 This has been got wrong once, expensively: the flat page originally shipped with a
@@ -175,20 +181,31 @@ border — no boundary at all — and shipped that way. So: **page flat → the 
 needs its own edge; page tinted → the fill step *may* be the edge and the border
 *may* go transparent.** Note the direction of that permission — the safe move
 through this transition is the one that leaves a tile MORE bounded, never less,
-which is why the current page tint kept every edge it had.
+which is why the `#f5f5f7` period kept every edge it had and why flattening back
+out of it was safe. **Read the rule, not the value:** the page went `#ffffff` →
+`#f5f5f7` → `#ffffff` inside 2026-08-13 alone. Today's step is the same 1.000:1
+as the broken state above; the only difference — and it is the whole difference —
+is that the border is real.
 
-**Why the page is `#f5f5f7` and not the obvious `#f2f2f7`:** because `#f2f2f7` is
+**If the page is ever tinted again it must not land on `#f2f2f7`:** that value is
 `surface.subtle`, and **`surface.subtle.light` cannot move.** `text.muted` is
 4.59:1 on it and 4.23:1 on the next step down, so the first deepening puts a table
 header's own label under the floor. It is a fixed point that other surfaces are
-chosen around. The live cost: subtle is 1.02:1 on the page, i.e. **invisible as a
-wash laid directly on the page plane** — it is still a 1.12:1 recess off the white
-card, which is where headers and wells actually live. Want a recess on the page?
-`surface.track`, or put the thing in a card.
+chosen around, and a `#f2f2f7` page would force subtle to equal the page — a state
+this library has shipped and regretted. `#f5f5f7` is the value that was solved for
+last time. With the page flat white, subtle is currently a 1.12:1 recess off
+**both** the page and the card, but that is a property of the page being white and
+is not durable: through the tinted period it was 1.02:1 on the page, i.e.
+invisible there, while still working correctly inside a card. Want a recess that
+survives a re-tint? `surface.track`, or put the thing in a card.
 
 **Elevation is a LADDER now, not a switch: rest → hover → popover.** Every card
-rests on `shadow.card`; `--interactive:hover` steps up to `shadow.lg`;
-`--raised` moved from `md` to `lg` so it still means "more than resting". This
+rests on `shadow.card`; both `--interactive:hover` and `--raised` step up to
+`shadow.cardRaise`, a dedicated pair of card-only tokens rather than a rung of the
+generic `sm/md/lg/xl` ladder (which still serves popovers — `.jrk-menu` is
+`shadow.lg`). In dark `shadow.card` is `none` and `cardRaise` is a single soft
+black, so the ladder collapses to one step there and `surface.cardHover` carries
+the hover instead. This
 reverses the old "elevation is opt-in at rest, a dashboard of tiles reads calmer
 flat" rule. **What must be protected is the GAP** — point rest and hover at the
 same token, or grow one without the other, and a card stops responding to the

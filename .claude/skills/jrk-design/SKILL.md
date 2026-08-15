@@ -78,7 +78,7 @@ not Apple's — it is a blue at hue 212° anchored on `#0069d9`, one step deeper
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#f5f5f7` | `#141416` |
+| page plane | `#ffffff` | `#141416` |
 | card / chrome | `#ffffff` | `#232326` |
 | popover / input | `#ffffff` | `#2c2c2e` |
 
@@ -88,33 +88,42 @@ on every card. **The colour layer did not move with it** — nothing measured
 changed, and notes across the repo that argue for tight radii or a flat page from
 an "Apple does it this way" premise are marked stale in their premise only.
 
-**The light page is TINTED and a tile is bounded three ways** — a fill step, a
-hairline, and `shadow.card`. `.jrk-card` draws `border.subtle` in both themes:
-1.26:1 in light, 1.24:1 in dark on top of the 1.17:1 fill step. One mechanism
-across themes with per-theme values — deliberately not hairline-in-light /
-fill-in-dark, because two mechanisms is what lets a change read correctly in one
-theme and vanish in the other.
+**The light page is FLAT `#ffffff`, so in light a tile is bounded TWO ways** — a
+hairline and `shadow.card`. `.jrk-card` draws `border.subtle` in both themes:
+1.26:1 in light, 1.24:1 in dark, where it rides on top of a 1.17:1 fill step that
+light does not have. One mechanism across themes with per-theme values —
+deliberately not hairline-in-light / fill-in-dark, because two mechanisms is what
+lets a change read correctly in one theme and vanish in the other.
+
+**The card-on-page step in light is 1.000:1, so a new tile must bring its own
+edge or it will not exist.** `.jrk-card`, `.jrk-topbar` and `.jrk-sidebar` all
+carry `border.subtle` already, and that is the only reason flattening the page was
+safe. Do not add a top-level surface that leans on a fill step.
 
 **`canvas.light` and that edge are a PAIR.** Flat page → the card needs its own
 edge; tinted page → the fill step *may* be the edge and the border *may* go
-transparent. That permission is declined here: the current tint is shallow
-(1.06:1 to the white card) so the step alone would bound *less* than the hairline
-did. **The safe direction through this transition is the one that leaves a tile
-more bounded, never less** — the library has shipped the broken combination once,
-when the 2px `#48a9df` brand edge that justified the flat page was removed and the
-page was not un-flattened with it, leaving light cards at a 1.000:1 step behind a
-transparent border. `border.card` and `size.cardEdge` no longer exist.
+transparent. **Note the direction of that permission: the safe move through a
+paired change is the one that leaves a tile MORE bounded, never less.** The
+library has shipped the broken combination once, when the 2px `#48a9df` brand edge
+that justified the flat page was removed and the page was not un-flattened with
+it, leaving light cards at a 1.000:1 step behind a *transparent* border. The step
+is the same today; the difference is that the border is real. `border.card` and
+`size.cardEdge` no longer exist.
 
-**The page is `#f5f5f7`, not the `#f2f2f7` the palette would suggest, because
-`surface.subtle` cannot move.** `text.muted` is 4.59:1 on `#f2f2f7` and 4.23:1 on
-the next step down, so subtle is pinned from below and other surfaces are chosen
-around it.
+**Read the rule, not the value** — the page went `#ffffff` → `#f5f5f7` → `#ffffff`
+inside 2026-08-13 alone. If it is ever tinted again it must not land on `#f2f2f7`,
+because `surface.subtle` cannot move: `text.muted` is 4.59:1 on `#f2f2f7` and
+4.23:1 on the next step down, so subtle is pinned from below and other surfaces
+are chosen around it. `#f5f5f7` is the value that was solved for last time.
 
 Three follow-on rules:
-- **Tiles keep a 1px border, never `border: 0`.** `.jrk-card` colours it
-  `border.subtle`; the other tiles reserve the width with `transparent`. The width
-  is reserved so an edge changing is only ever a colour and never reflows. `border:
-  0` sets `border-style: none`, after which `border-color` paints nothing.
+- **Tiles keep a 1px border, never `border: 0`.** `.jrk-card`, `.jrk-stat`, both
+  `.jrk-stat-row` forms, `.jrk-chart-card` and `.jrk-table-wrap` all now *colour*
+  it `border.subtle`; the reserved-width `transparent` idiom has moved to the
+  controls (`.jrk-btn`, `.jrk-badge`, `.jrk-tabs--pills .jrk-tab`, `.jrk-alert`).
+  Either way the width is reserved, so an edge changing is only ever a colour and
+  never reflows. `border: 0` sets `border-style: none`, after which `border-color`
+  paints nothing — that is the quiet way this breaks.
 - **A nested tile takes a 1px neutral hairline**, because a fill step only works
   once — a tile inside a tile sits on the card plane, where its own fill matches
   what it sits on. `nesting.css` is the single home for that rule; it used to
@@ -123,9 +132,11 @@ Three follow-on rules:
   built to sit on `.jrk-content--document`, which *is* the card plane.
 
 In light, `surface.subtle` (`#f2f2f7`) is a 1.12:1 recess off the **card** — table
-headers and inset wells read as set in. It is only 1.02:1 off the page, so it is
-**not usable as a wash laid directly on the page plane**; reach for `surface.track`
-there, or put the thing in a card. `surface.hover` is the same value. Interactive
+headers and inset wells read as set in — and, with the page flat white, 1.12:1 off
+the page as well. That second figure is **not durable**: through the tinted period
+it was 1.02:1 on the page, i.e. invisible there, while still working inside a card.
+For a wash that survives a re-tint reach for `surface.track`, or put the thing in a
+card. `surface.hover` is the same value. Interactive
 cards still use `surface.cardHover`, because that is the token that means "hover on
 a card" and the shadow is the better lift in light.
 
@@ -166,11 +177,12 @@ accessibility-clean: `systemGray` is 2.92:1 as body text and `systemIndigo` is
 Apple hex; deviations are noted on each token.
 
 **The accent anchor is used in every accent role.** `#0069d9` measures 5.22:1 on
-the white card and 4.79:1 on the `#f5f5f7` page, so `accent.text`, `text.link`,
+the white card and 5.22:1 on the flat white page, so `accent.text`, `text.link`,
 `border.accent` and `focus.ring` are all the anchor itself, and `accent.onSolid`
 is plain `#ffffff` (5.22:1). The **page** is the binding surface and it is what
 pins the anchor — a blue tuned only to the card can sit a step lighter and fail
-there. Only `accent.washText` steps away (`#005ec4`), because the anchor lands at
+there. It was pinned at 4.79:1 against the `#f5f5f7` page and a white page only
+relaxes that, so the headroom is not licence to lighten the anchor. Only `accent.washText` steps away (`#005ec4`), because the anchor lands at
 4.49:1 on the light wash, under the floor by 0.01. Dark text roles are *selected*,
 not derived: `#64b5ff`, since the anchor is 3.00:1 on the dark card.
 

@@ -256,10 +256,13 @@ grid of rules is most of what makes a spreadsheet feel like one.
 ## The plane a report sits on
 
 `.jrk-content--document` gives the content plane the **card** fill instead of the
-page fill — `#ffffff` on an `#f2f2f7` page in light, `#232326` on `#141416` in
-dark. It does real work in **both** themes again; for one period it was a no-op in
-light, because the page had been flattened to `#ffffff` and there was nothing left
-for it to change.
+page fill — `#232326` on `#141416` in dark, where it does real work. **In light it
+is currently a no-op**, because the page is flat `#ffffff` and the card fill is
+`#ffffff` too, so there is nothing left for it to change. This modifier has flipped
+with `surface.canvas` three times now, which is the tell that it is downstream of
+the page value rather than a decision of its own — expect it to start working again
+the next time the page tints, and do not build anything that depends on it painting
+in light.
 
 The history is worth keeping, because it is a full round trip and the argument
 against reaching for a flat plane casually. This modifier was scoped to one view
@@ -268,9 +271,13 @@ to separate a grid of cards, and a report is *one full-width object* with no gri
 to separate — so the plane was doing no work there and the white read as paper. On
 a dashboard the same move would flatten the hierarchy. The page then went white
 globally anyway, survivably, but **only** because the tile edge became a 2px brand
-line in the same change. Both halves have since been reverted together — which is
-the rule the round trip establishes: flat plane and heavy edge were each other's
-justification, so neither could be undone alone.
+line in the same change. Both halves were later reverted together — which is the
+rule the round trip establishes: flat plane and heavy edge were each other's
+justification, so neither could be undone alone. **The page is flat white again
+today**, and it is survivable for the same structural reason in a quieter form:
+the brand line is gone, but `.jrk-card` carries `border.subtle` and a resting
+`shadow.card`, so the edge is still paid for. The pairing rule is what carries
+forward, not any particular value.
 
 It is not "white in both themes". Dark ink on a forced-white surface is 1.19:1;
 a genuinely paper-white report would have to light-lock its entire ink set, not
