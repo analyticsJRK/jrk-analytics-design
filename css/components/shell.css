@@ -520,6 +520,75 @@
   --jrk-topbar-to: var(--jrk-gradient-bar-deep);
 }
 
+/* Brand variant: the product masthead, and the one topbar ramp whose two themes
+   are different designs rather than two values of one design.
+
+   DARK is a saturated bar carrying white ink — black at the leading edge, a muted
+   purple through the middle, deep navy at the trailing one. LIGHT is a PALE bar
+   carrying BLACK ink — white, lavender, a light blue.
+
+   That asymmetry is forced, not stylistic. White ink needs every stop at relative
+   luminance <= 0.1833; the pale light bar spans 0.19 to 1.00, so no single ink
+   clears 4.5:1 across it. The choice is therefore not which ink but which ramp,
+   and the answer is one ramp per theme with the ink that measures on it. Full
+   figures are on gradient.topbar.$measured — light 21.00 / 11.47 / 7.00 under
+   black, dark 21.00 / 8.95 / 14.84 under white. Nothing gates a colour inside a
+   linear-gradient(), so those were measured by hand and belong to the token.
+
+   THE INK IS SET AS A LOCAL --jrk-gradient-ink, NOT AS `color`. Four rules further
+   down already ink `.jrk-topbar--vivid`'s captions, statuses and ghost buttons from
+   that property; overriding the property makes all of them follow, where a `color`
+   declaration here would fix the bar's own text and leave every ghost button white
+   on a white leading edge. Redefine the variable, never the consumers.
+
+   0-3-0, matching --blue and for the identical reason: the base rule sets these
+   custom properties as DEFAULTS at 0-2-0, and a custom property is won by the
+   ordinary cascade. At 0-2-0 this would lose to the fallback it replaces and the
+   bar would silently render the teal->violet ribbon — the modifier looking like it
+   did nothing. Same trap stat.css documents for its four tones. */
+.jrk-topbar.jrk-topbar--vivid.jrk-topbar--brand {
+  --jrk-topbar-from: var(--jrk-gradient-topbar-from);
+  --jrk-topbar-via: var(--jrk-gradient-topbar-via);
+  --jrk-topbar-to: var(--jrk-gradient-topbar-to);
+  --jrk-gradient-ink: var(--jrk-gradient-topbar-ink);
+
+  /* AND THE FOCUS RING GOES WITH THE INK. `.jrk-topbar--vivid` points the ring at
+     gradient.focus, which is white — correct on a saturated band, and 1.00:1 on
+     this variant's #ffffff leading edge in light. That is a keyboard path with an
+     invisible stop on it, in the corner of the bar that holds the drawer button
+     and the wordmark. `validate` caught it, which is the whole reason its vivid
+     block asserts the ring against every tone rather than trusting focus.ring.
+     The topbar ink is already the theme-correct answer — black on the pale ramp,
+     white on the dark one — and it measures 7.00:1 at the worst stop of either. */
+  --jrk-focus-ring: var(--jrk-gradient-topbar-ink);
+}
+
+/* THE HAIRLINE STAYS ON THIS VARIANT IN BOTH THEMES, where --blue restores it in
+   dark alone. Same rule, evaluated per theme and coming out the same way twice for
+   different reasons: in dark the trailing stop is a deep navy that is only 1.4:1
+   off the page, and in LIGHT the leading stop is #ffffff, which is 1.09:1 off
+   surface.canvas — so each theme has one end where the bar and the page are the
+   same material. `.jrk-topbar--vivid` zeroes this on the stated grounds that "the
+   bar bounds itself", which is true of the three-hue ribbon and is not true here.
+
+   No `[data-theme]` pair is needed, unlike --blue's: this holds in both themes, so
+   one unconditional declaration says it. Colour only — the 1px width was never
+   given up, per the house rule. */
+.jrk-topbar.jrk-topbar--vivid.jrk-topbar--brand {
+  border-bottom-color: var(--jrk-border-subtle);
+}
+
+/* A ghost button's hover further down is `gradient.markSoft`, a white veil, which
+   lifts a dark tone and is nearly invisible on the pale light bar (1.03:1 on the
+   #ffffff end). `overlay.hoverVeil` is the DIRECTIONAL token that exists for
+   exactly this — black over a light ground, white over a dark one — so the same
+   declaration reads as feedback in both themes. 0-3-0 to beat the 0-2-0 rule below
+   it. */
+.jrk-topbar--vivid.jrk-topbar--brand .jrk-btn--ghost:hover:not(:disabled) {
+  background: var(--jrk-overlay-hover-veil);
+  color: var(--jrk-gradient-ink);
+}
+
 /* The hairline, back again, and ONLY under this variant in dark.
  *
  * `.jrk-topbar--vivid` drops it on the stated grounds that "the bar bounds itself".

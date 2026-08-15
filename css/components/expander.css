@@ -342,8 +342,43 @@
   --jrk-expander-wash: var(--jrk-chart-tint-3);
 }
 
+/* A RAMP, NOT A FLAT WASH — the tint sweeping toward the card plane it sits on.
+ *
+ * The geometry is the vivid tone's 135deg, so the two toned variants are the same
+ * gesture at two volumes rather than a gradient and a fill. What differs is where
+ * the ramp ENDS: vivid runs tone-from to tone-to, two selected saturated stops;
+ * this runs the tint to a mix of the tint and surface.default — the same hue
+ * fading toward the card.
+ *
+ * IT STOPS 40% SHORT OF THE CARD PLANE, and that is the whole design. A ramp all
+ * the way to surface.default would make the trailing corner of the summary
+ * identical to the panel below it, and the summary's job is to be a
+ * distinguishable band — the border-bottom is structural precisely because two of
+ * the four dark tints already sit only 1.11:1 off the card. Landing 40% of the way
+ * back keeps a step at every point of the sweep.
+ *
+ * NO INK NEEDED RE-MEASURING, and that is not luck. Every ink on this tone was
+ * selected against the tint (text.secondary on the wash, the card-plane chip, the
+ * accent.washText label), and the second stop is strictly BETWEEN the tint and
+ * surface.default — both grounds these inks are already gated on, since
+ * text.secondary measures 7.99:1 on the palest light tint and better on the white
+ * card. The sRGB decode is convex, so no interior point of the ramp falls outside
+ * its endpoints. The worst case is still the 0% stop, unchanged.
+ *
+ * SPLIT ACROSS background-color AND background-image ON PURPOSE. Where color-mix
+ * is unsupported the whole background-image declaration is invalid at parse time
+ * and drops, leaving the flat wash this rule used to be — the previous behaviour
+ * exactly, with no @supports block to keep in step. Do NOT collapse the two into
+ * one `background` shorthand: the shorthand resets background-color in the same
+ * declaration that fails, so the summary would lose its fill entirely rather than
+ * fall back to it. */
 .jrk-expander--pastel .jrk-expander__summary {
-  background: var(--jrk-expander-wash);
+  background-color: var(--jrk-expander-wash);
+  background-image: linear-gradient(
+    135deg,
+    var(--jrk-expander-wash) 0%,
+    color-mix(in srgb, var(--jrk-expander-wash) 40%, var(--jrk-surface-default)) 100%
+  );
 }
 
 /* THE DESCRIPTION IS text.secondary HERE, NOT text.muted, and this is the one

@@ -188,7 +188,17 @@ for (const mode of ['light', 'dark']) {
 console.log('\n== vivid gradient tiles ==');
 {
   const G = T.color.gradient;
-  const tones = Object.entries(G).filter(([k, v]) => !k.startsWith('$') && v.from && v.to);
+  // `topbar` is excluded from the TILE loop and gated separately below. It has
+  // from/to like a tone and is not one: it is chrome, it carries its own ink
+  // rather than gradient.ink, and its two themes are different designs rather
+  // than two values of one. Swept in here it fails four ways for reasons that are
+  // all "a tile is not a bar" — white ink it does not use, a page step a
+  // full-width band does not owe, and a lightness-match against tones it is not
+  // in a row with. Excluding it is not an exemption; the block below asserts MORE
+  // of it than this loop can (three stops, both inks, both themes).
+  const tones = Object.entries(G).filter(
+    ([k, v]) => !k.startsWith('$') && k !== 'topbar' && v.from && v.to,
+  );
   const INK = G.ink;
   const lightest = [];
 
@@ -246,6 +256,60 @@ console.log('\n== vivid gradient tiles ==');
   G.barDeep.light === G.blue.to.light
     ? pass('gradient.barDeep light is gradient.blue.to verbatim — the light masthead is unchanged')
     : fail(`gradient.barDeep light is ${G.barDeep.light}, not gradient.blue.to (${G.blue.to.light}) — the light bar was changed by what should be a dark-only value`);
+
+  // gradient.topbar is the .jrk-topbar--brand masthead ramp, and it is gated on
+  // its OWN ink rather than gradient.ink. That is the fact the tile loop cannot
+  // express: this is the one gradient in the namespace whose ink is theme-varying,
+  // because its light ramp is PALE (white at 0%) and its dark ramp is saturated.
+  // White would be 1.00:1 on the light bar's leading edge.
+  //
+  // Three stops, not two. The tiles get away with checking the endpoints because
+  // they have only two; this has a `via` that is a selected value in its own right
+  // and could be re-picked without either endpoint moving. Convexity still covers
+  // the interior of each SEGMENT, so three checks cover the whole sweep.
+  //
+  // Deliberately NOT held to the 1.2:1 page step, same as barDeep and for the
+  // mirrored reason: barDeep dissolves into the dark page at the trailing end,
+  // this one sits ~1.09:1 off the light page at the LEADING end. Both are answered
+  // by shell.css keeping the bar's bottom hairline, which is a CSS fact this
+  // script cannot see — so the token carries the pairing note and this asserts the
+  // half that is checkable.
+  {
+    const TB = G.topbar;
+    for (const stop of ['from', 'via', 'to']) {
+      for (const mode of ['light', 'dark']) {
+        const c = contrast(TB.ink[mode], TB[stop][mode]);
+        c >= 4.5
+          ? pass(`gradient.topbar.${stop} + gradient.topbar.ink ${mode} ${c.toFixed(2)}:1`)
+          : fail(`gradient.topbar.${stop} + gradient.topbar.ink ${mode} ${c.toFixed(2)}:1 — needs 4.5:1 (the bar carries 13px labels)`);
+      }
+    }
+
+    // The ink must genuinely DIFFER by theme. If someone "simplifies" it back to
+    // white in both, the light bar keeps passing nothing and starts failing the
+    // loop above — but if they instead lightened the whole light ramp to make
+    // white work, the pale masthead that was asked for would be gone with no test
+    // objecting. This states the design so that change has to be deliberate.
+    TB.ink.light !== TB.ink.dark
+      ? pass('gradient.topbar.ink is theme-varying — the pale light bar and the saturated dark one carry different inks')
+      : fail('gradient.topbar.ink is the same in both themes — one of the two ramps is now carrying an ink nothing measured it for');
+
+    // The focus ring on this variant is the ink, not gradient.focus, because
+    // gradient.focus is white and the light ramp starts at white. Assert the
+    // replacement clears the 3:1 non-text floor at every stop of both ramps.
+    for (const stop of ['from', 'via', 'to']) {
+      for (const mode of ['light', 'dark']) {
+        const cf = contrast(TB.ink[mode], TB[stop][mode]);
+        cf >= 3
+          ? pass(`topbar focus ring on ${stop} ${mode} ${cf.toFixed(2)}:1`)
+          : fail(`topbar focus ring on ${stop} ${mode} ${cf.toFixed(2)}:1 — needs 3:1`);
+      }
+    }
+    const focusOnPale = contrast(G.focus.light, TB.from.light);
+    focusOnPale < 3
+      ? pass(`gradient.focus is ${focusOnPale.toFixed(2)}:1 on the pale bar — the topbar ink override is load-bearing, not a duplicate`)
+      : warn(`gradient.focus now reads ${focusOnPale.toFixed(2)}:1 on gradient.topbar.from — re-check whether the --brand ring override is still needed`);
+  }
 
   // gradient.focus exists because focus.ring does NOT work here, and this is the
   // check that says so out loud: the ring is the brand anchor, which is the blue
