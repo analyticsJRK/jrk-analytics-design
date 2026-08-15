@@ -615,7 +615,10 @@ button.jrk-legend__item:hover {
      Chart chrome (axis, gridlines) is border.strong / chart.grid, so the tile
      boundary and the data's own rules stay distinct regardless. */
   border: 1px solid var(--jrk-border-subtle);
-  border-radius: var(--jrk-radius-xl);
+  /* Rectangular, with the card — see the note on .jrk-card. Same argument as the
+     hairline directly above: a chart tile bounded differently from the cards beside
+     it would read as two systems on one page. */
+  border-radius: var(--jrk-radius-none);
 }
 
 .jrk-chart-card__header {

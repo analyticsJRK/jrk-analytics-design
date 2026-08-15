@@ -135,13 +135,26 @@ in a shadow, a gradient or a `data:` URL, nothing will check it — measure by h
 and write the number down.**
 
 **THE LOOK IS A SOFT WEB UI ON AN APPLE COLOUR FOUNDATION** (since 2026-08-13).
-White cards floating on a `#f5f5f7` page, pill controls, generous radii, tall
-chrome. **Geometry, elevation and the page plane changed; not one measured colour
+White cards floating on a `#f5f5f7` page, pill controls, tall chrome.
+**Geometry, elevation and the page plane changed; not one measured colour
 did.** Several notes in this repo still argue for tight radii, a flat page and
 no-resting-shadow using "Apple does it this way" as the premise — those are marked
 where they stand, and the premise is what expired, not the measurement. **Anything
 justified by a contrast ratio, a CVD ΔE or a WCAG floor is untouched and is not up
 for restyling.**
+
+**SQUARE TILES, ROUNDED OVERLAYS — and that split is the rule, not a list of
+exceptions.** Directed 2026-08-14: `.jrk-card`, `.jrk-stat`, both `.jrk-stat-row`
+forms, `.jrk-chart-card`, `.jrk-table-wrap`, `.jrk-sheet` and (by composition)
+`.jrk-expander` are all `radius.none`. Anything that floats ABOVE the page keeps
+its radius — `.jrk-modal`, `.jrk-menu`, `.jrk-hovercard`, `.jrk-tooltip`,
+`.jrk-nav-flyout`, `.jrk-spotlight` — as do controls, badges, tags and the
+interior chrome inside a tile. This supersedes "generous radii" in the paragraph
+above for tiles only; the ladder is a CONTROL ladder now. Two consequences worth
+carrying: `radius.xl` is referenced by exactly one component and is not dead, and
+the enclosure is carried entirely by the hairline, the fill step and the shadow —
+which is why none of those three may be dropped on the grounds that a tile "looks
+bounded enough".
 
 **The light page is TINTED `#f5f5f7` and the card is bounded three ways.**
 `.jrk-card` draws `border.subtle` (1.26:1 light, 1.24:1 dark), sits on a fill step,

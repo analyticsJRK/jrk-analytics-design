@@ -41,7 +41,29 @@
   flex-direction: column;
   background: var(--jrk-surface-default);
   border: 1px solid var(--jrk-border-subtle);
-  border-radius: var(--jrk-radius-xl);
+  /* RECTANGULAR. Directed 2026-08-14, and it is the general form of what the table
+     wrap and the sheet were given the same day for a geometry-specific reason.
+     Their argument was narrow — a grid of straight rules running to its own edges
+     has no corner a radius can round without cutting the first and last cell of
+     every row — and this is not that argument. This is the look: every tile in the
+     product is square now, and the enclosure ladder is carried by the hairline, the
+     fill step and the shadow, none of which the corner was contributing to.
+
+     radius.none rather than a literal 0, so the value stays a token and this reads
+     as a deliberate rung rather than an unset property. The whole family follows:
+     .jrk-stat, both .jrk-stat-row forms, .jrk-chart-card and — by composition —
+     .jrk-expander, which is a .jrk-card and inherits this without a rule of its own.
+
+     WHAT IS DELIBERATELY NOT SQUARED, so the next person does not "finish the job":
+     controls are still pills (radius.full is a hard rule, and a text FIELD is still
+     radius-laddered because a fully-rounded one curls in on its first glyph); badges,
+     tags and status chips are still pills; interior chrome inside a tile keeps its
+     radii, which is the same line table.css drew when __block-num stayed radius.sm;
+     and the overlay surfaces — .jrk-modal, .jrk-menu, .jrk-hovercard, .jrk-tooltip,
+     .jrk-nav-flyout — are untouched, because they are things that float ABOVE the
+     page rather than tiles laid on it. If those should square too, that is a
+     separate direction and five more declarations. */
+  border-radius: var(--jrk-radius-none);
   /* Resting elevation, which reverses the rule that used to be written on
      shadow.lg — "elevation is opt-in AT REST ... every tile carrying a resting
      shadow was the look this system was built to avoid". That look is the brief
