@@ -749,11 +749,12 @@
 /* Document view: the content plane takes the CARD fill instead of the page fill,
    so a full-bleed report sits on the card surface rather than on the page plane.
 
-   **It is a NO-OP in light again** (2026-08-10): the page is flat #ffffff and the
-   card fill is #ffffff, so there is nothing for this rule to change there. It does
-   real work in dark — #232326 on #141416. This has now flipped three times with
-   the page value, which is the tell that it is downstream of surface.canvas rather
-   than a decision of its own. What still holds in light is the CONSEQUENCE the
+   **It does FAINT work in light again** (2026-08-16): the page is #fbfbfb and the
+   card fill is #ffffff, a 1.035:1 lift, where through the flat-white period it was
+   exactly nothing. It does real work in dark — #232326 on #141416. This has now
+   flipped FOUR times with the page value, which is the tell that it is downstream
+   of surface.canvas rather than a decision of its own — do not build anything that
+   depends on how strongly it paints. What still holds in light is the CONSEQUENCE the
    rule exists for: anything placed on this plane has no fill step to separate
    with, so it needs its own edge. The sheet draws one, and .jrk-card now draws a
    hairline by default, so the plane is survivable in light even while the fill

@@ -27,7 +27,7 @@ read from the shipped token layer, not from intent:
 
 | | Light | Dark |
 |---|---|---|
-| page plane | `#ffffff` | `#141416` |
+| page plane | `#fbfbfb` | `#141416` |
 | card | `#ffffff` | `#232326` |
 | popover / input | `#ffffff` | `#2c2c2e` |
 
@@ -35,18 +35,20 @@ The dark page is **not** true black: at 1920x1080 it halates against near-white
 text, so `--jrk-text-primary` in dark is `#ebebf0` rather than `#ffffff` for the
 same reason.
 
-**The light page is flat `#ffffff`, so a card bounds itself with a HAIRLINE.**
-`.jrk-card` ships `border: 1px solid var(--jrk-border-subtle)` — 1.26:1 on the
-page in light. In dark the card also has a fill step (`#232326` on `#141416`,
+**The light page is a `#fbfbfb` whisper, so a card still bounds itself with a
+HAIRLINE.** `.jrk-card` ships `border: 1px solid var(--jrk-border-subtle)` —
+1.21:1 on the page in light. The card-on-page fill step is only **1.035:1**, which
+is real but far too shallow to bound anything on its own, so treat it as
+decoration. In dark the card has a genuine fill step (`#232326` on `#141416`,
 1.17:1) and the hairline rides on top of it at 1.24:1, so the mechanism is the
 same in both themes and only the value differs. **You get that edge for free; do
 not add your own.** When a tile needs to assert itself more — on a tinted surface,
 or as a distinct object in a dense stack — ask for `.jrk-card--outlined`
 (`--jrk-border-default`, 1.52:1 on white), which is a step heavier. Nested tiles
 take that heavier hairline automatically, because a fill step only works once per
-plane. `--seamless` and `--flush` remove the edge entirely, which on a flat white
-page means the tile has no boundary at all — use them only where the surrounding
-layout already groups the content.
+plane. `--seamless` and `--flush` remove the edge and the shadow together, which
+leaves the tile with only that 1.035:1 step — effectively no boundary — so use
+them only where the surrounding layout already groups the content.
 
 The durable habit: **do not assume a fill step is doing the work — verify against
 `styles.css` before relying on it.** The page value has moved more than once, and

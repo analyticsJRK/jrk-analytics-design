@@ -71,10 +71,10 @@
 
    A tile is normally bounded by its fill step off the page. This card cannot
    rely on that for two reasons, one temporary and one permanent. The temporary
-   one is that `surface.canvas.light` is currently `#ffffff`, identical to
-   `surface.default`, so the step in light is 1.000:1 and a card here has no
-   boundary whatsoever — this screen is where that defect is most visible,
-   because the card is the only object on the page. The permanent one is that a
+   one is that `surface.canvas.light` is a `#fbfbfb` whisper against a `#ffffff`
+   card, so the step in light is only 1.035:1 and a card here has almost no
+   boundary of its own — this screen is where that is most visible, because the
+   card is the only object on the page. The permanent one is that a
    lone centred card has no sibling tiles to be read against: on a dashboard the
    grid itself implies the surfaces, and here there is nothing but the card, so
    its edge has to be explicit.

@@ -181,11 +181,16 @@ section in a `display: contents` element (the portal does) leaves the band with 
 previous sibling to match: `contents` affects layout, not selectors, so the rule
 written the other way round silently does nothing there.
 
-One consequence to know in light: `surface.tinted` is flat `#ffffff`, so a primary
-band stands out against the seam while a `--sub` band shares its fill. What
-separates a subsection band there is its own `border-block` hairlines plus the
-wider gap above it — which is why the section gap exists rather than reusing the
-block gap.
+One consequence to know in light, and it is not what it used to be: the primary
+band takes `surface.tinted` (`#eef4fd`) and a `--sub` band takes `surface.subtle`
+(`#f2f2f7`), which against the white sheet measure **1.11:1 and 1.12:1** — the
+same depth to within a rounding error, and **1.009:1 against each other**. So the
+two bands do *not* separate by lightness. What tells them apart is hue (pale blue
+against cool grey), the label's weight (bold vs semibold) and its colour
+(`text.primary` vs `text.secondary`), plus the subsection band's own
+`border-block` hairlines and the wider gap above it — which is why the section gap
+exists rather than reusing the block gap. **Do not "simplify" either fill toward
+the other**; depth is already spent here and weight is carrying the hierarchy.
 
 ## Bands and headers
 
@@ -229,10 +234,10 @@ i.e. invisible.
   the band it leads**. Correcting it means moving that token to the anchor *and*
   `text.onBannerMuted.dark` with it — `#a1a1a6` is a grey selected for the grey
   band and is 2.50:1 on the anchor. Neither half works alone.
-- The **section band** (`surface.tinted`, `#0e3543` dark) and this are two dark
-  blues 1.20:1 apart with 16° of hue between them, so they read as siblings there.
-  In light the section band is flat `#ffffff` and the two could not be more
-  different.
+- The **section band** (`surface.tinted`, `#0f2b4b` dark) and this are two dark
+  blues with hue between them, so they read as siblings there. In light the
+  section band is `#eef4fd`, a pale blue 1.11:1 off the sheet — visible, but far
+  quieter than its dark counterpart.
 
 Everything in the head takes `text.onBannerDeep`, including the gutter's row number
 (`text.muted` is 1.85:1 on this fill). It is **its own ink token** rather than
@@ -257,12 +262,13 @@ grid of rules is most of what makes a spreadsheet feel like one.
 
 `.jrk-content--document` gives the content plane the **card** fill instead of the
 page fill — `#232326` on `#141416` in dark, where it does real work. **In light it
-is currently a no-op**, because the page is flat `#ffffff` and the card fill is
-`#ffffff` too, so there is nothing left for it to change. This modifier has flipped
-with `surface.canvas` three times now, which is the tell that it is downstream of
-the page value rather than a decision of its own — expect it to start working again
-the next time the page tints, and do not build anything that depends on it painting
-in light.
+does faint work again**: the page is `#fbfbfb` and the card fill `#ffffff`, a
+1.035:1 lift, where through the flat-white period it was exactly nothing. This
+modifier has now flipped with `surface.canvas` **four** times, which is the tell
+that it is downstream of the page value rather than a decision of its own — the
+prediction written here last time ("expect it to start working again the next time
+the page tints") is what just happened. Do not build anything that depends on how
+strongly it paints in light.
 
 The history is worth keeping, because it is a full round trip and the argument
 against reaching for a flat plane casually. This modifier was scoped to one view
@@ -273,11 +279,12 @@ a dashboard the same move would flatten the hierarchy. The page then went white
 globally anyway, survivably, but **only** because the tile edge became a 2px brand
 line in the same change. Both halves were later reverted together — which is the
 rule the round trip establishes: flat plane and heavy edge were each other's
-justification, so neither could be undone alone. **The page is flat white again
+justification, so neither could be undone alone. **The page is a `#fbfbfb` whisper
 today**, and it is survivable for the same structural reason in a quieter form:
 the brand line is gone, but `.jrk-card` carries `border.subtle` and a resting
-`shadow.card`, so the edge is still paid for. The pairing rule is what carries
-forward, not any particular value.
+`shadow.card`, so the edge is still paid for and the 1.035:1 step is a bonus
+rather than a load-bearing channel. The pairing rule is what carries forward, not
+any particular value.
 
 It is not "white in both themes". Dark ink on a forced-white surface is 1.19:1;
 a genuinely paper-white report would have to light-lock its entire ink set, not

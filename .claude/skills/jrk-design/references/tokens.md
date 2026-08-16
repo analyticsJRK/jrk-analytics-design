@@ -22,64 +22,67 @@ dark theme a swap rather than a rewrite.
 
 | Token | Light | Dark | Use |
 |---|---|---|---|
-| `--jrk-surface-canvas` | `#ffffff` | `#141416` | page plane (the CONTENT area only — chrome takes `surface-default`) |
+| `--jrk-surface-canvas` | `#fbfbfb` | `#141416` | page plane (the CONTENT area only — chrome takes `surface-default`) |
 | `--jrk-surface-default` | `#ffffff` | `#232326` | cards, panels, **chart surface** |
-| `--jrk-surface-tinted` | `#e0f6ff` | `#0e3543` | KPI band, highlighted tiles |
+| `--jrk-surface-tinted` | `#eef4fd` | `#0f2b4b` | KPI band, highlighted tiles |
 | `--jrk-surface-subtle` | `#f2f2f7` | `#2c2c2e` | table header, inset wells, sheet toolbar |
 | `--jrk-surface-raised` | `#ffffff` | `#2c2c2e` | popovers, menus, modals, inputs |
 | `--jrk-surface-banner` | `#0069d9` | `#2c2c2e` | sheet title bar |
 | `--jrk-surface-card-hover` | `#ffffff` | `#2c2c2e` | fill of an INTERACTIVE card while hovered |
 | `--jrk-surface-hover` / `-active` / `-disabled` / `-inverse` | | | states |
 
-**The light page is FLAT `#ffffff`, so in light a tile is bounded TWO ways — the
-fill step does nothing.** `.jrk-card` draws `border.subtle` (1.26:1 light, 1.24:1
-dark) and rests on `shadow.card` (light only — a black shadow on `#141416` renders
-nothing). Only in dark is there a third channel, the 1.17:1 fill step of `#232326`
-on `#141416`. One mechanism in both themes, per-theme values — not
-hairline-in-light / fill-in-dark, because two mechanisms is what lets a change read
-correctly in one theme and vanish in the other.
+**The light page is a `#fbfbfb` WHISPER, so in light a tile is really bounded by
+the hairline and the shadow.** `.jrk-card` draws `border.subtle` (1.21:1 light,
+1.24:1 dark) and rests on `shadow.card` (light only — a black shadow on `#141416`
+renders nothing). Dark has a genuine third channel, the 1.17:1 fill step of
+`#232326` on `#141416`; light's equivalent is 1.035:1. One mechanism in both
+themes, per-theme values — not hairline-in-light / fill-in-dark, because two
+mechanisms is what lets a change read correctly in one theme and vanish in the
+other.
 
-**The consequence to carry: the card-on-page step in light is 1.000:1.** Any new
-top-level tile must bring its own edge or it will not exist at all — you cannot
-lean on a fill step that is not there. `.jrk-card`, `.jrk-topbar` and
-`.jrk-sidebar` each already carry `border.subtle`, which is the only reason
-flattening the page was safe.
+**The consequence to carry: the card-on-page step in light is 1.035:1 —
+decoration, not a boundary.** Any new top-level tile must bring its own edge; you
+cannot lean on a step that shallow. For scale, `#f5f5f7` gave 1.09:1 and `#f2f2f7`
+gives 1.12:1, and even those were never treated as sufficient alone. `.jrk-card`,
+`.jrk-topbar` and `.jrk-sidebar` each already carry `border.subtle`, which is what
+makes the page safe to re-tone in either direction.
 
-**Chrome no longer shares the canvas — but in light you cannot see the difference.**
-`.jrk-sidebar` and `.jrk-topbar` moved to `surface-default` on 2026-08-13, which
-matters in dark (`#232326` chrome around a `#141416` work area) and is a no-op in
-light now that both are `#ffffff`. Those two must still agree with each other: in
-any theme where they differ, a bar meeting a page-coloured rail puts a visible
-notch at their junction.
+**Chrome no longer shares the canvas, and as of `#fbfbfb` that is faintly visible
+in light again.** `.jrk-sidebar` and `.jrk-topbar` moved to `surface-default` on
+2026-08-13, which matters in dark (`#232326` chrome around a `#141416` work area)
+and was a no-op through the flat-white period; the white chrome now sits 1.035:1
+above the page. Those two must still agree with each other: a bar meeting a
+page-coloured rail puts a visible notch at their junction.
 
 **`canvas.light` and that edge are a pair — never move one alone.** The page has
-been `#ffffff`, `#f2f2f7` and `#f5f5f7`, and it went `#ffffff` → `#f5f5f7` →
-`#ffffff` inside 2026-08-13 alone. **Read the rule, not the value.** Flat page →
-the card must draw its own edge; tinted page → the fill step *may* be the edge and
-the border *may* go transparent. Note the direction of that permission: **the safe
-move through a paired change is the one that leaves a tile MORE bounded, never
-less**, which is why the tinted period kept every edge it had and why flattening
-back was only safe once each plane was self-bounding. The one broken state on
-record was the half-finished revert, where the brand edge was removed and the page
-was left flat: light cards had a 1.000:1 step behind a *transparent* border, i.e.
-no boundary at all, and it shipped. Today's step is the same 1.000:1 — what
-changed is that the border is real. `border.card` and `size.cardEdge` are still
-gone for good.
+been `#ffffff`, `#f2f2f7`, `#f5f5f7` and now `#fbfbfb`, and it went `#ffffff` →
+`#f5f5f7` → `#ffffff` inside 2026-08-13 alone. **Read the rule, not the value.**
+Flat page → the card must draw its own edge; tinted page → the fill step *may* be
+the edge and the border *may* go transparent. Note the direction of that
+permission: **the safe move through a paired change is the one that leaves a tile
+MORE bounded, never less**, which is why the tinted period kept every edge it had,
+why flattening back was only safe once each plane was self-bounding, and why the
+`#fbfbfb` move is the clean example — it added a step and kept every edge. The one
+broken state on record was the half-finished revert, where the brand edge was
+removed and the page was left flat: light cards had a 1.000:1 step behind a
+*transparent* border, i.e. no boundary at all, and it shipped. Today's step is
+barely better at 1.035:1 — what carries a tile is that the border is real.
+`border.card` and `size.cardEdge` are still gone for good.
 
-**If the page is ever tinted again it must not land on `#f2f2f7`, because
-`surface-subtle` is pinned and cannot move down** — `text.muted` is 4.59:1 on it
-and 4.23:1 one step deeper, so a table header's own label would fail. A `#f2f2f7`
-page would force subtle to equal the page, a state this library has shipped and
-regretted. `#f5f5f7` is the value that was solved for last time. Other surfaces
-are chosen around subtle.
+**The page must never land on `#f2f2f7`, because `surface-subtle` is pinned and
+cannot move down** — `text.muted` is 4.59:1 on it and 4.23:1 one step deeper, so a
+table header's own label would fail. A `#f2f2f7` page would force subtle to equal
+the page, a state this library has shipped and regretted. `#f5f5f7` is the value
+that was solved for last time; `#fbfbfb` avoids the problem from the other side by
+staying *lighter* than subtle. Other surfaces are chosen around subtle.
 
 Consequences worth knowing, none of them gated:
 - **`--jrk-surface-subtle` is a 1.12:1 recess off the CARD** (`#f2f2f7`), so table
-  headers and inset wells read as set in — and with the page flat white it is
-  1.12:1 off the page as well, so right now it recedes on both planes. **That is a
-  property of the page being white and it is not durable:** through the `#f5f5f7`
-  period it measured 1.02:1 on the page, i.e. invisible there, while still working
-  correctly inside a card. The failure is silent and one-sided — the component
+  headers and inset wells read as set in — and **1.08:1** off the `#fbfbfb` page,
+  so it still recedes on both planes, but only just. **That page figure is not
+  durable and is already faint:** through the `#f5f5f7` period it measured 1.02:1
+  on the page, i.e. invisible there, while still working correctly inside a card.
+  Every step the page takes toward subtle eats what is left. The failure is silent and one-sided — the component
   looks right everywhere it is normally tested. Do not build a PAGE-level wash on
   this token without re-measuring against the page of the day. It does not
   replace `--jrk-surface-track`, which is recessed in
@@ -97,12 +100,14 @@ Consequences worth knowing, none of them gated:
   page is doing.
   `--jrk-surface-card-hover` is still the token for a hovered card and is still a
   deliberate no-op in light, because the hover *shadow* carries that theme.
-- **`.jrk-content--document` is a no-op in LIGHT again.** The plane it paints
-  (`surface.default`) is `#ffffff` on a `#ffffff` page in light — the same colour —
-  and `#232326` on `#141416` in dark, where it still does real work. This modifier
-  has now flipped three times with `surface.canvas`, which is the tell that it is
-  downstream of the page value rather than a decision of its own. What holds either
-  way is the reason it exists: anything placed on that plane has no fill step to
+- **`.jrk-content--document` does faint work in light again.** The plane it paints
+  (`surface.default`) is `#ffffff` on a `#fbfbfb` page in light — a 1.035:1 lift,
+  where through the flat-white period it was exactly nothing — and `#232326` on
+  `#141416` in dark, where it has always done real work. This modifier has now
+  flipped **four** times with `surface.canvas`, which is the tell that it is
+  downstream of the page value rather than a decision of its own; do not build
+  anything that depends on how strongly it paints. What holds either way is the
+  reason it exists: anything placed on that plane has no usable fill step to
   separate with and needs its own edge.
 
 The card is what marks are measured against — `#ffffff` / `#232326`.
@@ -165,7 +170,7 @@ Where an edge IS drawn:
 mattered most for the removed brand edge and it still matters for
 `--jrk-border-accent`: a tab underline is a *signifier*, something depends on
 seeing it, so it needs WCAG 1.4.11's 3:1 and its numbers are recorded by hand on
-the token (`#0069d9`, 5.22:1 on the card and 5.22:1 on the flat white page). Decorative
+the token (`#0069d9`, 5.22:1 on the card and 5.04:1 on the `#fbfbfb` page). Decorative
 separation may sit below 3:1; the moment state rides on a border it may not. Note
 this token used to need a bespoke value to clear 3:1 at all; it now tracks
 `accent.text`, which is always safe because its floor is the higher one.
@@ -189,12 +194,13 @@ pressable. And `-wash-border` is kept far below `--jrk-border-accent` on purpose
 that one means *selected* on a segment or a tab, and the two must not converge.
 
 **The anchor is `#0069d9`, a saturated mid-tone, and every role takes it.**
-5.22:1 on the white card and 5.22:1 on the flat white page, white label at 5.22:1 —
+5.22:1 on the white card and 5.04:1 on the `#fbfbfb` page, white label at 5.22:1 —
 so `-text`, `--jrk-text-link`, `--jrk-border-accent` and `--jrk-focus-ring` are
 all the anchor itself. Only `-wash-text` steps away, and only because its
-background does. **The PAGE is still the binding surface even when it equals the
-card** — the anchor was pinned at 4.79:1 against the `#f5f5f7` page and a flat
-white one only relaxes it, so this is headroom, not licence to lighten the anchor.
+background does. **The PAGE is the binding surface and it is always the lower
+number** — the anchor was pinned at 4.79:1 against the `#f5f5f7` page and sits at
+5.04:1 here, so this is headroom, not licence to lighten the anchor. A deeper page
+spends it straight back.
 
 This is the second replacement — systemIndigo `#5856d6`, then a `#9ee4ff` cyan
 pastel, now this. The pastel is worth remembering because it is the shape of the

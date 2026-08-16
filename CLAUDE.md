@@ -135,7 +135,7 @@ in a shadow, a gradient or a `data:` URL, nothing will check it — measure by h
 and write the number down.**
 
 **THE LOOK IS A SOFT WEB UI ON AN APPLE COLOUR FOUNDATION** (since 2026-08-13).
-White cards on a flat `#ffffff` page, pill controls, tall chrome.
+White cards on a `#fbfbfb` page, pill controls, tall chrome.
 **Geometry, elevation and the page plane changed; not one measured colour
 did.** Several notes in this repo still argue for tight radii, a flat page and
 no-resting-shadow using "Apple does it this way" as the premise — those are marked
@@ -156,22 +156,23 @@ the enclosure is carried entirely by the hairline, the shadow and — in dark on
 the fill step, which is why none of those may be dropped on the grounds that a
 tile "looks bounded enough". In light there are just the two.
 
-**The light page is FLAT `#ffffff`, so in light the card is bounded TWO ways and
-the fill step is one of them only in dark.** `.jrk-card` draws `border.subtle`
-(1.26:1 light, 1.24:1 dark) and rests on `shadow.card`. In light the card-on-page
-step is **1.000:1** — it does nothing. Dark is unchanged: `#232326` on `#141416`
+**The light page is a `#fbfbfb` WHISPER, so in light the card is still bounded by
+the hairline and the shadow — treat the fill step as decoration.** `.jrk-card`
+draws `border.subtle` (1.21:1 light, 1.24:1 dark) and rests on `shadow.card`. In
+light the card-on-page step is **1.035:1**, which is real but far below the
+1.09:1 of the `#f5f5f7` era and the 1.12:1 of `#f2f2f7` — it cannot bound a tile
+on its own, so a new top-level surface must still bring its own edge. Dark is
+unchanged: `#232326` on `#141416`
 (1.17:1) plus the same hairline, and `shadow.card` is `none` there because a black
 shadow on `#141416` renders nothing. **One mechanism, both themes, per-theme
 values** — a light-hairline/dark-fill split is the shape the conflict register
 calls the most expensive thing in the file to forget.
 
-**The standing cost of the flat page is future-tense, and it is the thing to
-carry: a new top-level tile must bring its own edge or it will not exist at all.**
-Flattening was safe only because the soft-UI restyle left every plane
-self-bounding on the way past — `.jrk-card`, `.jrk-topbar` and `.jrk-sidebar` all
-carry `border.subtle`, and the first two carry `shadow.card` as well — so going to
-`#ffffff` removed nothing a tile was actually leaning on. It does mean you cannot
-add one that leans on a fill step.
+**The standing cost survives the tint, and it is the thing to carry: a new
+top-level tile must bring its own edge.** Every plane is self-bounding —
+`.jrk-card`, `.jrk-topbar` and `.jrk-sidebar` all carry `border.subtle`, and the
+first two carry `shadow.card` as well — which is what made the page safe to move
+in either direction. A 1.035:1 step is not a boundary you can build on.
 
 **`surface.canvas.light` and the card's edge are a PAIR. Never move one alone.**
 This has been got wrong once, expensively: the flat page originally shipped with a
@@ -181,11 +182,15 @@ border — no boundary at all — and shipped that way. So: **page flat → the 
 needs its own edge; page tinted → the fill step *may* be the edge and the border
 *may* go transparent.** Note the direction of that permission — the safe move
 through this transition is the one that leaves a tile MORE bounded, never less,
-which is why the `#f5f5f7` period kept every edge it had and why flattening back
-out of it was safe. **Read the rule, not the value:** the page went `#ffffff` →
-`#f5f5f7` → `#ffffff` inside 2026-08-13 alone. Today's step is the same 1.000:1
-as the broken state above; the only difference — and it is the whole difference —
-is that the border is real.
+which is why the `#f5f5f7` period kept every edge it had, why flattening back out
+of it was safe, and why the `#fbfbfb` move on 2026-08-16 is the clean worked
+example: it ADDS a step (1.000:1 → 1.035:1) and keeps every edge, so tiles came
+out more bounded, not less. **Read the rule, not the value:** the page went
+`#ffffff` → `#f5f5f7` → `#ffffff` inside 2026-08-13 alone, then to `#fbfbfb`
+three days later. The tint grants permission to drop the hairline; that
+permission is **declined**, because 1.035:1 is a whisper and the broken state
+above was a 1.00:1 step behind a *transparent* border. The border being real is
+the whole difference.
 
 **If the page is ever tinted again it must not land on `#f2f2f7`:** that value is
 `surface.subtle`, and **`surface.subtle.light` cannot move.** `text.muted` is
@@ -193,9 +198,10 @@ is that the border is real.
 header's own label under the floor. It is a fixed point that other surfaces are
 chosen around, and a `#f2f2f7` page would force subtle to equal the page — a state
 this library has shipped and regretted. `#f5f5f7` is the value that was solved for
-last time. With the page flat white, subtle is currently a 1.12:1 recess off
-**both** the page and the card, but that is a property of the page being white and
-is not durable: through the tinted period it was 1.02:1 on the page, i.e.
+last time, and `#fbfbfb` clears the constraint from the other side by staying
+*lighter* than subtle. Subtle is currently a **1.08:1** recess off the page and
+1.12:1 off the card — the page figure is not durable, and every step the page
+takes toward subtle eats it: through the `#f5f5f7` period it was 1.02:1, i.e.
 invisible there, while still working correctly inside a card. Want a recess that
 survives a re-tint? `surface.track`, or put the thing in a card.
 
@@ -337,7 +343,7 @@ webfont, and the outlines are Apple's; use Phosphor (MIT) with
 
 **The accent is a saturated blue, and every role takes the anchor.** `#0069d9`
 (hue 212°) is the brand anchor and it measures everywhere it is used: 5.22:1 on
-the white card, 5.22:1 on the flat white page, white label at 5.22:1. So
+the white card, 5.04:1 on the `#fbfbfb` page, white label at 5.22:1. So
 `accent.text`, `text.link`, `border.accent` and `focus.ring` are all the anchor
 itself. That is the *point* of this value — the previous accent was a pastel
 that could not be text or a signifier on a light surface, and each of those four

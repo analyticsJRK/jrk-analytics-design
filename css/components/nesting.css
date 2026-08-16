@@ -2,10 +2,11 @@
    ==================================================
 
    In DARK every tile is bounded by its fill step off the page — #232326 on
-   #141416 — and that works exactly once. In LIGHT the page is flat #ffffff, so
-   there is no step at all and .jrk-card draws a border.subtle hairline instead
-   (see card.css). Either way the problem this file solves is the same, and in
-   light it is simply more obvious: a tile nested inside another tile sits on the
+   #141416 — and that works exactly once. In LIGHT the page is a #fbfbfb whisper,
+   so the step is only 1.035:1, far too shallow to bound anything, and .jrk-card
+   draws a border.subtle hairline instead (see card.css). Either way the problem
+   this file solves is the same, and in light it is simply more obvious: a tile
+   nested inside another tile sits on the
    CARD plane, where its own surface.default fill is identical to what it sits on
    and the step is 1.0:1 — a
    Stat inside a Card, the "show table" view inside a ChartCard, a KPI band inside

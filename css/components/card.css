@@ -215,8 +215,8 @@
        #ffffff in light and is a deliberate no-op there, so the shadow is alone in
        light. That was originally because surface.hover.light (#f2f2f7) was the
        page value and washing a white card with it erased the fill step that
-       bounded the tile. The page is flat white now and the card carries its own
-       hairline, so that specific trap is gone — a #f2f2f7 hover would no longer
+       bounded the tile. The page is a #fbfbfb whisper now and the card carries its
+       own hairline, so that specific trap is gone — a #f2f2f7 hover would no longer
        dissolve the boundary. The split is KEPT anyway: cardHover is the token that
        means "hover on a card", the shadow is a better lift signal than a wash in
        light, and re-pointing this at surface.hover would re-couple the card to a
