@@ -352,7 +352,7 @@ it is what pins the anchor: a lighter blue that looks fine on the white card
 fails there.
 
 **It is not `systemBlue`.** `#007aff` gives a white label 4.02:1 and link text
-3.60:1 on the page. `#0069d9` is the shallowest step on the hue that clears
+3.88:1 on the page. `#0069d9` is the shallowest step on the hue that clears
 4.5:1 in every light-mode role. Do not "correct" it back to the Apple hex.
 
 **`accent.onSolid` is `#ffffff` in both modes, and is still not `text.inverse`.**

@@ -411,8 +411,11 @@
 }
 
 /* surface.hover IS safe here, and it is exactly the value that must never wash
-   a whole tile. The trap on a tile is that surface.hover equals the light page,
-   so it erases the fill step that bounds the card. This card is not bounded by
+   a whole tile. The trap on a tile is that surface.hover (#f2f2f7) has more than
+   once EQUALLED the light page, erasing the fill step that bounds the card — it
+   does not today (the page is #fbfbfb) but the token is one re-tint away from it
+   again, which is why the rule is written about the value and not the moment.
+   This card is not bounded by
    a fill step — it draws a real hairline — so the wash is free to pull it
    toward the page: 1.12:1 in both themes, with the edge still holding. No
    shadow, because there are dozens of these and one card lifting under the

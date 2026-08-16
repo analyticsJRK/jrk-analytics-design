@@ -210,7 +210,7 @@ banner turned the report's heaviest element into its palest. An accent whose
 anchor cannot be used in the accent's own roles is the wrong anchor.
 
 **It is not `systemBlue`.** `#007aff` gives a white label 4.02:1 and link text
-3.60:1 on the page — it fails here exactly the way `systemGray` and
+3.88:1 on the page — it fails here exactly the way `systemGray` and
 `systemIndigo` do. `#0069d9` is the shallowest step on the hue that clears 4.5:1
 in every light-mode role. The accent is not an Apple colour; the neutrals, status
 colours and chart palette still are.

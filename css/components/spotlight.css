@@ -68,11 +68,11 @@
      fill. Do not delete either as redundant; which one is doing nothing
      depends on the theme.
 
-       the wash    separates the spotlit card from the page at 4.76:1 in LIGHT.
+       the wash    separates the spotlit card from the page at 4.90:1 in LIGHT.
                    In dark it manages 1.17:1 and CANNOT do better: scrimming to
                    pure black tops out at 1.34:1, because the #232326 card is
                    already nearly black. No alpha fixes this.
-       the ring    2px border.accent — 5.22:1 on the light page, 8.41:1 on the
+       the ring    2px border.accent — 5.04:1 on the light page, 8.41:1 on the
                    dark one. Additive in light, load-bearing in DARK, where it
                    is the only thing that makes the hole findable.
 

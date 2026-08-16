@@ -1,22 +1,22 @@
 /* Card / panel — the container every dashboard tile and chart sits in. */
 
-/* The card draws a HAIRLINE in both themes — border.subtle, 1.26:1 in light and
-   1.24:1 on the card fill in dark — and, as of 2026-08-13, a RESTING SHADOW in
-   light as well.
+/* The card draws a HAIRLINE in both themes — border.subtle, 1.21:1 against the
+   light page (1.26:1 against the card's own fill) and 1.24:1 on the card fill in
+   dark — and, as of 2026-08-13, a RESTING SHADOW in light as well.
 
    Read the $lightNote on surface.canvas for the rule this file exists to obey. The
-   light page is TINTED again (#f5f5f7), which by that rule permits the fill step to
-   be the edge and the hairline to go transparent. The permission is declined here,
-   on purpose: the tint is shallow (1.06:1 to the white card, against the 1.12:1 the
-   old #f2f2f7 page gave) so the step alone would be a weaker boundary than what
-   this card had yesterday. Keeping the hairline means the page move can only leave
+   light page is a #fbfbfb WHISPER (2026-08-16), which by that rule permits the fill
+   step to be the edge and the hairline to go transparent. The permission is
+   declined here, on purpose: the step is 1.035:1, against the 1.09:1 the #f5f5f7
+   page gave and the 1.12:1 of #f2f2f7, so the step alone would be a far weaker
+   boundary than the hairline. Keeping the hairline means a page move can only leave
    a tile MORE bounded, never less — which is the safe direction through the one
-   transition this library has historically got wrong.
+   transition this library has historically got wrong, and it is what let the page
+   go flat and come back twice in three days without a tile ever losing its edge.
 
-   So a light card is now bounded three ways: a shallow fill step, the hairline, and
-   shadow.card. That is redundant and it is the point — the shadow is what makes it
-   read as FLOATING rather than merely as delimited, and the fill step is too
-   shallow to do that alone.
+   So in light the hairline and shadow.card carry the tile and the fill step is
+   decoration on top. The shadow is what makes it read as FLOATING rather than
+   merely delimited; at 1.035:1 the step could not do either alone.
 
    In dark the hairline is additive rather than load-bearing — the 1.17:1 fill step
    off #141416 still does the work, and 1.24:1 is a whisper on top of it. That is

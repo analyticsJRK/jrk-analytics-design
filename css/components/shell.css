@@ -475,8 +475,9 @@
     var(--jrk-topbar-to) 100%
   );
   color: var(--jrk-gradient-ink);
-  /* The bar bounds itself — 4.86:1 off the white page, 3.52:1 off the dark one —
-     so the neutral hairline would only draw a grey line under a saturated band.
+  /* The bar bounds itself — its weakest stop is 4.69:1 off the #fbfbfb light page
+     and 3.52:1 off the dark one — so the neutral hairline would only draw a grey
+     line under a saturated band.
      Colour only; the 1px width stays reserved, per the house rule. */
   border-bottom-color: transparent;
   -webkit-backdrop-filter: none;
@@ -566,9 +567,11 @@
 /* THE HAIRLINE STAYS ON THIS VARIANT IN BOTH THEMES, where --blue restores it in
    dark alone. Same rule, evaluated per theme and coming out the same way twice for
    different reasons: in dark the trailing stop is a deep navy that is only 1.4:1
-   off the page, and in LIGHT the leading stop is #ffffff, which is 1.09:1 off
-   surface.canvas — so each theme has one end where the bar and the page are the
-   same material. `.jrk-topbar--vivid` zeroes this on the stated grounds that "the
+   off the page, and in LIGHT the leading stop is #ffffff, which is only 1.03:1 off
+   surface.canvas — so each theme has one end where the bar and the page are very
+   nearly the same material. (That light figure was 1.09:1 against the #f5f5f7 page
+   and 1.00:1 while the page was flat white; the argument has only ever got
+   stronger, never weaker.) `.jrk-topbar--vivid` zeroes this on the stated grounds that "the
    bar bounds itself", which is true of the three-hue ribbon and is not true here.
 
    No `[data-theme]` pair is needed, unlike --blue's: this holds in both themes, so
