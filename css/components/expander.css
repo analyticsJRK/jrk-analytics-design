@@ -546,40 +546,51 @@
 
 /* ============================== the row ==============================
  *
- * THIS IS THE COMPONENT'S REAL WORK, and it is worth saying why it is a layout
- * rule rather than a decoration.
+ * A plain responsive grid. A card OPENS IN PLACE, in the column it already
+ * occupies, and the row's other cards do not move.
  *
- * The failure it exists to fix: three of these side by side, one opened, and the
- * table renders into a ~410px column. "947 of 982 units" wraps to three lines,
- * "96% below target" wraps to three lines, every row grows to four lines tall,
- * and a six-row table fills a screen while saying almost nothing. The table is
- * not badly styled there — it is correctly styled at a width no table can use.
+ * WHAT WAS REMOVED, AND WHY IT IS NOT COMING BACK BY ACCIDENT (2026-08-17,
+ * on direction). The row used to promote an open card to `grid-column: 1 / -1`
+ * and collapse itself to a single column while anything was open:
  *
- * So an open card takes the whole row. `grid-column: 1 / -1` is the mechanism and
- * it is also the fallback; the `:has()` rule below is what keeps the row from
- * leaving holes, because a full-width item cannot start mid-row and auto-placement
- * skips the rest of the line it was on. Collapsing to one column while anything is
- * open turns the row into an accordion, which is what it behaves like anyway. In a
- * browser without :has() the span still applies and the layout is merely gappy —
- * degraded, never broken.
+ *     .jrk-expander-row > .jrk-expander[data-expanded='true'] { grid-column: 1 / -1 }
+ *     .jrk-expander-row:has(> .jrk-expander[data-expanded='true']) {
+ *       grid-template-columns: 1fr;
+ *     }
  *
- * The tiles STRETCH to a common height, which is grid's default and is left alone
- * deliberately. `align-items: start` is the tempting alternative — every tile its
- * natural height — and it looks ragged the moment two descriptions wrap to
- * different line counts, which is most real rows. Stretching costs nothing here
- * because an open card is on its own row anyway, so nothing is ever stretched to
- * match a tile that has a table in it. The summary is what fills the extra height;
- * see the note on __heading. */
+ * The second rule is the one that was actually felt: collapsing the track list
+ * re-laid the WHOLE row, so opening one card stretched every other card to the
+ * full page width too. Three tidy tiles became three page-wide bands, and the
+ * two the reader had not touched moved and resized under the pointer. That is a
+ * large, surprising motion in return for width on a card they did not open.
+ *
+ * THE COST IS REAL AND IS NOW THE CONSUMER'S TO CARRY, so it is worth stating
+ * rather than deleting with the rules: a panel in a ~410px column is narrow, and
+ * a wide multi-column table put there is correctly styled at a width no table can
+ * use — "947 of 982 units" wraps, and every row grows to three or four lines. The
+ * component no longer fixes that by moving the layout. Fix it in the CONTENT
+ * instead: put a compact list in the panel rather than a six-column table, or give
+ * the row wider tracks, or use one full-width expander per row where the panel
+ * genuinely needs a table.
+ *
+ * THE ALIGNMENT HAD TO INVERT WITH IT, and that is not a second opinion — it is
+ * the same decision re-answered under the new layout. While an open card sat on a
+ * row of its own, `stretch` (grid's default) was free: nothing was ever stretched
+ * to match a tile that had a panel in it, and it bought a tidy common height for
+ * summaries whose descriptions wrap to different line counts. Opening in place
+ * removes that guarantee. Under `stretch`, opening one card in a row of three now
+ * grows the other two to its full panel height — two tall, mostly empty tiles
+ * beside the one the reader actually opened. That is the same "the cards I did not
+ * touch just resized themselves" motion the span rule was removed for, arriving
+ * by the other route, so `start` is what keeps the removal meaningful.
+ *
+ * The cost is the one the old note names: a row of closed cards is ragged along
+ * the bottom where descriptions wrap differently. Accepted, and the smaller of the
+ * two — a ragged edge is static and reads as content, where a tile resizing under
+ * the pointer reads as the page breaking. */
 .jrk-expander-row {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--jrk-space-4);
-}
-
-.jrk-expander-row > .jrk-expander[data-expanded='true'] {
-  grid-column: 1 / -1;
-}
-
-.jrk-expander-row:has(> .jrk-expander[data-expanded='true']) {
-  grid-template-columns: 1fr;
+  align-items: start;
 }

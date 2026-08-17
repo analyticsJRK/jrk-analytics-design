@@ -735,11 +735,15 @@
     </div>
 
     <div class="gal-rule">
-      <strong>An open card takes the whole row.</strong> That is the point of
-      <code class="jrk-mono">.jrk-expander-row</code>, not a nicety: three tiles side by side
-      puts a table in a ~410px column, where “947 of 982 units” wraps to three lines and every
-      row grows four lines tall. The table is not badly styled there — it is correctly styled at
-      a width no table can use.
+      <strong>A card opens in place</strong> — in the column it already occupies, with its
+      neighbours neither moving nor resizing.
+      <code class="jrk-mono">.jrk-expander-row</code> used to promote an open card to the full
+      row width and collapse to one column; that was removed on direction (2026-08-17) because
+      the collapse re-laid the whole row and stretched every <em>other</em> card to page width
+      too. The cost moved to the caller: three tiles across puts a panel in a ~410px column,
+      where a wide table is correctly styled at a width no table can use — “947 of 982 units”
+      wraps and rows grow three or four lines tall. Put a compact list in the panel, widen the
+      tracks, or give a table its own full-width expander.
     </div>
 
     <div class="gal-rule">

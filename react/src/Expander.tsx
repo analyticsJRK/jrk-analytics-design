@@ -132,12 +132,19 @@ export interface ExpanderRowProps {
   className?: string;
 }
 
-/** Lays expanders out side by side and gives an OPEN one the full row width.
+/** Lays expanders out side by side. A card OPENS IN PLACE, in the column it
+ *  already occupies; its neighbours neither move nor resize.
  *
- *  This is the component's real work. Three of these in a row with one open puts
- *  a table in a ~410px column, where "947 of 982 units" wraps to three lines and
- *  every row grows to four lines tall — the table is not badly styled, it is
- *  correctly styled at a width no table can use. */
+ *  It used to promote an open card to the full row width and collapse the row to a
+ *  single column. Removed on direction, 2026-08-17: the collapse re-laid the whole
+ *  row, so opening one card stretched every OTHER card to page width too. The row
+ *  block in expander.css records what went and what it cost.
+ *
+ *  What it cost is now the caller's to design around. A panel in a ~410px column is
+ *  narrow, and a wide multi-column table put there is correctly styled at a width
+ *  no table can use — "947 of 982 units" wraps, and rows grow to three or four
+ *  lines. Prefer a compact list in the panel, wider tracks, or a single full-width
+ *  expander per row where the panel genuinely needs a table. */
 export function ExpanderRow({ children, className }: ExpanderRowProps) {
   return <div className={cx('jrk-expander-row', className)}>{children}</div>;
 }

@@ -156,10 +156,19 @@ which darkens a light tint and lightens a dark one because a single white veil
 would lift a dark tint 1.34:1 and a light one 1.03:1; vivid takes `gradient.hover`,
 theme-independent because the ramp is.
 
-`.jrk-expander-row` lays them side by side and gives an **open** card the full row
-width, collapsing to one column while anything is open. That is the point of the
-component, not a nicety — three tiles across puts a table in a ~410px column where
-"947 of 982 units" wraps to three lines and every row grows four lines tall.
+`.jrk-expander-row` lays them side by side and a card **opens in place**, in the
+column it already occupies; its neighbours neither move nor resize. It used to
+promote an open card to the full row width and collapse the row to a single
+column — removed on direction 2026-08-17, because collapsing the track list re-laid
+the whole row, so opening one card stretched every *other* card to page width too.
+
+**That moved the cost to the caller, so design the panel for a narrow column.**
+Three tiles across puts a panel in a ~410px column, where a wide multi-column table
+is correctly styled at a width no table can use: "947 of 982 units" wraps and rows
+grow three or four lines tall. Use a compact list, wider tracks, or one full-width
+expander per row when the panel really needs a table. The row is `align-items:
+start` for the same reason the span went — under `stretch`, opening one card grows
+its untouched neighbours to match its panel height.
 
 Assign a hue by **position in the row**, never by what the card is about: half
 these pairs collapse under simulated CVD on both toned variants, and identity is
