@@ -95,6 +95,14 @@ export interface HoverCardRow {
 }
 
 export interface HoverCardProps {
+  /** The panel's id, and the target of the trigger's `aria-describedby`.
+   *
+   *  Optional only in the type. Without it the association the plain-CSS contract
+   *  requires cannot be expressed from React at all — which is what this
+   *  component's own preview did before the prop existed, pointing
+   *  `aria-describedby` at nothing. That failure is silent in the worst way: the
+   *  panel still opens on focus, so it looks reachable, and announces nothing. */
+  id?: string;
   /** Names what the rows break down — usually the tile's own metric. */
   header?: ReactNode;
   rows?: HoverCardRow[];
@@ -113,15 +121,16 @@ export interface HoverCardProps {
 /** The breakdown behind a headline number, revealed on hover **and on focus**.
  *
  *  The trigger must be focusable — a `<button>` or a link, never a bare `<div>` —
- *  and should name the panel with `aria-describedby`. Opening on hover alone
- *  makes the figures reachable only with a pointer, which is the difference
- *  between a disclosure and a decoration.
+ *  and must name the panel with `aria-describedby`, which means passing `id`
+ *  here. Opening on hover alone makes the figures reachable only with a pointer,
+ *  which is the difference between a disclosure and a decoration.
  *
  *  Watch for clipping: the panel escapes its anchor, so any ancestor with
  *  `overflow: hidden` cuts it off. In this library that is the joined
  *  `.jrk-stat-row` (the split row is fine), `.jrk-expander`, and
  *  `.jrk-table-wrap`. */
 export function HoverCard({
+  id,
   header,
   rows,
   note,
@@ -132,6 +141,7 @@ export function HoverCard({
 }: HoverCardProps) {
   return (
     <div
+      id={id}
       className={cx(
         'jrk-hovercard',
         align === 'end' && 'jrk-hovercard--end',

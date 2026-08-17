@@ -41,6 +41,7 @@ export const Default = () => (
           <span className="jrk-stat__meta">of units on a 2×/yr cadence</span>
         </button>
         <HoverCard
+          id="hca-default"
           header="Treatment coverage"
           rows={[
             { label: 'On cadence (≥2/yr)', value: '886' },
@@ -73,6 +74,7 @@ export const OnePerTrigger = () => (
             </span>
           </button>
           <HoverCard
+            id="hca-a"
             header="Collected by cycle"
             rows={[
               { label: 'On time', value: '$3.94M' },
@@ -89,6 +91,7 @@ export const OnePerTrigger = () => (
             </span>
           </button>
           <HoverCard
+            id="hca-b"
             align="end"
             header="Delinquent balance"
             rows={[
@@ -131,6 +134,7 @@ export const WithoutTheAnchor = () => (
           </span>
         </button>
         <HoverCard
+          id="hca-loose"
           header="Occupancy by region"
           rows={[
             { label: 'Southeast', value: '96.1%' },
