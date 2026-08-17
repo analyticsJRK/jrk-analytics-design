@@ -148,6 +148,34 @@
   gap: var(--jrk-space-1);
 }
 
+/* A SCROLLING LIST MUST NOT COMPRESS ITS ROWS, and this is the rule that makes
+   `.jrk-nav-item`'s "PINNED AT 32px" actually true.
+ *
+ * This is a column flex container, so every direct child defaults to
+ * `flex-shrink: 1`. The moment the rail holds more than fits — which is the
+ * normal state, that is why it scrolls — the children are compressed to make up
+ * the difference instead of the container scrolling. Measured in the consuming
+ * app: 904px of content in 858px, and the two rows that could give (a plain
+ * `.jrk-nav-item` placed straight in the rail) went from their declared 32px to
+ * 18.84px.
+ *
+ * IT ONLY HITS SOME ROWS, which is what makes it read as a styling mistake rather
+ * than a layout one. A row whose height comes from a fixed `height` and has
+ * nothing taller inside it can be squashed; a row wrapped in a consumer's own
+ * element, or one containing an input, has a min-content floor and cannot. So in
+ * that app the two top-level destinations shrank while every module row beside
+ * them — same class, same font, same icon — stayed 32px, and the two looked like
+ * they had been given a smaller type ramp on purpose.
+ *
+ * On the container rather than on `.jrk-nav-item`, deliberately: the item is also
+ * used in `.jrk-nav-flyout` and the topbar, where it is not a flex child of this
+ * box and does not need the declaration — and the bug belongs to the scrolling
+ * parent, which should never trade row height for a shorter scrollbar. This also
+ * covers the group captions and anything a consumer puts in the rail. */
+.jrk-sidebar__nav > * {
+  flex-shrink: 0;
+}
+
 .jrk-sidebar__group {
   padding: var(--jrk-space-4) var(--jrk-space-3) var(--jrk-space-1);
   font-size: var(--jrk-text-xs);
