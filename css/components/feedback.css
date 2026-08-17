@@ -4,14 +4,31 @@
 
 /* Inline, persistent message. Needs role="status" (or role="alert" for
    critical) so it is announced, and an icon + heading so the status reads
-   without color. */
+   without color.
+
+   SQUARE, BECAUSE IT RESTS ON THE PAGE. The 2026-08-14 direction is a split —
+   "square tiles, rounded overlays" — and it is written as a rule rather than as
+   the list of components converted that day. This one was not on that list and
+   kept `radius-lg`, which is how a 14px-cornered banner ended up sitting directly
+   above the square cards it introduces, on five screens of the consuming app.
+
+   The distinction that decides it is not size or importance, it is FLOW: an
+   overlay keeps its corners because it floats above the content and needs to read
+   as detached. An alert is in the flow, spans the column, and on several pages is
+   the first thing under the page header — the same position and the same width as
+   a card. `.jrk-toast` at the foot of this file is the counter-example and stays
+   `radius-lg`: it is `position: fixed` and genuinely floats. The two are not
+   inconsistent; they are the two sides of the same rule.
+
+   Geometry only. The tone washes below are untouched and nothing here was ever
+   measured against a corner. */
 .jrk-alert {
   display: flex;
   align-items: flex-start;
   gap: var(--jrk-space-3);
   padding: var(--jrk-space-3) var(--jrk-space-4);
   border: 1px solid transparent;
-  border-radius: var(--jrk-radius-lg);
+  border-radius: var(--jrk-radius-none);
   background: var(--jrk-status-neutral-wash);
   color: var(--jrk-text-primary);
 }

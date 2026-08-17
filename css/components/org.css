@@ -296,7 +296,16 @@
    spend, and nesting.css cannot help because these are not tiles. border.default
    at 1.52:1 / 1.54:1 is the same decorative separation the nested-tile hairline
    spends, which is right here: the hairline separates, the CONNECTOR carries the
-   meaning, and only the connector had a floor to clear. */
+   meaning, and only the connector had a floor to clear.
+
+   IT KEEPS ITS RADIUS, and that is a decision rather than an oversight — checked
+   and deliberately left on 2026-08-17, in the same pass that squared `.jrk-alert`.
+   The sentence above is the reason: THESE ARE NOT TILES. A node is a mark in a
+   diagram, sized by its content and placed by the graph, and what it has to read
+   as is a node on a connector chart — not a small card resting on the page. Square
+   them and the canvas starts reading as a table of boxes with the connectors as
+   rules between cells. The square rule is about tiles on a page plane; this is the
+   component to skip if a later pass sweeps every corner in the library. */
 .jrk-org__card {
   /* For the rollup keyline's pseudo-element. See the rollup block at the end. */
   position: relative;
