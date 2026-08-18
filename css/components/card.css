@@ -41,6 +41,18 @@
   flex-direction: column;
   background: var(--jrk-surface-default);
   border: 1px solid var(--jrk-border-subtle);
+  /* THE CARD CLIPS ITS OWN CORNER, added 2026-08-18 with the rounding. A flush body
+     holds a table wrap that runs to all four edges, and a square-cornered child inside
+     a 10px-rounded parent paints over the curve — the tile reads as square at the
+     bottom and rounded at the top. Clipping is what lets the child stay square and the
+     card own the geometry, which is the same division `.jrk-expander` already used.
+
+     `clip`, NOT `hidden`, and the difference is load-bearing: `overflow: hidden`
+     creates a scroll container, which would make it the nearest scrollport for the
+     sticky `thead` inside a nested `.jrk-table-wrap` and pin the header to the CARD
+     instead of to the scrolling table. `clip` does no such thing. Do not "simplify" it
+     to hidden. */
+  overflow: clip;
   /* ROUNDED AGAIN, at radius.md. Directed 2026-08-18, reversing the 2026-08-14
      squaring outright — that direction is gone, not narrowed, and the note it left
      on the radius token block ("a thing laid ON the page is square, a thing floating
@@ -241,6 +253,45 @@
    supplies it, so the two never double up. */
 .jrk-card__header + .jrk-card__body {
   padding-top: 0;
+}
+
+/* A FLUSH BODY IS THE EXCEPTION and takes a rule instead, added 2026-08-18. Its
+   content starts at the card's own edges with no padding between, so a table's
+   header row lands directly under the card's header with nothing between them —
+   two rows of bold-ish label text, one the card's name and one the column names,
+   reading as one confused double header. Reported as exactly that.
+
+   The hairline is the card header's, not the table's: `.jrk-table thead th` already
+   draws a `border-bottom`, and putting a second one on top of the header would be
+   two lines a row apart. This one closes the header off. */
+.jrk-card__header:has(+ .jrk-card__body--flush) {
+  padding-bottom: var(--jrk-space-3);
+  border-bottom: 1px solid var(--jrk-border-default);
+}
+
+/* THE TABLE HEADER TAKES THE RECESS FILL when it is flush inside a card, which is a
+   scoped reversal of the note on `.jrk-table thead th` — that rule moved the fill to
+   surface.default so a header would stop reading as a recess off the table body, and
+   it is right for a table standing on the page. Inside a flush card body the problem
+   is the opposite one: the header has the CARD's header above it rather than open
+   page, and matching fills there is what makes the two indistinguishable. Scoped, so
+   a bare `.jrk-table-wrap` keeps the directed treatment.
+
+   The sticky header still needs an opaque fill of its own or rows scroll through it;
+   this changes which opaque fill, not whether there is one. */
+.jrk-card__body--flush .jrk-table thead th {
+  background: var(--jrk-surface-subtle);
+}
+
+/* The wrap runs to the card's edges, so it hands its own edge and corner to the card
+   — `overflow: clip` on `.jrk-card` above is what makes that safe. Transparent rather
+   than zero-width, per the house rule: `border: 0` sets border-style to none, after
+   which a later border-color paints nothing, and the layout does not shift by a pixel
+   if the edge is ever restored. Same treatment, same reasoning, as
+   `.jrk-expander .jrk-expander__panel .jrk-table-wrap` in expander.css. */
+.jrk-card__body--flush > .jrk-table-wrap {
+  border-color: transparent;
+  border-radius: var(--jrk-radius-none);
 }
 
 .jrk-card__title {
