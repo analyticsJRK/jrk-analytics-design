@@ -13,6 +13,10 @@
     "guides/*.md"
   ],
   "overrides": {
+    "SectionNav": {
+      "cardMode": "column",
+      "viewport": "1120x800"
+    },
     "NavMenu": {
       "cardMode": "single",
       "primaryStory": "Open",

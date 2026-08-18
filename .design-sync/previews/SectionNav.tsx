@@ -6,11 +6,23 @@ import { SectionNav, Card, Stat, StatRow, Alert } from '@jrk/design';
    path is the one an app should use, and showing it wired by hand would teach the
    wrong thing.
 
-   THE INDEX IS A LINE OF DOTS AT REST, and these are still captures, so what you
-   see is the resting state: one dot per section, and exactly one label painted —
-   the current one. Hovering the nav, or tabbing into it, fades every label in at
-   once; that cannot be captured. The hidden labels are `opacity: 0`, never
-   display:none, so a screen reader gets the full index either way.
+   THE INDEX IS A LINE OF DOTS AT REST, and its labels are revealed by
+   `.jrk-section-nav:hover` / `:focus-within` — which package-capture.mjs does
+   neither of. Left alone, all three cards would capture as a column of dots with
+   one label, and every mechanical signal would agree with a screenshot of nothing:
+   the label text IS in the DOM, so `texts` is full and `thin`/`blank` stay false.
+   That is the hover-only-panel trap NOTES.md records against HoverCard, arriving
+   through a different component.
+
+   So the reveal is FORCED with a preview-scoped class, the same house pattern
+   HoverCard and NavMenuSeparator use — `.pv-reveal` below, applied via the
+   component's own `className`, which lands on the <nav>.
+
+   `Default` is deliberately NOT forced: it is the only cell showing the state a
+   reader actually meets first, and a card set where every cell is hover-revealed
+   would misrepresent the component as a plain labelled list. One cell at rest,
+   two revealed, is the honest pair. The hidden labels are `opacity: 0`, never
+   display:none, so a screen reader gets the full index in every case.
 
    Three more things about these captures are worth knowing before reading them:
 
@@ -51,6 +63,9 @@ const frameCss = `
   color: var(--jrk-text-muted);
   font-size: var(--jrk-text-md);
 }
+/* Forces the hover/focus reveal for a still capture. 0-2-0, matching the
+   component's own :hover rule and beating the 0-1-0 base that hides the label. */
+.pv-reveal .jrk-section-nav__label { opacity: 1; }
 `;
 
 const Frame = ({ children }: { children: ReactNode }) => (
@@ -138,7 +153,7 @@ export const TwoLevels = () => (
         <h2 id="pv2-capital">Capital projects</h2>
         <p className="pv-note">Roof replacement closed in May; boiler replacement moves to Q3.</p>
       </div>
-      <SectionNav headings="h2, h3" />
+      <SectionNav headings="h2, h3" className="pv-reveal" />
     </div>
   </Frame>
 );
@@ -175,7 +190,7 @@ export const CustomTitle = () => (
         <h2 id="pv3-sign-off">Sign-off</h2>
         <p className="pv-note">Asset manager review pending.</p>
       </div>
-      <SectionNav title="In this report" />
+      <SectionNav title="In this report" className="pv-reveal" />
     </div>
   </Frame>
 );

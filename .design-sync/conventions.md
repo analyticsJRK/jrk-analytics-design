@@ -85,6 +85,7 @@ Classes follow `jrk-block__element--modifier`. Tokens follow `--jrk-<group>-<nam
 `jrk-topbar` `jrk-content` `jrk-nav-item` `jrk-page-header` `jrk-tabs` `jrk-tab`
 `jrk-alert` `jrk-empty` `jrk-spinner` `jrk-chart` `jrk-chart-card` `jrk-bars`
 `jrk-legend` `jrk-sheet` `jrk-icon` `jrk-list` `jrk-org` `jrk-auth`
+`jrk-section-layout` `jrk-section-nav`
 
 **Tokens you will reach for most** — never a raw hex, never a ramp step:
 surfaces `--jrk-surface-canvas|default|tinted|subtle|raised` · text
@@ -92,8 +93,8 @@ surfaces `--jrk-surface-canvas|default|tinted|subtle|raised` · text
 · accent `--jrk-accent-solid|wash` · status
 `--jrk-status-{good|warning|serious|critical|neutral}-{mark|text|wash}` · series
 `--jrk-chart-1..8` · spacing `--jrk-space-0_5…--jrk-space-24` (4px grid) · radius
-`--jrk-radius-none|sm|md|lg|xl|2xl|full` (`none` for tiles, `full` for pill
-controls) · type `--jrk-text-2xs…--jrk-text-5xl` ·
+`--jrk-radius-none|sm|md|lg|xl|2xl|full` (`md` for tiles, `full` for pill
+controls, `xl`/`2xl` for overlays) · type `--jrk-text-2xs…--jrk-text-5xl` ·
 motion `var(--jrk-transition)` (never hand-roll a duration).
 
 ## Rules this library enforces — breaking them is a bug, not a style choice
@@ -116,12 +117,15 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
   dark `shadow-card` is `none` (a black shadow on `#141416` renders nothing) and
   `--jrk-surface-card-hover` is the channel that carries the hover instead. Each
   one does nothing in the theme the other works in.
-- **Tiles are SQUARE; only things that float are rounded.** `jrk-card`, `jrk-stat`,
-  `jrk-stat-row`, `jrk-chart-card`, `jrk-table-wrap`, `jrk-sheet` and `jrk-expander`
-  are all `--jrk-radius-none`. Anything that floats *above* the page keeps its
-  radius — modals, menus, hovercards, tooltips, nav flyouts, spotlights — as do
-  controls, badges, tags and the chrome *inside* a tile. The radius ladder is a
-  **control** ladder now; do not round a tile to make it look friendlier.
+- **Tiles are ROUNDED, at `--jrk-radius-md`.** `jrk-card`, `jrk-stat`,
+  `jrk-stat-row`, `jrk-chart-card`, `jrk-table-wrap`, `jrk-sheet`, `jrk-alert` and
+  `jrk-expander` all resolve it, and `.jrk-card` clips its own corner so a
+  full-bleed child cannot paint over the curve. Overlays keep their own, larger
+  radii — modals at `2xl`, menus, hovercards, tooltips, nav flyouts and spotlights
+  at `xl` — and controls, badges and tags are pills at `full`. The one surviving
+  `--jrk-radius-none` is a `jrk-table-wrap` inside an expander panel. **Do not
+  square a tile**: squaring was tried as a deliberate direction and then reversed,
+  so a square tile now reads as stale rather than intentional.
 - **A tile inside another tile takes a hairline automatically.** A fill step only
   works once per plane, so a Card/Stat/table nested in a Card gets
   `--jrk-border-default` from the library. Do not add your own.
@@ -137,6 +141,11 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
   not decoration: the wash is only ~1.05:1 against what surrounds it, so weight is
   the one channel that survives greyscale and colour-blindness. If you build a
   selection state of your own, carry a second channel the same way.
+  **`SectionNav` is the one deliberate exception**: its current row is a filled
+  `--jrk-accent-solid` dot on a spine plus `--jrk-text-primary` and semibold, not a
+  pill. It answers a different question — *where am I inside this page*, not *which
+  page* — and drawing both as the same object would put two identical "this is the
+  one" pills on screen meaning two different things.
 - **Right-align money and counts** with `jrk-num` on the cell **and** its header.
 - **Never cycle the 8-slot chart palette** — the fixed order is the
   colorblind-safety mechanism. A 9th series folds into "Other" or facets.
@@ -165,7 +174,7 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
   exists to break. A local-login fallback, if it ever exists, goes on its own
   route behind a link.
 
-## Four live traps
+## Five live traps
 
 - **Do not put an SVG inside a `jrk-grid` container.** `chart.css` scopes
   `.jrk-grid line, .jrk-grid path` to the chart gridline group, and the layout
@@ -191,6 +200,16 @@ motion `var(--jrk-transition)` (never hand-roll a duration).
   the one thing built for that plane and draws its own hairline; everything else on
   it needs `.jrk-card--outlined`. Put a normal tile grid there and the tiles
   dissolve into the background in both modes.
+- **`<Card frosted>` only works where something is BEHIND it.** It is the topbar's
+  vibrancy material (72% fill over a saturated blur). Over the plain page there is
+  nothing to blur and it composites to a 1.03:1 step — a normal card that has given
+  up its fill for no visible effect. Spend it on a saturated ground, over an image,
+  or with content scrolling underneath. Two hard rules: never combine it with
+  `--seamless` or `--flush` (it is the only tile whose fill can be weaker than the
+  base, so those remove the only channels holding it together), and **keep links
+  off it over colour** — `--jrk-accent-text` falls to 3.45:1 once a saturated ground
+  shows through and cannot be fixed, because it is already the shallowest passing
+  step on the hue. Muted text is re-inked to `--jrk-text-secondary` for you.
 
 ## Where the truth is
 

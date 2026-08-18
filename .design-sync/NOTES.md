@@ -1169,3 +1169,120 @@ Verdict, final run: all four stages ok, `55 unchanged / 0 changed / 4 added /
 bundle + styling + aux. Build ⊃ anchor was checked by set difference before
 uploading, per the orphaning rule above. Only the two documented warns:
 `[DTS_STYLE_SYSTEM]` and `[FONT_REMOTE] "Inter var"`.
+
+## A component that HIDES ITSELF at a breakpoint is invisible in the capture (2026-08-18)
+
+**The breakpoint sibling of the hover-only-panel trap above, found publishing
+`SectionNav`. Same shape, different mechanism, and it fooled every gate the same
+way.**
+
+`section-nav.css` ends with `@media (max-width: 1024px) { .jrk-section-nav {
+display: none } }` — correct behaviour: the index is an accelerator and the
+product targets 1920x1080, so below the sidebar breakpoint it leaves rather than
+reflowing into the horizontal pill row the doctrine forbids. The harness captures
+at **900x700**, which is under that breakpoint, so all three cells rendered the
+document body with **no index anywhere** — the component's own card documented
+everything except the component.
+
+`render-check` reported `bad: false, blank: false, thin: false,
+variantsIdentical: false`, `pngBytes: 197885`. All correct by their own
+definitions: the *body* renders, so the PNG is big and the text array is full.
+**Nothing mechanical can see this.** Only the sheet does.
+
+Fix: `cfg.overrides.SectionNav = {"cardMode": "column", "viewport": "1120x800"}`.
+Capture ABOVE the breakpoint rather than defeating the media query with preview
+CSS — the card then shows the true design instead of a state the component never
+enters at that width. `column` because the layout is two-column and wants the full
+card width. Cell height also dropped 1629 → 699 as a side effect (wider frame, less
+wrapping), which incidentally cleared a silent bottom crop.
+
+**The generalisation, now twice-proven:** any component whose visible state is
+gated — by a pointer (`HoverCard`), by focus, or **by a media query** — needs the
+gate opened for the capture. Pointer/focus gates take a preview-scoped class;
+a breakpoint gate takes `cfg.overrides.<Name>.viewport`. Before grading anything
+responsive, check the component's CSS for a `@media` block that could fire at
+900px.
+
+`SectionNav`'s own preview also carries a `.pv-reveal` class for the OTHER half of
+this: its labels are `opacity: 0` until `:hover`/`:focus-within`. `Default` is left
+unforced on purpose (it is the only cell showing the resting dot rail); `TwoLevels`
+and `CustomTitle` force the reveal so the depth and the title prop are legible.
+
+## conventions.md carried an INVERTED rule for five days (2026-08-18)
+
+**This is the strongest argument yet for the validation pass being a grep against
+the build rather than a read of the prose.**
+
+The header claimed, as a numbered rule: *"Tiles are SQUARE; only things that float
+are rounded — `jrk-card`, `jrk-stat`, `jrk-chart-card`, `jrk-table-wrap`,
+`jrk-sheet` and `jrk-expander` are all `--jrk-radius-none`."* Commit `6d8b84e`
+("Round every tile back to radius.md", 2026-08-18) reversed the squaring, and the
+header was not updated with it. Checked against `_ds_bundle.css`, every one of
+those resolves `var(--jrk-radius-md)`; the only surviving `--jrk-radius-none` is a
+`.jrk-table-wrap` inside an expander panel.
+
+This file is **inlined into the design agent's system prompt**, so the cost is not
+cosmetic: the agent would have squared every tile it built, against the shipped
+CSS, and been confident about it. Corrected, along with the radius token line that
+repeated the claim (`none` for tiles → `md`).
+
+Three further edits in the same pass, all verified against the build first:
+- The "selection is a tinted pill **everywhere**" rule now records `SectionNav` as
+  the one deliberate exception (dot + `text.primary` + semibold, not a pill),
+  with the reason — it answers *where in the page*, not *which page*.
+- `jrk-section-layout` / `jrk-section-nav` added to the class vocabulary.
+- A fifth live trap for `<Card frosted>`: 1.03:1 over a plain page, never with
+  `--seamless`/`--flush`, and **links are unfixable on it over colour**
+  (`accent.text` → 3.45:1, already the shallowest passing step on the hue).
+
+**Durable rule: a rendering direction that lands in `tokens.json` or a component
+header does NOT propagate to `conventions.md`.** Nothing links them. After any
+commit that changes a geometry/colour rule the header states, re-run the
+validation pass — and validate by grepping `ds-bundle/_ds_bundle.css` and the
+`components/<group>/<Name>/` tree, never by re-reading the sentence.
+
+## Both cached anchors were stale — the dated-file rule earns its keep (2026-08-18)
+
+`.cache/remote-sync.json` held **47** components (`styleSha 4a23ee1a`) and
+`.cache/remote-anchor.json` held **52** (`e917bdff`), against a live project at
+**59** (`4e010144`). Either would have produced a badly wrong diff — up to a dozen
+components reported as `added` that already existed, and an upload scope to match.
+
+Neither is deleted, because the gitignored `.cache/` is scratch and a future run
+that trusts a filename rather than re-fetching deserves to be caught by the
+fingerprint check, not by an empty directory. **Always `DesignSync get_file
+_ds_sync.json` into a NEW dated file and print
+`components / styleSha / auxSha / bundleSha12` before running the driver.** One
+node one-liner over the candidate files makes the staleness obvious in a second.
+
+## Run receipt — 2026-08-18
+
+Repo at `d2de2c6` (merge of PR #13: section index, frosted card, sectioned
+dashboard). Three driver runs: baseline, then the `SectionNav` viewport override,
+then the corrected conventions header (the header rebuild must be a **driver** run,
+not a bare converter run, or the receipt describes a build that was not uploaded).
+
+Verdict: all four stages ok, `anchor: ok`, `57 unchanged / 2 changed / 1 added /
+0 removed`, `0 delete(s)`, `pendingGrade: []`, `learningsUnmerged: []`. Capture
+printed 4 carried forward and **0 grade cleared** — the proof the next sync is
+cheap. Upload = 4 components (`SectionNav` new; `HoverCard` + `HoverCardAnchor`
+changed by commit `990d5e1`, which had never been synced; `Card` because its
+`.d.ts` gained `frosted?: boolean` while its render was untouched) + bundle +
+styling + aux, 328 files.
+
+Only the two documented warns: `[DTS_STYLE_SYSTEM]` and `[FONT_REMOTE] "Inter
+var"`. **`[GRID_OVERFLOW] NavMenu` did NOT fire this run** despite an unchanged
+`scriptsSha e0316766f3bdd146` — it is still recorded above as outstanding, so treat
+its absence as good news rather than evidence the entry is stale.
+
+**Re-sync risks added by this run:**
+- `cfg.overrides.SectionNav.viewport` is coupled to the `1024px` breakpoint in
+  `section-nav.css`. Move that media query and the card silently goes blank again
+  with every gate green.
+- `previews/SectionNav.tsx`'s `.pv-reveal` is coupled to the component's
+  `opacity`-based label reveal. If the reveal ever becomes `visibility` or
+  `display`, the class stops working and the cells go back to bare dots — and
+  nothing will say so.
+- `conventions.md` now asserts tile radius, the `SectionNav` selection exception
+  and the frosted-card ink figures. All three are hand-measured or geometry claims
+  that no gate re-checks; they go stale the moment those rules move.
