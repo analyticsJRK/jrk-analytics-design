@@ -16,7 +16,7 @@ import { Button, Stat, DataTable } from '@jrk/design';
 React exports: `Alert AppShell Badge BarList Button ButtonGroup Card CellBar
 ChartCard Checkbox Content DataTable Delta Empty Input Legend LineChart Main
 NavGroup NavItem NavMenu NavMenuItem NavMenuSeparator OrgChart OrgNode
-PageHeader Select Sidebar SidebarAction Sparkline Spinner Stat StatRow Status
+PageHeader SectionNav Select Sidebar SidebarAction Sparkline Spinner Stat StatRow Status
 Switch TabPanel Tabs Tag Textarea Topbar` plus `cx`, `setTheme`,
 `variantClass`, `MAX_SERIES`, `MAX_SERIES_ALL_PAIRS`.
 
@@ -106,6 +106,33 @@ more", move **both** card rungs and leave `shadow.lg` alone; the gap to hold is
 3.3x by ambient weight (y-offset × alpha).
 
 `.jrk-section` + `__header` + `__title` groups several cards under one heading.
+
+### Frosted card
+
+`.jrk-card--frosted` / `<Card frosted>` — the topbar's vibrancy material on a tile.
+
+- **Only where something is BEHIND it.** Over the flat page there is nothing to
+  blur and the 72% mix composites to a **1.03:1** step, so it is a normal card that
+  has given up what fill step it had for no visible effect. It earns its keep on a
+  saturated ground, over an image, or with content scrolling underneath
+- **The hairline and the shadow are load-bearing here**, more than on any other
+  tile: this is the only card whose fill can be weaker than the base. `--frosted`
+  with `--seamless` or `--flush` is a contradiction — do not combine them
+- **Ink was measured by hand**, because nothing gates a colour composited at
+  runtime. `text.primary` passes everywhere; `text.muted` fails (3.4:1 over the
+  accent solid) and **is re-inked to `text.secondary` by the modifier itself**, the
+  same move `.jrk-topbar--vivid` makes for its captions. `accent.text` also fails
+  (3.45:1) and **cannot be fixed** — it is already the shallowest passing step on
+  the hue, so keep links off a frosted card over colour
+- `backdrop-filter` creates a stacking context AND a containing block for fixed
+  descendants: a `.jrk-nav-flyout` or anything else escaping a clip with
+  `position: fixed` gets trapped inside. Behind `@supports`, with the opaque card
+  fill as the fallback
+- `.jrk-section--page` is the page-level section heading that goes with an index:
+  17px primary, on the rung between `.jrk-page-header__title` (20px) and
+  `.jrk-card__title` (15px). The base `.jrk-section__title` is 14px secondary and
+  is deliberately QUIETER than the tiles it labels, which is right for a sub-group
+  and backwards for a named page section
 
 ## Expandable card
 
@@ -309,6 +336,108 @@ For workbook-style financial reports use the **sheet** layer instead — see
   - no channel on that thumb measures 3:1 — the semibold is the only one that
     survives greyscale and CVD, so it is load-bearing. Full numbers and the
     one-line way back to a measuring signal are in `button.css`
+
+## Section index
+
+"Where am I on this page" for a long vertical report. `<SectionNav>` /
+`.jrk-section-nav`.
+
+```
+.jrk-section-layout > .jrk-section-layout__body + .jrk-section-nav
+.jrk-section-nav > __title + __list > li > a.__link(--sub)
+```
+
+- **This is the ONE form philosophy.md permits.** Layer 2 names a "jump to
+  section" row beside a sidebar and tabs as the most common IA failure in this
+  product, and grants exactly one way through: the index must be **derived from
+  the sections themselves, so it cannot drift from them**. So `<SectionNav>` has
+  **no `items` prop and will not get one** — it reads the headings out of a
+  region of the DOM. An authored index is a second source of truth for the page's
+  own structure. Same refusal-over-degradation shape as `seriesColor(8)` throwing
+- It is a **fourth question, not a fourth spine**: breadcrumb / sidebar / tabs all
+  navigate BETWEEN documents; this one answers where you are INSIDE one, which is
+  a reading position rather than a selection. **A page carrying tabs AND a section
+  index has to justify both** — a tab row whose panels are really parts of one
+  long page is a section index wearing the wrong widget
+- **`aria-current="location"`, never `"page"`.** The rail's current-page row is
+  still true and still on screen; two elements claiming `"page"` is two answers to
+  where-am-I in the accessibility tree. Every selector keys on the attribute, so
+  painted and announced state cannot disagree
+- **It is a LINE OF DOTS, not a list of labels** (directed). A `border.subtle`
+  hairline runs down the trailing edge of the list and each section is a dot
+  centred on it; the labels are present but transparent. Markup gains a required
+  `<span class="jrk-section-nav__label">` — the dot is the link's `::after`, so the
+  label has to be its own box to fade independently
+- **Not the rail's tinted pill, and that is deliberate.** The pill answers a
+  different question, and drawing both as the same object puts two identical "this
+  is the one" objects on screen meaning two different things
+- **Four channels mark the current section**, and only one is colour:
+  `accent.solid` dot at **5.04:1** light / **8.41:1** dark against resting
+  `text.muted` dots at 4.90:1 / 6.41:1 (hue — dies in greyscale); **10px against
+  6px**, 4px on a sub-row (size — survives greyscale); its **label painted while
+  the others are not** (the strongest channel on the component); and **semibold** on
+  that label. Hand-measured against `surface.canvas`, which is the binding surface —
+  nothing gates a dot against the page it sits on
+- **The resting dots are 4.90:1 on purpose.** Each is a link target, and a control
+  a reader cannot find does not exist. `border.strong` is the tempting value and is
+  **1.47:1** on the page — invisible at 6px
+- **What the form costs, and the three things that buy it back.** At rest the
+  reader sees how many sections there are and which one they are in, not what the
+  others are — discoverability traded for quiet, which layer 3 normally refuses
+  ("never a bare icon button"; a bare dot is worse than a bare icon). Legal only
+  because: the **current label stays painted**, so the index still answers
+  where-am-I in words; **hover or `:focus-within` on the NAV reveals every label at
+  once**, not per row, so the deferred question costs one gesture; and the hidden
+  labels use **`opacity`, never `display`/`visibility`**, so every section name
+  stays in the accessibility tree. Swapping that property silently deletes the
+  index for anyone not using their eyes
+- **Rows are a fixed `control-sm` (24px) with nowrap, ellipsised labels.** That is
+  what keeps the dots evenly spaced — a row that grew with its label would put them
+  at uneven intervals and the spine would stop reading as a scale. `minTouch` is
+  the same 24px, so the full-width row is a legal target. A name too long to fit is
+  fixed with `data-section-label` on the heading
+- **The dot is a fixed 12px box scaled by `transform`**, never a small box that
+  grows: animating width/height moves the dot's own layout box and drags its centre
+  off the spine mid-transition. `inset-inline-end` is `-(width / 2) - 0.5px`
+- Hover moves two channels (dot grows to 8px, dot and label take `text.primary`) —
+  between rest and current, so hovering a row cannot be mistaken for being in it
+- **Rule order is load-bearing:** base → `--sub` → `:hover` → `[aria-current]`.
+  `--sub` sets `color` AND the dot's `transform` at the same specificity as the
+  state rules, so written after them a current sub-row keeps the small muted dot
+  while everything else about it says "current"
+- **Scope the `headings` selector on a component-dense page.** The `'h2, h3'`
+  default is right for prose and wrong for a dashboard: `.jrk-card__title`,
+  `.jrk-chart-card__title` and `.jrk-expander__heading` are all `<h3>`, and the
+  expander's carries its own id for `aria-labelledby`, so filtering on `[id]` does
+  not save you either. Name the section headings positionally
+  (`'.jrk-section--page > .jrk-section__header > h2, .jrk-section--page > h3'`) —
+  the author declares which headings are sections, the DOM still supplies the labels
+- **The index scrolls itself.** When the list outgrows its column the marked row is
+  brought into the index's own scroll box — by a computed `scrollTo` on that one
+  element, never `scrollIntoView`, which walks every scrollable ancestor including
+  the document and would re-scroll the page a click had just started moving.
+  Nearest-edge, never centred, so a visible list does not drift under the reader
+- **Two levels, no third.** Depth comes from position in the `headings` selector
+  (`'h2, h3'`); a third selector is clamped with a dev warning. An index that needs
+  three levels means the page is too long, which is a layer-1 problem
+- **`--jrk-section-offset` on `.jrk-section-layout` is the single knob** for the
+  three things that must agree: where the index parks, how tall it may grow, and
+  the `scroll-margin-top` a jumped-to heading stops at. `<SectionNav>` reads the
+  resolved number off its own computed `top` rather than duplicating the constant
+- Clicking **moves focus into the section** (`tabindex="-1"`, `preventScroll`) so
+  Tab continues from the section rather than the index, and writes the id with
+  **`replaceState`** — the section is citable, but Back still leaves the page
+  instead of walking eleven headings backwards
+- The spy marks the **last heading past a reading line**, not the most-visible
+  section: most-visible never marks a short section between two long ones and
+  swaps between two similar ones on a single pixel of scroll. Bottom of document
+  snaps to the last entry; above the first heading the first entry is marked
+- **Below 1024px the column is dropped, not reflowed.** Reflowing it into a
+  horizontal pill row would be the named failure mode arriving as a responsive
+  artefact nobody chose. Legal because the index is an accelerator — every section
+  is still reachable by scrolling and every deep link still resolves
+- Live gallery page: `preview/sections.html` (real sticky, real scroll, both
+  themes). The vanilla controller there mirrors `SectionNav.tsx`; keep them in step
 
 ## Org chart
 

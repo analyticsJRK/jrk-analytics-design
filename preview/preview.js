@@ -10,6 +10,7 @@ const PAGES = [
   ['report.html', 'Report'],
   ['auth.html', 'Sign in'],
   ['dashboard.html', 'Dashboard'],
+  ['sections.html', 'Section index'],
 ];
 
 const STORAGE_KEY = 'jrk-preview-theme';
