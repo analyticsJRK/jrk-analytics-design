@@ -233,6 +233,29 @@
     content-visibility var(--jrk-transition) allow-discrete;
 }
 
+/* PADDING FOR ANYTHING THAT IS NOT A FULL-BLEED TABLE, added 2026-08-18.
+ *
+ * The panel had none at all, on the assumption its content is a `.jrk-table-wrap`
+ * meeting the card's edges — which the rule further down this file is entirely about.
+ * That assumption held while the only consumer put one table in here. It does not hold
+ * for a panel holding a REPORT: stat bands, nested cards and prose then start hard
+ * against the card's inner edge and stack with zero space between them, which is what
+ * an expanded cost breakdown looked like — reported as "zero margin or padding
+ * throughout".
+ *
+ * `:not(:has(> .jrk-table-wrap))` keeps the table case exactly as it was: a panel whose
+ * whole content is one wrap stays flush, because that wrap is drawn to meet the edges
+ * and padding around it would leave a gutter the card's own border already closed.
+ *
+ * The gap is what separates stacked children. A report in here is a sequence of
+ * sections, and without it two cards touch and read as one with a line through it. */
+.jrk-expander__panel-inner:not(:has(> .jrk-table-wrap)) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-4);
+  padding: var(--jrk-space-4) var(--jrk-space-5);
+}
+
 .jrk-expander[data-expanded='true'] .jrk-expander__panel {
   grid-template-rows: 1fr;
 }
