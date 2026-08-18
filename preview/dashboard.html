@@ -8,21 +8,81 @@
 <link rel="stylesheet" href="../css/index.css">
 <link rel="stylesheet" href="preview.css">
 <style>
-  /* The shell is full-height by design; inside the gallery it sits in flow. */
-  .jrk-app { min-height: 0; }
-  .jrk-sidebar { height: auto; min-height: 640px; position: static; }
-  .jrk-topbar { position: static; }
-  .gal-frame {
-    margin: var(--jrk-space-6);
-    border: 1px solid var(--jrk-border-default);
-    border-radius: var(--jrk-radius-2xl);
-    overflow: hidden;
+  /* THE SHELL IS NO LONGER FRAMED, and that is a requirement rather than a taste.
+     This page carries a live section index, whose whole behaviour is sticky
+     positioning and scroll tracking. The old .gal-frame was `overflow: hidden`,
+     which makes IT the sticky scroll box — and a box that never scrolls is a box
+     nothing can stick inside. The topbar and rail were also pinned to
+     `position: static` for the same framing. All three are gone: this is the real
+     shell, scrolling the document, at the real width.
+
+     What is lost is the rounded card the dashboard used to sit in on the gallery
+     index. What is gained is that every sticky surface in the library — rail,
+     topbar, section index — is now actually being exercised on this page. */
+
+  /* The gallery's own nav bar is sticky at top:0, and so are this page's topbar
+     and rail — three surfaces competing for the same 56px. On a framed demo that
+     never mattered; on a real shell it does. Dropping the gallery chrome to static
+     is the honest fix: the app's own chrome then sticks to the viewport exactly as
+     it does in production, and the gallery bar scrolls away like the page furniture
+     it is. */
+  .gal-nav { position: static; }
+
+  /* Page rhythm. The layout body mirrors .jrk-content__inner at space-5, which is
+     the gap between TILES; between named page SECTIONS that reads as one
+     undifferentiated stack. Sections are separated by space alone — no rules, no
+     fills — so the space has to be enough to do the job on its own. */
+  .jrk-section-layout__body { gap: var(--jrk-space-8); }
+
+  /* Gallery-local ground for the frosted demo: the library's own brand ramp, so
+     there is something real behind the glass. A frosted card over the flat page
+     blurs nothing and composites to a 1.03:1 step — see the modifier header in
+     card.css. */
+  .dash-glass-ground {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+    gap: var(--jrk-space-4);
+    padding: var(--jrk-space-5);
+    border-radius: var(--jrk-radius-md);
+    background: linear-gradient(
+      135deg,
+      var(--jrk-gradient-teal-from) 0%,
+      var(--jrk-gradient-blue-from) 52%,
+      var(--jrk-gradient-violet-from) 100%
+    );
+  }
+
+  /* A body tall enough that content actually passes UNDER the sticky frosted
+     summary — the second case where the material earns its keep. */
+  .dash-scroll-well {
+    max-height: 280px;
+    overflow-y: auto;
+    border: 1px solid var(--jrk-border-subtle);
+    border-radius: var(--jrk-radius-md);
+    background: var(--jrk-surface-default);
+  }
+  /* Squared and edge-less on three sides so it reads as a bar welded to the top
+     of the well rather than a card floating in it. COLOUR, never `border: 0` —
+     the house rule: `border: 0` also sets border-style to none, after which a
+     restored border-color paints nothing, and this way the 1px never reflows. */
+  .dash-scroll-well__bar {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    border-radius: 0;
+    border-inline-color: transparent;
+    border-block-start-color: transparent;
+  }
+  .dash-scroll-well__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--jrk-space-3);
+    padding: var(--jrk-space-4);
   }
 </style>
 </head>
 <body>
 
-<div class="gal-frame">
 <div class="jrk-app">
 
   <!-- Rail in the Snowsight shape: brand, then a row of VERBS behind a hairline,
@@ -172,6 +232,20 @@
           </div>
         </div>
 
+        <!-- ==================== the two-column layout ====================
+             .jrk-section-layout > __body + .jrk-section-nav. The page header
+             stays OUTSIDE it: the index indexes the report, not the chrome above
+             it, and a two-column grid starting at the breadcrumb would pull the
+             page title off the content's left edge. -->
+        <div class="jrk-section-layout">
+        <div class="jrk-section-layout__body">
+
+        <section class="jrk-section jrk-section--page">
+          <div class="jrk-section__header">
+            <h2 class="jrk-section__title" id="overview">Overview</h2>
+            <span class="jrk-caption">T12 · accrual basis · 47 properties</span>
+          </div>
+
         <div class="jrk-alert jrk-alert--warning" role="status">
           <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warningFill"></svg>
           <div class="jrk-alert__body">
@@ -261,8 +335,14 @@
           </div>
         </div>
 
-        <!-- charts -->
-        <div class="jrk-grid" style="--jrk-grid-min:min(100%, 420px)">
+        </section>
+
+        <section class="jrk-section jrk-section--page">
+          <div class="jrk-section__header">
+            <h2 class="jrk-section__title" id="collections">Collections</h2>
+            <button class="jrk-btn jrk-btn--link jrk-btn--sm">Open in report builder</button>
+          </div>
+
           <div class="jrk-chart-card">
             <div class="jrk-chart-card__header">
               <div>
@@ -278,6 +358,18 @@
               <div id="line-table" hidden></div>
             </div>
           </div>
+        </section>
+
+        <section class="jrk-section jrk-section--page">
+          <div class="jrk-section__header">
+            <h2 class="jrk-section__title" id="delinquency">Delinquency</h2>
+            <span class="jrk-caption">As of 29 Jul 2026</span>
+          </div>
+
+          <!-- TWO h3s INSIDE ONE h2 — the index's second level. Depth comes from
+               position in the `headings` selector ('h2, h3'), never from a prop,
+               and two levels is the cap. -->
+          <h3 class="jrk-section__title" id="top-balances">Top balances</h3>
 
           <div class="jrk-chart-card">
             <div class="jrk-chart-card__header">
@@ -290,14 +382,14 @@
               <div class="jrk-chart"><div class="jrk-bars" id="bar-list" style="--jrk-bars-label:150px"></div></div>
             </div>
           </div>
-        </div>
 
-        <!-- table -->
-        <section class="jrk-section">
-          <div class="jrk-section__header">
-            <h2 class="jrk-section__title">Properties needing attention</h2>
-            <button class="jrk-btn jrk-btn--link jrk-btn--sm">View all 47</button>
-          </div>
+          <h3 class="jrk-section__title" id="by-property">By property</h3>
+
+          <div class="jrk-section">
+            <div class="jrk-section__header">
+              <span class="jrk-caption">6 of 47 properties, ranked by delinquency</span>
+              <button class="jrk-btn jrk-btn--link jrk-btn--sm">View all 47</button>
+            </div>
           <div class="jrk-table-wrap">
             <table class="jrk-table">
               <caption class="jrk-sr-only">Properties needing attention, sorted by delinquency descending</caption>
@@ -326,12 +418,291 @@
               </div>
             </div>
           </div>
+          </div>
         </section>
+
+        <!-- ==================== surfaces / frosted ==================== -->
+        <section class="jrk-section jrk-section--page">
+          <div class="jrk-section__header">
+            <h2 class="jrk-section__title" id="surfaces">Surfaces</h2>
+            <span class="jrk-caption">.jrk-card--frosted</span>
+          </div>
+
+          <p class="jrk-caption" style="max-width:78ch">
+            The topbar's vibrancy material, on a tile. It is only worth spending where
+            there is something BEHIND the card: over the flat page there is nothing to
+            blur and the 72% mix composites to a 1.03:1 step, which is a normal card that
+            has quietly given up its fill. Both cases that earn it are below.
+          </p>
+
+          <!-- Case 1: laid on a saturated ground. -->
+          <div class="dash-glass-ground">
+            <section class="jrk-card">
+              <div class="jrk-card__body">
+                <h3 class="jrk-card__title">Opaque</h3>
+                <p class="jrk-card__subtitle">Plain <code class="jrk-mono">.jrk-card</code>. The ramp stops dead at the edge.</p>
+              </div>
+            </section>
+            <section class="jrk-card jrk-card--frosted">
+              <div class="jrk-card__body">
+                <h3 class="jrk-card__title">Frosted</h3>
+                <p class="jrk-card__subtitle">72% fill over <code class="jrk-mono">saturate(180%) blur(20px)</code>. The ramp reads through, shifted and softened.</p>
+              </div>
+            </section>
+            <section class="jrk-card jrk-card--frosted">
+              <div class="jrk-card__body">
+                <h3 class="jrk-card__title">Collected rent · $4.21M</h3>
+                <p class="jrk-card__subtitle">This subtitle is the proof: <code class="jrk-mono">.jrk-card__subtitle</code> is <code class="jrk-mono">text.muted</code> everywhere else, and the modifier re-inks it to <code class="jrk-mono">text.secondary</code> — muted lands at 3.4:1 once a saturated ground shows through.</p>
+              </div>
+            </section>
+          </div>
+
+          <!-- Case 2: content scrolls underneath it. Scroll the well. -->
+          <div class="dash-scroll-well">
+            <div class="jrk-card jrk-card--frosted dash-scroll-well__bar">
+              <div class="jrk-card__body">
+                <div class="jrk-row" style="align-items:baseline;gap:var(--jrk-space-3)">
+                  <strong>12 delinquent accounts</strong>
+                  <span class="jrk-spacer"></span>
+                  <span class="jrk-caption">Scroll — the rows pass under the glass</span>
+                </div>
+              </div>
+            </div>
+            <div class="dash-scroll-well__body">
+              <div class="jrk-list">
+                <ul class="jrk-list__group">
+                  <li class="jrk-list__row"><span class="jrk-list__label">Unit 214 · M. Alvarez</span><span class="jrk-list__value">$4,208.00</span></li>
+                  <li class="jrk-list__row"><span class="jrk-list__label">Unit 118 · R. Okafor</span><span class="jrk-list__value">$3,940.00</span></li>
+                  <li class="jrk-list__row"><span class="jrk-list__label">Unit 402 · T. Nguyen</span><span class="jrk-list__value">$3,110.00</span></li>
+                  <li class="jrk-list__row"><span class="jrk-list__label">Unit 307 · S. Whitfield</span><span class="jrk-list__value">$2,884.00</span></li>
+                  <li class="jrk-list__row"><span class="jrk-list__label">Unit 511 · D. Brennan</span><span class="jrk-list__value">$2,640.00</span></li>
+                  <li class="jrk-list__row"><span class="jrk-list__label">Unit 226 · A. Kowalski</span><span class="jrk-list__value">$2,415.00</span></li>
+                  <li class="jrk-list__row"><span class="jrk-list__label">Unit 133 · L. Mbeki</span><span class="jrk-list__value">$2,208.00</span></li>
+                  <li class="jrk-list__row"><span class="jrk-list__label">Unit 620 · P. Castellanos</span><span class="jrk-list__value">$1,975.00</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="jrk-alert jrk-alert--accent" role="status">
+            <svg class="jrk-alert__icon" viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.5h.01"/></svg>
+            <div class="jrk-alert__body">
+              <p class="jrk-alert__title">A link is the one ink frost cannot fix</p>
+              <p class="jrk-alert__text">accent.text falls to 3.45:1 once a saturated ground shows through, and it is already the shallowest passing step on the hue — so there is no value to swap in. Keep links off a frosted card over colour. The full hand-measured table is in card.css.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== leasing ==================== -->
+        <section class="jrk-section jrk-section--page">
+          <div class="jrk-section__header">
+            <h2 class="jrk-section__title" id="leasing">Leasing pipeline</h2>
+            <span class="jrk-caption">Expandable cards — open one</span>
+          </div>
+
+          <div class="jrk-expander-row">
+            <section class="jrk-card jrk-expander" data-expanded="false">
+              <h3 class="jrk-expander__heading" id="dexp-1-h">
+                <button class="jrk-expander__summary" aria-expanded="false" aria-controls="dexp-1">
+                  <span class="jrk-expander__icon">
+                    <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="clock"></svg>
+                  </span>
+                  <span class="jrk-expander__text">
+                    <span class="jrk-expander__tag">renewals</span>
+                    <span class="jrk-expander__title">218 leases expire in the next 60 days</span>
+                    <span class="jrk-expander__desc">Renewal offers are out on 164. The remaining 54 are past the notice window.</span>
+                  </span>
+                  <svg class="jrk-icon jrk-expander__caret" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg>
+                </button>
+              </h3>
+              <div class="jrk-expander__panel" id="dexp-1" role="region" aria-labelledby="dexp-1-h">
+                <div class="jrk-expander__panel-inner">
+                  <div class="jrk-table-wrap">
+                    <table class="jrk-table jrk-table--compact">
+                      <thead><tr><th scope="col">Property</th><th scope="col" class="jrk-num">Expiring</th><th scope="col" class="jrk-num">Offered</th><th scope="col" class="jrk-num">Past notice</th></tr></thead>
+                      <tbody>
+                        <tr><th scope="row">Harbor Point</th><td class="jrk-num">64</td><td class="jrk-num">51</td><td class="jrk-num">13</td></tr>
+                        <tr><th scope="row">Bellevue Commons</th><td class="jrk-num">48</td><td class="jrk-num">40</td><td class="jrk-num">8</td></tr>
+                        <tr><th scope="row">Lakeshore East</th><td class="jrk-num">44</td><td class="jrk-num">33</td><td class="jrk-num">11</td></tr>
+                        <tr><th scope="row">Cedar Grove</th><td class="jrk-num">36</td><td class="jrk-num">25</td><td class="jrk-num">11</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <p class="jrk-expander__footer">+26 across three more properties.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="jrk-card jrk-expander jrk-expander--pastel jrk-expander--teal" data-expanded="false">
+              <h3 class="jrk-expander__heading" id="dexp-2-h">
+                <button class="jrk-expander__summary" aria-expanded="false" aria-controls="dexp-2">
+                  <span class="jrk-expander__icon">
+                    <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="house"></svg>
+                  </span>
+                  <span class="jrk-expander__text">
+                    <span class="jrk-expander__tag">turns</span>
+                    <span class="jrk-expander__title">41 units down for turn</span>
+                    <span class="jrk-expander__desc">Averaging 18.4 days against a 14-day target. Nine are past 30.</span>
+                  </span>
+                  <svg class="jrk-icon jrk-expander__caret" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg>
+                </button>
+              </h3>
+              <div class="jrk-expander__panel" id="dexp-2" role="region" aria-labelledby="dexp-2-h">
+                <div class="jrk-expander__panel-inner">
+                  <p>Turn time is measured from move-out inspection to rent-ready, so it includes vendor scheduling. The nine units past 30 days are all waiting on the same flooring contractor.</p>
+                </div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <!-- ==================== activity ==================== -->
+        <section class="jrk-section jrk-section--page">
+          <div class="jrk-section__header">
+            <h2 class="jrk-section__title" id="activity">Activity</h2>
+            <button class="jrk-btn jrk-btn--link jrk-btn--sm">Open audit log</button>
+          </div>
+
+          <div class="jrk-grid jrk-grid-2">
+            <div class="jrk-list">
+              <div class="jrk-list__header">This report</div>
+              <ul class="jrk-list__group">
+                <li class="jrk-list__row"><span class="jrk-list__label">Period</span><span class="jrk-list__value">Quarter to date</span></li>
+                <li class="jrk-list__row"><span class="jrk-list__label">Basis</span><span class="jrk-list__value">Accrual</span></li>
+                <li class="jrk-list__row"><span class="jrk-list__label">Last full load</span><span class="jrk-list__value">29 Jul 2026, 04:12 ET</span></li>
+                <li class="jrk-list__row jrk-list__row--control">
+                  <span class="jrk-list__label">Auto-refresh</span>
+                  <label class="jrk-switch"><input type="checkbox" role="switch" checked><span class="jrk-sr-only">Auto-refresh</span></label>
+                </li>
+              </ul>
+              <p class="jrk-list__footer">Applies to every metric on this page.</p>
+            </div>
+
+            <div class="jrk-list">
+              <div class="jrk-list__header">Recent changes</div>
+              <ul class="jrk-list__group">
+                <li><a class="jrk-list__row jrk-list__row--link" href="#"><span class="jrk-list__label">Riverside Flats reclassified</span><span class="jrk-list__value">2h ago</span></a></li>
+                <li><a class="jrk-list__row jrk-list__row--link" href="#"><span class="jrk-list__label">July close posted, 44 properties</span><span class="jrk-list__value">6h ago</span></a></li>
+                <li><a class="jrk-list__row jrk-list__row--link" href="#"><span class="jrk-list__label">Budget v3 approved</span><span class="jrk-list__value">2d ago</span></a></li>
+              </ul>
+              <p class="jrk-list__footer">A row that navigates shows a chevron — never a button.</p>
+            </div>
+          </div>
+
+          <div class="jrk-row" style="gap:var(--jrk-space-2);flex-wrap:wrap">
+            <span class="jrk-badge jrk-badge--good"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="checkFill"></svg>Reconciled</span>
+            <span class="jrk-badge jrk-badge--warning"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warningFill"></svg>3 pending</span>
+            <span class="jrk-badge jrk-badge--critical"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="criticalFill"></svg>12 escalated</span>
+            <span class="jrk-tag">Occupancy &gt; 90%<button class="jrk-tag__remove" aria-label="Remove filter"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="close"></svg></button></span>
+            <span class="jrk-tag">Southeast<button class="jrk-tag__remove" aria-label="Remove filter"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="close"></svg></button></span>
+          </div>
+        </section>
+
+        <!-- ==================== saved views ==================== -->
+        <section class="jrk-section jrk-section--page">
+          <div class="jrk-section__header">
+            <h2 class="jrk-section__title" id="views">Saved views</h2>
+            <button class="jrk-btn jrk-btn--primary jrk-btn--sm">New view</button>
+          </div>
+
+          <div class="jrk-filter-bar">
+            <select class="jrk-select jrk-select--sm" aria-label="Period"><option>Quarter to date</option><option>Last 30 days</option><option>Year to date</option></select>
+            <select class="jrk-select jrk-select--sm" aria-label="Region"><option>All regions</option><option>Southeast</option><option>Midwest</option></select>
+            <div class="jrk-tabs jrk-tabs--pills" role="tablist" aria-label="View mode">
+              <button class="jrk-tab" role="tab" aria-selected="true">Chart</button>
+              <button class="jrk-tab" role="tab" aria-selected="false">Table</button>
+            </div>
+            <span class="jrk-spacer"></span>
+            <button class="jrk-btn jrk-btn--ghost jrk-btn--sm">Reset</button>
+          </div>
+
+          <div class="jrk-grid jrk-grid-3">
+            <div class="jrk-field">
+              <label class="jrk-field__label" for="d-name">View name</label>
+              <input class="jrk-input" id="d-name" value="Southeast delinquency">
+            </div>
+            <div class="jrk-field">
+              <label class="jrk-field__label" for="d-owner">Shared with</label>
+              <select class="jrk-select" id="d-owner"><option>Asset management</option><option>Regional directors</option><option selected>Everyone</option></select>
+            </div>
+            <div class="jrk-field">
+              <label class="jrk-field__label" for="d-thresh">Alert threshold</label>
+              <input class="jrk-input jrk-input--numeric" id="d-thresh" value="5.0">
+              <span class="jrk-field__help">Percent delinquent, 30+ days.</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== data states ==================== -->
+        <section class="jrk-section jrk-section--page">
+          <div class="jrk-section__header">
+            <h2 class="jrk-section__title" id="states">Data states</h2>
+            <span class="jrk-caption">Loading · empty · error · partial</span>
+          </div>
+
+          <div class="jrk-grid jrk-grid-2">
+            <div class="jrk-card">
+              <div class="jrk-card__body">
+                <div class="jrk-empty">
+                  <svg class="jrk-empty__icon" viewBox="0 0 40 40" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="9" width="28" height="24" rx="3"/><path d="M6 16h28M14 9v24"/></svg>
+                  <p class="jrk-empty__title">No delinquencies</p>
+                  <p class="jrk-empty__text">Nothing is past due in this period. Widen the date range or clear the occupancy filter to see more.</p>
+                  <div class="jrk-empty__actions"><button class="jrk-btn jrk-btn--secondary jrk-btn--sm">Clear filters</button></div>
+                </div>
+              </div>
+            </div>
+            <div class="jrk-card">
+              <div class="jrk-card__body">
+                <div class="jrk-loading">
+                  <span class="jrk-spinner jrk-spinner--lg" aria-hidden="true"></span>
+                  <span role="status">Loading portfolio data…</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="jrk-alert jrk-alert--critical" role="alert">
+            <svg class="jrk-alert__icon" viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round"><circle cx="10" cy="10" r="8"/><path d="M10 6v5M10 13.5h.01"/></svg>
+            <div class="jrk-alert__body">
+              <p class="jrk-alert__title">Snowflake sync failed</p>
+              <p class="jrk-alert__text">Last successful load was 14 hours ago. Figures above may be stale.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================== methodology ==================== -->
+        <section class="jrk-section jrk-section--page">
+          <div class="jrk-section__header">
+            <h2 class="jrk-section__title" id="methodology">Methodology</h2>
+          </div>
+          <div class="jrk-card">
+            <div class="jrk-card__body">
+              <p>T12 on an accrual basis. NOI excludes capital and debt service. Year-over-year compares the trailing twelve months to the twelve before it, not calendar years — the two differ by roughly 40 basis points across this portfolio.</p>
+              <p class="jrk-card__subtitle" style="margin-top:var(--jrk-space-3)">
+                Scroll back up and watch the index: the marker follows the heading that has
+                reached the reading line, and when the list is taller than its column the
+                index scrolls itself just far enough to keep that row on screen.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        </div>
+
+        <!-- The index is DERIVED — this markup is an empty shell, and the
+             controller at the bottom of the page fills it from the headings in
+             __body, exactly as <SectionNav> does in React. There is deliberately
+             no authored list here to fall out of step with the page. -->
+        <nav class="jrk-section-nav" aria-labelledby="dash-index-title">
+          <p class="jrk-section-nav__title" id="dash-index-title">On this page</p>
+          <ul class="jrk-section-nav__list"></ul>
+        </nav>
+
+        </div>
 
       </div>
     </main>
   </div>
-</div>
 </div>
 
 <script type="module" src="preview.js"></script>
@@ -542,6 +913,182 @@ $('rows').innerHTML=ROWS.map(([name,region,tone,units,occ,bal,del])=>`
      it animates the width over 200ms without ever resizing the window, so a
      one-shot measurement lands the panel mid-transition and leaves it adrift. */
   new ResizeObserver(replace).observe(rail);
+})();
+
+/* ---------------- expandable cards ---------------- */
+/* Gallery chrome — <Expander> owns this state in an app. data-expanded and
+   aria-expanded carry the same fact: the attribute on the button is the
+   accessible truth, and CSS cannot reach up from it to the card that restyles. */
+document.querySelectorAll('.jrk-expander__summary').forEach((btn) => {
+  btn.onclick = () => {
+    const open = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!open));
+    btn.closest('.jrk-expander').dataset.expanded = String(!open);
+  };
+});
+
+/* ---------------- section index ----------------
+ *
+ * The vanilla twin of <SectionNav>. Repeated here in plain JS for the same reason
+ * the flyout controller above is: the CSS layer is the primary interface and has
+ * to stand up without React. Every decision mirrors SectionNav.tsx — read the
+ * comments there for the why, and keep the two in step.
+ *
+ * THE SELECTOR IS SCOPED, AND THAT IS THE ONE THING TO COPY FROM THIS PAGE.
+ * <SectionNav>'s default is 'h2, h3', which is right for a document and WRONG for
+ * a page like this: a component-dense dashboard is full of headings that are not
+ * sections — every .jrk-card__title, every .jrk-chart-card__title and every
+ * .jrk-expander__heading is an <h3>, and the expander's even carries an id for its
+ * own aria-labelledby. An unscoped index would list nineteen rows, most of them
+ * tiles. Naming the section headings positionally is the author saying which
+ * headings are sections; the LABELS still come off the document, which is the part
+ * that must never be authored. Two selectors, so two levels. */
+(() => {
+  const nav = document.querySelector('.jrk-section-nav');
+  const body = document.querySelector('.jrk-section-layout__body');
+  const list = nav.querySelector('.jrk-section-nav__list');
+  const HEADINGS = [
+    '.jrk-section--page > .jrk-section__header > h2',
+    '.jrk-section--page > h3.jrk-section__title',
+  ];
+  const LINE_SLOP = 8;
+
+  /* One source for the offset: the nav's own computed `top`, which the browser has
+     already resolved from --jrk-section-offset. No constant to keep in step. */
+  const offset = () => parseFloat(getComputedStyle(nav).top) || 72;
+
+  let entries = [];
+  let lock = null;
+
+  function derive() {
+    const margin = `${offset()}px`;
+    entries = [...body.querySelectorAll(HEADINGS.join(', '))]
+      .map((el) => {
+        const label = (el.dataset.sectionLabel || el.textContent || '').trim();
+        if (!label || !el.id) return null;
+        if (el.style.scrollMarginTop !== margin) el.style.scrollMarginTop = margin;
+        if (el.tabIndex !== -1) el.tabIndex = -1;
+        return { id: el.id, label, sub: el.matches(HEADINGS[1]), el };
+      })
+      .filter(Boolean);
+
+    list.innerHTML = entries
+      /* The __label span is required — the dot is the link's ::after and the
+         label is what fades, so they have to be separate boxes. */
+      .map((e) =>
+        `<li><a class="jrk-section-nav__link${e.sub ? ' jrk-section-nav__link--sub' : ''}" href="#${e.id}">` +
+        `<span class="jrk-section-nav__label">${e.label}</span></a></li>`)
+      .join('');
+  }
+
+  /* Last heading to have reached the reading line — a POSITION test, not a
+     most-visible test. Most-visible never marks a short section between two long
+     ones, and swaps the marker back and forth between two similar ones. */
+  function compute() {
+    if (!entries.length) return null;
+    const doc = document.documentElement;
+    if (window.scrollY + window.innerHeight >= doc.scrollHeight - 2) {
+      return entries[entries.length - 1].id;
+    }
+    const line = offset() + LINE_SLOP;
+    let current = entries[0].id;
+    for (const e of entries) {
+      if (e.el.getBoundingClientRect().top > line) break;
+      current = e.id;
+    }
+    return current;
+  }
+
+  /* THE INDEX SCROLLS TOO. Once the page has more sections than the index column
+     is tall, the marked row can sit outside the index's own scroll box — and an
+     index whose current row is off its own screen answers nothing.
+   *
+   * NOT row.scrollIntoView({ block: 'nearest' }), which is the obvious call and is
+   * wrong here: scrollIntoView walks EVERY scrollable ancestor up to the document,
+   * so it would re-scroll the page a click had just started moving. Scrolling one
+   * box by a computed delta only does what it says.
+   *
+   * Nearest-edge, never centred: centring re-scrolls the index on every step down
+   * the list, so a comfortably visible list appears to drift for no reason. */
+  function reveal(row) {
+    if (!row || nav.scrollHeight <= nav.clientHeight) return;
+    const pad = 8;
+    const navBox = nav.getBoundingClientRect();
+    const rowBox = row.getBoundingClientRect();
+    let delta = 0;
+    if (rowBox.top < navBox.top + pad) delta = rowBox.top - (navBox.top + pad);
+    else if (rowBox.bottom > navBox.bottom - pad) delta = rowBox.bottom - (navBox.bottom - pad);
+    if (!delta) return;
+    nav.scrollTo({ top: nav.scrollTop + delta, behavior: reduced() ? 'auto' : 'smooth' });
+  }
+
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function paint(id) {
+    let marked = null;
+    for (const a of list.querySelectorAll('.jrk-section-nav__link')) {
+      if (a.getAttribute('href') === `#${id}`) {
+        a.setAttribute('aria-current', 'location');
+        marked = a;
+      } else {
+        a.removeAttribute('aria-current');
+      }
+    }
+    reveal(marked);
+  }
+
+  let frame = 0;
+  function onScroll() {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      if (!lock) paint(compute());
+    });
+  }
+
+  list.addEventListener('click', (event) => {
+    const link = event.target.closest('.jrk-section-nav__link');
+    if (!link) return;
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+
+    const id = decodeURIComponent(link.getAttribute('href').slice(1));
+    const entry = entries.find((e) => e.id === id);
+    if (!entry) return;
+
+    const reduce = reduced();
+    entry.el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    /* preventScroll because scrollIntoView already placed the section, honouring
+       its scroll-margin; letting focus() scroll as well slams the heading to the
+       very top and back under the bar. Focus moves INTO the section so Tab
+       continues from there rather than from the index. */
+    entry.el.focus({ preventScroll: true });
+
+    paint(id);
+    /* Held while the smooth scroll runs, or the marker stutters through every
+       section the page flies past instead of moving once. */
+    lock = id;
+    setTimeout(() => { lock = null; }, reduce ? 0 : 700);
+
+    /* replaceState: the section is citable, and Back still leaves the page rather
+       than walking nine headings backwards. */
+    history.replaceState(null, '', `#${encodeURIComponent(id)}`);
+  });
+
+  derive();
+  paint(compute());
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  /* Content that arrives after first paint — a loaded report, a revealed section —
+     is the normal case on these pages, and an index that only reflects the first
+     paint is exactly the drift this component exists to prevent. The observer is
+     not given `attributes`, so the id / tabindex / scroll-margin writes in derive()
+     cannot schedule it in a loop. */
+  new MutationObserver(() => { derive(); paint(compute()); }).observe(body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
 })();
 </script>
 </body>

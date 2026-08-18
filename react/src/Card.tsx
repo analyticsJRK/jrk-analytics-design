@@ -12,6 +12,20 @@ export interface CardProps {
   raised?: boolean;
   /** Removes body padding — for a table or chart that should meet the edges. */
   flush?: boolean;
+  /** The topbar's vibrancy material on a tile — a 72% fill over a saturated blur.
+   *
+   *  ONLY for a card with content BEHIND it: a sticky summary over a scrolling
+   *  body, a panel laid on the vivid gradient band, a tile over an image. Over the
+   *  plain page there is nothing to blur and the mix composites to a 1.03:1 step,
+   *  so it is a normal card that has given up its fill for no visible effect.
+   *
+   *  It re-inks muted text to `text.secondary` on its own, because muted lands at
+   *  3.4:1 once a saturated ground shows through. A LINK is still not safe there
+   *  (`accent.text` falls to 3.45:1) and cannot be fixed by re-inking — the anchor
+   *  is already the shallowest passing step on the hue. Read the modifier's header
+   *  in card.css for the full hand-measured table; nothing gates a colour that is
+   *  composited at runtime. */
+  frosted?: boolean;
   className?: string;
 }
 
@@ -23,10 +37,18 @@ export function Card({
   children,
   raised,
   flush,
+  frosted,
   className,
 }: CardProps) {
   return (
-    <section className={cx('jrk-card', raised && 'jrk-card--raised', className)}>
+    <section
+      className={cx(
+        'jrk-card',
+        raised && 'jrk-card--raised',
+        frosted && 'jrk-card--frosted',
+        className,
+      )}
+    >
       {(title || actions) && (
         <header className="jrk-card__header">
           <div>

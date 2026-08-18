@@ -57,6 +57,9 @@ export type { OrgChartProps, OrgNodeProps } from './Org';
 export { AuthLayout, SsoButton } from './Auth';
 export type { AuthLayoutProps, SsoButtonProps } from './Auth';
 
+export { SectionNav } from './SectionNav';
+export type { SectionNavProps } from './SectionNav';
+
 export { SpotlightGuide } from './Spotlight';
 export type {
   SpotlightGuideProps,

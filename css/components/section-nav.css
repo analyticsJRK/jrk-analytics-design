@@ -1,0 +1,420 @@
+/* Section index — the "where am I on this page" rail for a long vertical view.
+ *
+ * ------------------------------------------------------------------------
+ * WHY THIS EXISTS AT ALL, GIVEN THAT LAYER 2 NAMES IT AS A FAILURE MODE
+ * ------------------------------------------------------------------------
+ * philosophy.md is explicit: "A 'jump to section' pill row *plus* a sidebar
+ * *plus* tabs *plus* expandable cards *plus* a '3 more types' disclosure is five
+ * answers to one question, and it is the most common IA failure in this
+ * product." That entry is not overruled here. It is the reason this component
+ * has the shape it has, because the same paragraph grants exactly one way
+ * through: "the index should be DERIVED FROM THE SECTIONS THEMSELVES, so it
+ * cannot drift from them."
+ *
+ * So two constraints are load-bearing and neither is negotiable by a caller:
+ *
+ *   1. THE INDEX IS DERIVED, NEVER AUTHORED. <SectionNav> takes no item list —
+ *      there is no `items` prop to pass, in the same spirit as seriesColor(8)
+ *      throwing. A hand-written index is a second source of truth for the page's
+ *      own structure and it goes stale the first time a section is renamed. If
+ *      you find yourself wanting to list the sections by hand, the thing you
+ *      actually want is a sidebar, and the library already has one.
+ *
+ *   2. IT IS A FOURTH QUESTION, NOT A FOURTH SPINE. Breadcrumb answers "where am
+ *      I", sidebar "where else can I go", tabs "what are the facets of this
+ *      thing". Those three are all about NAVIGATING BETWEEN DOCUMENTS. This one
+ *      answers "where am I INSIDE this document" — a reading position, which is
+ *      continuous rather than a selection, and which none of the three can
+ *      answer. The cap in philosophy.md is a cap on answers to ONE question; it
+ *      is not a cap on questions.
+ *
+ *      The corollary is the review rule that comes with this component: a page
+ *      showing tabs AND a section index has to justify both, because a tab row
+ *      whose panels are really just parts of one long page is a section index
+ *      wearing the wrong widget. Pick one.
+ *
+ * A THIRD THING, learned by building the dashboard demo rather than by argument:
+ * <SectionNav>'s default heading selector is 'h2, h3', which is correct for a page
+ * of prose and wrong for a page of components. Every .jrk-card__title,
+ * .jrk-chart-card__title and .jrk-expander__heading in this library is an <h3>, and
+ * the expander's carries its own id for aria-labelledby — so an unscoped index on a
+ * dashboard lists the tiles, and "require an id" does not save you. Scope the
+ * selector positionally at the call site. See preview/dashboard.html for the scoped
+ * form and preview/sections.html for the prose page where the default is right.
+ *
+ * Layout contract — the two-column form:
+ *   .jrk-section-layout > .jrk-section-layout__body + .jrk-section-nav
+ *
+ * The nav is on the TRAILING edge. The app rail is already on the leading one,
+ * and two vertical lists of links down the left of the same screen is the
+ * "answers to one question" fault arriving through geometry rather than through
+ * information architecture.
+ *
+ * Markup contract — the nav itself. THE LABEL SPAN IS REQUIRED: the dot is the
+ * link's ::after and the label is the thing that fades, so a bare text node in the
+ * anchor cannot be revealed independently of the row it sits in.
+ *   <nav class="jrk-section-nav" aria-label="On this page">
+ *     <p class="jrk-section-nav__title">On this page</p>
+ *     <ul class="jrk-section-nav__list">
+ *       <li><a class="jrk-section-nav__link" href="#id" aria-current="location">
+ *         <span class="jrk-section-nav__label">…</span></a></li>
+ *       <li><a class="jrk-section-nav__link jrk-section-nav__link--sub" href="#id">
+ *         <span class="jrk-section-nav__label">…</span></a></li>
+ *     </ul>
+ *   </nav>
+ *
+ * aria-current="location", NOT "page", and the distinction is the whole reason
+ * this component is not just .jrk-nav-item with a different parent. The page has
+ * not changed — the rail's own aria-current="page" row is still true and still
+ * on screen. Two elements claiming "page" is literally two answers to where-am-I
+ * in the accessibility tree, where a screen reader cannot see the layout that
+ * makes the difference obvious. "location" is the ARIA value for a position
+ * within a context and it is the correct one here. Every selector below keys on
+ * the attribute rather than on a modifier class, so the painted state and the
+ * announced state cannot drift.
+ */
+
+/* ============================== layout ============================== */
+
+/* Two columns, and the index column is sized by its own content rather than by a
+   track, so the body column takes everything else. `align-items: start` is what
+   lets the nav be sticky at all: a stretched grid item is full-height, and
+   position:sticky on a full-height box never has anywhere to move to. */
+.jrk-section-layout {
+  /* THE SCROLL OFFSET, in one place, because three separate things need the same
+     number and they must agree: where the sticky index parks, how tall it may
+     grow, and how far above a heading the scroll stops. Get them out of step and
+     either the index sits under the topbar or the heading you clicked lands
+     behind it.
+
+     56px topbar + 16px of air. An app with different chrome overrides this one
+     property on this element and all three follow. */
+  --jrk-section-offset: calc(var(--jrk-topbar-default) + var(--jrk-space-4));
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--jrk-space-6);
+  align-items: start;
+}
+
+/* Mirrors .jrk-content__inner — the body column is the same stack of tiles it
+   would have been without an index beside it, so wrapping an existing page in
+   the layout does not restyle its contents. `min-width: 0` on top of the
+   minmax(0, 1fr), because a wide table inside a grid item resolves its own
+   min-content width and stretches the track otherwise; the two together are what
+   make an overflowing table scroll internally instead of shoving the index off
+   the page. */
+.jrk-section-layout__body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-5);
+}
+
+/* THE TARGETS NEED THE OFFSET TOO, and this is the rule that stops a clicked
+   heading landing behind the sticky topbar. It is set here for the plain-HTML
+   path; <SectionNav> also writes scroll-margin-top onto every heading it indexes
+   at derive time, reading the resolved value off its own computed `top`, so the
+   React path works even when the nav is used outside this layout.
+
+   :where() so the whole thing stays at specificity 0 and a consumer's own
+   scroll-margin on a heading wins without needing !important. */
+.jrk-section-layout__body :where(h2, h3, h4, [data-section])[id] {
+  scroll-margin-top: var(--jrk-section-offset);
+}
+
+/* ============================== the index ============================== */
+
+/* A VERTICAL LINE OF DOTS, directed. The index was a track with a label on every
+ * row and an accent segment marking the current one; it is now a hairline spine
+ * with one dot per section, and the labels are revealed rather than resident.
+ *
+ * READ THIS BEFORE TIDYING ANYTHING BELOW, because the form spends a signifier
+ * and the mitigations are not decoration.
+ *
+ * WHAT THE CHANGE COSTS. At rest a reader can no longer SEE what the sections
+ * are; they can only see how many there are and which one they are in. That is
+ * discoverability traded for quiet, which is the exact Norman-versus-Ive tension
+ * layer 3 exists to arbitrate, and layer 3 normally refuses the trade — "never a
+ * bare icon button" is this library's shortest statement of it. A bare dot is
+ * strictly worse than a bare icon: an icon at least gestures at its meaning.
+ *
+ * WHAT MAKES IT LEGAL ANYWAY, and all three are load-bearing:
+ *
+ *   1. THE CURRENT SECTION'S LABEL IS ALWAYS VISIBLE. The index still answers
+ *      "where am I" IN WORDS at rest, which is the question it exists for. Only
+ *      "what else is there" is deferred. Do not fold this into the hover rule.
+ *   2. THE WHOLE LIST REVEALS ON HOVER OR FOCUS ANYWHERE IN THE NAV — not per
+ *      row. Approaching the rail with the pointer, or tabbing into it, restores
+ *      the full labelled index, so the deferred question costs one gesture rather
+ *      than one gesture per section.
+ *   3. EVERY LABEL IS ALWAYS IN THE ACCESSIBILITY TREE. The rows hide with
+ *      `opacity`, never `display: none` or `visibility: hidden`, so a screen
+ *      reader gets the same index it always had. This is the "tooltip plus an
+ *      accessible name" escape hatch the bare-icon rule names, and it only works
+ *      because of the property chosen — swapping opacity for visibility here
+ *      silently deletes the index for anyone not using their eyes.
+ *
+ * WHAT MARKS THE CURRENT ONE, in channel order, because the previous form's
+ * three channels had to be re-earned rather than assumed:
+ *
+ *   hue        accent.solid dot — 5.04:1 on the light page, 8.41:1 on the dark
+ *              one, against text.muted dots at 4.90:1 / 6.41:1. A real 1.4.11
+ *              signifier in both themes. Dies in greyscale.
+ *   size       10px against 6px (4px on a sub-row). SURVIVES GREYSCALE, and it
+ *              is why the dots are scaled rather than recoloured alone.
+ *   presence   its label is painted and the others are not. The strongest channel
+ *              on the component and the one a tidy-up is most likely to remove.
+ *   weight     semibold on that label, same instruction as .jrk-nav-item: keep it.
+ *
+ * The resting dots are at 4.90:1 rather than something fainter ON PURPOSE. They
+ * are not decoration — each one is a link target, and a control a reader cannot
+ * find is a control that does not exist. `border.strong` was the tempting value
+ * and it is 1.47:1 on the page: invisible at 6px.
+ *
+ * Every figure here is hand-measured against surface.canvas, because NOTHING
+ * GATES THEM — `validate` sees named tokens against text and marks, never a dot
+ * against the page it sits on. On `.jrk-content--document` the ground is the card
+ * fill instead and both figures improve slightly (5.22:1 / 5.07:1), so the page
+ * is the binding surface, as it is everywhere else in this library. */
+
+.jrk-section-nav {
+  /* Resolved once into a local property because it is needed twice and the
+     fallback chain is long. The fallback covers standalone use outside
+     .jrk-section-layout, where --jrk-section-offset is inherited from nowhere. */
+  --jrk-section-top: var(
+    --jrk-section-offset,
+    calc(var(--jrk-topbar-default) + var(--jrk-space-4))
+  );
+
+  /* The gap between the end of a label and the spine. One property so the title,
+     the rows and the dots cannot drift out of alignment with each other. */
+  --jrk-section-gutter: var(--jrk-space-4);
+
+  position: sticky;
+  top: var(--jrk-section-top);
+  /* An index longer than the viewport scrolls itself rather than being cut off at
+     the fold — the one place "resolve overflow by disclosure, not by scrolling"
+     does not apply, because there is nothing left to disclose: the index IS the
+     disclosure. */
+  max-height: calc(100vh - var(--jrk-section-top) - var(--jrk-space-6));
+  overflow-y: auto;
+  /* NARROWER THAN THE LABELLED FORM'S 208px, because the labels no longer have to
+     wrap — they are one nowrap line each, ellipsised, with `data-section-label` on
+     the heading as the documented fix for a section name too long to fit. Most of
+     this width is deliberately empty: the dots sit on the trailing edge and the
+     revealed labels run back toward the content. */
+  width: 180px;
+  /* NOT DECORATION — it is what keeps the dots and the focus ring on screen.
+     `overflow-y: auto` forces the other axis into a scroll container too (a
+     `visible` axis paired with a non-visible one computes to `auto`), so this box
+     clips horizontally. A dot's box hangs 6.5px past the list's content edge and
+     a row's focus ring is base.css's 1.5px outline at a 1px offset; 8px clears
+     both. Same clipping rule that forces .jrk-nav-flyout to escape its rail with
+     position: fixed. */
+  padding-inline: var(--jrk-space-2);
+  flex-shrink: 0;
+}
+
+/* Tracks .jrk-sidebar__group in size, weight, colour and sentence case — the two
+   are the same object (a caption naming a list of links) in two places. It is
+   END-ALIGNED here, unlike the rail's, because everything under it is: the labels
+   run back from the spine, so a start-aligned caption would sit alone against the
+   opposite edge of an otherwise empty column.
+
+   The +1px is the spine's own width. The title is a sibling of the list, so its
+   content edge sits one pixel further out than the list's; without it the caption
+   is a pixel adrift of every label beneath it. */
+.jrk-section-nav__title {
+  padding: 0 calc(var(--jrk-section-gutter) + 1px) var(--jrk-space-2) 0;
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-normal);
+  color: var(--jrk-text-muted);
+  text-align: end;
+}
+
+/* THE SPINE. One continuous hairline down the trailing edge of the list, with the
+   dots centred on it — which is what makes them read as positions on a track
+   rather than as a column of unrelated marks, and it is the difference between a
+   scroll indicator and a set of radio buttons.
+
+   1.21:1 against the #fbfbfb page in light and 1.46:1 against the dark one. That
+   is decorative separation, which 1.4.11 permits under 3:1: the spine carries no
+   state and no target. The DOTS carry both, and they measure. */
+.jrk-section-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border-inline-end: 1px solid var(--jrk-border-subtle);
+}
+
+/* The row is a 24px hit target spanning the full column, so the thing you aim at
+   is a comfortable band and not the 6px dot — 24px is `minTouch`, the WCAG 2.2 AA
+   floor (2.5.8), and it is also what keeps the dots EVENLY SPACED. A row that grew
+   with its label would put the spine's dots at uneven intervals and the line would
+   stop reading as a scale. That is why the label is nowrap and ellipsised rather
+   than allowed to wrap. */
+.jrk-section-nav__link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: var(--jrk-control-sm);
+  padding-inline-end: var(--jrk-section-gutter);
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-regular);
+  color: var(--jrk-text-secondary);
+  /* base.css underlines every anchor, and an underline under a revealed label
+     reads as a second mark on a row whose state is already carried by its dot. */
+  text-decoration: none;
+  transition: color var(--jrk-transition);
+}
+
+/* THE DOT. A fixed 12px box scaled down, rather than a small box that grows.
+   Animating width/height would move the dot's own layout box and drag its centre
+   off the spine mid-transition; `transform` is composited and leaves the box
+   alone, so the dot breathes about a centre that never moves.
+
+   -6.5px puts the 12px box's centre at +0.5px past the list's content edge, which
+   is the middle of the 1px spine. Change the box size and this number changes with
+   it: it is (width / 2) + 0.5. */
+.jrk-section-nav__link::after {
+  content: '';
+  position: absolute;
+  inset-inline-end: -6.5px;
+  top: 50%;
+  width: 12px;
+  height: 12px;
+  border-radius: var(--jrk-radius-full);
+  background: var(--jrk-text-muted);
+  /* 0.5 of 12px = a 6px dot. */
+  transform: translateY(-50%) scale(0.5);
+  transition:
+    transform var(--jrk-transition),
+    background-color var(--jrk-transition);
+}
+
+/* THE LABELS ARE PRESENT AND TRANSPARENT, never removed. `opacity` keeps them in
+   the accessibility tree and keeps the column's width stable, so revealing the
+   index costs no reflow — the same reserved-space principle as the tab's
+   transparent underline and the card's transparent border. */
+.jrk-section-nav__label {
+  /* A flex item's default `min-width: auto` refuses to shrink below its
+     min-content width, so without this the ellipsis never fires and a long label
+     simply overflows the column — leftward, into the content, because the row is
+     end-justified. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity var(--jrk-transition);
+}
+
+/* SECOND LEVEL, AND THERE IS NO THIRD. Two levels is the cap, enforced in
+   <SectionNav> as well as here: an index deep enough to need three levels has
+   stopped being a position indicator and become a second copy of the document,
+   which is the drift this component exists to prevent. If a page genuinely has
+   that much structure, the problem is at layer 1 — the page is too long.
+
+   Depth is a SMALLER DOT and a smaller, quieter label. It is not an indent: the
+   labels are end-aligned against the spine, so an indent would move them away
+   from the only edge they are aligned to and read as a mistake.
+
+   ABOVE THE STATE RULES, AND THAT PLACEMENT IS LOAD-BEARING. This is a variant of
+   the resting row, not a state, and it sets `color` and the dot's `transform` —
+   exactly what :hover and [aria-current] set, at the same specificity. Written
+   after them, a current or hovered SUB row keeps the small dot and drops back to
+   muted ink while everything else about it says "current": some channels right,
+   some wrong, which is the hardest kind of fault to see. Base, variant, state. */
+.jrk-section-nav__link--sub {
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+}
+
+.jrk-section-nav__link--sub::after {
+  /* 0.334 of 12px = a 4px dot. */
+  transform: translateY(-50%) scale(0.334);
+}
+
+/* REVEAL. On the NAV, not on the row — approaching the rail restores the whole
+   index at once, so "what else is there" costs one gesture rather than one per
+   section. :focus-within is the keyboard half of the same rule and is not
+   optional: without it a reader tabbing through the index would be moving between
+   invisible targets.
+
+   This is the mitigation the header calls load-bearing. It is what makes a column
+   of unlabelled dots an acceptable answer to layer 3 rather than a refusal of it. */
+.jrk-section-nav:hover .jrk-section-nav__label,
+.jrk-section-nav:focus-within .jrk-section-nav__label {
+  opacity: 1;
+}
+
+/* Hover moves TWO channels — the dot grows and both it and the label take
+   text.primary (20.29:1 light / 15.48:1 dark) — so the row under the pointer is
+   unmistakable without borrowing the current row's accent. No fill: a wash would
+   need a radius to sit in, and a rounded fill welded to a spine is the pill this
+   component deliberately is not. */
+.jrk-section-nav__link:hover {
+  color: var(--jrk-text-primary);
+  text-decoration: none;
+}
+
+.jrk-section-nav__link:hover::after {
+  background: var(--jrk-text-primary);
+  /* 0.667 of 12px = an 8px dot — between rest and current, so hovering a row can
+     never be mistaken for being in it. */
+  transform: translateY(-50%) scale(0.667);
+}
+
+/* THE CURRENT SECTION. Four channels, listed in the header with what each one
+   survives. The label rule below is the one to guard: it is what keeps this index
+   answering "where am I" in words while every other row is a dot.
+
+   aria-current="location" only. Writing every selector against the attribute means
+   a row cannot be painted current without also being announced current. */
+.jrk-section-nav__link[aria-current='location'] {
+  color: var(--jrk-text-primary);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-section-nav__link[aria-current='location'] .jrk-section-nav__label {
+  opacity: 1;
+}
+
+.jrk-section-nav__link[aria-current='location']::after {
+  background: var(--jrk-accent-solid);
+  /* 0.833 of 12px = a 10px dot. */
+  transform: translateY(-50%) scale(0.833);
+}
+
+/* The current row keeps its accent and its size under the pointer — a transient
+   pointer state must not overwrite where-am-I. Same ordering problem shell.css
+   solves for aria-expanded vs aria-current, solved the same way: this sits below
+   the hover rules and out-specifies them. */
+.jrk-section-nav__link[aria-current='location']:hover::after {
+  background: var(--jrk-accent-solid-hover);
+  transform: translateY(-50%) scale(0.833);
+}
+
+/* ============================== responsive ============================== */
+
+/* Below the sidebar breakpoint the index leaves the page rather than reflowing
+ * into a horizontal row of pills above the content — which is precisely the
+ * "jump to section pill row" philosophy.md names as the failure mode, and it
+ * would arrive here as a RESPONSIVE artefact that nobody chose.
+ *
+ * Removing it is legal because of layer 3's rule that accelerators are additive,
+ * never structural: every section is still reachable by scrolling, every heading
+ * still carries an id, and every deep link still resolves. Nothing is lost but
+ * speed. The product targets 1920x1080; this is the escape hatch, not the design. */
+@media (max-width: 1024px) {
+  .jrk-section-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .jrk-section-nav {
+    display: none;
+  }
+}

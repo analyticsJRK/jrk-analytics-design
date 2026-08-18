@@ -1,0 +1,439 @@
+<!-- @dsCard group="Shell" name="Long report page with a live section index" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Section index — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="preview.css">
+<style>
+  /* THIS PAGE IS DELIBERATELY NOT FRAMED. The whole component is a scroll
+     behaviour — the index parks under the topbar, the marker follows the reading
+     line, a clicked heading stops clear of the bar — and none of that is
+     observable in a boxed, non-scrolling frame. So the shell here is the real
+     one, scrolling the document, at the real width. dashboard.html was un-framed
+     for the same reason when it gained an index.
+
+     THE TWO PAGES TEACH DIFFERENT HALVES and neither is redundant. This one is
+     PROSE: every h2/h3 on it really is a section, so the default 'h2, h3' selector
+     is correct and the markup is plain headings. The dashboard is COMPONENT-DENSE,
+     where card, chart and expander titles are all <h3> too, so it scopes the
+     selector to its section headings. That contrast is the lesson. */
+
+  /* The gallery's own nav bar is sticky at top:0, and so are this page's topbar
+     and rail — three surfaces competing for the same 56px. On a framed demo that
+     never mattered; on a real shell it does. Dropping the gallery chrome to static
+     is the honest fix: the app's own chrome then sticks to the viewport exactly as
+     it does in production, and the gallery bar scrolls away like the page furniture
+     it is. */
+  .gal-nav { position: static; }
+
+  /* Section chrome. Gallery-local: the library has no opinion about how a report
+     lays its own prose out, only about the index beside it. */
+  .rp-sec {
+    display: flex;
+    flex-direction: column;
+    gap: var(--jrk-space-3);
+  }
+
+  .rp-sec h2 {
+    font-size: var(--jrk-text-xl);
+    font-weight: var(--jrk-weight-semibold);
+    letter-spacing: var(--jrk-tracking-tight);
+    margin: var(--jrk-space-5) 0 0;
+  }
+
+  .rp-sec h3 {
+    font-size: var(--jrk-text-lg);
+    font-weight: var(--jrk-weight-semibold);
+    color: var(--jrk-text-secondary);
+    margin: var(--jrk-space-4) 0 0;
+  }
+
+  /* The headings take tabindex="-1" so a keyboard reader who jumps continues
+     FROM the section. That makes them focusable, and base.css rings anything
+     focusable — but :focus-visible only, so a mouse jump paints nothing and a
+     keyboard jump paints the ring, which is exactly right. Nothing to override. */
+
+  .rp-note {
+    max-width: 72ch;
+    color: var(--jrk-text-muted);
+    font-size: var(--jrk-text-md);
+  }
+</style>
+</head>
+<body>
+
+<div class="jrk-app">
+
+  <nav class="jrk-sidebar" aria-label="Main">
+    <div class="jrk-sidebar__brand">
+      <span class="gal-nav__mark">J</span> <span>JRK Analytics</span>
+    </div>
+    <div class="jrk-sidebar__nav">
+      <div class="jrk-sidebar__group">Portfolio</div>
+      <a class="jrk-nav-item" href="dashboard.html">
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="house"></svg>
+        <span class="jrk-nav-item__label">Overview</span>
+      </a>
+      <!-- The rail's current-page row and the index's current-section row are on
+           screen together here on purpose. They answer different questions and
+           they are drawn as different objects: a tinted pill for the page, a
+           filled dot on a spine for the position. If they ever converge into the
+           same object, that is the bug. -->
+      <a class="jrk-nav-item" href="#" aria-current="page">
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chartBar"></svg>
+        <span class="jrk-nav-item__label">Property review</span>
+      </a>
+      <a class="jrk-nav-item" href="report.html">
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="clock"></svg>
+        <span class="jrk-nav-item__label">Sheet</span>
+      </a>
+      <a class="jrk-nav-item" href="components.html">
+        <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="plus"></svg>
+        <span class="jrk-nav-item__label">Components</span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="jrk-main">
+    <header class="jrk-topbar">
+      <span class="jrk-input-group jrk-topbar__search">
+        <span class="jrk-input-group__icon">
+          <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="search"></svg>
+        </span>
+        <input class="jrk-input jrk-input--sm" placeholder="Search properties, units, tenants" aria-label="Search">
+      </span>
+      <span class="jrk-spacer"></span>
+      <span class="jrk-status"><span class="jrk-dot jrk-dot--good jrk-dot--pulse" aria-hidden="true"></span>Synced 4m ago</span>
+    </header>
+
+    <main class="jrk-content">
+      <div class="jrk-content__inner">
+
+        <div>
+          <nav aria-label="Breadcrumb">
+            <ol class="jrk-breadcrumbs">
+              <li><a href="dashboard.html">Portfolio</a></li>
+              <li><a href="#">Colorado</a></li>
+              <li><span aria-current="page">Summit at Red Rocks</span></li>
+            </ol>
+          </nav>
+
+          <div class="jrk-page-header">
+            <div>
+              <h1 class="jrk-page-header__title">Summit at Red Rocks — Q2 2026 review</h1>
+              <p class="jrk-page-header__desc">316 units · Golden, CO · T12 · accrual basis · as of 30 Jun 2026</p>
+            </div>
+            <div class="jrk-page-header__actions">
+              <button class="jrk-btn jrk-btn--secondary jrk-btn--sm">Export</button>
+              <button class="jrk-btn jrk-btn--cta jrk-btn--sm">Run report</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== the two-column layout ==================== -->
+        <div class="jrk-section-layout">
+
+          <div class="jrk-section-layout__body">
+
+            <section class="rp-sec">
+              <h2 id="summary">Portfolio summary</h2>
+              <p class="rp-note">
+                Every figure on this page is the same window, the same basis and the same
+                316 units. Where a section mixes cuts it says so on the section.
+              </p>
+              <div class="jrk-stat-row jrk-stat-row--split">
+                <div class="jrk-stat">
+                  <span class="jrk-stat__label">Collected rent</span>
+                  <span class="jrk-stat__value">$4.21<span class="jrk-stat__unit">M</span></span>
+                  <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--good"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="arrowUp"></svg><span class="jrk-sr-only">up</span>+3.1% <span class="jrk-text-muted">vs last quarter</span></span></span>
+                </div>
+                <div class="jrk-stat">
+                  <span class="jrk-stat__label">Occupancy</span>
+                  <span class="jrk-stat__value">93.8<span class="jrk-stat__unit">%</span></span>
+                  <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--bad"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="arrowDown"></svg><span class="jrk-sr-only">down</span>−0.6pt <span class="jrk-text-muted">vs last quarter</span></span></span>
+                </div>
+                <div class="jrk-stat">
+                  <span class="jrk-stat__label">NOI vs budget</span>
+                  <span class="jrk-stat__value">+7.0<span class="jrk-stat__unit">%</span></span>
+                  <span class="jrk-stat__meta"><span class="jrk-text-muted">$1,580,906 actual · $1,478,106 budget</span></span>
+                </div>
+                <div class="jrk-stat">
+                  <span class="jrk-stat__label">Delinquency, 30+ days</span>
+                  <span class="jrk-stat__value">4.7<span class="jrk-stat__unit">%</span></span>
+                  <span class="jrk-stat__meta"><span class="jrk-delta jrk-delta--good"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="arrowDown"></svg><span class="jrk-sr-only">down</span>−1.2pt <span class="jrk-text-muted">vs last quarter</span></span></span>
+                </div>
+              </div>
+            </section>
+
+            <section class="rp-sec">
+              <h2 id="revenue">Revenue</h2>
+              <p class="rp-note">
+                Billed rather than received. The cash figure sits lower whenever delinquency
+                is rising, which is why the two sections below are read together.
+              </p>
+
+              <h3 id="rent-roll">Rent roll</h3>
+              <div class="jrk-card">
+                <div class="jrk-card__body">
+                  <p class="jrk-card__subtitle">
+                    Scheduled rent of $4,486,300 against 316 units, 12 of them down for
+                    turn at the close. Loss to lease has narrowed for a fourth quarter.
+                  </p>
+                </div>
+              </div>
+
+              <h3 id="other-income">Other income</h3>
+              <div class="jrk-card">
+                <div class="jrk-card__body">
+                  <p class="jrk-card__subtitle">
+                    Parking, pet rent, utility reimbursement and late fees. Utility
+                    reimbursement is the only line that moved more than 5% against budget.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section class="rp-sec">
+              <h2 id="delinquency">Delinquency</h2>
+              <p class="rp-note">
+                Falling is good here. Direction and interpretation are separate inputs, and
+                this is the metric where assuming down-is-bad gets it backwards.
+              </p>
+
+              <h3 id="aging" data-section-label="Aging buckets">Aging buckets, 0–120 days</h3>
+              <div class="jrk-table-wrap">
+                <table class="jrk-table">
+                  <caption class="jrk-sr-only">Delinquency by aging bucket</caption>
+                  <thead>
+                    <tr>
+                      <th scope="col">Bucket</th>
+                      <th scope="col">Status</th>
+                      <th scope="col" class="jrk-num">Accounts</th>
+                      <th scope="col" class="jrk-num">Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>0–30 days</td>
+                      <td><span class="jrk-badge jrk-badge--good"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="checkFill"></svg>Current</span></td>
+                      <td class="jrk-num">41</td>
+                      <td class="jrk-num">$78,410</td>
+                    </tr>
+                    <tr>
+                      <td>31–60 days</td>
+                      <td><span class="jrk-badge jrk-badge--warning"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warningFill"></svg>Review</span></td>
+                      <td class="jrk-num">18</td>
+                      <td class="jrk-num">$61,220</td>
+                    </tr>
+                    <tr>
+                      <td>61–120 days</td>
+                      <td><span class="jrk-badge jrk-badge--critical"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="criticalFill"></svg>Escalated</span></td>
+                      <td class="jrk-num">9</td>
+                      <td class="jrk-num">$71,226</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <h3 id="write-offs">Write-offs</h3>
+              <div class="jrk-card">
+                <div class="jrk-card__body">
+                  <p class="jrk-card__subtitle">
+                    $18,900 written off against a $24,000 reserve. Two accounts account for
+                    just over half of it.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section class="rp-sec">
+              <h2 id="expenses">Operating expenses</h2>
+              <p class="rp-note">
+                Controllable expenses are 2.4% under budget; the overage is entirely in
+                insurance, which is not controllable at the property.
+              </p>
+              <div class="jrk-card">
+                <div class="jrk-card__body">
+                  <p class="jrk-card__subtitle">
+                    Payroll, turnover, R&amp;M, contract services, marketing, administrative,
+                    utilities, insurance and taxes. Nine lines, three of them over.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section class="rp-sec">
+              <h2 id="capital">Capital projects</h2>
+              <div class="jrk-card">
+                <div class="jrk-card__body">
+                  <p class="jrk-card__subtitle">
+                    Roof replacement on buildings 3 and 4 closed in May, $412,000 against a
+                    $430,000 approval. Boiler replacement moves to Q3.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section class="rp-sec">
+              <h2 id="data-quality">Data quality</h2>
+              <div class="jrk-alert jrk-alert--warning" role="status">
+                <svg class="jrk-alert__icon" viewBox="0 0 20 20" aria-hidden="true" stroke-linecap="round"><path d="M10 2.5 18 16.5H2z"/><path d="M10 8v3.5M10 14h.01"/></svg>
+                <div class="jrk-alert__body">
+                  <p class="jrk-alert__title">3 units missing a June close</p>
+                  <p class="jrk-alert__text">Totals on this page exclude them. The partial state is stated rather than smoothed over — a number that quietly drops rows is a misleading number.</p>
+                </div>
+              </div>
+            </section>
+
+            <section class="rp-sec">
+              <h2 id="methodology">Methodology</h2>
+              <p class="rp-note">
+                T12 on an accrual basis. NOI excludes capital and debt service. YoY compares
+                the trailing twelve months to the twelve before it, not calendar years —
+                the two differ by about 40 basis points at this property.
+              </p>
+              <p class="rp-note">
+                Scroll back up: the index tracks the heading that has reached the reading
+                line, not whichever section happens to fill the most of the screen. Clicking
+                a row moves the URL to that section's id and moves keyboard focus into it,
+                so Tab continues from the section rather than from the index.
+              </p>
+            </section>
+
+          </div>
+
+          <!-- The index is DERIVED. This markup is an empty shell; the controller
+               below fills it from the headings in __body, exactly as <SectionNav>
+               does in React. There is deliberately no authored list to fall out
+               of step with the document. -->
+          <nav class="jrk-section-nav" aria-labelledby="sn-title">
+            <p class="jrk-section-nav__title" id="sn-title">On this page</p>
+            <ul class="jrk-section-nav__list"></ul>
+          </nav>
+
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script type="module" src="preview.js"></script>
+<script type="module">
+/* Vanilla section index. The React <SectionNav> owns all of this in an app; it is
+   repeated here in plain JS for the same reason the spotlight driver in
+   components.html is — the CSS layer is the primary interface and has to stand up
+   without React. Every decision below mirrors SectionNav.tsx; read the comments
+   there for why, and keep the two in step. */
+(() => {
+  const nav = document.querySelector('.jrk-section-nav');
+  const body = document.querySelector('.jrk-section-layout__body');
+  const list = nav.querySelector('.jrk-section-nav__list');
+  const HEADINGS = 'h2, h3';
+  const LINE_SLOP = 8;
+
+  /* One source for the offset: the nav's own computed `top`, which the browser
+     has already resolved from --jrk-section-offset. No constant to keep in step
+     with the CSS. */
+  const offset = () => parseFloat(getComputedStyle(nav).top) || 72;
+
+  let entries = [];
+  let lock = null;
+
+  function derive() {
+    const margin = `${offset()}px`;
+    entries = [...body.querySelectorAll(HEADINGS)]
+      .map((el) => {
+        const label = (el.dataset.sectionLabel || el.textContent || '').trim();
+        if (!label || !el.id) return null;
+        if (el.style.scrollMarginTop !== margin) el.style.scrollMarginTop = margin;
+        if (el.tabIndex !== -1) el.tabIndex = -1;
+        return { id: el.id, label, sub: el.matches('h3'), el };
+      })
+      .filter(Boolean);
+
+    /* The __label span is required — the dot is the link's ::after and the label
+       is what fades, so they have to be separate boxes. */
+    list.innerHTML = entries
+      .map(
+        (e) =>
+          `<li><a class="jrk-section-nav__link${e.sub ? ' jrk-section-nav__link--sub' : ''}" href="#${e.id}">` +
+          `<span class="jrk-section-nav__label">${e.label}</span></a></li>`,
+      )
+      .join('');
+  }
+
+  /* Last heading to have reached the reading line — a POSITION test, not a
+     most-visible test. Most-visible never marks a short section between two long
+     ones, and swaps the marker back and forth between two similar ones. */
+  function compute() {
+    if (!entries.length) return null;
+    const doc = document.documentElement;
+    if (window.scrollY + window.innerHeight >= doc.scrollHeight - 2) {
+      return entries[entries.length - 1].id;
+    }
+    const line = offset() + LINE_SLOP;
+    let current = entries[0].id;
+    for (const e of entries) {
+      if (e.el.getBoundingClientRect().top > line) break;
+      current = e.id;
+    }
+    return current;
+  }
+
+  function paint(id) {
+    for (const a of list.querySelectorAll('.jrk-section-nav__link')) {
+      if (a.getAttribute('href') === `#${id}`) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    }
+  }
+
+  let frame = 0;
+  function onScroll() {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      if (!lock) paint(compute());
+    });
+  }
+
+  list.addEventListener('click', (event) => {
+    const link = event.target.closest('.jrk-section-nav__link');
+    if (!link) return;
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+
+    const id = decodeURIComponent(link.getAttribute('href').slice(1));
+    const entry = entries.find((e) => e.id === id);
+    if (!entry) return;
+
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    entry.el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    entry.el.focus({ preventScroll: true });
+
+    paint(id);
+    /* Held while the smooth scroll runs, or the marker stutters through every
+       section the page flies past instead of moving once. */
+    lock = id;
+    setTimeout(() => { lock = null; }, reduce ? 0 : 700);
+
+    /* replaceState: the section is citable, and Back still leaves the page
+       rather than walking eleven headings backwards. */
+    history.replaceState(null, '', `#${encodeURIComponent(id)}`);
+  });
+
+  derive();
+  paint(compute());
+  addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', onScroll);
+  new MutationObserver(() => { derive(); paint(compute()); }).observe(body, {
+    childList: true,
+    subtree: true,
+    characterData: true,
+  });
+})();
+</script>
+</body>
+</html>

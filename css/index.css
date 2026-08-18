@@ -48,6 +48,10 @@
 @import './components/list.css';
 @import './components/sheet.css';
 @import './components/shell.css';
+/* After shell.css — the section index parks under .jrk-topbar and its layout
+   mirrors .jrk-content__inner, so it is read alongside the shell rather than as
+   a standalone widget. Nothing in it overrides a shell rule. */
+@import './components/section-nav.css';
 @import './components/feedback.css';
 @import './components/chart.css';
 @import './components/org.css';

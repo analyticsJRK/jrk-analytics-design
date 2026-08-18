@@ -284,6 +284,53 @@
       </div>
     </div>
 
+    <!-- Frosted. On a GRADIENT ground on purpose: over the flat page there is
+         nothing for backdrop-filter to blur and the 72% mix composites to a
+         1.03:1 step, so a frosted card sitting in an ordinary stack is a normal
+         card that has quietly given up its fill. -->
+    <div
+      style="
+        display:grid;
+        grid-template-columns:repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+        gap:var(--jrk-space-4);
+        margin-top:var(--jrk-space-4);
+        padding:var(--jrk-space-5);
+        border-radius:var(--jrk-radius-md);
+        background:linear-gradient(135deg, var(--jrk-gradient-teal-from) 0%, var(--jrk-gradient-blue-from) 52%, var(--jrk-gradient-violet-from) 100%);
+      "
+    >
+      <div class="jrk-card">
+        <div class="jrk-card__body">
+          <p class="gal-label">default</p>
+          <p class="jrk-card__subtitle">Opaque. The ramp stops dead at the edge.</p>
+        </div>
+      </div>
+      <div class="jrk-card jrk-card--frosted">
+        <div class="jrk-card__body">
+          <p class="gal-label">--frosted</p>
+          <p class="jrk-card__subtitle">72% fill over <code class="jrk-mono">saturate(180%) blur(20px)</code> — the topbar's material, on a tile. Muted ink is re-inked to <code class="jrk-mono">text.secondary</code> by the modifier: muted lands at 3.4:1 once a saturated ground shows through.</p>
+        </div>
+      </div>
+      <div class="jrk-card jrk-card--frosted">
+        <div class="jrk-card__body">
+          <p class="gal-label">--frosted</p>
+          <p class="jrk-card__subtitle">The hairline and the shadow are the whole boundary here — this is the only tile whose fill can be weaker than the base card's, which is why <code class="jrk-mono">--seamless</code> and <code class="jrk-mono">--flush</code> must never be combined with it.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>Frost is only worth spending where something is behind it.</strong>
+      <code class="jrk-mono">--frosted</code> with <code class="jrk-mono">--seamless</code> or
+      <code class="jrk-mono">--flush</code> is a contradiction: it removes the two channels
+      holding the tile together and leaves a blur with no object around it. A link is the one
+      ink it cannot fix — <code class="jrk-mono">accent.text</code> falls to 3.45:1 over a
+      saturated ground and is already the shallowest passing step on the hue. The full
+      hand-measured table is in <code class="jrk-mono">card.css</code>; nothing gates a colour
+      composited at runtime. Both cases that earn it — a saturated ground and content
+      scrolling underneath — are live on the <a href="dashboard.html">dashboard page</a>.
+    </div>
+
     <div class="jrk-card" style="margin-top:var(--jrk-space-4)">
       <div class="jrk-card__header">
         <div>
@@ -1164,6 +1211,54 @@
         <button class="jrk-tab" role="tab" aria-selected="true">Chart</button>
         <button class="jrk-tab" role="tab" aria-selected="false">Table</button>
       </div>
+    </div>
+
+    <!-- Section index. position:static here because the gallery is a static
+         rendering — the whole point of the component is a scroll behaviour, and
+         it is live on preview/dashboard.html and preview/sections.html. This cell
+         exists so the row states can be compared in both themes.
+
+         AT REST it is a line of dots with ONE label painted: the current one.
+         Hover anywhere on the nav — or tab into it — and every label fades in.
+         The hidden labels are `opacity: 0`, never display:none, so they are all
+         still in the accessibility tree. -->
+    <div class="gal-demo gal-demo--plain">
+      <span class="gal-label">Section index — hover it. The current row is <code class="jrk-mono">aria-current="location"</code></span>
+      <nav class="jrk-section-nav" aria-labelledby="sn-demo-title" style="position:static;max-height:none">
+        <p class="jrk-section-nav__title" id="sn-demo-title">On this page</p>
+        <ul class="jrk-section-nav__list">
+          <li><a class="jrk-section-nav__link" href="#"><span class="jrk-section-nav__label">Portfolio summary</span></a></li>
+          <li><a class="jrk-section-nav__link" href="#"><span class="jrk-section-nav__label">Revenue</span></a></li>
+          <li><a class="jrk-section-nav__link jrk-section-nav__link--sub" href="#"><span class="jrk-section-nav__label">Rent roll</span></a></li>
+          <li><a class="jrk-section-nav__link jrk-section-nav__link--sub" href="#"><span class="jrk-section-nav__label">Other income</span></a></li>
+          <li><a class="jrk-section-nav__link" href="#" aria-current="location"><span class="jrk-section-nav__label">Delinquency</span></a></li>
+          <li><a class="jrk-section-nav__link jrk-section-nav__link--sub" href="#"><span class="jrk-section-nav__label">Aging buckets</span></a></li>
+          <li><a class="jrk-section-nav__link" href="#"><span class="jrk-section-nav__label">Operating expenses</span></a></li>
+          <li><a class="jrk-section-nav__link" href="#"><span class="jrk-section-nav__label">Data quality</span></a></li>
+        </ul>
+      </nav>
+    </div>
+
+    <div class="gal-rule">
+      <strong>Four channels mark the current section, and only one of them is colour.</strong>
+      The dot is <code class="jrk-mono">accent.solid</code> — <strong>5.04:1</strong> against
+      the light page and <strong>8.41:1</strong> against the dark one, where the resting dots
+      are <code class="jrk-mono">text.muted</code> at 4.90:1 and 6.41:1. Size (10px against 6px)
+      and the painted label both survive greyscale, where hue does not, and the label carries
+      the semibold as well. The resting dots are deliberately not fainter: each one is a link
+      target, and <code class="jrk-mono">border.strong</code> — the tempting value — is 1.47:1
+      on the page, which is invisible at 6px.
+    </div>
+
+    <div class="gal-rule">
+      <strong>What the dot form costs.</strong> At rest the reader can see how many sections
+      there are and which one they are in, but not what the others are — discoverability
+      traded for quiet, which layer 3 normally refuses. Three things buy it back and none of
+      them is optional: the current label stays painted, so the index still answers
+      <em>where am I</em> in words; hover or focus anywhere in the nav reveals the whole list
+      at once rather than one row at a time; and the hidden labels use
+      <code class="jrk-mono">opacity</code>, so a screen reader gets the index it always had.
+      Live on the <a href="dashboard.html">dashboard</a>.
     </div>
   </section>
 </div>

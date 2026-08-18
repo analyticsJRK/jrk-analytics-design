@@ -137,6 +137,86 @@
   border-color: var(--jrk-border-default);
 }
 
+/* FROSTED — the topbar's vibrancy material, on a tile.
+ *
+ * Same recipe as .jrk-topbar, deliberately not a second one: `surface.default` at
+ * 72% over a saturated blur. One frosted material in the library means a floating
+ * card and the bar above it read as the same glass, and it means the mix is tuned
+ * in one place. Everything below is the cost of moving that material onto a tile,
+ * which turns out to be a different problem from putting it on a bar.
+ *
+ * ---------------------------------------------------------------------------
+ * WHAT IT DOES OVER A PLAIN PAGE: NOTHING, AND THAT IS THE FIRST THING TO KNOW
+ * ---------------------------------------------------------------------------
+ * `backdrop-filter` blurs what is BEHIND the element. Over the flat #fbfbfb page
+ * there is nothing to blur, and the 72% mix composites to #fefefe — a 1.03:1 step
+ * off the page, against the base card's already-thin 1.035:1. So a frosted card
+ * sitting in an ordinary content stack is a normal card that has quietly given up
+ * what little fill step it had, in exchange for no visible effect at all.
+ *
+ * It earns its keep in exactly two places, and both are "there is content behind
+ * it": a tile that OVERLAPS something — a sticky summary over a scrolling body, a
+ * card laid on the vivid gradient band, a panel over an image — or a tile the
+ * reader scrolls content underneath. Anywhere else, use .jrk-card.
+ *
+ * THE HAIRLINE AND THE SHADOW ARE NOT OPTIONAL HERE, and this modifier is the
+ * sharpest instance of the standing rule that a top-level tile must bring its own
+ * edge. It is the only tile in the library whose fill can be WEAKER than the base
+ * card's, so `--frosted --seamless` and `--frosted --flush` are contradictions:
+ * they remove the only two channels holding the tile together and leave a blur
+ * with no object around it. Do not combine them.
+ *
+ * ---------------------------------------------------------------------------
+ * INK, MEASURED BY HAND — because nothing gates a colour composited at runtime
+ * ---------------------------------------------------------------------------
+ * `validate` measures ink against the card's OPAQUE fill. On this tile the real
+ * fill depends on whatever happens to be behind it, so the figures below were
+ * computed by alpha-blending 72% of the card over each backdrop. Worst realistic
+ * grounds are the accent solid and the four gradient tones; pure black (light) and
+ * pure white (dark) are included as the absurd bound.
+ *
+ *   text.primary   light 20.8 / 13.9 / 10.6:1   dark 13.8 / 10.2 / 5.2:1   PASSES
+ *   text.secondary light 10.9 /  7.2 /  5.5:1   dark  8.0 /  5.9 / 3.0:1   passes*
+ *   text.muted     light  5.0 /  3.4 /  2.6:1   dark  5.7 /  4.2 / 2.2:1   FAILS
+ *   accent.text    light  5.2 /  3.5 /  2.6:1   dark  7.5 /  5.6 / 2.8:1   FAILS
+ *
+ * (page / accent-solid / absurd-bound, in that order. * secondary clears 4.5:1 on
+ * every real ground and only fails against pure white in dark.)
+ *
+ * So MUTED INK IS RE-INKED TO SECONDARY below — the same move .jrk-topbar--vivid
+ * makes for its captions, arriving through a different component for the same
+ * reason: those tokens were selected against opaque surfaces and this is not one.
+ *
+ * A LINK IS THE ONE THING THAT IS STILL NOT SAFE, and it is not re-inked because
+ * there is no value that would fix it: `accent.text` IS the anchor, the shallowest
+ * step on the hue that clears 4.5:1 in every light role, and it lands at 3.45:1
+ * once a saturated ground shows through. Keep links off a frosted card over a
+ * saturated ground, or ink them `text.primary` and let the underline carry the
+ * affordance. Stated rather than gated: no check can see this.
+ *
+ * ---------------------------------------------------------------------------
+ * Two mechanical consequences of backdrop-filter, both easy to lose an hour to:
+ * it creates a STACKING CONTEXT (so z-index inside the card no longer competes
+ * with the page), and it makes the card a CONTAINING BLOCK for fixed-position
+ * descendants — which would trap a .jrk-nav-flyout or any other panel that
+ * escapes a clip with position: fixed. Do not nest one in here.
+ *
+ * Behind @supports so the opaque card fill stays the fallback, exactly as the
+ * topbar does it. Everything outside the query is unchanged from .jrk-card. */
+.jrk-card--frosted .jrk-card__subtitle,
+.jrk-card--frosted .jrk-caption,
+.jrk-card--frosted .jrk-text-muted {
+  color: var(--jrk-text-secondary);
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .jrk-card--frosted {
+    background: color-mix(in srgb, var(--jrk-surface-default) 72%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+  }
+}
+
 /* A tile lifted ABOVE the resting plane. It used to be the only way a card got a
    shadow at all, back when elevation was opt-in; now that every card rests on
    shadow.card, this modifier's job changed from "has elevation" to "has MORE
@@ -321,4 +401,24 @@
   font-size: var(--jrk-text-md);
   font-weight: var(--jrk-weight-semibold);
   color: var(--jrk-text-secondary);
+}
+
+/* A PAGE-LEVEL section — the kind a section index points at, rather than a quiet
+   label over a group of tiles.
+ *
+ * The base `__title` is 14px secondary, which is deliberately quieter than the
+ * 15px primary `.jrk-card__title` inside it: it labels a group without competing
+ * with the tiles. That inversion is correct for a sub-group and WRONG for a page
+ * blocked into named sections, where a heading smaller than the card titles under
+ * it reads as a caption that has floated to the top.
+ *
+ * 17px puts it on the rung between `.jrk-page-header__title` (20px) and the card
+ * title (15px), so a page reads 20 > 17 > 15 and the hierarchy is legible without
+ * a rule, a fill or any other ink. That is the whole modifier — three
+ * declarations, no enclosure. Sections are separated by SPACE, which is free. */
+.jrk-section--page > .jrk-section__header .jrk-section__title,
+.jrk-section--page > .jrk-section__title {
+  font-size: var(--jrk-text-xl);
+  letter-spacing: var(--jrk-tracking-tight);
+  color: var(--jrk-text-primary);
 }
