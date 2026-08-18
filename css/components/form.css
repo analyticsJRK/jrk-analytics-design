@@ -128,6 +128,98 @@
   background: var(--jrk-surface-hover);
 }
 
+/* ---------- search ----------
+ *
+ * A SEARCH FIELD IS TINTED, not neutral, and this modifier is the generalisation of
+ * a treatment that already existed in this library scoped to exactly one element.
+ * `.jrk-topbar__search` in shell.css has worn accent.wash + accent.washText since
+ * the topbar was built, and the argument written there is not about the topbar at
+ * all: "on white chrome a neutral filled field is a lightness step and nothing
+ * else, where a tinted one is a hue the eye finds without looking for it." That is
+ * true of the search box over a table on a report page, and there are far more of
+ * those in the consuming app than there are topbars. Directed 2026-08-18.
+ *
+ * THE ONE DIFFERENCE FROM THE TOPBAR'S COPY IS THE EDGE, and it is the difference
+ * accent.wash's own token note already draws. The topbar field is borderless by
+ * instruction — a large, left-aligned, glyph-bearing field on a saturated bar,
+ * where the fill alone is enough to read as a control, and that note ends "it is
+ * NOT a precedent". This modifier is the non-precedent case: a 230px box in a card
+ * header on a white page, where a wash at 1.16:1 off the card is a hue and not a
+ * boundary, so it draws accent.washBorder (1.76:1 on white, 2.03:1 on the dark
+ * card) and stays a visible target. Do not "align" the two by deleting it.
+ *
+ * The placeholder moves with the fill for a reason that is measured rather than
+ * aesthetic, and shell.css carries the numbers: `.jrk-input::placeholder` is
+ * text.muted, which was darkened specifically to clear 4.5:1 against the surfaces
+ * it was chosen for, and lands at 4.36:1 on accent.wash in light — under the floor.
+ * accent.washText measures 5.31:1 light and 6.73:1 dark and is also the glyph's
+ * ink, so the field reads as one tinted object. text.secondary was the alternative
+ * at 8.88:1 and is rejected at that weight: a placeholder that dark stops looking
+ * like a prompt and starts looking like a value somebody already typed.
+ *
+ * THE TYPED VALUE IS NOT RETINTED and inherits text.primary from the base rule.
+ * The tint marks the affordance; once there is real text in the box, that text is
+ * data and reads at full strength.
+ *
+ * IT KEYS ON `[type='search']` AS WELL AS THE CLASS, and the attribute is the one
+ * that does nearly all the work. Every selector below is written as a pair. The
+ * reason is that the React `Input` builds the control's class list itself — a
+ * caller's `className` forwards to the `.jrk-field` SHELL, not to the input — so
+ * there is no way for a consumer to put `--search` on the element that needs it
+ * without adding a prop to the component. The DOM already carries the fact in
+ * `type`, so the CSS reads it there and every search field in every consuming app
+ * is tinted with no caller change at all, in JSX and in hand-written HTML alike.
+ * The modifier stays for the field that searches but is not `type='search'` —
+ * a `type='text'` combobox filter, for instance.
+ *
+ * `.jrk-input[type='search']` is 0-2-0, which clears `.jrk-input--filled` (0-1-0)
+ * so a filled search field resolves as a search field. It does NOT clear
+ * `.jrk-input:hover:not(:disabled)` (0-3-0), which is why the hover pair below is
+ * restated rather than inherited — without it the border steps to border.strong on
+ * hover and drops a grey edge onto a blue field. */
+.jrk-input--search,
+.jrk-input[type='search'] {
+  background: var(--jrk-accent-wash);
+  border-color: var(--jrk-accent-wash-border);
+}
+
+.jrk-input--search:hover:not(:disabled),
+.jrk-input[type='search']:hover:not(:disabled) {
+  background: var(--jrk-accent-wash-hover);
+  border-color: var(--jrk-accent-wash-border);
+}
+
+.jrk-input--search::placeholder,
+.jrk-input[type='search']::placeholder {
+  color: var(--jrk-accent-wash-text);
+}
+
+/* THE GLYPH IS RECOLOURED FROM THE GROUP, NOT FROM THE FIELD, and it has to be:
+   `.jrk-input-group__icon` is the input's SIBLING, so a value set on the input is
+   invisible to it — the same constraint that makes `--field-px` a group-level
+   custom property twenty lines below. `:has()` is what lets the group detect a
+   search field without the caller passing a second class to the wrapper, which
+   matters twice over here, since the React component would not accept one.
+
+   Ends up at 0-3-0 / 0-4-0, comfortably over the base icon rule's 0-1-0, so file
+   order between them is not load-bearing. */
+.jrk-input-group:has(.jrk-input--search) .jrk-input-group__icon,
+.jrk-input-group:has(.jrk-input[type='search']) .jrk-input-group__icon {
+  color: var(--jrk-accent-wash-text);
+}
+
+/* WEBKIT'S CLEAR BUTTON IS A LOSS ON A TINTED FIELD. `::-webkit-search-cancel-button`
+   paints a fixed dark-grey glyph that neither theme's tokens reach — on the dark
+   theme's #0d2947 wash it is a grey smudge, and it appears only once there is text,
+   so it is invisible in every empty-state screenshot. Hidden, with Escape and
+   select-all-delete still clearing the field as they always did. Every consuming
+   app pairs these boxes with a visible "Clear" control anyway; the library cannot
+   assume that, but it can decline to ship a control it cannot colour. */
+.jrk-input--search::-webkit-search-cancel-button,
+.jrk-input[type='search']::-webkit-search-cancel-button {
+  appearance: none;
+}
+
 /* THE TEXTAREA IS NOT A PILL, and this is a functional limit rather than a
    stylistic exception. `radius-full` resolves against the SHORTER side, so on a
    64px-tall box it draws 32px caps — a lozenge, with the first and last character

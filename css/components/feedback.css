@@ -6,19 +6,19 @@
    critical) so it is announced, and an icon + heading so the status reads
    without color.
 
-   SQUARE, BECAUSE IT RESTS ON THE PAGE. The 2026-08-14 direction is a split —
-   "square tiles, rounded overlays" — and it is written as a rule rather than as
-   the list of components converted that day. This one was not on that list and
-   kept `radius-lg`, which is how a 14px-cornered banner ended up sitting directly
-   above the square cards it introduces, on five screens of the consuming app.
+   radius.md, MATCHING THE CARD IT SITS ABOVE. The 2026-08-14 "square tiles,
+   rounded overlays" split that squared this is reversed as of 2026-08-18, but the
+   reason this rule exists at all survives the reversal and is why it is not simply
+   deleted: an alert is IN THE FLOW — it spans the column and on several pages is
+   the first thing under the page header, at the same position and the same width
+   as a card — so it has to be bounded like the cards it introduces. Under the
+   squaring that meant square; it now means md. Left to its old `radius-lg` it
+   would be a 14px-cornered banner above 10px cards, which is the same defect this
+   header was written about, one value over.
 
-   The distinction that decides it is not size or importance, it is FLOW: an
-   overlay keeps its corners because it floats above the content and needs to read
-   as detached. An alert is in the flow, spans the column, and on several pages is
-   the first thing under the page header — the same position and the same width as
-   a card. `.jrk-toast` at the foot of this file is the counter-example and stays
-   `radius-lg`: it is `position: fixed` and genuinely floats. The two are not
-   inconsistent; they are the two sides of the same rule.
+   `.jrk-toast` at the foot of this file stays `radius-lg` and is the counter-example
+   in both directions: it is `position: fixed` and genuinely floats, so it tracks the
+   overlay surfaces, not the tiles.
 
    Geometry only. The tone washes below are untouched and nothing here was ever
    measured against a corner. */
@@ -28,7 +28,7 @@
   gap: var(--jrk-space-3);
   padding: var(--jrk-space-3) var(--jrk-space-4);
   border: 1px solid transparent;
-  border-radius: var(--jrk-radius-none);
+  border-radius: var(--jrk-radius-md);
   background: var(--jrk-status-neutral-wash);
   color: var(--jrk-text-primary);
 }

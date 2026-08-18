@@ -267,7 +267,15 @@
    0-3-0 deliberately. nesting.css is imported LAST and gives `.jrk-card
    .jrk-table-wrap` its neutral hairline at 0-2-0, so a matching 0-2-0 here would
    lose on source order no matter what this file does. The extra class is what
-   makes the override survive the import order rather than depend on it. */
+   makes the override survive the import order rather than depend on it.
+
+   THE radius.none STAYS, and it is the one place in the library where that value
+   survived the 2026-08-18 rounding. It is not a leftover. `.jrk-table-wrap` is
+   radius.md now, and a rounded table inset inside a rounded card draws two curves a
+   hairline apart at the bottom corners — the concentric-radius artifact. Squaring
+   the inner one lets `.jrk-expander`'s own `overflow: hidden` do the rounding, so
+   the panel's bottom corners follow the CARD's 10px exactly, which is what "meets
+   the card's edges" means once the card has corners again. */
 .jrk-expander .jrk-expander__panel .jrk-table-wrap {
   border-color: transparent;
   border-radius: var(--jrk-radius-none);

@@ -41,29 +41,36 @@
   flex-direction: column;
   background: var(--jrk-surface-default);
   border: 1px solid var(--jrk-border-subtle);
-  /* RECTANGULAR. Directed 2026-08-14, and it is the general form of what the table
-     wrap and the sheet were given the same day for a geometry-specific reason.
-     Their argument was narrow — a grid of straight rules running to its own edges
-     has no corner a radius can round without cutting the first and last cell of
-     every row — and this is not that argument. This is the look: every tile in the
-     product is square now, and the enclosure ladder is carried by the hairline, the
-     fill step and the shadow, none of which the corner was contributing to.
+  /* ROUNDED AGAIN, at radius.md. Directed 2026-08-18, reversing the 2026-08-14
+     squaring outright — that direction is gone, not narrowed, and the note it left
+     on the radius token block ("a thing laid ON the page is square, a thing floating
+     ABOVE it is rounded") no longer describes this library.
 
-     radius.none rather than a literal 0, so the value stays a token and this reads
-     as a deliberate rung rather than an unset property. The whole family follows:
-     .jrk-stat, both .jrk-stat-row forms, .jrk-chart-card and — by composition —
+     md, not the radius.xl the tiles carried BEFORE the squaring. 18px was the
+     friendly-web end of the softened ladder and it is a different look from the one
+     being asked for; 10px rounds the corner without the tile reading as a lozenge.
+     So this is not a `git revert` of that commit and should not be turned into one.
+
+     THE WHOLE TILE FAMILY IS md, and the point of the direction is that there is no
+     longer an exception to hunt for: .jrk-stat, both .jrk-stat-row forms,
+     .jrk-chart-card, .jrk-table-wrap, .jrk-sheet, .jrk-alert, and — by composition —
      .jrk-expander, which is a .jrk-card and inherits this without a rule of its own.
+     The two that had a geometry-specific argument for staying square (the table wrap
+     and the sheet: a grid of straight rules has no corner a radius can round without
+     cutting the first and last cell of every full-width row) come along anyway, and
+     both clip their own content — `overflow: auto` on each — so the rounded frame
+     trims the corner cells rather than letting a fill poke through it. Their headers
+     say so at the declaration.
 
-     WHAT IS DELIBERATELY NOT SQUARED, so the next person does not "finish the job":
-     controls are still pills (radius.full is a hard rule, and a text FIELD is still
+     STILL NOT md, so the next person does not "finish the job" in the other
+     direction: controls are pills (radius.full is a hard rule, and a text FIELD stays
      radius-laddered because a fully-rounded one curls in on its first glyph); badges,
-     tags and status chips are still pills; interior chrome inside a tile keeps its
-     radii, which is the same line table.css drew when __block-num stayed radius.sm;
-     and the overlay surfaces — .jrk-modal, .jrk-menu, .jrk-hovercard, .jrk-tooltip,
-     .jrk-nav-flyout — are untouched, because they are things that float ABOVE the
-     page rather than tiles laid on it. If those should square too, that is a
-     separate direction and five more declarations. */
-  border-radius: var(--jrk-radius-none);
+     tags and status chips are pills; interior chrome inside a tile keeps its own
+     radii (the expander's icon chip at md, the sheet's `__block-num` at sm); and the
+     overlay surfaces — .jrk-modal at 2xl, .jrk-menu, .jrk-hovercard, .jrk-tooltip,
+     .jrk-nav-flyout, .jrk-spotlight at xl — keep the values they have always had.
+     Those were never part of either direction. */
+  border-radius: var(--jrk-radius-md);
   /* Resting elevation, which reverses the rule that used to be written on
      shadow.lg — "elevation is opt-in AT REST ... every tile carrying a resting
      shadow was the look this system was built to avoid". That look is the brief

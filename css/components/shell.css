@@ -692,6 +692,13 @@
    neutral filled field is a lightness step and nothing else, where a tinted one
    is a hue the eye finds without looking for it.
 
+   THAT ARGUMENT IS NOW GENERALISED as `.jrk-input--search` in form.css, directed
+   2026-08-18, because it was never about the topbar — it is about search fields.
+   These rules are kept rather than replaced by the modifier for the one thing that
+   IS about the topbar: the borderless exception below. Read the modifier's header
+   before changing any colour here; the fill, the glyph ink and the placeholder ink
+   are the same three tokens in both places and are meant to stay that way.
+
    DESCENDANT SELECTORS, because `.jrk-topbar__search` lands on a different element
    depending on how the search is built. The plain-HTML form puts it on the
    `.jrk-input-group` wrapper; React's `<Input className>` forwards to the

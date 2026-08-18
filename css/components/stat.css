@@ -12,11 +12,11 @@
      systems on one page. So it draws the same border.subtle hairline, which on the
      flat white light page is the only thing bounding it. See card.css. */
   border: 1px solid var(--jrk-border-subtle);
-  /* Rectangular, with the card — see the note on .jrk-card, where the reasoning for
+  /* radius.md, with the card — see the note on .jrk-card, where the reasoning for
      the whole family lives. A KPI tile bounded differently from the cards beside it
      would read as two systems on one page, and that is as true of the corner as it
      is of the hairline this rule sits under. */
-  border-radius: var(--jrk-radius-none);
+  border-radius: var(--jrk-radius-md);
 }
 
 /* Periwinkle KPI tile — the band across the top of a dashboard. */
@@ -154,13 +154,14 @@
      and the tiles inside stay on internal hairlines — see the > .jrk-stat rule
      below. */
   border: 1px solid var(--jrk-border-subtle);
-  /* Rectangular, with the card. The JOINED row is the one place this changes what a
-     neighbouring property is doing: `overflow: hidden` was partly clipping the first
-     and last tile into the band's rounded ends, and there are no rounded ends now. It
-     stays, because it is also what stops a tile's own fill bleeding past the band's
-     hairline — but it is doing one job now rather than two, and this is the row whose
-     clipping the hover card's placement trap is about. */
-  border-radius: var(--jrk-radius-none);
+  /* radius.md, with the card. The JOINED row is the one place this changes what a
+     neighbouring property is doing: the band has rounded ends again, so `overflow:
+     hidden` is back to doing two jobs — clipping the first and last tile into those
+     ends, and stopping a tile's own fill bleeding past the band's hairline. It was
+     never removed during the squaring, so nothing has to be re-added here; note only
+     that this is the row whose clipping the hover card's placement trap is about, and
+     a rounded band makes that clip visible again at the two outer corners. */
+  border-radius: var(--jrk-radius-md);
   overflow: hidden;
 }
 
@@ -233,11 +234,13 @@
 .jrk-stat-row--split > .jrk-stat {
   background: var(--jrk-surface-default);
   border: 1px solid var(--jrk-border-subtle);
-  /* Rectangular, with the card. Restated here rather than left to the base rule
+  /* radius.md, with the card. Restated here rather than left to the base rule
      because this block restates the whole tile treatment at 0-2-0 to beat the joined
-     row's internal-hairline rules — omit it and a split row's tiles would be the one
-     rounded thing left on the page. */
-  border-radius: var(--jrk-radius-none);
+     row's internal-hairline rules — and one of those, `.jrk-stat-row:not(--split)
+     > .jrk-stat`, sets `border-radius: 0` at the same 0-2-0 and appears EARLIER in
+     the file. Omit this line and a split row's tiles would be the one square thing
+     left on the page, losing on source order to a rule that is not about them. */
+  border-radius: var(--jrk-radius-md);
 }
 
 .jrk-stat-row--split > .jrk-stat--tinted {

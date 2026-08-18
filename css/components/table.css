@@ -7,12 +7,18 @@
 /* A bare table panel on the page IS a tile, so it is bounded the same way a card
    is — border.subtle hairline, fill step, shadow.card at rest. See card.css.
 
-   RECTANGULAR, by explicit direction: this is the one tile in the library that
-   does not take the softened radius ladder. A table is a grid of straight rules
-   that run to its edges, and an 18px corner cuts across the first and last cell
-   of the header and footer rows, so the outer curve never agrees with the
-   geometry inside it. radius.none rather than a literal 0 so the value is still
-   a token; do not "restore consistency" by pointing it back at radius.xl.
+   radius.md, with every other tile, as of the 2026-08-18 direction. This rule
+   carried the longest-standing squaring argument in the library and it is worth
+   stating what happened to it rather than deleting it: a table is a grid of
+   straight rules running to its own edges, so a corner radius cuts across the
+   first and last cell of the header and footer rows and the outer curve never
+   quite agrees with the geometry inside. That is still true. What makes it
+   survivable is `overflow: auto` on the line below — the wrap clips its own
+   content, so the corner TRIMS those cells rather than letting them paint
+   outside a rounded frame, and at 10px the trim is a couple of pixels off a cell
+   that is already padded. The earlier objection was written against radius.xl,
+   where 18px ate visibly into the header row. Do not read the reversal as the
+   argument having been wrong; it was measured at a different value.
 
    The shadow is the RESTING step of the ladder (rest -> hover -> popover), the
    same token .jrk-card uses, so a table panel floats exactly as much as the
@@ -24,7 +30,7 @@
   max-width: 100%;
   background: var(--jrk-surface-default);
   border: 1px solid var(--jrk-border-subtle);
-  border-radius: var(--jrk-radius-none);
+  border-radius: var(--jrk-radius-md);
   box-shadow: var(--jrk-shadow-card);
 }
 
