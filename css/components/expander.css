@@ -146,8 +146,13 @@
 
    Measured, both themes. Ink accent.washText on accent.wash is 5.31:1 light and
    6.73:1 dark. The fill step is deliberately weak — 1.16:1 light, 1.06:1 dark —
-   so the hairline is not decoration you can drop, exactly as accent.washBorder is
-   load-bearing on .jrk-btn--primary for the same reason.
+   and since 2026-08-19 there is no hairline behind it: every wash-filled pill in
+   the library gave up accent.washBorder on instruction, .jrk-btn--primary
+   included. This chip can afford that more easily than the button can, and the
+   reason is already written four paragraphs down for the pastel tones: nothing
+   here depends on finding the chip's edge, only on reading its 5.31:1 label. The
+   border stays 1px transparent rather than going to zero, so the chip does not
+   reflow by 2px against the tones that already set it transparent.
 
    The consequence to respect: this is now the .jrk-btn--primary triple exactly.
    A tinted button must not sit in an expander summary — height is the only thing
@@ -162,7 +167,7 @@
   letter-spacing: var(--jrk-tracking-normal);
   color: var(--jrk-accent-wash-text);
   background: var(--jrk-accent-wash);
-  border: 1px solid var(--jrk-accent-wash-border);
+  border: 1px solid transparent;
   border-radius: var(--jrk-radius-full);
 }
 

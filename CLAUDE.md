@@ -301,9 +301,10 @@ milder version of the same collision**: its fill family (`accent.wash` /
 `washHover` / `washActive`) lands on top of `--jrk-chart-tint-1` — `#cfe1fd`
 against `#c7deff` in light, `#143a5e` against `#113a5e` in dark, i.e. the same
 color. Accepted, because the two are never the identity channel for the same
-thing and only the button carries a hairline (`accent.washBorder`) and a label.
-The rule it produces: a tinted button does not sit inside a chart tile among
-tint-filled marks.
+thing and the button carries a label. It used to carry a hairline as well and
+no longer does (see the borderless-pill rule below), so the label is now the
+whole of the difference — which makes the rule it produces stricter, not looser:
+a tinted button does not sit inside a chart tile among tint-filled marks.
 
 **Color is never the only signal.** Status needs icon + label. Deltas state
 direction in text. Charts have a table view.
@@ -367,39 +368,55 @@ the accent did. That is what `status.critical.solid` / `.onSolid` are for.
 
 **The accent has two button volumes, and which one is the DEFAULT is the whole
 decision.** `.jrk-btn--primary` is **tinted** — `accent.wash` fill,
-`accent.washText` label, `accent.washBorder` hairline — and it is the everyday
-button. `.jrk-btn--cta` is the solid anchor with a white label, and there is **at
+`accent.washText` label, no border — and it is the everyday button. `.jrk-btn--cta` is the solid anchor with a white label, and there is **at
 most one per view**, for the action that commits. `--primary` used to *be* the
 solid one; the reason it moved is that a screen here shows a page-header action, an
 export, a filter and a segmented control at once, and four saturated blue
 rectangles tell the reader nothing about which one commits. Three details are
 load-bearing, all of them recorded on the tokens: the label is `washText`, not
 `accent.text` (the anchor is 4.49:1 on the wash — under by 0.01); the wash cannot
-bound the control (1.16:1 on the white card, 1.06:1 on the dark one) so the
-hairline is not decoration you can drop; and `accent.washBorder` is kept far below
-`border.accent`, which means *selected* on a segment or tab — if those two ever
-converge, a button and a chosen control look alike.
+bound the control (1.16:1 on the white card, 1.06:1 on the dark one), so **this
+button has no boundary at all in dark** and `shadow.sm` is the only one it has in
+light; and `accent.washBorder` is kept far below `border.accent`, which means
+*selected* on a segment or tab — if those two ever converge, a button and a chosen
+control look alike.
+
+**EVERY WASH-FILLED PILL IS BORDERLESS, directed 2026-08-19, and the four move
+together.** `.jrk-btn--primary`, the `.jrk-btn-group` thumb, the selected
+`.jrk-tabs--pills` tab and `.jrk-expander__tag` all dropped `accent.washBorder`;
+`.jrk-nav-item[aria-current]` and `.jrk-sidebar__action[aria-current]` never had
+one. The 1px stays reserved as `transparent` on all of them — **never `border: 0`**,
+which also kills `border-style` and makes a later `border-color` paint nothing —
+so an edge coming back reflows nothing. What this *costs* is written on each rule
+and summarised in the two paragraphs below; read them before adding a fifth wash
+pill, because the fill is 1.06:1 on the dark card and there is nothing behind it.
+`accent.washBorder` survives on the two wash fills that are **not** pills —
+`.jrk-input--search` / `[type='search']` and `.jrk-org__card[aria-current]` — and
+if either loses it too, delete the token rather than leave a colour nothing
+draws.
 
 **A segmented control is an inset well with a RAISED TINTED THUMB, and the
 current-page nav row is the same tinted pill.** `.jrk-btn-group`,
 `.jrk-tabs--pills`, `.jrk-nav-item[aria-current]` and
 `.jrk-sidebar__action[aria-current]` all say "this is the one" the same way now:
-`accent.wash` + `accent.washText` + **semibold**. On the two segmented controls the
-thumb adds `shadow.md` and the faint `accent.washBorder` hairline and floats in a
+`accent.wash` + `accent.washText` + **semibold**, and none of the four draws a
+border. On the two segmented controls the thumb adds `shadow.md` and floats in a
 `surface.track` well whose unselected segments are bare labels — no fill, no
-border, so there is one enclosure in the control and it marks the choice. The two
+shadow, so there is one raised object in the control and it marks the choice. The two
 segmented controls are the same widget in two markup contracts; a change to one
 belongs in both. Segment height comes from the button's own size modifier (the
 first track era pinned it at 22px, under the 24px `minTouch` floor).
 
 **This design spends a measured signal, and you need to know that before you
-touch it.** No channel on the thumb reaches 3:1: the fill is **1.05:1** against the
-track in light and 1.20:1 in dark, the hairline 1.44:1 and 2.30:1, and the shadow
-is invisible in dark by construction. The nav pill is the same story — **1.04:1**
-against a hovered row, 1.08:1 against an open one. Immediately before this the
-segment carried `border.accent` at 5.22:1/6.37:1 and the nav row a solid
-`accent.solid` pill at 5.22:1. Both were traded, deliberately and on instruction,
-for the quieter look.
+touch it.** No channel on the thumb reaches 3:1, and since the hairline went there
+are only three: the fill is **1.05:1** against the track in light and 1.20:1 in
+dark, and the shadow is invisible in dark by construction — so **in dark the state
+rides on hue and weight alone**, the hairline's 2.30:1 having been the one channel
+that worked there. The nav pill is the same story — **1.04:1** against a hovered
+row, 1.08:1 against an open one. Two revisions ago the segment carried
+`border.accent` at 5.22:1/6.37:1 and the nav row a solid `accent.solid` pill at
+5.22:1. All of it was traded, deliberately and on instruction, for the quieter
+look.
 
 So: **the `semibold` is structure, not styling.** It is the only channel that
 survives greyscale, both dichromacies and both themes, and it is what keeps

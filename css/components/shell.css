@@ -1018,9 +1018,12 @@
   background: transparent;
   /* The base .jrk-tab is border: 0 plus a 2px transparent bottom rule, because the
      underline variant selects by that rule. A pill is a box, so it takes a real
-     border on all four sides — transparent here, coloured on the thumb. Set as the
-     shorthand, which also resets the border-style that `border: 0` left as `none`;
-     that is the quiet way a later border-color paints nothing. */
+     border on all four sides — transparent here AND on the thumb, which gave up
+     its accent.washBorder hairline on 2026-08-19 along with every other
+     wash-filled pill. The 1px stays reserved so an edge coming back never reflows
+     the row. Set as the shorthand, which also resets the border-style that
+     `border: 0` left as `none`; that is the quiet way a later border-color paints
+     nothing. */
   border: 1px solid transparent;
   /* radius-full, tracking .jrk-btn-group > .jrk-btn. The old `calc(radius - 2px)`
      kept an inner rounded rectangle concentric with its well; a pill has no curve
@@ -1046,11 +1049,15 @@
    selected state at all in the track era: every selected rule keyed on
    aria-selected, which is only meaningful inside a tablist, so a pill row used as
    navigation rendered with nothing marked. */
+/* Borderless since 2026-08-19, tracking .jrk-btn-group's thumb — the two
+   segmented controls are the same widget and a change to one belongs in both.
+   The full cost of dropping the hairline is written on that rule in button.css;
+   the short form is that dark now rests on hue and weight alone, so the semibold
+   here is structure and not styling. */
 .jrk-tabs--pills .jrk-tab[aria-selected='true'],
 .jrk-tabs--pills .jrk-tab[aria-current='page'] {
   background: var(--jrk-accent-wash);
   color: var(--jrk-accent-wash-text);
-  border-color: var(--jrk-accent-wash-border);
   font-weight: var(--jrk-weight-semibold);
   box-shadow: var(--jrk-shadow-md);
   z-index: 1;

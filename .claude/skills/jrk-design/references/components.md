@@ -26,10 +26,17 @@ Switch TabPanel Tabs Tag Textarea Topbar` plus `cx`, `setTheme`,
 
 - Variants: `--primary` `--cta` `--secondary` `--ghost` `--danger` `--danger-solid`
   `--danger-quiet` `--link`
-- **`--primary` is TINTED** (accent wash + `accent.washText` + an
-  `accent.washBorder` hairline) and is the everyday button. **`--cta` is the solid
-  accent** — at most one per view, for the action that commits. Putting two `--cta`s
-  on a screen removes the only reason either is loud
+- **`--primary` is TINTED** (accent wash + `accent.washText`, **no border**) and is
+  the everyday button. **`--cta` is the solid accent** — at most one per view, for
+  the action that commits. Putting two `--cta`s on a screen removes the only reason
+  either is loud
+- **Every wash-filled PILL is borderless** (2026-08-19): `--primary`, the
+  `.jrk-btn-group` thumb, the selected `.jrk-tabs--pills` tab, `.jrk-expander__tag`.
+  The 1px stays `transparent` — never `border: 0` — so an edge coming back reflows
+  nothing. The cost is real and is recorded on each rule: the wash is 1.16:1 light /
+  1.06:1 dark against the card, `shadow.sm` carries `--primary` in light and nothing
+  carries it in dark. `accent.washBorder` lives on only on the two wash fills that
+  are not pills — `.jrk-input--search` and `.jrk-org__card[aria-current]`
 - The loading spinner's ink is set per variant and defaults to `text.secondary`;
   a new filled variant must name its own or it inherits the quiet one
 - Sizes: `--sm` `--lg` (md is default), plus `--icon` (square), `--block`
@@ -159,9 +166,10 @@ header on a white card, not a gradient card.
 `__tag` is brand-inked, not neutral: **`accent.washText` in both the plain and
 pastel tones** — one ink, so the chip is the same object across a row — with the
 FILL doing the per-tone work by a single rule, *step away from what you sit on*.
-On the white card that means `accent.wash` + the `accent.washBorder` hairline
-(5.31:1 light / 6.73:1 dark ink; the fill step is 1.16:1 / 1.06:1, so the hairline
-is load-bearing). On a pastel wash it steps back to `surface.default`, which
+On the white card that means bare `accent.wash`, borderless like every other wash
+pill since 2026-08-19 (5.31:1 light / 6.73:1 dark ink; the fill step is 1.16:1 /
+1.06:1, and nothing backs it up — affordable here only because nothing depends on
+finding the chip's edge). On a pastel wash it steps back to `surface.default`, which
 cannot collide with any tone — `accent.wash` there would be `#e3efff` on `#c7deff`
 on the blue tone, the same colour. Chip-vs-wash steps run 1.27–1.37:1 light and
 1.34–1.36:1 dark on blue/teal, dropping to 1.12:1 and 1.11:1 on the violet and
@@ -332,10 +340,12 @@ For workbook-style financial reports use the **sheet** layer instead — see
   - `--pills` is the same widget as `.jrk-btn-group`, rendered the same way: a
     `surface.track` well, unselected segments as bare labels, and the selected one
     as a raised tinted thumb (`accent.wash` + `accent.washText` + **semibold** +
-    `shadow.md` + an `accent.washBorder` hairline). Change one and change the other
-  - no channel on that thumb measures 3:1 — the semibold is the only one that
-    survives greyscale and CVD, so it is load-bearing. Full numbers and the
-    one-line way back to a measuring signal are in `button.css`
+    `shadow.md`, and no border since 2026-08-19). Change one and change the other
+  - no channel on that thumb measures 3:1, and there are only three left — in DARK
+    it is hue and weight alone, since the shadow renders nothing there and the
+    hairline that did (2.30:1) is gone. The semibold is the only channel that
+    survives greyscale and CVD, so it is load-bearing. Full numbers and the one-line
+    way back to a measuring signal are in `button.css`
 
 ## Section index
 

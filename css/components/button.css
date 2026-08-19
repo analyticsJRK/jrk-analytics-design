@@ -161,18 +161,28 @@
    anything. Tinted spends the accent at a lower volume so that the one solid
    button on a screen still means something.
 
-   Two things this treatment must not lose, both handled below rather than
-   assumed. The LABEL: accent.washText, not accent.text — the anchor lands at
-   4.49:1 on this wash, 0.01 under the floor, which is the reason washText is a
-   separate token at all. The BOUNDARY: a wash is 1.16:1 on the white card and
-   1.06:1 on the dark one, so the fill cannot bound the control and
-   accent.washBorder draws the edge. A tile can be bounded by a fill step alone
-   because its content groups it; a button cannot, because looking pressable is
-   the job. */
+   The LABEL is the one thing this treatment must not lose: accent.washText, not
+   accent.text — the anchor lands at 4.49:1 on this wash, 0.01 under the floor,
+   which is the reason washText is a separate token at all.
+
+   THE HAIRLINE IS GONE, directed 2026-08-19, and what it cost is recorded here so
+   that nobody re-derives it as a bug. accent.washBorder drew the edge because the
+   wash is 1.16:1 on the white card and 1.06:1 on the dark one — a hue, not an
+   enclosure — and a button cannot live on that the way a tile can, because
+   looking pressable is the job. Nothing replaced it. shadow-sm carries the light
+   theme and renders nothing on the dark card, so in DARK this button is now a
+   tinted label with no boundary at all; that is the known cost of the
+   instruction, which was that every wash-filled pill loses its border. The same
+   call was made on the segmented-control thumb, the pill tab and the expander
+   tag, so the four still agree with each other — an edge coming back on one of
+   them belongs on all four.
+
+   Putting a boundary back is one line, border-color: var(--jrk-accent-wash-border),
+   and the base rule still reserves the 1px so it reflows nothing. Do NOT reach
+   for border.accent instead: that colour means "selected". */
 .jrk-btn--primary {
   background: var(--jrk-accent-wash);
   color: var(--jrk-accent-wash-text);
-  border-color: var(--jrk-accent-wash-border);
   /* shadow-sm, the same faint one --secondary takes, rather than --cta's
      shadow-md: a heavier shadow under a pale fill reads as a grey smudge. */
   box-shadow: var(--jrk-shadow-sm);
@@ -426,17 +436,20 @@
 
 /* The thumb: the tinted button, LIFTED out of the well. Same accent.wash fill,
    same accent.washText ink, same semibold and the same wash steps on hover and
-   press as .jrk-btn--primary, plus a shadow and the button's own faint
-   accent.washBorder hairline. No accent edge — this is a raised object, not an
-   outlined one.
+   press as .jrk-btn--primary, plus a shadow. NO BORDER of any kind — not the
+   accent edge it wore two revisions ago, and since 2026-08-19 not the faint
+   accent.washBorder hairline either. It is a raised object, and now an entirely
+   unoutlined one.
 
    READ THIS BEFORE CHANGING IT, because the number is not obvious from looking at
-   it. NO CHANNEL HERE MEASURES 3:1. The fill is 1.05:1 against the track in light
-   and 1.20:1 in dark; the hairline is 1.44:1 and 2.30:1; the shadow is invisible
-   in dark by construction. The state rides on four sub-3:1 channels at once —
-   hue, weight, the hairline, and the shadow in light only — and this is a
-   deliberate, directed deviation from the rule that a selection signal must
-   measure. It was an accent edge at 5.22:1 / 6.37:1 immediately before this.
+   it. NO CHANNEL HERE MEASURES 3:1, and there are only THREE of them left. The
+   fill is 1.05:1 against the track in light and 1.20:1 in dark; the shadow is
+   invisible in dark by construction. So the state rides on hue, weight and the
+   shadow in light — and in DARK on hue and weight ALONE, because the hairline at
+   2.30:1 was the one channel that worked there and it is the one that was
+   removed. This is a deliberate, directed deviation from the rule that a
+   selection signal must measure; it was an accent edge at 5.22:1 / 6.37:1 two
+   revisions ago and a hairline until 2026-08-19.
 
    The one channel that is theme-independent, CVD-independent and survives
    greyscale is the WEIGHT step, medium -> semibold. It is the reason this is
@@ -455,12 +468,11 @@
      4.49:1 — under the floor by 0.01. That 0.01 is the entire reason washText
      exists as a separate token. */
   color: var(--jrk-accent-wash-text);
-  border-color: var(--jrk-accent-wash-border);
   font-weight: var(--jrk-weight-semibold);
   /* shadow-md, tokenised rather than the buttons' hand-rolled 0.5px bezel: this
-     one has to read as LIFT, not as a hairline substitute. It contributes nothing
-     in dark — a black shadow on a #18181a track — which is why the hairline is
-     not optional. */
+     one has to read as LIFT. It contributes nothing in dark — a black shadow on
+     a #18181a track — and there is no hairline behind it any more, which is what
+     leaves dark resting on hue and weight. Do not weaken it. */
   box-shadow: var(--jrk-shadow-md);
   z-index: 1;
 }
