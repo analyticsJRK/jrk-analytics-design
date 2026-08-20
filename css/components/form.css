@@ -85,7 +85,19 @@
   width: 100%;
   height: var(--jrk-control-md);
   padding-inline: var(--field-px);
-  font-size: var(--jrk-text-md);
+  /* `sm` (13px), NOT `md` (14px) — a field label is a control label, and buttons
+     have sat one step below body copy since the pill refresh. The two control
+     families were reading at different sizes in the same filter bar, which is the
+     same "two type systems for one kind of word" failure the button's own weight
+     comment describes. Directed 2026-08-20: every control defaults to `sm`.
+
+     THIS COSTS THE SAME THING THE BUTTON ALREADY PAID, recorded so it is not
+     rediscovered as a bug: `.jrk-input--sm` also resolves to `--jrk-text-sm`, so
+     the default field and the small field are no longer separated BY TYPE SIZE.
+     They are still distinct sizes — `--sm` steps the height (`control-sm`) and
+     `--field-px` with it — and the scale only ever had 1px between those two
+     steps. `--lg` is untouched. */
+  font-size: var(--jrk-text-sm);
   color: var(--jrk-text-primary);
   background: var(--jrk-surface-raised);
   border: 1px solid var(--jrk-border-strong);
@@ -486,7 +498,9 @@
     gap: var(--jrk-space-3);
     min-height: 32px;
     padding: var(--jrk-space-1_5) var(--jrk-space-4);
-    font-size: var(--jrk-text-md);
+    /* Follows the closed field above — a picker option and the field it fills are
+       the same words and must not change size when the list opens. */
+    font-size: var(--jrk-text-sm);
     color: var(--jrk-text-primary);
     background: transparent;
     cursor: pointer;
@@ -618,8 +632,11 @@
   color: var(--jrk-text-disabled);
 }
 
+/* `sm`, with the controls rather than with body copy — a checkbox label is the
+   control's name, not prose about it. The hint below stays at `xs`, so the two
+   still separate. */
 .jrk-check__label {
-  font-size: var(--jrk-text-md);
+  font-size: var(--jrk-text-sm);
   line-height: var(--jrk-leading-snug);
   user-select: none;
 }

@@ -62,7 +62,10 @@
   gap: var(--jrk-space-3);
   min-height: 32px;
   padding: var(--jrk-space-1_5) var(--jrk-space-4);
-  font-size: var(--jrk-text-md);
+  /* `sm`, matching the controls. The 32px min-height is unchanged — the row is
+     sized by minTouch, not by its type, so this tightens the reading weight of a
+     long list without shortening it or moving anything else. */
+  font-size: var(--jrk-text-sm);
 }
 
 /* The inset separator. Drawn as a pseudo-element rather than a border so it can

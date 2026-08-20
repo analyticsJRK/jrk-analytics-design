@@ -925,7 +925,12 @@
   align-items: center;
   gap: var(--jrk-space-1_5);
   padding: var(--jrk-space-2_5) var(--jrk-space-3);
-  font-size: var(--jrk-text-md);
+  /* `sm`, with the buttons and fields — a tab is a control, and the pill form of
+     this widget IS a .jrk-btn-group sibling, so the two must agree. The 3px
+     selected rule below was sized against a 14px label; at 13px it reads heavier
+     rather than lighter, so it does not need to follow. The `medium` weight stays:
+     it is what separates a tab from a list row now that the size does not. */
+  font-size: var(--jrk-text-sm);
   font-weight: var(--jrk-weight-medium);
   color: var(--jrk-text-muted);
   white-space: nowrap;

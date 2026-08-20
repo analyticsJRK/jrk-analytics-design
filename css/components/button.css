@@ -121,10 +121,12 @@
 
 /* ---------- variants ---------- */
 
-/* The anatomy is now a PILL: a hairline bezel, a soft ambient shadow, and a fully
-   rounded edge. What replaced the macOS push button is the shape and the padding,
-   not the structure — the bezel is still what keeps a pale variant from reading as
-   a floating label, and every variant below still states its own boundary.
+/* The anatomy is a PILL: a fill, a shadow, and a fully rounded edge. The hairline
+   bezel that used to be part of that list is GONE from every variant — the wash
+   pills lost it on 2026-08-19 and the two white ones on 2026-08-20 — so ELEVATION
+   is now the only boundary mechanism this family has in light, and the fill step is
+   the only one it has in dark. Every variant below still states its own boundary;
+   what changed is that none of them states it with a border.
 
    The hand-rolled `0 0.5px 1.5px` bezels are gone in favour of shadow-sm and
    shadow-md, which is a de-duplication as much as a restyle: five variants were
@@ -219,12 +221,35 @@
   box-shadow: none;
 }
 
-/* The default macOS control: white, hairline bezel, faint shadow. */
+/* The default control: white, NO BEZEL, and a shadow that has to carry the whole
+   enclosure. Directed 2026-08-20 — every white button loses its border and states
+   "raised" with elevation instead.
+
+   READ THE MEASUREMENT BEFORE TOUCHING THIS, because it is the reason the shadow
+   stepped up a rung rather than staying where it was. surface.raised is #ffffff in
+   light, which is surface.default verbatim, so a white button sitting on a card has
+   a 1.00:1 fill step and on the #fbfbfb page a 1.035:1 one. With the hairline gone
+   there is NOTHING else in light: shadow-sm (0 1px 3px at 0.05 alpha) was tuned to
+   sit under a border.default edge and cannot bound a control on its own, so this
+   takes shadow-md — the same rung as --cta and the segmented thumb, the one the
+   shadow namespace describes as having to read as LIFT.
+
+   THE THEMES SPLIT, and they split the useful way round for once. In LIGHT the fill
+   step is nil and the shadow does all of it. In DARK the shadow is close to
+   invisible (black on a #232326 card) but surface.raised is a real 1.125:1 step off
+   that card, so the button is bounded by its fill there. One mechanism each, neither
+   redundant — the same shape as .jrk-card--interactive:hover. This is why the white
+   pill survives the un-bordering where .jrk-btn--primary did not: the wash is
+   1.06:1 on the dark card and had no fill step to fall back on.
+
+   The 1px stays reserved as `transparent`. NEVER `border: 0` — that kills
+   border-style too, after which a later border-color paints nothing at all.
+   Putting the bezel back is one line: border-color: var(--jrk-border-default). */
 .jrk-btn--secondary {
   background: var(--jrk-surface-raised);
   color: var(--jrk-text-primary);
-  border-color: var(--jrk-border-default);
-  box-shadow: var(--jrk-shadow-sm);
+  border-color: transparent;
+  box-shadow: var(--jrk-shadow-md);
 }
 
 .jrk-btn--secondary:hover:not(:disabled) {
@@ -253,11 +278,20 @@
 /* Destructive, macOS style: a normal push button wearing red TEXT. A saturated
    red rectangle sitting in a toolbar is an iOS-alert shape and looks wrong
    beside other desktop controls. */
+/* Unbordered and lifted for the same reason as --secondary above, and the
+   measurement there applies verbatim: this is the same white pill wearing red ink.
+
+   THE HOVER EDGE IS KEPT ON PURPOSE. The un-bordering instruction is about the
+   RESTING state, and status.critical.mark on hover is what makes the destructive
+   hover read as destructive rather than as a generic pink tint — the wash alone is
+   a hue, not a warning. So this control is the one place an edge appears on hover
+   and it costs nothing structurally, because the base rule reserves the 1px. If
+   that ever reads as a jump, drop the border-color line and NOT the wash. */
 .jrk-btn--danger {
   background: var(--jrk-surface-raised);
   color: var(--jrk-status-critical-text);
-  border-color: var(--jrk-border-default);
-  box-shadow: var(--jrk-shadow-sm);
+  border-color: transparent;
+  box-shadow: var(--jrk-shadow-md);
 }
 
 .jrk-btn--danger:hover:not(:disabled) {

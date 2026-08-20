@@ -3,6 +3,12 @@
 Design library for JRK analytics dashboards. One token layer, a plain-CSS
 component library, and React wrappers over the same class names.
 
+## Output style
+- Bullet points, not prose. No paragraphs over 2 sentences.
+- No preamble, no summary of what you just did, no "Great question".
+- Explain only when asked; otherwise show the code/command.
+- Snowflake for SQL, Python for modeling/API, TypeScript for UI.
+
 **There is exactly one consumer: `jrk-analytics-web-app`** — specifically
 `apps/portal`, Next.js 15 / React 19 / Tailwind v4. It **vendors** this library:
 `scripts/sync-design.mjs` there copies `package.json`, `LICENSE`, `dist`, `css`,
@@ -395,6 +401,25 @@ pill, because the fill is 1.06:1 on the dark card and there is nothing behind it
 if either loses it too, delete the token rather than leave a colour nothing
 draws.
 
+**NO BUTTON DRAWS A BORDER ANY MORE. The white ones went on 2026-08-20 and they
+state "raised" with `shadow.md` instead.** `.jrk-btn--secondary` and
+`.jrk-btn--danger` dropped `border.default` and stepped up from `shadow.sm` to
+`shadow.md` — the `--cta` / segmented-thumb rung, the one the shadow namespace
+says has to read as LIFT. **The step up is not decoration, it is the whole
+boundary:** `surface.raised.light` is `#ffffff`, i.e. `surface.default` verbatim,
+so a white button on a card has a **1.00:1** fill step and on the page a 1.035:1
+one, and `shadow.sm` was tuned to sit *under* a hairline. **The themes split the
+useful way round for once** — light has no fill step and a working shadow, dark
+has a real **1.125:1** step off the card and a shadow that renders nothing. One
+mechanism each, neither redundant, the `.jrk-card--interactive:hover` shape again.
+**That is also why the white pill survives un-bordering where `--primary` did
+not:** the wash is 1.06:1 on the dark card with nothing behind it, so that
+variant genuinely has no dark boundary and this one does. Two consequences:
+`shadow.sm` is now referenced by `--primary` alone, so it is not dead but it is
+close; and `--danger` **keeps its `status.critical.mark` hover edge on purpose** —
+the instruction was about the resting state, and the wash alone is a hue rather
+than a warning.
+
 **A segmented control is an inset well with a RAISED TINTED THUMB, and the
 current-page nav row is the same tinted pill.** `.jrk-btn-group`,
 `.jrk-tabs--pills`, `.jrk-nav-item[aria-current]` and
@@ -432,6 +457,22 @@ Apple color; the neutrals, status colors and chart palette still are.
 
 **Dark values are selected, not flipped.** Every themed token has an explicit
 `light` and `dark` entry chosen for that surface.
+
+**EVERY CONTROL LABEL IS `text.sm` (13px), one step under body copy** — directed
+2026-08-20, and it is a *default* change, not a new ladder. `.jrk-btn` already sat
+there; `.jrk-input` / `.jrk-select` / `.jrk-textarea` (and `.jrk-select option`,
+which must not resize when the picker opens), `.jrk-check__label`, `.jrk-tab` and
+`.jrk-list__row` followed. **The cost is the same one the button already paid and
+it is not a bug:** `--sm` also resolves to `text.sm`, so on buttons and fields the
+default and the small size are no longer separated *by type size* — they are still
+separated by height and padding, and the scale only ever had 1px there. `--lg` is
+untouched everywhere. **Heights did not move**, so a 32px control now holds a 13px
+label and `minTouch` is unaffected. What was deliberately LEFT at `md` is the
+title-and-prose layer — `.jrk-section__title`, `.jrk-chart-card__title`,
+`.jrk-alert__title`, `.jrk-modal__body`, `.jrk-page-header__desc`,
+`.jrk-auth__subtitle`, `.jrk-org__name` — because `base.css` body is `md` and
+dropping a title to `sm` makes it *smaller than the copy it heads*. **Controls
+shrank; the type hierarchy did not.**
 
 **Non-touch, 1920x1080.** Controls are **24/32/40** (md and lg both stepped up on
 2026-08-13 for the airier look) and `minTouch` is 24px — the WCAG 2.2 AA floor
