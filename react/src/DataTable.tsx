@@ -34,6 +34,23 @@ export interface DataTableProps<Row> {
   rows: Row[];
   rowKey: (row: Row, index: number) => string;
   caption?: string;
+  /** Keep the caption for assistive tech but take it off the screen.
+   *
+   *  A `<caption>` is the table's accessible NAME, so it should almost always be
+   *  set — a screen-reader user landing on a page with three tables gets "table"
+   *  three times without it. It is far less often wanted visibly: on a screen
+   *  whose `<h1>` already says "Deal Pipeline", a caption above the header row
+   *  repeats the page title in grey and spends a row of the scroll port saying
+   *  nothing new.
+   *
+   *  This is the split the library's own gallery makes — its data-table demo
+   *  writes `<caption class="jrk-sr-only">` — and the prop exists because a
+   *  consumer of the React component had no way to reach that class. Without it
+   *  the choice was a redundant visible caption or an unnamed table, and the
+   *  second one is invisible in a screenshot, so it is the one that gets picked.
+   *
+   *  Prefer this over dropping `caption`. */
+  captionHidden?: boolean;
   density?: 'compact' | 'default' | 'comfortable';
   /** Freezes the first column while the table scrolls sideways. */
   stickyFirst?: boolean;
@@ -65,6 +82,7 @@ export function DataTable<Row>({
   rows,
   rowKey,
   caption,
+  captionHidden,
   density = 'default',
   stickyFirst,
   maxHeight,
@@ -116,7 +134,9 @@ export function DataTable<Row>({
         )}
         aria-busy={loading || undefined}
       >
-        {caption && <caption>{caption}</caption>}
+        {caption && (
+          <caption className={cx(captionHidden && 'jrk-sr-only')}>{caption}</caption>
+        )}
         <thead>
           <tr>
             {columns.map((col) => {

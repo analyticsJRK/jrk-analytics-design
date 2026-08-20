@@ -541,6 +541,40 @@
   border-top: 1px solid var(--jrk-border-default);
 }
 
+/* IN A CAPPED WRAP THE FOOTER PINS, and it is the same argument as `thead th` being
+   sticky twenty lines from the top of this file — stated again because the two are
+   easy to think of as unrelated and they are the same mechanism solving the same
+   problem at the other end of the box.
+
+   The wrap is the scroll port. Uncapped it does not scroll vertically and a footer
+   sitting after the table is simply the last thing on the panel, which is what the
+   library's own gallery shows. CAPPED, the table is taller than the port, so an
+   in-flow footer sits BELOW the fold: the pagination controls are unreachable until
+   the reader scrolls to the bottom of a hundred rows, which is precisely the trip
+   pagination exists to save them. The header would be unreadable the same way, which
+   is why it was made sticky; the footer was left behind because the only tables that
+   had one were short.
+
+   BOTH AXES, and the second one is the half that is easy to omit. This is a BLOCK
+   child of a scroll container, so its containing block is the container's content box
+   — the VISIBLE width, not the scrolled width of the table beside it. `bottom: 0`
+   alone therefore pins it vertically and lets it slide out of view to the left as a
+   wide table is scrolled sideways, taking the row count with it. `inset-inline-start:
+   0` holds it. Nothing needs to be measured: `width: auto` already resolves to the
+   port.
+
+   The explicit fill is structural for the same reason the sticky header's is — a
+   transparent sticky box lets the rows run through it — and z-index 3 clears the
+   sticky first COLUMN (2), which would otherwise paint over the footer's leading end
+   at exactly the corner where the row count sits. */
+.jrk-table-wrap--capped .jrk-table-footer {
+  position: sticky;
+  bottom: 0;
+  inset-inline-start: 0;
+  z-index: 3;
+  background: var(--jrk-surface-default);
+}
+
 .jrk-pagination {
   display: flex;
   align-items: center;
