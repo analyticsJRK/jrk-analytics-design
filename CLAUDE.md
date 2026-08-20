@@ -140,6 +140,25 @@ namespaces, whose figures are hand-recorded on their tokens. **If you put a colo
 in a shadow, a gradient or a `data:` URL, nothing will check it — measure by hand
 and write the number down.**
 
+**AND THE LIBRARY NOW HAS ONE GRADIENT WHOSE SAFETY IS A LAYOUT FACT RATHER THAN A
+COLOUR ONE.** The `.jrk-topbar--brand` light ramp was reversed on 2026-08-20 to
+`#d5dfff → #245ec6 → #ffffff` under ink `#1d273d`. **Its middle stop measures
+2.48:1 and it ships that way deliberately.** Both ENDS pass (11.23:1 leading,
+14.90:1 trailing) and the ink fails from roughly 34% to 66% of the bar width —
+note this is the *opposite* of the convexity argument the four positional tones
+rely on, where the endpoints bound the interior; here the endpoints pass and the
+interior fails, because this ink sits between the two ends in luminance rather
+than below both. **On a ramp like that, checking the stops is not enough — the
+spans between them have to be checked too.** What makes it shippable is that
+`.jrk-topbar--brand` keeps the leading fifth and the trailing fifth inked and
+holds the middle empty with `.jrk-spacer`. **So a change to the topbar's layout is
+a change to its contrast**, which is true of nothing else in this file. The
+guarantee is thin: the right-hand cluster is about 400px, so below roughly 1200px
+of bar width it slides into the failing band. Put NOTHING ELSE on that bar in
+plain ink — the segmented control and the ghost buttons there are given a bounded
+ground of their own for this reason — and if the middle ever has to carry text,
+re-step `via` toward `#4d94ff` (4.83:1 under this ink) rather than re-inking.
+
 **THE LOOK IS A SOFT WEB UI ON AN APPLE COLOUR FOUNDATION** (since 2026-08-13).
 White cards on a `#fbfbfb` page, pill controls, tall chrome.
 **Geometry, elevation and the page plane changed; not one measured colour
@@ -334,6 +353,31 @@ categorical set carries identity and is CVD-validated. Tints are pastel fills
 for marks that are *already* labelled; the validator deliberately skips them, so
 using one where color is the identity channel is a bug no gate will catch.
 
+**THE VIVID TILE TONES ARE TWO DIFFERENT KINDS OF THING, and the rules are nearly
+opposite.** `gradient.{rose,violet,blue,teal}` are POSITIONAL — assign by slot,
+never by meaning, because half the positional pairs collapse under CVD and colour
+cannot carry identity. `gradient.{critical,warning,good}`, added 2026-08-20, are
+SEMANTIC: the hue is supposed to mean what the label says, and a tone that does
+*not* match the severity in the label is the bug. **They are not tones five, six
+and seven.** Four rules, and the second and third are the ones that get forgotten:
+**(1) ONE TONE PER ROW**, chosen by the row's worst severity — never mix the three,
+and never mix them with a positional tone. That is what answers the CVD objection
+rather than pretending it was passed: telling red from burnt orange under
+deuteranopia is exactly what this palette cannot do, and a uniform row removes the
+task instead of failing it. **(2) The severity must ALSO be in the label or the
+value** — the tone is redundant encoding, same standing as `chart.tint`. **(3) A
+row with nothing wrong in it takes NO vivid tone at all, not the good one.**
+Green-for-fine on every dashboard is a heat blanket: if every row is lit, none of
+them leads; `good` is for a row whose SUBJECT is an improvement, not the resting
+state of a healthy row. **(4) Two of the three values will look wrong and are
+not.** `warning.from` is `#b45400`, a burnt orange close to brown, because
+`status.warning.mark` `#ff9500` gives white 2.20:1 and cannot be a vivid stop at
+all; `good.from` is `#00813a`, a deep forest green, not `status.good.mark`
+`#34c759` at 2.22:1. Both are their hue held down to where white ink survives. A
+brighter orange means giving up white text, which means giving up `gradient.ink`,
+which means it is not this component. `critical.from` is `status.critical.solid`
+verbatim, so a critical row and a `.jrk-btn--danger` are the same red on purpose.
+
 **The typeface is Inter, loaded by `css/fonts.css`.** SF Pro cannot be shipped,
 so Inter is the stand-in everywhere — including on Apple hardware, so that the
 tracking tokens are right for one face instead of half-right for two.
@@ -396,10 +440,16 @@ which also kills `border-style` and makes a later `border-color` paint nothing �
 so an edge coming back reflows nothing. What this *costs* is written on each rule
 and summarised in the two paragraphs below; read them before adding a fifth wash
 pill, because the fill is 1.06:1 on the dark card and there is nothing behind it.
-`accent.washBorder` survives on the two wash fills that are **not** pills —
-`.jrk-input--search` / `[type='search']` and `.jrk-org__card[aria-current]` — and
-if either loses it too, delete the token rather than leave a colour nothing
-draws.
+`accent.washBorder` has ONE consumer left, and it is not a pill:
+`.jrk-org__card[aria-current]`, in two rules (the resting card and
+`--link[aria-current]:hover`). **`.jrk-input--search` / `[type='search']` lost it
+on 2026-08-20** — it was the last wash-filled *control* still drawing an edge, and
+a single holdout reads as an oversight rather than as an exception. So the rule is
+now simply: **no control draws a wash edge; one tile does.** If the org card ever
+loses it too, delete the token rather than leave a colour nothing draws — and note
+that three files still *mention* it in comments (`button.css`, `form.css`,
+`shell.css`) as the one-line way to put an edge back, so grep for the
+`border-color:` declaration rather than the token name.
 
 **NO BUTTON DRAWS A BORDER ANY MORE. The white ones went on 2026-08-20 and they
 state "raised" with `shadow.md` instead.** `.jrk-btn--secondary` and
@@ -418,7 +468,11 @@ variant genuinely has no dark boundary and this one does. Two consequences:
 `shadow.sm` is now referenced by `--primary` alone, so it is not dead but it is
 close; and `--danger` **keeps its `status.critical.mark` hover edge on purpose** —
 the instruction was about the resting state, and the wash alone is a hue rather
-than a warning.
+than a warning. The search field went the same morning, so **2026-08-20 finished
+the un-bordering the 19th started**: across buttons, segments, tabs, nav rows, the
+expander tag and the search box, not one control in the library states its
+boundary with a border any more. In light that is `shadow.md` or `shadow.sm`; in
+dark it is a fill step where one exists and nothing where it does not.
 
 **A segmented control is an inset well with a RAISED TINTED THUMB, and the
 current-page nav row is the same tinted pill.** `.jrk-btn-group`,
