@@ -552,6 +552,14 @@ blocks, so ARIA roles are mandatory. In a sheet, tone comes from the metric's
   stretched by `width: 100%` scales the text and strokes too.
 - **Component CSS sizes bare `svg` with `svg:not(.jrk-icon)`.** A plain
   `.jrk-btn svg` rule out-specifies `.jrk-icon` and kills the `em` contract.
+- **A `position: sticky` BLOCK child of a scroll container is sized by the port,
+  not by the scrolled content beside it.** Its containing block is the container's
+  content box, so `bottom: 0` pins it vertically and lets it slide out of view
+  sideways as a wide table is scrolled — `inset-inline-start: 0` is the other half,
+  and `width: auto` then already resolves to the port. Bit the capped table's
+  pinned footer, which took the row count off-screen with it. A sticky box also
+  needs an explicit fill or the rows run straight through it, and its `z-index` has
+  to clear the sticky first COLUMN, not just the rows.
 
 ## Verifying visually
 
