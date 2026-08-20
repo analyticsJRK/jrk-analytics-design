@@ -41,7 +41,8 @@
       "cardMode": "column"
     },
     "OrgChart": {
-      "cardMode": "column"
+      "cardMode": "column",
+      "viewport": "1120x800"
     },
     "OrgNode": {
       "cardMode": "column"

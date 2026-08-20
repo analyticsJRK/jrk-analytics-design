@@ -1286,3 +1286,69 @@ its absence as good news rather than evidence the entry is stale.
 - `conventions.md` now asserts tile radius, the `SectionNav` selection exception
   and the frosted-card ink figures. All three are hand-measured or geometry claims
   that no gate re-checks; they go stale the moment those rules move.
+
+## Run receipt — 2026-08-20
+
+Repo at `3085190` ("Freeze every table's panes, and add a filled org rollup
+variant"), clean and pushed before the driver ran. Three driver runs: baseline,
+then the `FilledGroups` preview width fix, then the `OrgChart` viewport override.
+
+Verdict: all four stages ok, `anchor: ok`, `58 unchanged / 2 changed / 0 added /
+0 removed`, `0 delete(s)`, `renderChurned: []`, `learningsUnmerged: []`. Grades
+cleared for both changed components (contract changed) and re-graded from the
+fresh sheets — DataTable 7 cells, OrgChart 4, all `good`. Upload = 3 components
+(`DataTable` + `OrgChart` changed; **`VividStat` rode along**) + bundle + styling
++ docs, 24 files, `_ds_sync.json` last. Only the two documented warns:
+`[DTS_STYLE_SYSTEM]` and `[FONT_REMOTE] "Inter var"`. `[GRID_OVERFLOW] NavMenu`
+did not fire again — still recorded above as outstanding, still treat its absence
+as good news.
+
+**The anchor was verified, not assumed.** `DesignSync get_file _ds_sync.json`
+matched `ds-bundle/_ds_sync.json` on all four global digests (`styleSha`,
+`auxSha`, `bundleSha12`, `scriptsSha`), on 10 spot-checked per-file hashes and on
+180 `sourceHashes` entries, and `list_projects` put the project's `updatedAt` at
+the 2026-08-18 run — i.e. nobody had uploaded since. So the dated copy is the
+last upload's own sidecar rather than a re-typed one, which is the cheaper way to
+satisfy the dated-file rule above: **compare digests against a live fetch instead
+of transcribing 16 KB of hashes by hand.**
+
+**`VividStat` was a contract-only change from `aafde55`, not from this session.**
+Its `.d.ts` and `.prompt.md` moved (`SemanticTone = 'critical' | 'warning' |
+'good'`) while its render hash and sourceKey held, so it re-uploaded bytes with no
+re-grade. Same shape as HoverCard on 2026-08-18: a merged commit that had never
+been synced. **Check `git log <last-receipt-SHA>..HEAD -- react/src/<Name>.tsx`
+before assuming an unexpected name in `upload.components` is a bug.**
+
+**THE WIDE-CROP RULE BIT AGAIN, and the arithmetic above is incomplete.** The
+`FilledGroups` cell shipped its fourth group as a yellow sliver down the right
+edge, exactly as `OrgNode.Rollup` did on 2026-08-09, with the render check green
+both times. Dropping `nodeWidth` from 188 to the 176 default did NOT fix it, and
+that is the part worth adding: **a node's width is the width of its SUBTREE, not
+of its card.** Southeast has two expanded children, so it costs 2 x 192 = 384px
+on its own, and the top level is 384 + 3 x 192 = 960px however narrow the cards
+are. Fixed with `cfg.overrides.OrgChart.viewport = "1120x800"`, the SectionNav
+precedent. To budget one of these: sum the LEAF count per top-level branch, not
+the sibling count.
+
+**Re-sync risks added by this run:**
+- `cfg.overrides.OrgChart.viewport` is coupled to `FilledGroups`' leaf count.
+  A fifth group, a wider `nodeWidth`, or expanding a second branch puts it back
+  over ~1070px of card and the card clips again with every gate green. The other
+  three OrgChart cells just gain whitespace, so the sheet will not flag it.
+- `previews/OrgChart.tsx` now passes `toggleLabel="2 markets"`. The default label
+  counts "reports", which is right for a reporting line and wrong for a fund —
+  if that sample is ever re-pointed at people, drop the override rather than
+  leaving it lying about what the children are.
+- **`.jrk-table-wrap` caps itself at 70vh now, so a DataTable card shows a
+  SCROLLED subset of its rows.** The FrozenPanes cell renders 9 of 20 rows at the
+  harness's 700px height, and a viewport change alters what the card shows with no
+  source change at all. Do not read a short row count as a data bug.
+- `FrozenPanes` and `FilledGroups` both assert behaviour a still cannot show:
+  stickiness, and a hover veil. Grading them is a judgement about GEOMETRY —
+  is the frozen column where it should be, do all four groups fit — and the
+  behaviour is verified in the repo's own headless measurements instead.
+- **Pre-existing CRLF, deliberately left:** `css/components/chart.css`,
+  `css/components/feedback.css`, `react/src/Menu.tsx`. All three predate this
+  sync, so their recorded keys already hash CRLF and are stable. Normalizing them
+  would clear Menu's grade and re-render two components for no semantic reason —
+  do it as its own change, not as a side effect of a sync.

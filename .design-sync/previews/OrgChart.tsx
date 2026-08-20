@@ -88,10 +88,20 @@ export const FitsWithoutScrolling = () => (
    `current` keeps its group fill here and states currency on a border.accent
    edge instead (3.81:1 light / 5.26:1 dark) — the wash the plain card uses is
    the same colour as tint-1, so the two signals would collide. */
+/* DEFAULT nodeWidth, not a wider one. Four groups at 188px overflowed the
+   capture box and the fourth was sliced to a sliver down the right edge — the
+   harness crops WIDE cells as silently as tall ones, and the org chart's own
+   `.jrk-org-scroll` is what hides it (a screenshot cannot scroll). Each leaf
+   costs nodeWidth + 2x gutter, so four cost 4 x 204 = 816px at 188 and 4 x 192 =
+   768 at the 176 default, plus 16px per nesting level. Look at the sheet; the
+   render check passes either way. */
 export const FilledGroups = () => (
-  <OrgChart label="Fund IV portfolio rollup" nodeWidth={188} groupFill>
+  <OrgChart label="Fund IV portfolio rollup" groupFill>
     <OrgNode name="JRK Fund IV" role="Closed-end · 2021 vintage" meta="$1.42B AUM · 37 assets" rollup>
-      <OrgNode name="Southeast" role="4 markets" meta="$612M · 14 assets" href="#" collapsible>
+      {/* The count is the toggle's label, and the default counts "reports" —
+          right for a reporting line, wrong for a fund whose children are
+          markets. */}
+      <OrgNode name="Southeast" role="4 markets" meta="$612M · 14 assets" href="#" collapsible toggleLabel="2 markets">
         <OrgNode name="Atlanta" meta="$318M · 7 assets" />
         <OrgNode name="Tampa" meta="$294M · 7 assets" />
       </OrgNode>
