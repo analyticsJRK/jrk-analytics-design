@@ -107,8 +107,8 @@ export function StatRow({ children, className }: { children: ReactNode; classNam
 
 /* ---------- vivid tile ---------- */
 
-/** The four gradient tones. Pick one by the tile's POSITION in the row, never by
- *  what the metric means.
+/** The four POSITIONAL tones. Pick one by the tile's position in the row, never
+ *  by what the metric means.
  *
  *  Half these pairs collapse under simulated CVD — violet and blue are dE 1.9
  *  apart under protanopia, i.e. the same colour — which is unavoidable at the
@@ -117,13 +117,40 @@ export function StatRow({ children, className }: { children: ReactNode; classNam
  *  measurably cannot do. See $hueIsNotIdentity in tokens.json. */
 export type VividTone = 'rose' | 'violet' | 'blue' | 'teal';
 
+/** The three SEMANTIC tones, added 2026-08-20. A different kind of thing from
+ *  `VividTone` — these mean what they say, and the rules are close to inverted.
+ *  Read $semanticToneNote in tokens.json; the three that matter here:
+ *
+ *  1. ONE TONE PER ROW, chosen by the row's worst severity. Never mix these with
+ *     each other, and never mix them with a positional tone. The CVD collapse
+ *     above is unfixed — telling `critical` red from `warning` burnt orange is
+ *     exactly the discrimination this palette cannot make — and a uniform row is
+ *     what removes that task rather than pretending it was passed.
+ *  2. The severity must be in the `label` or the `value` too. The tone is
+ *     redundant encoding, never the encoding.
+ *  3. A row with nothing wrong in it takes NO tone at all. `good` is for a row
+ *     whose subject IS an improvement, not the resting state of a healthy one.
+ *
+ *  Note also that neither colour is the status colour you may be expecting:
+ *  `warning` is a burnt #b45400 and `good` a forest #00813a, because the vivid
+ *  tile carries white ink and status.warning.mark is 2.20:1 against white. */
+export type SemanticTone = 'critical' | 'warning' | 'good';
+
+/** Every tone a vivid tile accepts. Kept as a union of the two named types
+ *  rather than one flat list of seven, so the distinction between "assigned by
+ *  position" and "assigned by meaning" survives in the type and not only in a
+ *  comment nobody reads at the call site. */
+export type VividStatTone = VividTone | SemanticTone;
+
 export interface VividStatProps {
   /** Required, and load-bearing: it is the tile's only identity channel. */
   label: string;
   value: ReactNode;
   unit?: string;
-  /** Defaults to the brand blue. A four-hue row is something you ask for. */
-  tone?: VividTone;
+  /** Defaults to the brand blue. A multi-hue row is something you ask for, and
+   *  with a `SemanticTone` it is something you must NOT ask for — see the note on
+   *  `SemanticTone` for why one tone per row is a hard rule there. */
+  tone?: VividStatTone;
   /** The period or scope line — "Jan 1 – Dec 31". Sized down, never dimmed:
    *  a vivid tile has no muted ink to dim it with. */
   caption?: ReactNode;
