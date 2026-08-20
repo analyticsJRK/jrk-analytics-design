@@ -286,12 +286,60 @@
 
 /* ---------- density ---------- */
 
+/* COMPACT IS A DENSITY, NOT JUST A SHORTER ROW, as of 2026-08-20. It used to step
+   `padding-block` alone, which is the one axis that does the LEAST for the table
+   this modifier exists for.
+
+   The case that forced it is the acquisitions pipeline: eighteen columns over
+   ~2,800 deals, read by scrolling SIDEWAYS. Vertical padding does not move a
+   horizontal scrollbar at all. What does is the inline padding and the type — at
+   space-4 a table spends 32px per column on padding alone, 576px across eighteen
+   columns, which is most of a laptop viewport handed to whitespace between the
+   figures the reader is trying to compare.
+
+   So compact steps all three, and each number is the scale's own next rung down
+   rather than a tuned value: text.sm -> text.xs in the body (13 -> 12px), text.xs
+   -> text.2xs in the header (12 -> 11px), space-4 -> space-2_5 inline (16 -> 10px),
+   and the space-2_5 -> space-1_5 block step this rule already had.
+
+   THE FLOOR IS 11px AND IT SITS ON THE HEADER, DELIBERATELY. text.2xs is the
+   smallest size the library ships; it lands on a short, semibold column name the
+   reader learns once, and the DATA stays at 12px. Do not invert that to buy another
+   pixel — the figure is the thing being read, and 11px figures across a wide grid is
+   where a dense table stops being dense and starts being unreadable.
+
+   `--comfortable` is untouched. It is the other end of the same axis and its whole
+   job is to give a short table room, so stepping its type down would be backwards.
+
+   Every selector lists `tbody th`, `tfoot th` and `tfoot td` beside `td`, per the
+   contract stated at the top of the body section — a row header IS a body cell, and
+   a density modifier that skips it leaves the leading column at a different size
+   from the row it names. */
+.jrk-table--compact {
+  font-size: var(--jrk-text-xs);
+}
+
+.jrk-table--compact thead th {
+  font-size: var(--jrk-text-2xs);
+}
+
 .jrk-table--compact thead th,
 .jrk-table--compact tbody td,
 .jrk-table--compact tbody th,
 .jrk-table--compact tfoot th,
 .jrk-table--compact tfoot td {
   padding-block: var(--jrk-space-1_5);
+  padding-inline: var(--jrk-space-2_5);
+}
+
+/* The footer caps the table, so it follows the table's density. Left at text.sm it
+   reads a step LARGER than the header of the grid above it, which inverts the
+   hierarchy — pagination is chrome and the column names are not. The adjacent-
+   sibling combinator is what the DataTable emits: `.jrk-table-footer` is the wrap's
+   second child, immediately after the table. */
+.jrk-table--compact + .jrk-table-footer {
+  padding-block: var(--jrk-space-1_5);
+  font-size: var(--jrk-text-xs);
 }
 
 .jrk-table--comfortable thead th,

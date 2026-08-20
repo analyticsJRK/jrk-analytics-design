@@ -139,14 +139,32 @@
  * true of the search box over a table on a report page, and there are far more of
  * those in the consuming app than there are topbars. Directed 2026-08-18.
  *
- * THE ONE DIFFERENCE FROM THE TOPBAR'S COPY IS THE EDGE, and it is the difference
- * accent.wash's own token note already draws. The topbar field is borderless by
- * instruction — a large, left-aligned, glyph-bearing field on a saturated bar,
- * where the fill alone is enough to read as a control, and that note ends "it is
- * NOT a precedent". This modifier is the non-precedent case: a 230px box in a card
- * header on a white page, where a wash at 1.16:1 off the card is a hue and not a
- * boundary, so it draws accent.washBorder (1.76:1 on white, 2.03:1 on the dark
- * card) and stays a visible target. Do not "align" the two by deleting it.
+ * THERE IS NO LONGER A DIFFERENCE FROM THE TOPBAR'S COPY: THE EDGE IS GONE.
+ * Directed 2026-08-20, finishing the un-bordering that took the wash pills on the
+ * 19th (.jrk-btn--primary, the segmented thumb, the selected pills tab, the
+ * expander tag) and the two white ones the same morning. A search field was the
+ * last wash-filled control in the library still drawing accent.washBorder, and a
+ * single holdout reads as an oversight rather than as an exception — which is what
+ * it had become: the paragraph this replaces argued the case as "the non-precedent",
+ * and by then every other wash control had followed the precedent anyway.
+ *
+ * WHAT IT SPENDS, recorded here so it is not re-derived as a bug later. The wash is
+ * 1.16:1 off the light card and 1.06:1 off the dark one, so the fill is a HUE and
+ * not an enclosure; accent.washBorder (1.76:1 on white, 2.03:1 on the dark card)
+ * was the only measuring edge this control had, and it is the one that went. What
+ * remains at rest is hue, the leading glyph, and the placeholder — three channels,
+ * none of them a 3:1 boundary. That is the same trade .jrk-btn--primary made and it
+ * is acceptable for the same reason: a search box is a large target that a reader
+ * looks FOR rather than one whose edges they have to find in order to hit it.
+ *
+ * NOTE WHAT DOES NOT CHANGE. :focus-visible still draws the full focus ring, so the
+ * keyboard path keeps a boundary that never depended on this border. And the 1px
+ * stays reserved as `transparent` — NEVER `border: 0`, which drops border-style
+ * with it and makes any later border-color paint nothing at all. Putting the edge
+ * back is one line: border-color: var(--jrk-accent-wash-border).
+ *
+ * accent.washBorder now has ONE consumer left in the library, .jrk-org__card
+ * [aria-current] in org.css. Check that before concluding the token is dead.
  *
  * The placeholder moves with the fill for a reason that is measured rather than
  * aesthetic, and shell.css carries the numbers: `.jrk-input::placeholder` is
@@ -180,13 +198,18 @@
 .jrk-input--search,
 .jrk-input[type='search'] {
   background: var(--jrk-accent-wash);
-  border-color: var(--jrk-accent-wash-border);
+  border-color: transparent;
 }
 
+/* STILL RESTATED RATHER THAN INHERITED, and the reason survived the un-bordering
+   even though the value it sets did not. `.jrk-input:hover:not(:disabled)` is 0-3-0
+   and out-specifies the 0-2-0 rule above, so without this pair the border steps to
+   border.strong on hover — putting a grey edge onto a field that has none at rest,
+   which is a worse artefact than the edge never leaving in the first place. */
 .jrk-input--search:hover:not(:disabled),
 .jrk-input[type='search']:hover:not(:disabled) {
   background: var(--jrk-accent-wash-hover);
-  border-color: var(--jrk-accent-wash-border);
+  border-color: transparent;
 }
 
 .jrk-input--search::placeholder,
