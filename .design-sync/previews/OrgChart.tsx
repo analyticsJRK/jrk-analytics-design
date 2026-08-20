@@ -71,3 +71,38 @@ export const FitsWithoutScrolling = () => (
     </OrgNode>
   </OrgChart>
 );
+
+/* THE NODE ITSELF CARRIES THE GROUP COLOUR instead of a keyline beside it.
+   `groupFill` is a rendering choice over the same `rollup` mechanism — same
+   slots, same order, same subtree cascade — so Atlanta and Tampa wear
+   Southeast's tint without being told to, and the root card, which sits above
+   the rollup, keeps the plain card plane because it has no group.
+
+   FOUR REGIONS, DELIBERATELY. The fill is `chart.tint`, which the validator
+   skips by design: adjacent tints hold dE 14.5 light / 17.1 dark for the first
+   four slots and then break at the 4|5 pair (7.0 / 8.6, floor 10), so five
+   groups warns in development. The keyline the default draws holds 22.3 / 16.5
+   at any count and separates all eight by texture — if a reader has to tell six
+   groups apart by colour, that is the variant that can do it.
+
+   `current` keeps its group fill here and states currency on a border.accent
+   edge instead (3.81:1 light / 5.26:1 dark) — the wash the plain card uses is
+   the same colour as tint-1, so the two signals would collide. */
+export const FilledGroups = () => (
+  <OrgChart label="Fund IV portfolio rollup" nodeWidth={188} groupFill>
+    <OrgNode name="JRK Fund IV" role="Closed-end · 2021 vintage" meta="$1.42B AUM · 37 assets" rollup>
+      <OrgNode name="Southeast" role="4 markets" meta="$612M · 14 assets" href="#" collapsible>
+        <OrgNode name="Atlanta" meta="$318M · 7 assets" />
+        <OrgNode name="Tampa" meta="$294M · 7 assets" />
+      </OrgNode>
+      <OrgNode name="Midwest" role="3 markets" meta="$488M · 12 assets" href="#" current />
+      <OrgNode
+        name="Open position"
+        role="Regional Director, Mountain West"
+        meta="$320M · 11 assets"
+        vacant
+      />
+      <OrgNode name="Northeast" role="2 markets" meta="$204M · 4 assets" href="#" />
+    </OrgNode>
+  </OrgChart>
+);

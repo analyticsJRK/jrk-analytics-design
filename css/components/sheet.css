@@ -66,6 +66,29 @@
   --jrk-sheet-group-gap: var(--jrk-space-3);
   --jrk-sheet-section-gap: var(--jrk-space-5);
 
+  /* THE VERTICAL FREEZE STACK. Three things pin to the top of the scroll port and
+     each has to know the height of the ones above it: the toolbar at 0, the letter
+     bar under the toolbar, and (since 2026-08-20) every metric header under both.
+     CSS cannot ask an element how tall it is, so the same bargain the track list
+     makes above applies here — the heights are STATED, and the two going out of
+     step is the thing to watch.
+
+     --jrk-sheet-toolbar-h has no default because a sheet may have no toolbar; the
+     consumer sets it from `offsetHeight` (the report preview does, through a
+     ResizeObserver) and it falls back to 0px at every read.
+
+     --jrk-sheet-colbar-h IS derivable on paper — 3px + 3px padding, a 9px letter at
+     the sheet's 1.25 line-height, and a 1px bottom rule, so 18.25px — and 18px is
+     that rounded down, which parks a metric header a quarter-pixel under the letter
+     bar rather than a quarter-pixel over the letters. Override it if the letter bar
+     is restyled, or measure it the way the toolbar is measured. Getting it wrong is
+     visible immediately and only at the top of the port: too small and the header
+     hides the letters, too large and a hairline of the scrolling row shows through
+     the gap. */
+  --jrk-sheet-colbar-h: 18px;
+  --jrk-sheet-frozen-top: calc(
+    var(--jrk-sheet-toolbar-h, 0px) + var(--jrk-sheet-colbar-h));
+
   position: relative;
   display: flex;
   flex-direction: column;
@@ -450,8 +473,38 @@
  * and they are not the same fact. Everything in the row takes it, including the
  * gutter's row number, which cannot stay text.muted (1.85:1 on this fill). The
  * internal dividers take the same rgba white the title bar uses, because
- * border.default is a grey line drawn on navy. */
+ * border.default is a grey line drawn on navy.
+ *
+ * IT ALSO FREEZES, as of 2026-08-20, and this is the sheet's half of the direction
+ * that every table keeps its column headers on screen. The letter bar was already
+ * sticky and the gutter and label column were already frozen inline, so the sheet
+ * LOOKED like it had frozen panes — but A…Y is a coordinate system, not a column
+ * name. The row that says JAN FEB MAR … TOTAL YTD is this one, and it scrolled away
+ * after the first screen of a sixteen-row block, which is the exact moment a reader
+ * starts needing it.
+ *
+ * IT PINS INSIDE ITS OWN BLOCK, AND THAT IS THE WHOLE DESIGN. A sticky flow-level
+ * grid item is constrained by its grid container's content box — not by its grid
+ * area, which is the reading that would have made this impossible — so a head
+ * inside `.jrk-sheet__block` can travel exactly as far as its block and no
+ * further. Each metric's header therefore rides down its own rows and is pushed
+ * out by the next block's, which is the behaviour a workbook has and the reason
+ * this needs no JS: the head that is on screen always names the figures under it.
+ * (Measured in Chrome rather than argued from the spec text, because the
+ * grid-area reading is the one most people quote.) A head that is a direct child
+ * of `.jrk-sheet` — the flat, block-less shape — pins for the whole sheet
+ * instead, which is right for the same reason.
+ *
+ * `top` is the stated stack from the top of this file, so the head parks under the
+ * letter bar rather than over it. z-index 20 sits above the frozen gutter and
+ * label column (10) and below the letter bar (30) and toolbar (40): the head has
+ * to cover the rows it scrolls over, and be covered by the two things it parks
+ * under. Its own gutter and label cells keep the row's fill, which is what stops
+ * the data showing through the one cell that is frozen on both axes at once. */
 .jrk-sheet__block-head {
+  position: sticky;
+  top: var(--jrk-sheet-frozen-top);
+  z-index: 20;
   display: grid;
   grid-template-columns: var(--jrk-sheet-cols);
   min-height: var(--jrk-sheet-row);
@@ -725,10 +778,12 @@
   .jrk-sheet__toolbar { display: none; }
 
   /* Frozen panes are a screen affordance; on paper they would print the label
-     column over the data. */
+     column over the data, and a pinned metric header would print once over the
+     first rows of its block instead of at the top of each page. */
   .jrk-sheet__gutter,
   .jrk-sheet__cell--label,
-  .jrk-sheet__colbar {
+  .jrk-sheet__colbar,
+  .jrk-sheet__block-head {
     position: static;
   }
 

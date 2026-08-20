@@ -247,7 +247,7 @@ a screen reader and to a colorblind reader both.
 Real `<table>` inside `.jrk-table-wrap` (the wrapper owns the scroll, so a wide
 table never scrolls the page body).
 
-- `.jrk-table` + `--compact` `--comfortable` `--zebra` `--sticky-first`
+- `.jrk-table` + `--compact` `--comfortable` `--zebra`
 - `.jrk-num` on every money/count cell **and** its header — tabular figures, so a
   column of equal-length values stacks. Cells are **centred** by design direction,
   which throws away the scan line on mixed-magnitude columns; `.jrk-col-end` is
@@ -263,6 +263,36 @@ table never scrolls the page body).
 `display: block` on `__fill` is load-bearing: these are `<span>`s, and an inline
 box ignores width and height, so the bar renders as an empty track. This shipped
 broken once.
+
+### Frozen panes are the default, not a modifier
+
+By direction (2026-08-20) **every** table keeps its column headers and its leading
+column on screen, on both axes. There is nothing to turn on:
+
+- the lead column is `position: sticky` on every `.jrk-table` — `th:first-child`
+  and `td:first-child`, with a `border.default` divider drawn **at rest**, the same
+  line at the same weight `.jrk-sheet` draws
+- `.jrk-table-wrap` caps its own port at `--jrk-table-height` (**70vh**), because
+  `thead th` is `sticky; top: 0` and sticky resolves against the nearest SCROLLING
+  ancestor — an uncapped wrap never scrolls vertically, the page body does, and the
+  header scrolls away while the CSS says it is pinned. It is a `max-height`, so a
+  short table is untouched
+- `.jrk-table-footer` pins to the bottom of that port and holds
+  `inset-inline-start: 0`, or the row count slides off sideways
+- the sticky ladder is **2** lead column, **3** header, **4** corner, **5** footer.
+  Raise one without reading the others and one cell paints over another at one
+  scroll position only
+- fills are stated per section (header + body = the card plane, `tfoot` =
+  `surface.subtle`). `background: inherit` does NOT work: the fills live on the
+  cells, so it resolves to the row's transparent background and the freeze goes
+  see-through. Row states (hover, `aria-selected`, `--zebra`) out-specify it at
+  (0,2,3) vs (0,2,2), which is what keeps a frozen cell lit with its own row
+- `@media print` removes the cap and unsticks everything — a capped port prints the
+  visible rows and silently drops the rest, and `thead` un-stuck repeats per page
+  on its own
+- `--sticky-first` and `--capped` are **retained no-ops**; `<DataTable stickyFirst>`
+  is deprecated and still emits the class. `maxHeight` now only retunes a port that
+  is already capped
 
 **The wrap is RECTANGULAR** (`radius.none`) — one of two, with `.jrk-sheet`, and
 for the same reason: a grid of straight rules that run to its own edges has no
@@ -474,8 +504,8 @@ every connector is derived from the layout, so there is nothing to measure.
 
 Card modifiers: `--link` (renders as `<a>`/`<button>`), `--vacant` (open post).
 State is `aria-current` on the card, not a modifier. Branch modifiers:
-`--stacked`, `--rollup`. Sizing knob: `--jrk-org-node` on `.jrk-org`
-(default 176px).
+`--stacked`, `--rollup`. Root modifier: `.jrk-org--group-fill` (see the filled
+variant below). Sizing knob: `--jrk-org-node` on `.jrk-org` (default 176px).
 
 - **It is a nested `<ul>`, not `role="tree"`.** A tree role promises roving
   tabindex and arrow-key movement between siblings, which nothing here
@@ -547,15 +577,71 @@ keyline inside the card.
   `--jrk-org-group` there) all four become invalid-at-computed-value, the
   keyline falls back to the plain colour, and every texture silently vanishes
   with no error.
-- **Keyline, not a wash and not a coloured connector.** A wash collides with
-  `aria-current` (`accent.washHover` and `chart-tint-1` are the same colour);
-  tinting the connectors would drop the one mark that must clear 3:1 to
-  2.12–2.57:1 for mint, yellow, orange and teal in light.
+- **Keyline, not a coloured connector.** Tinting the connectors would drop the
+  one mark that must clear 3:1 to 2.12–2.57:1 for mint, yellow, orange and teal
+  in light. The keyline is also not a wash *by default*, because a full-card wash
+  collides with `aria-current` — `accent.washHover` and `chart-tint-1` are the
+  same colour. `.jrk-org--group-fill` is the variant that does fill the card, and
+  it answers that collision by not bringing the wash at all: see below.
 - **A vacant card keeps its keyline.** The vacancy is about the seat, the rollup
   about the branch — and blanking it would leave the children wearing a group
   their own parent does not.
 - **One `--rollup` per chart.** Two both start at slot 1, so B's first child can
   land beside A's last in the same colour. `<OrgNode>` warns on nesting.
+
+### `.jrk-org--group-fill` — the node carries the colour
+
+`<OrgChart groupFill>`. A **rendering** choice over the same `--rollup`
+mechanism, on the ROOT list: same slots, same order, same subtree cascade, and
+every declaration falls back to the value the card already had — so on a chart
+that never groups anything it changes nothing.
+
+- **The fill is `chart.tint`, and the card's three ink levels are what decide
+  it.** On the eight tints `text.primary` is 15.32–16.99:1 light / 9.68–11.85:1
+  dark and `text.secondary` 7.98–8.85 / 5.58–6.83, but **`text.muted` fails at
+  3.70–4.10 / 4.01–4.90** — so `__meta` steps up to secondary, and so does a
+  `--vacant` name. On the saturated marks it collapses further: no ink but black
+  clears 4.5:1 across the eight in *both* themes, which would flatten three
+  levels to one, and `focus.ring` measures **1.26:1** on slot 5 in light, so the
+  library's one focus ring would disappear on a filled card. On the tints it
+  clears everywhere (worst 3.81:1 light, 5.26:1 dark).
+- **It is the weaker variant at telling groups apart. Measured, dE 10 floor,
+  both themes:**
+
+  | | keyline (marks) | filled (tints) |
+  |---|---|---|
+  | worst adjacent pair | 22.3 / 16.5 | 4.5 / 8.6 |
+  | adjacency guaranteed to | any count | **4 groups** |
+  | all pairs guaranteed to | 3 | **2** |
+  | 8 groups | 0 unseparable pairs | 18 / 16 |
+
+  The break is at the 4|5 pair (7.0 / 8.6); 1–4 are clear at 14.5 / 17.1. Five or
+  more groups warns in development. Re-ordering does not rescue it — the best of
+  all 40,320 permutations is dE 8.8 in light, still under the floor — and texture
+  is unavailable, because a patterned card fill is unreadable under text. So past
+  four groups the fill is decoration over a tree that already draws the grouping;
+  if a reader must tell six groups apart by colour, use the keyline.
+- **The current card keeps its group fill** and states currency on a
+  `border.accent` edge — 3.81:1 light / 5.26:1 dark, which makes it the rare
+  "this is the one" in this library that clears the 3:1 signifier floor, against
+  the plain card's 1.76:1 hairline over a 1.16:1 wash. On slot 1 the group's own
+  mark is blue too, so there the edge says nothing and the accent ink on the name
+  (4.51:1 / 5.26:1) carries it alone.
+- **The hairline goes to the group's MARK**, because `border.default` is 1.11:1
+  on a tint. Decorative separation only — a 1px edge is not something a reader
+  compares across a chart. Colour only, 1px unchanged, so nothing reflows.
+- **Hover is `overlay.hoverVeil`**, laid as a background-*image* over the fill so
+  the tint declaration keeps serving the colour. A tint has no next plane, and
+  `surface.hover` would replace the group colour with grey. Identical idiom to
+  `.jrk-expander--pastel`; same 1.10–1.17:1 light / 1.19–1.26:1 dark band.
+- **A vacant card keeps its fill**, for the same reason it keeps its keyline —
+  and the dash moves to the group's mark, since `border.strong` is 1.24:1 on a
+  tint and a dash nobody can see is not redundant coding.
+- Every state is **restated at a specificity that wins on its own**, not on
+  source order — the base card defines rest, `--link:hover`, `[aria-current]` and
+  `--vacant` at (0,1,0)/(0,2,0), and a partial override leaves a hovered or
+  current filled card wearing a grey plane where its group should be. Same reason
+  the stacked branch restates its connectors.
 
 ## Hover card
 

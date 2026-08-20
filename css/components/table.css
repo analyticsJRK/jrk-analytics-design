@@ -28,6 +28,29 @@
 .jrk-table-wrap {
   overflow: auto;
   max-width: 100%;
+  /* THE VERTICAL CAP IS THE DEFAULT AS OF 2026-08-20, and it is here because
+     FREEZING IS NO LONGER OPT-IN: by direction, every table in this library keeps
+     its column headers and its leading column visible on both axes. The lead
+     column is a pure CSS fact and holds itself (see the frozen-panes section
+     below). The HEADER cannot: `thead th` is `position: sticky; top: 0`, sticky
+     resolves against the nearest SCROLLING ancestor, and an uncapped wrap never
+     scrolls vertically — the page body does. So the header scrolled away on every
+     table that did not pass a height, while the CSS three rules down said it was
+     pinned, and the fix was a modifier each consumer had to remember. A guarantee
+     that depends on a caller remembering it is not a guarantee.
+
+     `max-height` and not `height`: a short table is untouched — no cap engages, no
+     scrollbar, no reserved space — so this only reaches the tables that were
+     already broken. Nothing in the library's own gallery changes shape apart from
+     the long ones, which is the point.
+
+     70vh is a PORT, not a design value: it leaves the page header, the topbar and
+     a following section on screen at 1080px while giving the table the rest. Set
+     `--jrk-table-height` to retune it per surface, or to `none` for a surface that
+     is printed rather than scrolled — and see the @media print block at the foot
+     of this file, which does exactly that for paper, because a capped port prints
+     the visible rows and silently drops the rest. */
+  max-height: var(--jrk-table-height, 70vh);
   background: var(--jrk-surface-default);
   border: 1px solid var(--jrk-border-subtle);
   border-radius: var(--jrk-radius-md);
@@ -65,10 +88,24 @@
 
 /* ---------- header ---------- */
 
+/* ONE STICKY LADDER FOR THE WHOLE TABLE, written here because four rules in this
+   file have to agree about it:
+
+     2  the frozen lead column (body and foot)
+     3  the header row
+     4  the header's own first cell — the CORNER, frozen on both axes, which has to
+        beat both of the above or the lead column paints over the column name it
+        belongs to
+     5  .jrk-table-footer, which must clear the lead column at exactly the corner
+        where the row count sits
+
+   Raise one of these without reading the other three and the failure is a single
+   cell painting over another at one scroll position — visible only mid-scroll,
+   which is the hardest kind of thing to catch in a screenshot. */
 .jrk-table thead th {
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 3;
   padding: var(--jrk-space-2_5) var(--jrk-space-4);
   font-size: var(--jrk-text-xs);
   font-weight: var(--jrk-weight-semibold);
@@ -261,27 +298,73 @@
   text-align: start;
 }
 
-/* Row-identifying first column. Sticks horizontally so it stays visible while
-   the reader scrolls a wide table sideways. */
-.jrk-table--sticky-first th:first-child,
-.jrk-table--sticky-first td:first-child {
+/* ---------- frozen panes ----------
+
+   THE LEADING COLUMN IS FROZEN ON EVERY TABLE, by direction, 2026-08-20. It was
+   `.jrk-table--sticky-first` and is now the default, for the same reason the
+   header's cap is: the column that names the row is the reader's coordinate
+   system, and a wide table scrolled sideways without it hands them eighteen
+   columns of figures belonging to a row they can no longer identify. That is not
+   a table with a nice option turned off, it is an unreadable one — and the option
+   was being forgotten one table at a time, which is exactly the history the
+   leading-column ALIGNMENT rule above records for `.jrk-col-start`. Same
+   component, same mistake, same answer.
+
+   THE FILL IS STATED PER SECTION AND THAT IS NOT REPETITION. A sticky cell with
+   no fill lets the scrolling columns slide visibly underneath it, and the three
+   sections do not sit on one plane: the header and the body are the card plane,
+   the totals row is a recess. `background: inherit` is not the shortcut it looks
+   like — these fills live on the CELLS, not on the `tr`, so inheriting resolves to
+   the row's transparent background and the freeze goes see-through.
+
+   The per-row STATES then have to out-specify this, and they do without help:
+   hover, `aria-selected` and `--zebra` are all (0,2,3) against this rule's
+   (0,2,2), so a frozen cell follows its own row's fill rather than sitting a step
+   off the row it names. Worth re-checking after any edit here — a lead column that
+   does not light up with its row reads as a detached panel, which this file
+   already recorded once for `tbody th`.
+
+   The divider is drawn ALWAYS, not only once the reader has scrolled. There is no
+   "is scrolled sideways" selector that ships in every browser this library
+   targets, and a rule that appears the moment a table is touched reads as a
+   glitch. A workbook draws its frozen-pane divider at rest too, and `.jrk-sheet`
+   draws exactly this line at exactly this weight — so the two layers agree, and a
+   narrow table pays one hairline for it. */
+.jrk-table th:first-child,
+.jrk-table td:first-child {
   position: sticky;
   inset-inline-start: 0;
   z-index: 2;
-  background: var(--jrk-surface-default);
   border-inline-end: 1px solid var(--jrk-border-default);
 }
 
-/* The corner cell is sticky in both directions and needs its own fill, which has
-   to be the HEADER's fill — it was surface.subtle while the header was, and left
-   behind it would be a single grey cell in an otherwise white header row. */
-.jrk-table--sticky-first thead th:first-child {
-  z-index: 3;
+.jrk-table thead th:first-child,
+.jrk-table tbody th:first-child,
+.jrk-table tbody td:first-child {
   background: var(--jrk-surface-default);
 }
 
-.jrk-table--sticky-first tbody tr:hover td:first-child {
-  background: var(--jrk-surface-hover);
+/* The corner. Frozen on both axes, so it has to sit above the header row AND the
+   column — see the ladder note above. Its fill is the HEADER's fill, taken from
+   the rule directly above: it was surface.subtle while the header was, and left
+   behind it would be a single grey cell in an otherwise white header row. */
+.jrk-table thead th:first-child {
+  z-index: 4;
+}
+
+/* The totals row's own recess, which the (0,2,2) fill above would otherwise
+   overwrite with the card plane, leaving one white cell in a grey footer. */
+.jrk-table tfoot th:first-child,
+.jrk-table tfoot td:first-child {
+  background: var(--jrk-surface-subtle);
+}
+
+/* Retained and now a no-op, on the same terms as `.jrk-col-center`: consumers
+   already write it, `<DataTable stickyFirst>` already emits it, and a class that
+   silently stops existing is worse than one that agrees with the default. Do not
+   re-point it at the freeze — there is nothing left for it to turn on. */
+.jrk-table--sticky-first {
+  /* intentionally empty — the freeze is the default */
 }
 
 /* ---------- density ---------- */
@@ -357,17 +440,14 @@
   background: var(--jrk-surface-subtle);
 }
 
-/* ---------- vertical scroll, which is what pins the header ----------
+/* ---------- vertical scroll ----------
 
-   `thead th` is `position: sticky; top: 0` above, and sticky resolves against
-   the nearest SCROLLING ancestor — this wrapper. With no height cap the wrapper
-   never scrolls vertically, the page body does, and the header scrolls away
-   while the CSS says it is pinned. That is not a bug you find by reading the
-   header rule, so the cap is a named modifier rather than something each
-   consumer rediscovers: `<DataTable maxHeight>` sets it.
-
-   The height itself is the consumer's, because it depends on what else is on
-   the page; this only supplies the `overflow` the cap needs to mean anything. */
+   The cap and the `overflow` it needs are both on `.jrk-table-wrap` itself now —
+   see the long note at the top of this file. This modifier is retained because
+   `<DataTable maxHeight>` emits it and consumers write it, and because it still
+   says something true about the element it is on. It turns on nothing the base
+   rule does not: a wrap carrying a `maxHeight` inline style is capped at that
+   height, and a wrap without one is capped at `--jrk-table-height` anyway. */
 .jrk-table-wrap--capped {
   overflow: auto;
 }
@@ -541,19 +621,20 @@
   border-top: 1px solid var(--jrk-border-default);
 }
 
-/* IN A CAPPED WRAP THE FOOTER PINS, and it is the same argument as `thead th` being
+/* THE FOOTER PINS ON EVERY WRAP, and it is the same argument as `thead th` being
    sticky twenty lines from the top of this file — stated again because the two are
    easy to think of as unrelated and they are the same mechanism solving the same
    problem at the other end of the box.
 
-   The wrap is the scroll port. Uncapped it does not scroll vertically and a footer
-   sitting after the table is simply the last thing on the panel, which is what the
-   library's own gallery shows. CAPPED, the table is taller than the port, so an
-   in-flow footer sits BELOW the fold: the pagination controls are unreachable until
-   the reader scrolls to the bottom of a hundred rows, which is precisely the trip
-   pagination exists to save them. The header would be unreadable the same way, which
-   is why it was made sticky; the footer was left behind because the only tables that
-   had one were short.
+   The wrap is the scroll port, and since the cap became the default EVERY wrap is
+   one — so this stopped being a `--capped` rule and became a base one. On a table
+   shorter than the port it is a no-op: a sticky box already at the bottom of a
+   container that does not scroll has nowhere to move, which is what the library's
+   own gallery shows. On a table TALLER than the port an in-flow footer sits BELOW
+   the fold, and the pagination controls are unreachable until the reader scrolls to
+   the bottom of a hundred rows — precisely the trip pagination exists to save them.
+   The header would be unreadable the same way, which is why it was made sticky; the
+   footer was left behind because the only tables that had one were short.
 
    BOTH AXES, and the second one is the half that is easy to omit. This is a BLOCK
    child of a scroll container, so its containing block is the container's content box
@@ -564,14 +645,15 @@
    port.
 
    The explicit fill is structural for the same reason the sticky header's is — a
-   transparent sticky box lets the rows run through it — and z-index 3 clears the
-   sticky first COLUMN (2), which would otherwise paint over the footer's leading end
-   at exactly the corner where the row count sits. */
-.jrk-table-wrap--capped .jrk-table-footer {
+   transparent sticky box lets the rows run through it — and z-index 5 is the top of
+   the ladder documented above the header rule, clearing the frozen lead column (2),
+   which would otherwise paint over the footer's leading end at exactly the corner
+   where the row count sits. */
+.jrk-table-wrap .jrk-table-footer {
   position: sticky;
   bottom: 0;
   inset-inline-start: 0;
-  z-index: 3;
+  z-index: 5;
   background: var(--jrk-surface-default);
 }
 
@@ -620,5 +702,42 @@
   .jrk-skeleton {
     animation: none;
     background: var(--jrk-surface-active);
+  }
+}
+
+/* ---------- print ---------- */
+
+/* THE DEFAULT CAP IS A SCROLL-PORT DECISION AND PAPER HAS NO SCROLL PORT. Left
+   alone, `max-height: 70vh` plus `overflow: auto` prints the rows that happen to
+   be inside the port and drops every row after them — silently, with no rule or
+   ellipsis to say so, which is the worst failure mode a report can have. Removing
+   the cap is therefore not a nicety here; it is the other half of making the cap
+   the default.
+
+   The freeze goes with it, for the reason `.jrk-sheet`'s own print block states:
+   frozen panes are a screen affordance, and on paper a sticky header prints once
+   over the first rows while a sticky lead column prints over the data. `thead`
+   then does the right thing on its own — un-stuck, it repeats as a table header
+   group at the top of every page, which is what a sticky header was standing in
+   for. */
+@media print {
+  .jrk-table-wrap {
+    max-height: none;
+    overflow: visible;
+  }
+
+  .jrk-table thead th,
+  .jrk-table th:first-child,
+  .jrk-table td:first-child,
+  .jrk-table-wrap .jrk-table-footer {
+    position: static;
+  }
+
+  .jrk-table thead {
+    display: table-header-group;
+  }
+
+  .jrk-table tr {
+    break-inside: avoid;
   }
 }

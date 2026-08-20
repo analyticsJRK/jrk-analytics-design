@@ -530,6 +530,28 @@
       tabular figures so digits stack.
     </div>
 
+    <!-- frozen panes: both axes, no modifier -->
+    <p class="gal-label">Frozen panes — both axes, on every table</p>
+    <div class="jrk-table-wrap" id="frozen-table" style="--jrk-table-height:300px"></div>
+    <div class="gal-rule">
+      Scroll this one <strong>both ways</strong>. The header row, the leading
+      <code class="jrk-mono">Property</code> column and the corner cell between them are all
+      frozen, with no modifier and no prop:
+      <code class="jrk-mono">.jrk-table-wrap</code> caps its own port at
+      <code class="jrk-mono">--jrk-table-height</code> — 70vh by default, overridden to 300px
+      here so the freeze is visible without scrolling the gallery — and the first column is
+      sticky on every <code class="jrk-mono">.jrk-table</code>. Eighteen columns over twenty-four
+      rows is the shape that makes the case: lose the header and a figure has no month, lose
+      the lead column and it has no property.
+      The <code class="jrk-mono">.jrk-table-footer</code> pins to the bottom of the same port
+      and holds its leading edge, so the row count cannot slide off sideways, and the totals
+      <code class="jrk-mono">&lt;tfoot&gt;</code> keeps its own recess in the frozen cell.
+      <code class="jrk-mono">--sticky-first</code> and
+      <code class="jrk-mono">--capped</code> are retained as no-ops — consumers already write
+      them, and a class that silently stops existing is worse than one that agrees with the
+      default.
+    </div>
+
     <!-- signed values: the two forms -->
     <p class="gal-label">Signed values — pick by the job</p>
     <div class="gal-demo gal-demo--stack">
@@ -954,6 +976,125 @@
       Dana carries <code class="jrk-mono">aria-current</code>, whose tinted wash is
       1.16:1 on the light card, so the <strong>semibold name is the channel</strong>
       that survives greyscale and both dichromacies.
+    </div>
+
+    <!-- the same rollup, drawn as a fill instead of a keyline -->
+    <p class="gal-label">Filled nodes — the same rollup, drawn on the card instead of beside it</p>
+    <div class="gal-demo gal-demo--plain">
+      <div class="jrk-card" style="width:100%">
+        <div class="jrk-card__header">
+          <div>
+            <div class="jrk-card__title">Fund IV rollup</div>
+            <div class="jrk-card__subtitle">Four regions · <code class="jrk-mono">.jrk-org--group-fill</code></div>
+          </div>
+        </div>
+        <div class="jrk-card__body">
+          <div class="jrk-org-scroll">
+            <ul class="jrk-org jrk-org--group-fill" aria-label="Fund IV portfolio rollup">
+              <li class="jrk-org__node">
+                <div class="jrk-org__card">
+                  <span class="jrk-org__name">JRK Fund IV</span>
+                  <span class="jrk-org__role">Closed-end · 2021 vintage</span>
+                  <span class="jrk-org__meta">$1.42B AUM · 37 assets</span>
+                </div>
+                <ul class="jrk-org__branch jrk-org__branch--rollup">
+                  <li class="jrk-org__node">
+                    <a class="jrk-org__card jrk-org__card--link" href="#">
+                      <span class="jrk-org__name">Southeast</span>
+                      <span class="jrk-org__role">4 markets</span>
+                      <span class="jrk-org__meta">$612M · 14 assets</span>
+                    </a>
+                    <button class="jrk-org__toggle" aria-expanded="true" aria-controls="orgf-se">
+                      <span>2 markets</span>
+                      <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg>
+                    </button>
+                    <ul class="jrk-org__branch" id="orgf-se">
+                      <li class="jrk-org__node">
+                        <div class="jrk-org__card">
+                          <span class="jrk-org__name">Atlanta</span>
+                          <span class="jrk-org__meta">$318M · 7 assets</span>
+                        </div>
+                      </li>
+                      <li class="jrk-org__node">
+                        <div class="jrk-org__card">
+                          <span class="jrk-org__name">Tampa</span>
+                          <span class="jrk-org__meta">$294M · 7 assets</span>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>
+
+                  <li class="jrk-org__node">
+                    <a class="jrk-org__card jrk-org__card--link" href="#" aria-current="true">
+                      <span class="jrk-org__name">Midwest</span>
+                      <span class="jrk-org__role">3 markets</span>
+                      <span class="jrk-org__meta">$488M · 12 assets</span>
+                    </a>
+                  </li>
+
+                  <li class="jrk-org__node">
+                    <div class="jrk-org__card jrk-org__card--vacant">
+                      <span class="jrk-org__name">Open position</span>
+                      <span class="jrk-org__role">Regional Director, Mountain West</span>
+                      <span class="jrk-org__meta">$320M · 11 assets</span>
+                    </div>
+                  </li>
+
+                  <li class="jrk-org__node">
+                    <a class="jrk-org__card jrk-org__card--link" href="#">
+                      <span class="jrk-org__name">Northeast</span>
+                      <span class="jrk-org__role">2 markets</span>
+                      <span class="jrk-org__meta">$204M · 4 assets</span>
+                    </a>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>The fill is <code class="jrk-mono">chart.tint</code>, not the mark, and the card's
+      three ink levels are what decide it.</strong> On the eight tints
+      <code class="jrk-mono">text.primary</code> measures 15.32–16.99:1 light / 9.68–11.85:1 dark and
+      <code class="jrk-mono">text.secondary</code> 7.98–8.85 / 5.58–6.83, but
+      <code class="jrk-mono">text.muted</code> lands at 3.70–4.10 / 4.01–4.90 and <em>fails</em> —
+      so <code class="jrk-mono">__meta</code> steps up to secondary here. On the saturated marks it
+      collapses further: no ink but black clears 4.5:1 across the eight, in <em>both</em> themes,
+      which would flatten three levels to one — and <code class="jrk-mono">focus.ring</code> measures
+      1.26:1 on slot 5 in light, so the library's one focus ring would vanish on a filled card. On
+      the tints that ring clears everywhere (worst 3.81:1 light, 5.26:1 dark). A variant that costs
+      the focus indicator is not a variant.
+    </div>
+
+    <div class="gal-rule">
+      <strong>It is the weaker of the two at telling groups apart, and that is the whole trade.</strong>
+      Tints are pastel by construction — outside the lightness band, under the chroma floor — so the
+      validator skips them. Measured at the same dE 10 floor, both themes: the keyline's marks hold
+      <strong>22.3 / 16.5</strong> on the worst adjacent pair, the tints <strong>4.5 / 8.6</strong>.
+      It does not fail immediately — the first four slots are clear (14.5 / 17.1) and the break is at
+      the 4|5 pair — so <strong>four groups or fewer is safe, five warns in development</strong>.
+      Non-adjacent groups are only guaranteed to two (1|3 is dE 6.0 / 3.9). Re-ordering does not
+      rescue it: the best of all 40,320 permutations is dE 8.8 in light, still under the floor. This
+      demo runs four regions for that reason.
+    </div>
+
+    <div class="gal-rule">
+      Three details worth looking for. <strong>The root card is unfilled</strong> — it sits above
+      the rollup, so it has no group, and every declaration in the variant falls back to the value
+      the card already had (the plain card plane in either theme); setting the class on a chart that
+      never groups anything changes nothing.
+      <strong>Midwest is <code class="jrk-mono">aria-current</code> and keeps its group fill</strong>,
+      stating currency on a <code class="jrk-mono">border.accent</code> edge instead — 3.81:1 light /
+      5.26:1 dark, which makes it the rare "this is the one" in this library that clears the 3:1
+      signifier floor, where the plain card's is a 1.76:1 hairline over a 1.16:1 wash. And
+      <strong>the vacant card keeps its fill too</strong>: the dash says the seat is open, the fill
+      says which rollup it heads, and both move — the dash to the group's mark, since
+      <code class="jrk-mono">border.strong</code> is 1.24:1 on a tint, and the name to secondary.
+      Hover Southeast: the tint takes <code class="jrk-mono">overlay.hoverVeil</code>, the same
+      directional veil the pastel expander uses, because a tint has no next plane to step to.
     </div>
   </section>
 
@@ -1399,6 +1540,77 @@
     ro.observe(document.documentElement);
     STEPS.forEach((s) => { const t = s.target && document.querySelector(s.target); if (t) ro.observe(t); });
     document.fonts?.ready.then(repos);
+  })();
+
+  /* Frozen panes. Eighteen columns over twenty-four rows, which is the only shape that
+     actually demonstrates the freeze — a table that fits its port proves nothing.
+     Figures are from a seeded LCG, not Math.random: a demo whose numbers change on
+     every reload is unusable for comparing two screenshots. */
+  (() => {
+    const wrap = document.getElementById('frozen-table');
+    if (!wrap) return;
+
+    const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const TAIL = ['Total', 'YTD', 'YoY %', 'Budget', 'Variance'];
+    const NAMES = [
+      'Bellevue Commons', 'Harbor Point', 'Riverside Flats', 'Sutter Yards', 'Ridgeline Park',
+      'Cascade Terrace', 'Foxglove Court', 'Marlowe Station', 'Halstead Row', 'Pinecrest Village',
+      'Kingsbury Landing', 'Ashford Green', 'Old Mill Quarter', 'Verona Heights', 'Larkspur Bend',
+      'Waverly Flats', 'Tamarack Ridge', 'Beacon and Vine', 'Northgate Mews', 'Ellsworth Place',
+      'Juniper Crossing', 'Sundial Commons', 'Glenrose Manor', 'Copperfield Walk',
+    ];
+
+    let seed = 20260820;
+    const rand = () => ((seed = (seed * 1103515245 + 12345) & 0x7fffffff) / 0x7fffffff);
+    const k = (n) => `$${Math.round(n / 1000).toLocaleString('en-US')}k`;
+
+    const head = `<tr><th scope="col">Property</th>${[...MONTHS, ...TAIL]
+      .map((c) => `<th scope="col" class="jrk-num">${c}</th>`).join('')}</tr>`;
+
+    const totals = new Array(MONTHS.length).fill(0);
+    const body = NAMES.map((name) => {
+      const months = MONTHS.map((_, i) => 40000 + Math.round(rand() * 90000) + i * 900);
+      months.forEach((v, i) => { totals[i] += v; });
+      const total = months.reduce((a, b) => a + b, 0);
+      const ytd = months.slice(0, 7).reduce((a, b) => a + b, 0);
+      const yoy = (rand() * 14 - 5);
+      const budget = Math.round(total * (0.92 + rand() * 0.14));
+      const variance = total - budget;
+      return `<tr>
+        <th scope="row">${name}</th>
+        ${months.map((v) => `<td class="jrk-num">${k(v)}</td>`).join('')}
+        <td class="jrk-num">${k(total)}</td>
+        <td class="jrk-num">${k(ytd)}</td>
+        <td class="jrk-num">${yoy >= 0 ? '+' : '−'}${Math.abs(yoy).toFixed(1)}%</td>
+        <td class="jrk-num">${k(budget)}</td>
+        <td class="jrk-num">${variance >= 0 ? '+' : '−'}${k(Math.abs(variance))}</td>
+      </tr>`;
+    }).join('');
+
+    const grand = totals.reduce((a, b) => a + b, 0);
+    const foot = `<tr>
+      <th scope="row">Portfolio</th>
+      ${totals.map((v) => `<td class="jrk-num">${k(v)}</td>`).join('')}
+      <td class="jrk-num">${k(grand)}</td>
+      <td class="jrk-num">${k(totals.slice(0, 7).reduce((a, b) => a + b, 0))}</td>
+      <td class="jrk-num">+3.1%</td>
+      <td class="jrk-num">${k(Math.round(grand * 0.97))}</td>
+      <td class="jrk-num">${k(Math.round(grand * 0.03))}</td>
+    </tr>`;
+
+    wrap.innerHTML = `<table class="jrk-table jrk-table--compact">
+      <caption class="jrk-sr-only">Revenue by property and month</caption>
+      <thead>${head}</thead>
+      <tbody>${body}</tbody>
+      <tfoot>${foot}</tfoot>
+    </table>
+    <div class="jrk-table-footer">
+      <span>24 of 312 properties</span>
+      <div class="jrk-pagination">
+        <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" disabled>Previous</button>
+        <button class="jrk-btn jrk-btn--ghost jrk-btn--sm">Next</button>
+      </div>
+    </div>`;
   })();
 
   /* Expandable cards. Gallery chrome — <Expander> owns this state in an app.

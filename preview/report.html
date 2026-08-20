@@ -82,9 +82,27 @@
       expense variance, down is the good outcome.
     </div>
     <div class="gal-rule">
-      <strong>Frozen panes are a screen affordance.</strong> They unfreeze under
-      <code class="jrk-mono">@media print</code>, because a sticky label column printed over
-      the data is worse than no freeze at all.
+      <strong>Four things freeze, and the metric header is the one that used to not.</strong>
+      Scroll the report above in both directions. Inline, the number gutter and the
+      <code class="jrk-mono">--label</code> column hold the left edge; vertically, the toolbar
+      pins at the top, the letter bar parks under it at
+      <code class="jrk-mono">--jrk-sheet-toolbar-h</code>, and every
+      <code class="jrk-mono">.jrk-sheet__block-head</code> parks under both at
+      <code class="jrk-mono">--jrk-sheet-frozen-top</code>. A…Y is a coordinate system, not a
+      column name: the row that says <em>JAN FEB MAR … TOTAL YTD</em> is the block head, and it
+      used to scroll away after the first screen of a sixteen-row block — exactly when a
+      reader starts needing it.
+      <br><br>
+      <strong>Each head pins inside its own block.</strong> A sticky grid item is constrained
+      by its grid container, so a head can travel as far as its metric block and no further —
+      it rides down its own rows and is pushed out by the next block's, which is what a
+      workbook does and why this needs no JavaScript. The head on screen always names the
+      figures under it.
+      <br><br>
+      <strong>All of it is a screen affordance.</strong> Everything unfreezes under
+      <code class="jrk-mono">@media print</code>: a sticky label column printed over the data
+      is worse than no freeze at all, and a pinned metric header would print once over the top
+      of its block instead of at the top of each page.
     </div>
   </section>
 
@@ -403,15 +421,28 @@ html += metricBlock(2, 'AM Cash Flow', cf, { budget: budgetCF });
 
 document.getElementById('sheet').innerHTML = html;
 
-/* Park the column bar directly under the sticky toolbar. offsetHeight, not
-   contentRect.height — the toolbar has vertical padding, and the content box
-   is 16px shorter than the space it actually occupies, which parks the letter
-   bar underneath the toolbar where it is invisible. */
+/* Park the column bar directly under the sticky toolbar, and the metric headers
+   directly under the column bar. offsetHeight, not contentRect.height — the
+   toolbar has vertical padding, and the content box is 16px shorter than the
+   space it actually occupies, which parks the letter bar underneath the toolbar
+   where it is invisible.
+
+   The letter bar is measured for the same reason even though sheet.css states a
+   default for it: 18px is the value derived on paper from its own padding, glyph
+   and rule, and a real measurement is what keeps the metric headers parked
+   correctly if any of those three is ever restyled. This is the escape hatch the
+   token's comment points at, demonstrated rather than described. */
 const sheet = document.getElementById('sheet');
 const tb = sheet.querySelector('.jrk-sheet__toolbar');
-const syncToolbar = () => sheet.style.setProperty('--jrk-sheet-toolbar-h', `${tb.offsetHeight}px`);
-new ResizeObserver(syncToolbar).observe(tb);
-syncToolbar();
+const cb = sheet.querySelector('.jrk-sheet__colbar');
+const syncFrozen = () => {
+  sheet.style.setProperty('--jrk-sheet-toolbar-h', `${tb.offsetHeight}px`);
+  if (cb) sheet.style.setProperty('--jrk-sheet-colbar-h', `${cb.offsetHeight}px`);
+};
+const ro = new ResizeObserver(syncFrozen);
+ro.observe(tb);
+if (cb) ro.observe(cb);
+syncFrozen();
 
 /* ---------------- the short-block shape ----------------
    The case `--grouped` exists for: two years per metric, no chart, many metrics.
@@ -478,8 +509,12 @@ document.getElementById('t-group').onchange =
   e => kpi.classList.toggle('jrk-sheet--grouped', e.target.checked);
 
 document.getElementById('t-grid').onchange = e => sheet.classList.toggle('jrk-sheet--gridlines', e.target.checked);
-document.getElementById('t-cols').onchange = e =>
+/* Re-measure with it: with the letter bar hidden its height is 0, and a metric
+   header still parked 18px down would leave a strip of scrolling rows above it. */
+document.getElementById('t-cols').onchange = e => {
   sheet.querySelector('.jrk-sheet__colbar').style.display = e.target.checked ? '' : 'none';
+  syncFrozen();
+};
 document.getElementById('t-thresh').onchange = e =>
   sheet.querySelectorAll('.jrk-sheet__cell--critical').forEach(c => c.style.background = e.target.checked ? '' : 'transparent');
 /* Off = the page plane the rest of the app uses. The toggle does real work in BOTH

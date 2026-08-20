@@ -644,7 +644,15 @@
  * each root restarts the palette at slot 1 per root and stands two slot-1
  * subtrees side by side, which is precisely the adjacency this whole scheme
  * rests on not doing. The root list IS the single parent those roots lack. Still
- * one rollup per chart — the root list or a node, never both. */
+ * one rollup per chart — the root list or a node, never both.
+ *
+ * HOW the group is DRAWN is a separate choice from which slot it takes, and there
+ * are two: the keyline below (the default) and the filled card under
+ * `.jrk-org--group-fill` at the foot of this file. Everything above is shared —
+ * same slots, same order, same subtree cascade — and each slot rule therefore
+ * names both a mark and its tint. The two are the same SLOT and not the same
+ * COLOUR, and the filled variant is measurably the weaker of the two at telling
+ * groups apart; its own block carries the numbers. */
 
 /* THE KEYLINE CARRIES TWO CHANNELS, HUE AND TEXTURE, AND THE PAIRING IS DERIVED
    RATHER THAN CHOSEN. Hue alone tops out fast: measured against scripts/cvd.mjs
@@ -679,34 +687,42 @@
    library does not trade a visible failure for a silent one. */
 .jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 1) {
   --jrk-org-group: var(--jrk-chart-1);
+  --jrk-org-group-fill: var(--jrk-chart-tint-1);
   --jrk-org-group-texture: var(--jrk-org-tex-solid);
 }
 .jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 2) {
   --jrk-org-group: var(--jrk-chart-2);
+  --jrk-org-group-fill: var(--jrk-chart-tint-2);
   --jrk-org-group-texture: var(--jrk-org-tex-solid);
 }
 .jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 3) {
   --jrk-org-group: var(--jrk-chart-3);
+  --jrk-org-group-fill: var(--jrk-chart-tint-3);
   --jrk-org-group-texture: var(--jrk-org-tex-dash);
 }
 .jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 4) {
   --jrk-org-group: var(--jrk-chart-4);
+  --jrk-org-group-fill: var(--jrk-chart-tint-4);
   --jrk-org-group-texture: var(--jrk-org-tex-dash);
 }
 .jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 5) {
   --jrk-org-group: var(--jrk-chart-5);
+  --jrk-org-group-fill: var(--jrk-chart-tint-5);
   --jrk-org-group-texture: var(--jrk-org-tex-dot);
 }
 .jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 6) {
   --jrk-org-group: var(--jrk-chart-6);
+  --jrk-org-group-fill: var(--jrk-chart-tint-6);
   --jrk-org-group-texture: var(--jrk-org-tex-dot);
 }
 .jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 7) {
   --jrk-org-group: var(--jrk-chart-7);
+  --jrk-org-group-fill: var(--jrk-chart-tint-7);
   --jrk-org-group-texture: var(--jrk-org-tex-rail);
 }
 .jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 8) {
   --jrk-org-group: var(--jrk-chart-8);
+  --jrk-org-group-fill: var(--jrk-chart-tint-8);
   --jrk-org-group-texture: var(--jrk-org-tex-rail);
 }
 
@@ -764,3 +780,194 @@
    the BRANCH. A region with no manager still has properties rolling up into it.
    Two orthogonal facts get two channels: the dashed edge, muted name and the
    word "Open" say the post is unfilled, the keyline says which rollup it heads. */
+
+/* ============================== filled nodes ============================== */
+
+/* THE NODE ITSELF CARRIES THE GROUP COLOUR, instead of the keyline. Opt in with
+ * `.jrk-org--group-fill` on the root list — `<OrgChart groupFill>` — which is a
+ * RENDERING choice over the rollup mechanism above and changes nothing about
+ * which slot a group gets. Without a rollup somewhere it does nothing at all:
+ * every declaration below falls back to the value the card already had, so a
+ * chart that sets this and never groups anything renders identically.
+ *
+ * WHY THE FILL IS THE TINT AND NOT THE MARK. The card holds three levels of ink,
+ * and that is what decides it. Measured on all eight tints, both themes:
+ *
+ *   text.primary    15.32 .. 16.99 light   9.68 .. 11.85 dark    ok
+ *   text.secondary   7.98 ..  8.85 light   5.58 ..  6.83 dark    ok
+ *   text.muted       3.70 ..  4.10 light   4.01 ..  4.90 dark    FAILS 4.5
+ *
+ * so `__meta` steps up to text.secondary below, and that is a requirement rather
+ * than a preference. On the SATURATED marks the picture collapses: no ink but
+ * black clears 4.5:1 across the eight (worst 5.08 light / 5.76 dark, and every
+ * slot wants black in BOTH themes), which would flatten the card's three levels
+ * to one — and worse, `focus.ring` measures 1.26:1 on slot 5 in light and 1.36:1
+ * on slot 3 in dark, i.e. the library's one focus ring would disappear on a
+ * filled card. On the tints that same ring clears everywhere: worst 3.81:1 light,
+ * 5.26:1 dark. A variant that costs the focus indicator is not a variant, so the
+ * marks are out and only the tint is left. Same reasoning, same fills and the
+ * same $hueIsNotIdentity licence as `.jrk-expander--pastel`, which is the
+ * component to keep this consistent with.
+ *
+ * WHAT IT COSTS, AND IT IS THE POINT OF THE WHOLE BLOCK. The tints are pastel by
+ * construction — outside the lightness band, under the chroma floor — so the
+ * validator skips them and they are far weaker at identity than the marks the
+ * keyline uses. Measured against scripts/cvd.mjs at validate's own dE 10 floor,
+ * both themes:
+ *
+ *                          keyline (marks)        filled (tints)
+ *   worst adjacent pair    22.3 / 16.5            4.5 / 8.6
+ *   all-pairs safe cap     3 slots                2 slots
+ *   8 groups               0 unseparable pairs    18 / 16 unseparable pairs
+ *                          (hue + texture)        (hue only)
+ *
+ * The adjacent figure is the one that matters, because adjacent siblings are what
+ * a reader compares, and it does NOT fail immediately — the first four slots are
+ * clear (worst 14.5 light / 17.1 dark) and the break is at the 4|5 pair (7.0 /
+ * 8.6), then 6|7 (4.5 / 8.9). So:
+ *
+ *   - up to FOUR groups, adjacent groups are guaranteed distinguishable;
+ *   - at FIVE or more they are not, and <OrgNode> warns in development;
+ *   - non-adjacent groups are only guaranteed to TWO, so two distant subtrees can
+ *     read as one colour at any useful count. 1|3 is dE 6.0 light / 3.9 dark.
+ *
+ * Re-ordering the tints does not rescue it and the number is worth keeping so
+ * nobody tries: the best of all 40,320 permutations lands at dE 8.8 in light,
+ * still under the floor (dark would reach 13.3, so it would take a per-theme
+ * order to fix half of it). Texture is not available either — the keyline's
+ * second channel is what takes eight groups from 9 unseparable pairs to 0, and a
+ * patterned card fill is unreadable under text.
+ *
+ * NONE OF WHICH BREAKS THE FEATURE, because the fill has exactly the standing the
+ * keyline already declares for itself: an ACCELERATOR over a tree that draws the
+ * grouping structurally and labels every node. Do not promote it past that — no
+ * legend-by-colour, no unlabelled node, no two cards distinguished by fill alone.
+ * If a reader has to tell six groups apart by colour, the keyline is the variant
+ * that can do it, and it is the default for that reason.
+ *
+ * SPECIFICITY IS DELIBERATE AND NOT ORDER-DEPENDENT. Every state the base card
+ * defines — rest, `--link:hover`, `[aria-current]`, `--vacant` — is restated here
+ * at a specificity that WINS on its own rather than on source position, because
+ * the base rules sit at (0,1,0) and (0,2,0) and a partial override would leave a
+ * hovered or current filled card wearing a grey plane where its group should be.
+ * That is the same reason the stacked branch restates its connectors instead of
+ * patching them. Every fallback is the value the card would have had without this
+ * class, so nothing here is reachable by an ungrouped node. */
+.jrk-org--group-fill .jrk-org__card {
+  background: var(--jrk-org-group-fill, var(--jrk-surface-default));
+  /* The hairline goes to the group's own MARK, because border.default is 1.11:1
+     on a tint and 1.13:1 in dark — invisible, on a card that has just given up
+     the fill step it used to be bounded by. The mark is the same hue one big
+     lightness step away: 1.67 .. 3.05:1 against its own tint in light, 3.22 ..
+     4.00:1 in dark. Decorative separation, which the conflict register permits
+     below 3:1, and NOT a second identity channel — a 1px edge is not something a
+     reader compares across a chart. Colour only, 1px unchanged, so an ungrouped
+     card beside a grouped one still does not reflow. */
+  border-color: var(--jrk-org-group, var(--jrk-border-default));
+}
+
+/* The keyline is what this variant replaces, so it must not paint underneath the
+   fill — a 4px capsule of the mark inside a tint of the same hue reads as a
+   printing artefact rather than as either signal. `display: none` and not a
+   transparent background: the pseudo-element has no other job here. */
+.jrk-org--group-fill .jrk-org__card::before {
+  display: none;
+}
+
+/* text.muted is 3.70:1 on the palest light tint and fails on all eight, so the
+   figure line steps to text.secondary — 7.98:1 light, 5.58:1 dark, worst slot in
+   each. This is the "when you move a plane, move what measures against it" rule
+   arriving in a component: the card's fill moved, so its quietest ink had to. */
+.jrk-org--group-fill .jrk-org__meta {
+  color: var(--jrk-text-secondary);
+}
+
+/* Hover is a VEIL over the tint, not a step to the next plane, because a tint has
+   no next plane — surface.hover would replace the group colour with grey, which
+   is the one thing a hover here must not do. overlay.hoverVeil is the directional
+   token that exists for this (it darkens a light tint and lightens a dark one),
+   laid as a background-IMAGE over the fill so the tint declaration keeps serving
+   the colour. Identical idiom to `.jrk-expander--pastel`'s summary hover, and the
+   same measured band: 1.10 .. 1.17:1 light, 1.19 .. 1.26:1 dark. */
+.jrk-org--group-fill .jrk-org__card--link:hover {
+  background-color: var(--jrk-org-group-fill, var(--jrk-surface-hover));
+  background-image: linear-gradient(var(--jrk-overlay-hover-veil), var(--jrk-overlay-hover-veil));
+  border-color: var(--jrk-org-group, var(--jrk-border-strong));
+}
+
+/* THE CURRENT CARD KEEPS ITS GROUP FILL AND SAYS SO ON THE EDGE, which is the
+   answer to the objection written on the keyline rule above — "a full-card wash
+   would collide with aria-current", accent.washHover being the same colour as
+   tint-1. It would, so the wash does not come: the fill stays the group's, and
+   currency moves to border.accent plus the accent ink on the name.
+
+   That trade comes out AHEAD, which is worth stating plainly because the default
+   treatment is the library's settled one. border.accent measures 3.81:1 on the
+   worst light tint and 5.26:1 on the worst dark one, so this is the rare
+   "this is the one" in the library that clears the 3:1 signifier floor at all —
+   on the plain card the same signal is a 1.76:1 hairline over a 1.16:1 wash, and
+   the semibold is doing the structural work. The name's accent.washText is
+   4.51:1 light / 5.26:1 dark on the worst slot, gated the same way it is on the
+   plain card.
+
+   ONE CAVEAT, and it is a slot collision rather than a measurement: on slot 1 the
+   group's own mark IS blue, so the accent edge and the resting edge are near
+   enough the same colour that the edge channel says nothing and the ink carries
+   it alone. Nothing to fix — it is one slot out of eight and the ink is gated —
+   but do not add a chart with a blue single series beside it, per the standing
+   accent/slot-1 rule. */
+.jrk-org--group-fill .jrk-org__card[aria-current] {
+  background: var(--jrk-org-group-fill, var(--jrk-accent-wash));
+  border-color: var(--jrk-border-accent);
+}
+
+.jrk-org--group-fill .jrk-org__card[aria-current] .jrk-org__name {
+  color: var(--jrk-accent-wash-text);
+}
+
+.jrk-org--group-fill .jrk-org__card[aria-current] .jrk-org__role {
+  color: var(--jrk-accent-wash-text);
+}
+
+/* Restated so a hovered current card keeps BOTH facts. Without it the hover rule
+   above (0,3,0) and this one (0,3,0) would be decided by source order for the
+   border, and the accent edge — the only channel here that clears 3:1 — is the
+   one that would lose. */
+.jrk-org--group-fill .jrk-org__card--link[aria-current]:hover {
+  background-color: var(--jrk-org-group-fill, var(--jrk-accent-wash-hover));
+  background-image: linear-gradient(var(--jrk-overlay-hover-veil), var(--jrk-overlay-hover-veil));
+  border-color: var(--jrk-border-accent);
+}
+
+/* A VACANT CARD KEEPS ITS FILL, for the same reason it keeps its keyline in the
+   default variant: --jrk-org-group-fill is inherited by the subtree, so blanking
+   it here would leave the children wearing a colour their own parent does not — a
+   hole in the middle of a group, which reads as a rendering fault rather than as
+   a vacancy. The seat and the branch are orthogonal facts and they get separate
+   channels: the DASH says the post is open, the fill says which rollup it heads.
+
+   Two things have to move with the fill, neither optional. The dashed edge takes
+   the group's mark, because border.strong is 1.24:1 on a tint and a dash nobody
+   can see is not redundant coding. And the muted name steps to text.secondary —
+   3.70:1 against 7.98:1 — which is the same ink correction `__meta` takes above,
+   for the same reason. `--vacant` states the transparent fill at (0,1,0), so this
+   has to be (0,3,0) to hold. */
+.jrk-org--group-fill .jrk-org__card--vacant {
+  background: var(--jrk-org-group-fill, transparent);
+  border-color: var(--jrk-org-group, var(--jrk-border-strong));
+}
+
+.jrk-org--group-fill .jrk-org__card--vacant .jrk-org__name {
+  color: var(--jrk-text-secondary);
+}
+
+/* The CONNECTORS are untouched, and that is not an omission — it is the same
+   split the keyline rule states. They stay text.muted (5.07:1 light / 5.46:1
+   dark on the plane they cross, which is the page and not the cards) because they
+   carry the reporting relationship and have a 3:1 floor to clear; four of the
+   eight marks sit at 2.12 .. 2.57:1 in light, so a group-coloured connector would
+   put the one mark that must be readable under the floor for half the palette.
+   The line says who reports to whom. The fill says which rollup this belongs to.
+
+   The TOGGLE is untouched for a plainer reason: it sits between cards, on the
+   page, and a pill wearing the group colour would read as a node. */

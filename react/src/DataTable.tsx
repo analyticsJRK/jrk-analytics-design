@@ -52,17 +52,28 @@ export interface DataTableProps<Row> {
    *  Prefer this over dropping `caption`. */
   captionHidden?: boolean;
   density?: 'compact' | 'default' | 'comfortable';
-  /** Freezes the first column while the table scrolls sideways. */
-  stickyFirst?: boolean;
-  /** Caps the scroll port so the sticky header actually pins.
+  /** @deprecated No-op since 2026-08-20 — the first column is frozen on every
+   *  table by direction, so there is nothing left to turn on. Still accepted, and
+   *  still emits `.jrk-table--sticky-first` (retained as an empty rule), so
+   *  existing callers neither break nor change behaviour. New code should drop it.
    *
-   *  `thead th` is `position: sticky; top: 0` in every table this library
-   *  draws, and on a table that does not scroll VERTICALLY that rule does
-   *  nothing at all — sticky resolves against the nearest scrolling ancestor,
-   *  which is the wrapper, and an uncapped wrapper never scrolls; the page body
-   *  does. So a long table's header scrolls away while the CSS says it is
-   *  pinned. Pass a height (`'70vh'`, `'min(70vh, 820px)'`) and the header
-   *  stays put. Any CSS length. */
+   *  If a first column genuinely must scroll away, that is a change to
+   *  `table.css`, not a prop — say so rather than reintroducing the flag. */
+  stickyFirst?: boolean;
+  /** Overrides the default height of the scroll port. Any CSS length.
+   *
+   *  THE PORT IS CAPPED WITHOUT THIS. `thead th` is `position: sticky; top: 0` in
+   *  every table this library draws, and sticky resolves against the nearest
+   *  SCROLLING ancestor — the wrapper. An uncapped wrapper never scrolls
+   *  vertically, the page body does, and a long table's header scrolls away while
+   *  the CSS says it is pinned. That used to be this prop's job, which made the
+   *  frozen header depend on every caller remembering it; `.jrk-table-wrap` now
+   *  caps itself at `--jrk-table-height` (70vh) and short tables are untouched
+   *  because it is a `max-height`.
+   *
+   *  So pass this to retune the port for a particular screen — `'50vh'` under a
+   *  tall page header, `'min(70vh, 820px)'` to stop a table growing on a large
+   *  display — not to switch the freeze on. */
   maxHeight?: string;
   zebra?: boolean;
   loading?: boolean;

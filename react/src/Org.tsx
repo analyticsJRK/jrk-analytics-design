@@ -9,6 +9,29 @@ import { cx } from './utils';
  * because the nesting can be at any depth. */
 const InRollup = createContext(false);
 
+/* Whether the chart draws groups as FILLS rather than keylines. Only the dev
+ * warning needs it — the styling is a descendant selector off the root class —
+ * but the safe group count differs between the two variants, so the warning
+ * cannot be written without knowing which one is on. */
+const GroupFill = createContext(false);
+
+/* Adjacent tints stop being distinguishable at the 4|5 pair: dE 7.0 light / 8.6
+ * dark against validate's floor of 10, where the first four are 14.5 / 17.1. The
+ * marks the keyline uses hold 22.3 / 16.5 at every count, which is why this
+ * threshold belongs to the filled variant alone. */
+const GROUP_FILL_SAFE = 4;
+
+const warnGroupFill = (count: number, where: string) => {
+  if (count <= GROUP_FILL_SAFE) return;
+  console.warn(
+    `[jrk] ${where} with groupFill has ${count} groups. Adjacent tints are only ` +
+      `distinguishable to ${GROUP_FILL_SAFE} (slots 4|5 measure dE 7.0 light / 8.6 dark, floor 10), ` +
+      'so two neighbouring groups can read as one colour. The default keyline holds ' +
+      'adjacency at any count and separates all 8 by texture — drop groupFill, or make ' +
+      'sure nothing depends on telling the fills apart.',
+  );
+};
+
 /* Org chart — hierarchy runs DOWN, peers fan OUT.
  *
  * Reporting structure, portfolio structure, entity ownership: all the same
@@ -58,11 +81,39 @@ export interface OrgChartProps {
    *  Still ONE per chart: use this or a node's `rollup`, never both. Nesting
    *  warns in development. */
   rollup?: boolean;
+  /** Draw each rollup group as a FILLED CARD instead of a keyline.
+   *
+   *  A rendering choice over the same rollup mechanism — same slots, same order,
+   *  same subtree cascade — so it does nothing on its own: with no `rollup`
+   *  anywhere the chart renders exactly as it does without this prop.
+   *
+   *  It is the WEAKER of the two at telling groups apart, and knowingly. The fill
+   *  has to sit under three levels of ink, which rules the saturated marks out
+   *  (no ink but black clears 4.5:1 on them, and the focus ring measures 1.26:1
+   *  on one slot) and leaves the pastel `chart.tint` set, which the validator
+   *  skips by design. Measured, both themes, against the keyline's marks:
+   *
+   *  | | keyline | filled |
+   *  |---|---|---|
+   *  | worst adjacent pair | dE 22.3 / 16.5 | dE 4.5 / 8.6 |
+   *  | adjacency guaranteed to | any count | 4 groups |
+   *  | all pairs guaranteed to | 3 groups | 2 groups |
+   *  | 8 groups | 0 unseparable pairs | 18 / 16 |
+   *
+   *  So: fine at four groups or fewer, and past that the fill is decoration over
+   *  a tree that already draws the grouping. Warns in development at five. If a
+   *  reader has to tell six groups apart by colour, use the keyline — that is
+   *  what it is the default for. */
+  groupFill?: boolean;
   children: ReactNode;
   className?: string;
 }
 
-export function OrgChart({ label, nodeWidth, scroll = true, rollup, children, className }: OrgChartProps) {
+export function OrgChart({ label, nodeWidth, scroll = true, rollup, groupFill, children, className }: OrgChartProps) {
+  if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+    if (rollup && groupFill) warnGroupFill(Children.toArray(children).length, '<OrgChart rollup>');
+  }
+
   const tree = (
     <ul
       /* `jrk-org__branch--rollup` on the root <ul> rather than a modifier of its
@@ -70,7 +121,15 @@ export function OrgChart({ label, nodeWidth, scroll = true, rollup, children, cl
          .jrk-org__node`, and the root list's children ARE `.jrk-org__node`,
          exactly like a branch's — a separate class would mean eight more
          nth-child rules that had to stay in step with the branch's forever. */
-      className={cx('jrk-org', rollup && 'jrk-org__branch--rollup', className)}
+      className={cx(
+        'jrk-org',
+        rollup && 'jrk-org__branch--rollup',
+        /* On the ROOT, not on the branch: the fill is a chart-wide rendering
+           choice and the CSS reaches every card from here by descent. Putting it
+           on a branch would leave a rollup hung on a node unstyled. */
+        groupFill && 'jrk-org--group-fill',
+        className,
+      )}
       aria-label={label}
       style={
         nodeWidth
@@ -81,7 +140,9 @@ export function OrgChart({ label, nodeWidth, scroll = true, rollup, children, cl
       {/* Seeds the nesting guard, so a node that also sets `rollup` inside a
           root-grouped chart warns rather than quietly laying a second palette
           over the first. */}
-      <InRollup.Provider value={Boolean(rollup)}>{children}</InRollup.Provider>
+      <InRollup.Provider value={Boolean(rollup)}>
+        <GroupFill.Provider value={Boolean(groupFill)}>{children}</GroupFill.Provider>
+      </InRollup.Provider>
     </ul>
   );
 
@@ -132,6 +193,9 @@ export interface OrgNodeProps {
    *  It is still an accelerator, never the identity channel — every card is
    *  labelled and the tree draws the grouping regardless.
    *
+   *  `<OrgChart groupFill>` draws these same groups as filled cards instead, at a
+   *  measured cost in separation — see that prop.
+   *
    *  ONE PER CHART; nesting warns in development. */
   rollup?: boolean;
   /** Give the node a disclosure toggle. Ignored when it has no children. */
@@ -172,6 +236,7 @@ export function OrgNode({
   const kids = Children.toArray(children);
   const hasKids = kids.length > 0;
   const alreadyGrouped = useContext(InRollup);
+  const filledGroups = useContext(GroupFill);
 
   const [uncontrolled, setUncontrolled] = useState(Boolean(defaultCollapsed));
   const isControlled = collapsed !== undefined;
@@ -189,6 +254,7 @@ export function OrgNode({
         '[jrk] <OrgNode stacked> is for leaf children. A stacked child with children of its own centres over its subtree and pulls off the spine.',
       );
     }
+    if (rollup && filledGroups) warnGroupFill(kids.length, '<OrgNode rollup>');
     if (rollup && alreadyGrouped) {
       console.warn(
         '[jrk] <OrgNode rollup> is nested inside another rollup. Both start at palette slot 1, so two subtrees can end up adjacent in the same colour — the one case the colouring does not survive. Use one rollup level per chart.',

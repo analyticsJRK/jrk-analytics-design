@@ -1,4 +1,5 @@
 import { DataTable, CellBar, Badge, Empty } from '@jrk/design';
+import type { Column } from '@jrk/design';
 
 type Row = {
   property: string;
@@ -103,5 +104,61 @@ export const EmptyState = () => (
     rows={[]}
     rowKey={(r) => r.property}
     empty={<Empty title="No properties match" description="Clear the region filter to see the full portfolio." />}
+  />
+);
+
+/* FROZEN PANES ARE NOT A PROP, and this is the shape that shows why they are the
+   default. Eighteen columns over twenty rows scrolls on both axes: without the
+   frozen header a figure has no month, and without the frozen lead column it has
+   no property. Both are on for every `.jrk-table` — `stickyFirst` is a retained
+   no-op, and `maxHeight` only retunes a port that is already capped at 70vh.
+
+   `rowHeader` on the identity column is still the caller's job. It is what makes
+   the frozen cell a real `<th scope="row">` rather than a bold cell that happens
+   to be pinned — the freeze is a rendering fact, the row header is a semantic one,
+   and the reader who most needs the second one cannot see the first. */
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'] as const;
+
+type MonthlyRow = { property: string; months: number[] };
+
+const monthly: MonthlyRow[] = [
+  'Parkside Commons', 'Vista Ridge', 'Harbor Point', 'Cedar Hollow', 'Riverbend Flats',
+  'Sutter Yards', 'Ridgeline Park', 'Cascade Terrace', 'Halstead Row', 'Pinecrest Village',
+  'Ashford Green', 'Old Mill Quarter', 'Verona Heights', 'Larkspur Bend', 'Waverly Flats',
+  'Tamarack Ridge', 'Northgate Mews', 'Ellsworth Place', 'Juniper Crossing', 'Glenrose Manor',
+].map((property, r) => ({
+  property,
+  months: MONTHS.map((_, m) => 42000 + ((r * 7 + m * 13) % 11) * 4300 + m * 900),
+}));
+
+const sum = (ns: number[]) => ns.reduce((a, b) => a + b, 0);
+
+const monthlyColumns: Column<MonthlyRow>[] = [
+  { key: 'property', header: 'Property', rowHeader: true, sortValue: (r) => r.property },
+  ...MONTHS.map((m, i) => ({
+    key: m,
+    header: m,
+    numeric: true,
+    sortValue: (r: MonthlyRow) => r.months[i],
+    cell: (r: MonthlyRow) => money(r.months[i]),
+  })),
+  { key: 'total', header: 'Total', numeric: true, sortValue: (r) => sum(r.months), cell: (r) => money(sum(r.months)) },
+  { key: 'ytd', header: 'YTD', numeric: true, cell: (r) => money(sum(r.months.slice(0, 7))) },
+  { key: 'budget', header: 'Budget', numeric: true, cell: (r) => money(sum(r.months) * 0.97) },
+  /* The sign is printed, so direction survives greyscale and both dichromacies —
+     no tone class is doing the work here. */
+  { key: 'variance', header: 'Variance', numeric: true, cell: (r) => `+${money(sum(r.months) * 0.03)}` },
+  { key: 'occupancy', header: 'Occupancy', numeric: true, cell: () => '94.2%' },
+];
+
+export const FrozenPanes = () => (
+  <DataTable
+    caption="Revenue by property and month"
+    captionHidden
+    columns={monthlyColumns}
+    rows={monthly}
+    rowKey={(r) => r.property}
+    density="compact"
+    footer={<span>20 of 312 properties</span>}
   />
 );

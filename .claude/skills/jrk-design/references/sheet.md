@@ -312,12 +312,44 @@ the data, which is what the removed brand edge could not promise.
 
 ## Frozen panes
 
-The gutter, the label column, and the column bar are all sticky. Rows carry an
-explicit background so the frozen columns stay opaque — without it the data
-slides visibly underneath them.
+Four things freeze, and they are a stack:
+
+| | pins to | offset |
+|---|---|---|
+| `__gutter`, `__cell--label` | the left edge | `0`, `--jrk-sheet-gutter` |
+| `__toolbar` | both axes | `0` |
+| `__colbar` | the top | `--jrk-sheet-toolbar-h` |
+| `__block-head` | the top, **inside its own block** | `--jrk-sheet-frozen-top` |
+
+Rows carry an explicit background so the frozen columns stay opaque — without it
+the data slides visibly underneath them. z-order is gutter/label **10**,
+block-head **20**, colbar **30**, toolbar **40**.
+
+**The metric header froze on 2026-08-20**, which is the sheet's half of the
+direction that every table keeps its column headers on screen. A…Y is a coordinate
+system, not a column name: the row reading *JAN FEB MAR … TOTAL YTD* is
+`__block-head`, and it used to scroll away after the first screen of a sixteen-row
+block.
+
+**Each head pins inside its own block, and that needs no JS.** A sticky flow-level
+grid item is constrained by its grid CONTAINER's content box — not by its grid
+area, which is the reading that would make this impossible — so a head travels as
+far as its `.jrk-sheet__block` and no further: it rides down its own rows and is
+pushed out by the next block's. Measured in Chrome, not argued from the spec text.
+A head that is a direct child of `.jrk-sheet` pins for the whole sheet instead.
+
+**The offsets are STATED, like `--jrk-sheet-track-width`.** CSS cannot ask an
+element how tall it is. `--jrk-sheet-toolbar-h` has no default (a sheet may have no
+toolbar) and the consumer sets it from `offsetHeight`;
+`--jrk-sheet-colbar-h` defaults to **18px**, derived on paper from the letter bar's
+3px + 3px padding, 9px glyph at line-height 1.25, and 1px rule. Wrong either way is
+visible only at the top of the port: too small and the header hides the letters,
+too large and a hairline of scrolling row shows through the gap. `report.html`
+measures both through a `ResizeObserver` — that is the escape hatch, demonstrated.
 
 They **unfreeze under `@media print`**: a sticky label column printed over the
-data is worse than no freeze at all.
+data is worse than no freeze at all, and a pinned metric header would print once
+over the top of its block instead of at the top of each page.
 
 ## Verifying a sheet
 
@@ -329,7 +361,21 @@ while building this and neither was real. **Measure positions instead:**
 // every frozen label must land on one x
 new Set([...d.querySelectorAll('.jrk-sheet__cell--label')]
   .map(el => Math.round(el.getBoundingClientRect().left))).size === 1
+
+// a pinned block-head holds --jrk-sheet-frozen-top through its OWN block, then is
+// pushed out by the block edge. Sweep scroll positions — a single mid-scroll
+// sample cannot tell "pinned" from "not yet reached".
+const head = sheet.querySelector('.jrk-sheet__block-head'), blk = head.parentElement;
+[60, 160, 260].map(d => {
+  sheet.scrollTop = blk.offsetTop + d;
+  return head.getBoundingClientRect().top - sheet.getBoundingClientRect().top;  // constant
+});
 ```
+
+Note the reference report is only a little taller than its own `82vh` port at
+1920x1080, so `scrollTop` clamps to ~40px and nothing appears to pin. Shrink
+`--jrk-sheet-height` for the measurement rather than concluding the freeze is
+broken.
 
 ## Overflow
 

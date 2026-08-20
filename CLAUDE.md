@@ -352,6 +352,21 @@ collapsing pair ever shares both.
 categorical set carries identity and is CVD-validated. Tints are pastel fills
 for marks that are *already* labelled; the validator deliberately skips them, so
 using one where color is the identity channel is a bug no gate will catch.
+**Now measured, because a skipped set invites the assumption that it is merely
+weaker rather than unsafe:** at validate's own dE 10 floor the tints' worst
+ADJACENT pair is **4.5 light / 8.6 dark** against the marks' 22.3 / 16.5, and the
+all-pairs safe cap is **2 slots** against 3. Adjacency does hold for the first
+four slots (14.5 / 17.1) and breaks at the 4|5 pair, which is the only reason
+`.jrk-org--group-fill` can exist at all — and re-ordering cannot fix it, the best
+of all 40,320 permutations being dE 8.8 in light. A tint fill is legal on a
+labelled object up to about four; past that it is decoration.
+**The other half of why a tint is the only fill that can sit under text:** on the
+saturated marks no ink but BLACK clears 4.5:1, in both themes, and `focus.ring`
+measures **1.26:1** on slot 5 in light — so a solid-mark surface costs the
+library's one focus ring. On the tints that ring clears everywhere (3.81:1 worst
+light, 5.26:1 dark), `text.primary` and `text.secondary` clear, and `text.muted`
+FAILS on all eight (3.70–4.10 light) — so anything muted must step up when it
+lands on a tint.
 
 **THE VIVID TILE TONES ARE TWO DIFFERENT KINDS OF THING, and the rules are nearly
 opposite.** `gradient.{rose,violet,blue,teal}` are POSITIONAL — assign by slot,
@@ -537,6 +552,39 @@ rail's own history records as tried and rejected; and the sheet takes `size.shee
 a separate ladder that did not move at all. **A dense report is still dense — it is
 the chrome around it that grew.** Never go below 24px.
 
+**EVERY TABLE FREEZES ITS COLUMN HEADERS AND ITS LEADING COLUMN, on both axes,
+and it is STRUCTURAL rather than a modifier** (directed 2026-08-20). `--sticky-first`
+and `--capped` are retained as empty rules and `<DataTable stickyFirst>` is a
+deprecated no-op, because the option was being forgotten one table at a time — the
+same history `.jrk-col-start` records for the same column. Three things this cost,
+all of them deliberate: **(1) `.jrk-table-wrap` now caps its own port** at
+`--jrk-table-height` (70vh), because `thead th` is `sticky; top: 0` and sticky
+resolves against the nearest SCROLLING ancestor — an uncapped wrap never scrolls
+vertically, the page body does, and the header scrolls away while the CSS says it
+is pinned. It is a `max-height`, so short tables are untouched; `@media print`
+removes it, because a capped port prints the visible rows and **silently drops the
+rest**. **(2) The frozen divider is drawn at rest**, on every table including a
+narrow one, because no "is scrolled sideways" selector ships everywhere and a rule
+that appears when you touch a table reads as a glitch — a workbook draws it at rest
+too, and this is `.jrk-sheet`'s line at `.jrk-sheet`'s weight. **(3) The fills are
+stated per section** — header and body on the card plane, `tfoot` on
+`surface.subtle` — because `background: inherit` resolves to the row's transparent
+background and a see-through frozen cell shows the data sliding under it. The
+sticky ladder is **2 lead column / 3 header / 4 corner / 5 footer**, and the sheet's
+is **10 gutter+label / 20 block-head / 30 colbar / 40 toolbar**; move one rung
+without reading the rest and one cell paints over another at a single scroll
+position.
+
+**In the sheet the thing that froze is `__block-head`, not the letter bar** — A…Y is
+a coordinate system, the month names are the column headers — and it pins **inside
+its own block**, so each metric's header rides down its own rows and is pushed out
+by the next. That works because a sticky flow-level grid item is constrained by its
+grid CONTAINER, not by its grid area (see the gotchas below). Its `top` is
+`--jrk-sheet-frozen-top`, a **stated** sum of `--jrk-sheet-toolbar-h` (no default;
+the consumer measures it) and `--jrk-sheet-colbar-h` (18px, derived on paper) — the
+same bargain `--jrk-sheet-track-width` makes, with the same failure mode: restyle
+the letter bar and the headers park in the wrong place.
+
 **`.jrk-sheet` is a grid, not a table.** One shared `--jrk-sheet-cols` track list
 is the only way a single Excel-style column bar can align with stacked metric
 blocks, so ARIA roles are mandatory. In a sheet, tone comes from the metric's
@@ -552,6 +600,13 @@ blocks, so ARIA roles are mandatory. In a sheet, tone comes from the metric's
   stretched by `width: 100%` scales the text and strokes too.
 - **Component CSS sizes bare `svg` with `svg:not(.jrk-icon)`.** A plain
   `.jrk-btn svg` rule out-specifies `.jrk-icon` and kills the `em` contract.
+- **A `position: sticky` GRID ITEM is constrained by its grid CONTAINER's content
+  box, not by its grid area.** The grid-area reading is the one most people quote,
+  and it would make a sticky row inside a grid impossible — its area is one row
+  tall, so there would be no room to move. Flow-level items take the container's
+  content box, which is what lets `.jrk-sheet__block-head` pin for exactly the
+  height of its own block. Measured in Chrome; do not "fix" it back on the strength
+  of the spec text.
 - **A `position: sticky` BLOCK child of a scroll container is sized by the port,
   not by the scrolled content beside it.** Its containing block is the container's
   content box, so `bottom: 0` pins it vertically and lets it slide out of view
