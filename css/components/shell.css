@@ -589,7 +589,14 @@
      block asserts the ring against every tone rather than trusting focus.ring.
      The topbar ink is already the theme-correct answer — black on the pale ramp,
      white on the dark one — and it measures 7.00:1 at the worst stop of either. */
-  --jrk-focus-ring: var(--jrk-gradient-topbar-ink);
+  /* The ring is gradient.topbar.RING, not the ink, since 2026-08-20. It was the ink
+     until the light ramp was reversed; #1d273d is 2.48:1 on the new #245ec6 via
+     stop, under the 3:1 floor a ring is held to. Bounding the controls (below)
+     answers the INK's miss and cannot answer this one, because a ring is drawn
+     outside whatever ground its control brings - so the ring needed a value of its
+     own, and black is very nearly the only one that clears every stop of both
+     ramps. The token carries the arithmetic. */
+  --jrk-focus-ring: var(--jrk-gradient-topbar-ring);
 }
 
 /* THE HAIRLINE STAYS ON THIS VARIANT IN BOTH THEMES, where --blue restores it in
@@ -618,6 +625,70 @@
 .jrk-topbar--vivid.jrk-topbar--brand .jrk-btn--ghost:hover:not(:disabled) {
   background: var(--jrk-overlay-hover-veil);
   color: var(--jrk-gradient-ink);
+}
+
+/* A GHOST BUTTON ON THIS VARIANT BRINGS ITS OWN GROUND AT REST, not only on hover.
+ *
+ * This is the one rule on the bar that exists because of WHERE things are rather
+ * than what colour they are, and gradient.topbar.$measured is the argument. The
+ * light ramp was re-specified on 2026-08-20 as #d5dfff -> #245ec6 -> #ffffff under
+ * ink #1d273d. Both ENDS measure — 11.23:1 and 14.90:1 — and the INTERIOR does not:
+ * the ink falls under 4.5:1 from roughly 34% to 66% of the bar's width, worst at
+ * the 52% stop where it is 2.48:1.
+ *
+ * That shipped on a layout guarantee: `.jrk-spacer` holds the middle of this bar
+ * empty, the drawer button and wordmark sit in the leading fifth, and the theme
+ * control, account name and sign-out sit in the trailing fifth. Both safe. The
+ * guarantee is THIN, though, and thin in a way nothing would catch — the trailing
+ * cluster is around 400px wide, so somewhere below ~1200px of bar it slides left
+ * into the band, and a ghost button that was 7.7:1 on a desktop becomes 2.9:1 on a
+ * laptop with the sidebar open. No gate in this library measures a control against
+ * the interpolated middle of a gradient it happens to be sitting over.
+ *
+ * So the fix is the one the bar already uses twice, made explicit: a control whose
+ * ink is measured against its OWN fill does not care what is behind it. That is
+ * exactly the reasoning the note further down gives for leaving
+ * `.jrk-topbar__search` and `.jrk-btn--secondary` alone — accent.wash at 5.31:1 on
+ * itself, a white fill at 4.86:1+ — and a resting ghost button is the same problem
+ * without the same answer, because its fill is `transparent`.
+ *
+ * overlay.hoverVeil at a fraction of its strength: DIRECTIONAL, so it darkens the
+ * pale ends and lightens nothing, which is what keeps a resting control from
+ * reading as a pressed one. The hover rule above stays at full strength and still
+ * outranks this, so the rest/hover step survives.
+ *
+ * WHY NOT JUST RE-STEP THE VIA STOP. Because #245ec6 is what was asked for and the
+ * band it creates carries nothing. $restepNote records the opposite call being made
+ * on an earlier request, and the difference is which part of the bar the failure
+ * lands on: that one put it under the account menu, this one puts it under empty
+ * space. If text ever has to sit mid-bar, re-step the token — do not thin this rule
+ * out to compensate.
+ *
+ * 0-3-0 to clear the 0-2-0 `.jrk-topbar--vivid .jrk-btn--ghost` ink rule below
+ * without disturbing it; that rule sets `color` and this sets `background`, so they
+ * compose rather than compete. */
+.jrk-topbar--vivid.jrk-topbar--brand .jrk-btn--ghost {
+  background: color-mix(in srgb, var(--jrk-overlay-hover-veil) 55%, transparent);
+}
+
+/* AND THE SEGMENTED CONTROL, for the same reason and with a stronger claim on it.
+ *
+ * The theme control is the widest thing in the trailing cluster and therefore the
+ * first to enter the band as the bar narrows. It is also the one control on the bar
+ * whose unselected segments carry ink with no fill of their own, so at rest all
+ * three read straight off the ramp.
+ *
+ * A track rather than a per-segment fill: the group is one object and its own
+ * boundary is what makes the selected segment legible as a selection instead of as
+ * a coloured patch. Consumers own the SELECTED segment's fill — see
+ * .portal-topbar's rule — because which pair of values reads as 'current' depends
+ * on the ramp behind it, and the ramp is a token this file does not choose.
+ *
+ * radius.full to match the pill the segments already are; without it the track's
+ * corners cut the outer segments' own rounding. */
+.jrk-topbar--vivid.jrk-topbar--brand .jrk-btn-group {
+  background: color-mix(in srgb, var(--jrk-overlay-hover-veil) 45%, transparent);
+  border-radius: var(--jrk-radius-full);
 }
 
 /* The hairline, back again, and ONLY under this variant in dark.

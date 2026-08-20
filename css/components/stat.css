@@ -329,6 +329,50 @@
   --jrk-gradient-to: var(--jrk-gradient-teal-to);
 }
 
+/* ---------- semantic tones ----------
+ *
+ * THREE MORE TONE CLASSES, AND THEY ARE NOT TONES FIVE, SIX AND SEVEN. Read
+ * gradient.$semanticToneNote in tokens.json before using them; the short version
+ * is that the four tones above are assigned by POSITION and these three are
+ * assigned by MEANING, and mixing the two systems in one row defeats both.
+ *
+ * The rules, restated here because this is where somebody will be looking:
+ *
+ *   1. ONE TONE PER ROW, chosen by the worst severity in the row. Never mix
+ *      these with each other and never mix them with a positional tone. The CVD
+ *      collapse $hueIsNotIdentity measures is real and unfixed — red against
+ *      burnt orange is precisely the discrimination this palette cannot make —
+ *      and a uniform row is what removes the task rather than pretending it was
+ *      passed.
+ *   2. The severity has to be in the LABEL or the VALUE as well. The tone is
+ *      redundant encoding, the same standing chart.tint has.
+ *   3. A row with nothing wrong in it takes NO vivid tone. --good is for a row
+ *      whose subject IS an improvement, not the resting state of a healthy one.
+ *      Green-on-everything is a heat blanket in which nothing leads.
+ *
+ * Each rule sets only the two stops, so the single `background-image`
+ * declaration on the base rule keeps owning the angle and the geometry.
+ *
+ * 0-3-0, for the identical reason the four tones above are: a custom property is
+ * won by the ordinary cascade, so a tone at 0-1-0 loses to the
+ * `--jrk-gradient-from` DEFAULT set on the 0-2-0 base rule and the tile silently
+ * renders BLUE — which on a semantic tone is worse than it is on a positional
+ * one, because a critical row coming out brand-blue reads as fine. */
+.jrk-stat.jrk-stat--vivid.jrk-stat--critical {
+  --jrk-gradient-from: var(--jrk-gradient-critical-from);
+  --jrk-gradient-to: var(--jrk-gradient-critical-to);
+}
+
+.jrk-stat.jrk-stat--vivid.jrk-stat--warning {
+  --jrk-gradient-from: var(--jrk-gradient-warning-from);
+  --jrk-gradient-to: var(--jrk-gradient-warning-to);
+}
+
+.jrk-stat.jrk-stat--vivid.jrk-stat--good {
+  --jrk-gradient-from: var(--jrk-gradient-good-from);
+  --jrk-gradient-to: var(--jrk-gradient-good-to);
+}
+
 /* The base tile centres its stack; this one is left-aligned like a masthead, so
    the three text rows share a left axis instead of a centre one. Overriding
    justify-content AND text-align because __label and __meta are flex rows and

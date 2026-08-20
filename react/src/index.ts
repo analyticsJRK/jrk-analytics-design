@@ -36,7 +36,7 @@ export { Badge, Status, Tag } from './Badge';
 export type { BadgeProps, StatusProps, TagProps, StatusTone } from './Badge';
 
 export { Stat, StatRow, Delta, Sparkline, VividStat, MiniBars, Gauge } from './Stat';
-export type { StatProps, DeltaProps, VividStatProps, VividTone } from './Stat';
+export type { StatProps, DeltaProps, VividStatProps, VividTone, SemanticTone, VividStatTone } from './Stat';
 
 export { DataTable, CellBar, CellBarSigned, HeatLegend, cellHeatProps, divergingStep } from './DataTable';
 export type { DataTableProps, Column, SortDir } from './DataTable';

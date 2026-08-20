@@ -284,6 +284,48 @@
   font-size: var(--jrk-text-lg);
 }
 
+/* A DROPDOWN SETS ITS LABEL ONE RUNG SMALLER THAN THE TEXT FIELD IT SHARES A BOX
+   WITH, at all three sizes. Requested 2026-08-20 as "every dropdown, smaller
+   font"; stated here as a step on the scale rather than a literal, so the three
+   sizes keep their relationship to each other and to the fields beside them.
+
+   md -> sm, sm -> xs, lg -> md. The option list below steps with them.
+
+   WHY THE SELECT AND NOT THE FIELD IT IS BOXED WITH. `.jrk-input`,
+   `.jrk-select` and `.jrk-textarea` share one base rule because they are one
+   box, and that stays true of every property except this one. A text field
+   renders what somebody TYPED — arbitrary length, arbitrary content, and it is
+   the thing being read while it is being written. A select renders one label
+   from a list the designer wrote, already sized to fit, and its job on screen is
+   to be scanned rather than read. The scale can therefore afford a rung here and
+   cannot afford one there, and shrinking both to keep the rule shared would have
+   been the easy wrong answer.
+
+   THE BOX DOES NOT MOVE. height, --field-px, the chevron and its reserved
+   padding all stay on the base rule and the size modifiers, so a select still
+   lines up with the input next to it in a form row — only the label inside gets
+   smaller. That is the whole reason this is a separate declaration and not an
+   edit to the shared rule: touching font-size there would have re-sized every
+   field in the library and moved nothing else, which reads as a bug rather than
+   as a decision.
+
+   Specificity: 0-1-0 for the first selector, same as the base rule it overrides,
+   so it depends on coming AFTER it in this file — which is what the placement
+   just below the size modifiers is for. The two modifier selectors are also
+   0-1-0 against their own rules above. Moving any of these three above the rule
+   it overrides silently restores the old size, and nothing would catch it. */
+.jrk-select {
+  font-size: var(--jrk-text-sm);
+}
+
+.jrk-select--sm {
+  font-size: var(--jrk-text-xs);
+}
+
+.jrk-select--lg {
+  font-size: var(--jrk-text-md);
+}
+
 /* Numeric inputs align on the decimal when stacked in a column. */
 .jrk-input--numeric {
   font-variant-numeric: tabular-nums;
@@ -479,6 +521,16 @@
     overflow: hidden;
   }
 
+  /* Steps with the closed control above — text.sm, not text.md. A dropdown whose
+     button and whose open list disagree by a rung is the one place the mismatch
+     is unmissable, because base-select renders the list directly under the
+     control and the reader sees both at once.
+
+     min-height stays 32px on purpose. It is a POINTER TARGET, not a line box:
+     shrinking the row with the label would take a 32px hit area down to about
+     28px for a control people click through repeatedly, and the extra leading is
+     what makes a long option list scannable. Same reason the closed select keeps
+     its height. */
   .jrk-select option {
     position: relative;
     display: flex;
@@ -486,7 +538,7 @@
     gap: var(--jrk-space-3);
     min-height: 32px;
     padding: var(--jrk-space-1_5) var(--jrk-space-4);
-    font-size: var(--jrk-text-md);
+    font-size: var(--jrk-text-sm);
     color: var(--jrk-text-primary);
     background: transparent;
     cursor: pointer;
