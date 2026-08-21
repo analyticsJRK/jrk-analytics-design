@@ -27,7 +27,7 @@
  * WHAT THE SKIN IS: square machined plates, each with a captioned header band in
  * inscriptional caps; an engraved bevel instead of a drop shadow; gold as the
  * SELECTION signal rather than as decoration; and the diamond as the shape that
- * survives with the gold removed. That last part is the same problem Endfield
+ * survives with the gold removed. That last part is the same problem Industry
  * has and it is worth stating in the same place: accent-solid is 1.94:1 on the
  * light plate, so the brand colour is what disappears in greyscale and in print,
  * and the geometry is what has to carry identity when the colour cannot.
@@ -77,8 +77,8 @@
   border-radius: 0;
 }
 
-/* .jrk-btn--icon IS IN THAT LIST, unlike under Endfield, and the difference is
-   the reference rather than an oversight: Endfield's round icon button is its
+/* .jrk-btn--icon IS IN THAT LIST, unlike under Industry, and the difference is
+   the reference rather than an oversight: Industry's round icon button is its
    charcoal chip, and this look has no chips at all — every affordance on the
    reference screen is a rectangle or a diamond. */
 
@@ -102,7 +102,7 @@
 
 /* ── the header band: a captioned plate ───────────────────────────────────
    Every panel on the reference screen names itself in a banded caption, and that
-   band is this skin's tile signature the way the chamfer is Endfield's. It is
+   band is this skin's tile signature the way the chamfer is Industry's. It is
    surface-tinted rather than surface-subtle: the band is a LIFT off the plate in
    dark and a recess in light, which is what surface-tinted already does, and the
    token file pins both steps (1.17:1 / 1.25:1) against the muted ink a caption
@@ -169,7 +169,7 @@
 }
 
 /* The small labels stay in the base sans and take the wide caps tracking. This
-   is the list Endfield draws too, for the same reason: these are the strings
+   is the list Industry draws too, for the same reason: these are the strings
    short enough that uppercase at 0.18em still reads as a word.
    VALUES ARE DELIBERATELY ABSENT — tracking this wide makes two numbers harder
    to compare, and a stat's value is the thing on the tile a reader is comparing.
@@ -238,7 +238,7 @@
    field in the masthead goes illegible. The base library's --brand and --vivid
    variants exist precisely because a dark bar needs its own ink namespace; a
    skin has no business conscripting the default bar into one. Same shape as the
-   decision Endfield records for its wedge: do not put a fill under ink you do
+   decision Industry records for its wedge: do not put a fill under ink you do
    not own. */
 :root[data-skin='midgard'] .jrk-topbar {
   border-bottom-color: var(--jrk-border-accent);
@@ -253,7 +253,7 @@
    deliberately SMALL blast radius: relative on .jrk-card itself would re-parent
    any absolutely positioned descendant a component put there, and relative on
    .jrk-topbar un-sticks the bar outright — a mistake already recorded in
-   Endfield's wedge comment. A footer contains buttons and nothing positioned.
+   Industry's wedge comment. A footer contains buttons and nothing positioned.
 
    The fill is surface-default because the footer sits on the plate, which is what
    makes the line appear to pass BEHIND the diamond rather than into it. Offset by

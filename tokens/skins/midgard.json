@@ -9,7 +9,7 @@
     "$measuredNote": "Every ratio in a $note below was computed against the plate — #faf7ef light, #1a2028 dark — and every ink that lands on the page was checked at ALL THREE stops of the gradient, the dark end being the binding one in light. scripts/validate-skin.mjs re-derives them on each `npm test` and does not read these strings.",
     "$cvdNote": "THE ACCENT AND THE WARM STATUS HALF COLLIDE IN DARK, IT IS NOT FIXABLE BY RE-STEPPING, AND IT IS THE HEADLINE FINDING OF THIS SKIN. accent-solid #d9ae43 against the dark marks measures dE 1.9 to status.warning (protanopia), 3.3 to status.serious and 7.6 to status.critical — all under validate's floor of 10. A search over the alternatives says the collision is intrinsic rather than badly chosen: every gold from #b8891f to #e6c15c stays under 10 against every amber a warning could plausibly be (the best pair, #b8891f against #ffb35c at 12.9, costs the metal), because an amber accent and an amber warning separate only by lightness and these two sit within 0.03 of each other. The light half is clear at 22.7 / 33.5 / 22.3, because the light status marks are deep browns and reds under a bright gold. So under this skin in dark the base library's `colour is never the only signal` stops being belt-and-braces and becomes load-bearing: a status badge carries its icon AND its label, a delta states direction in text, and a gold --cta does not share a tile with a warning chip whose only mark is its colour. Nothing gates this — validate:skin runs its CVD check on hazard VARIANTS and this skin declares none — so it is written here and in CLAUDE.md instead.",
     "$chartNote": "The skin overrides NO chart slot and the inherited palette is safe on both plates: the light plate #faf7ef is only marginally darker than the base card, and the dark plate #1a2028 is darker than the base #232326, which improves every dark mark. What it does inherit is a new instance of the library's accent-collides-with-a-slot debt, and it lands somewhere better: the gold is dE 1.3 from slot 4 (#d5ab19) and 3.7 from slot 2 in light, so the accent IS slot 4. In the base library the accent collides with slot 1, which is the default single-series colour for every sparkline, cell bar and bar list; here slot 1 is untouched blue at dE 54, so the ordinary one-series chart is safe under this skin and it is a multi-series chart reaching slot 2 or 4 that needs a label between the mark and a gold control. Same standing rule as the base: never put a chart on an accent wash.",
-    "$noVariantsNote": "NO HAZARD VARIANTS, deliberately. Endfield's accent is a hazard signal, and a signal can be re-hued without touching what the design means. This accent is a MATERIAL — aged gold on slate, with a vellum half derived from it — and a purple or green 'gold' is a different skin rather than a variant of this one. If a hue axis is ever wanted here, the thing to vary is the METAL (steel, bronze), and every gold role in the file would have to be re-derived because the light half's roles are all stepped away from the fill rather than equal to it."
+    "$noVariantsNote": "NO HAZARD VARIANTS, deliberately. Industry's accent is a hazard signal, and a signal can be re-hued without touching what the design means. This accent is a MATERIAL — aged gold on slate, with a vellum half derived from it — and a purple or green 'gold' is a different skin rather than a variant of this one. If a hue axis is ever wanted here, the thing to vary is the METAL (steel, bronze), and every gold role in the file would have to be re-derived because the light half's roles are all stepped away from the fill rather than equal to it."
   },
   "stamp": "midgard",
   "$varsNote": "Keyed by the CSS variable name WITHOUT the --jrk- prefix. The build ASSERTS every name here exists in the base layer, so a typo fails `npm run build` rather than emitting a colour nothing reads; skin-only names go in `skinOnly`, which is the only exemption.",
@@ -17,9 +17,9 @@
     "surface-canvas": {
       "light": "linear-gradient(180deg, #efe9dc 0%, #e8e1d1 55%, #ded6c4 100%)",
       "dark": "linear-gradient(180deg, #0b0f14 0%, #0f151b 55%, #070a0d 100%)",
-      "$note": "A GRADIENT, legal only because every consumer sets it with the `background` shorthand (base.css, auth.css, shell.css) — a `background-color` drops it silently. It also means no single-hex gate can measure 'the page', so every ink landing here is held to the ramp's WORST stop. Vertical rather than Endfield's 168deg.",
+      "$note": "A GRADIENT, legal only because every consumer sets it with the `background` shorthand (base.css, auth.css, shell.css) — a `background-color` drops it silently. It also means no single-hex gate can measure 'the page', so every ink landing here is held to the ramp's WORST stop. Vertical rather than Industry's 168deg.",
       "$monotonicNote": "THE DARK RAMP IS NOT MONOTONIC and that matters more than it looks. #0b0f14 -> #0f151b -> #070a0d is lit across the middle band, the way the reference screen is, so the binding stop for every dark ink is the MIDDLE one (#0f151b) and not an end. The convexity argument CLAUDE.md records for the four positional tones — 'the endpoints bound the interior' — is FALSE here, and checking only the ends would report a page that is 1.12:1 off the plate as 1.27:1. validate-skin walks every stop, which is why this is safe to ship; anything measured by hand against this token has to walk them too. The light ramp IS monotonic and bottoms out at #ded6c4.",
-      "$lightNote": "That #ded6c4 stop is what set text-muted and accent-text. Deepening it pushes both under 4.5:1 across the bottom third of the screen — the exact failure Endfield's text-muted hit twice — so if this ramp is re-stepped, re-step those two with it."
+      "$lightNote": "That #ded6c4 stop is what set text-muted and accent-text. Deepening it pushes both under 4.5:1 across the bottom third of the screen — the exact failure Industry's text-muted hit twice — so if this ramp is re-stepped, re-step those two with it."
     },
     "surface-default": {
       "light": "#faf7ef",
@@ -55,7 +55,7 @@
     "surface-banner": {
       "light": "#1b1811",
       "dark": "#0b0f14",
-      "$note": "FLAT, not a ramp: the base masthead's three-stop gradient carries a middle stop that fails and is kept legible by layout, and this skin declines that bargain the way Endfield does. Warm in light, cold in dark — the light half's chrome stays dark, which is what keeps the two halves recognisably one skin."
+      "$note": "FLAT, not a ramp: the base masthead's three-stop gradient carries a middle stop that fails and is kept legible by layout, and this skin declines that bargain the way Industry does. Warm in light, cold in dark — the light half's chrome stays dark, which is what keeps the two halves recognisably one skin."
     },
     "surface-banner-deep": {
       "light": "#100e09",
@@ -148,7 +148,7 @@
     "accent-solid": {
       "light": "#d9ae43",
       "dark": "#d9ae43",
-      "$note": "AGED GOLD, one value across both halves. About 1.94:1 on the vellum plate and 8:1 on the slate one — so in light the brand fill does not bound itself and needs an edge or dark ink inside it, exactly the position Endfield's yellow is in. Two skins, same finding: that is a property of warm high-chroma accents rather than of yellow."
+      "$note": "AGED GOLD, one value across both halves. About 1.94:1 on the vellum plate and 8:1 on the slate one — so in light the brand fill does not bound itself and needs an edge or dark ink inside it, exactly the position Industry's yellow is in. Two skins, same finding: that is a property of warm high-chroma accents rather than of yellow."
     },
     "accent-solid-hover": {
       "light": "#c9a02f",
@@ -289,7 +289,7 @@
     "shadow-card": {
       "light": "inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 1px 3px rgba(28, 26, 21, 0.1)",
       "dark": "inset 0 1px 0 rgba(232, 230, 223, 0.07), 0 2px 6px rgba(0, 0, 0, 0.5)",
-      "$note": "The plate at rest. NOT `none` in dark, unlike the base library and unlike Endfield, and it must not be made `none`: css/skins/midgard.css composes `var(--jrk-shadow-md)` into the selection ring, and a shadow LIST containing `none` is invalid CSS that drops the whole declaration. The drop half is near-invisible on the dark page by construction; the bevel is what carries the plate there."
+      "$note": "The plate at rest. NOT `none` in dark, unlike the base library and unlike Industry, and it must not be made `none`: css/skins/midgard.css composes `var(--jrk-shadow-md)` into the selection ring, and a shadow LIST containing `none` is invalid CSS that drops the whole declaration. The drop half is near-invisible on the dark page by construction; the bevel is what carries the plate there."
     },
     "shadow-card-raise": {
       "light": "inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 6px 18px rgba(28, 26, 21, 0.16)",
@@ -318,7 +318,7 @@
     "tracking-caps": {
       "light": "0.18em",
       "dark": "0.18em",
-      "$note": "Wider than Endfield's 0.14em and far wider than the base. The reference sets every caption in widely-tracked caps, and 0.18em is where a four-to-six character label stops reading as a word and starts reading as an engraving. css/skins/midgard.css keeps it off VALUES for the base library's reason: tracking this wide makes two numbers harder to compare, and a value is the thing on a tile a reader is comparing."
+      "$note": "Wider than Industry's 0.14em and far wider than the base. The reference sets every caption in widely-tracked caps, and 0.18em is where a four-to-six character label stops reading as a word and starts reading as an engraving. css/skins/midgard.css keeps it off VALUES for the base library's reason: tracking this wide makes two numbers harder to compare, and a value is the thing on a tile a reader is comparing."
     },
     "tracking-wide": {
       "light": "0.1em",
@@ -330,7 +330,7 @@
     "radius-xl": { "light": "0", "dark": "0" },
     "radius-2xl": { "light": "0", "dark": "0" },
     "radius-data-end": { "light": "0", "dark": "0" },
-    "$radiusNote": "SQUARE everywhere a radius is named — plates, overlays, controls and data ends alike. This skin has no notch and no chamfer: it is machined plate, so a corner is simply a corner, which also keeps it visually distinct from Endfield's 45deg cut. radius-full is deliberately NOT overridden, because it is what keeps a spinner a circle, a radio round and a switch a switch; css/skins/midgard.css squares the named controls that would otherwise stay pills and turns the status DOT into a diamond, and that named list is the skin's contract."
+    "$radiusNote": "SQUARE everywhere a radius is named — plates, overlays, controls and data ends alike. This skin has no notch and no chamfer: it is machined plate, so a corner is simply a corner, which also keeps it visually distinct from Industry's 45deg cut. radius-full is deliberately NOT overridden, because it is what keeps a spinner a circle, a radio round and a switch a switch; css/skins/midgard.css squares the named controls that would otherwise stay pills and turns the status DOT into a diamond, and that named list is the skin's contract."
   },
   "skinOnly": {
     "$comment": "Names with no base counterpart, exempt from the build's exists-in-base assertion. Every one is referenced from css/skins/midgard.css — validate:skin fails on one that is not, which is the only thing standing between a value here and a token that ships and does nothing.",

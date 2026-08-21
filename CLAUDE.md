@@ -643,18 +643,18 @@ produces convincing artifacts.
 
 ## Skins — a SECOND AXIS, and the only one in this library
 
-**TWO SKINS SHIP, `endfield` and `midgard`, and the difference between them is
+**TWO SKINS SHIP, `industry` and `midgard`, and the difference between them is
 the useful thing in this section.** Everything down to the end of `validate:skin`
 below is INFRASTRUCTURE and applies to both. Everything after that is per-skin,
 and the second skin's real value is that it *tested* the first one's rules: three
-of Endfield's findings reproduced (so they are rules about warm high-chroma
+of Industry's findings reproduced (so they are rules about warm high-chroma
 accents, not about yellow) and three did not (so they were rules about a
 chamfer). Both are marked where they stand.
 
 **A SKIN IS NOT A THIRD THEME.** `tokens/skins/*.json` each carry their own
 `light` and `dark` halves, so a skin is **orthogonal** to the theme and is
-stamped separately: `data-skin="endfield"` **crossed with** `data-theme`, which
-is four blocks rather than one. `data-theme="endfield"` matches nothing and
+stamped separately: `data-skin="industry"` **crossed with** `data-theme`, which
+is four blocks rather than one. `data-theme="industry"` matches nothing and
 cannot be made to — that stamp has nowhere to put the second half of a skin's
 palette. This is why `vars` in `build-tokens.mjs` is still `[name, light, dark]`
 and must stay that way; a third value per token models an axis that does not
@@ -684,13 +684,13 @@ a warning. It caught a dead `notch-lg` on the first run.
 exists because `validate-colors.mjs` is 568 lines written against the base tree
 and measures everything against `$meta.surfaces`, one hex per theme. **A skin's
 page can be a gradient**, and that is the check nothing else in the toolchain can
-perform: an ink is held to the page's **worst stop**, not to the panel. Endfield's
+perform: an ink is held to the page's **worst stop**, not to the panel. Industry's
 `text-muted` was re-stepped twice for exactly this — `#5d686d` cleared 5.28:1 on
 the panel and failed at 4.07:1 on the page's dark end, i.e. it passed everywhere
 a single-hex gate would have looked and failed on the bottom third of the screen.
 
 **Two things a skin gets wrong that the base library cannot.** (1) **A saturated
-yellow is very nearly the luminance of near-white**: Endfield's `accent-solid` is
+yellow is very nearly the luminance of near-white**: Industry's `accent-solid` is
 1.18:1 on its own light panel, so the brand colour is the thing that VANISHES in
 greyscale and in print while staying vivid on screen. It separates by chroma
 alone, so it never carries a state on its own and its focus ring is **two-tone**.
@@ -701,8 +701,67 @@ the brand yellow — while dark takes the anchor for all four. **Read that as th
 general rule:** the base library's one-anchor-everywhere is a property of *its*
 accent, not of the token layout.
 
+**A VIVID FILL CANNOT CARRY BOTH PAGE INKS, SO A HUE-SWAPPABLE PAGE MARK EITHER
+GIVES UP THE BOLD FILL OR ACCEPTS A LAYOUT CONDITION — Industry's stripe is the
+worked example and it took the second option, by direction.** The stripe's light
+band 1 is each hue's vivid `accent-solid` (so it matches the gallery picker's
+swatch) and its dark band 1 is that hue's deep `accent-wash`; three darkening
+steps behind it make the extrude, and all four bands are declared per variant so
+`data-hazard` re-colours it. **The cost is that with `data-hazard="red"`,
+`"purple"` or `"blue"` in LIGHT, no page-level text may cross the stripe.** Those
+hues take white ink and no step of them takes black, so near-black is 3.88:1 /
+2.95:1 / 3.92:1 on the fill and worse down the darkening face — **worst band
+1.62:1.** Light page ink is near-black and cannot be switched, and no re-stepping
+fixes a hue's own luminance. This is the **second** layout-dependent contrast fact
+in the library after `.jrk-topbar--brand`, and unlike that one it has no bounded
+region to promise about — the honest form of the promise is "move the band", which
+`stripe-from` / `stripe-to` do.
+
+**The alternative was built, measured, and is one commit away: derive every band
+from `accent-wash` instead.** Every wash in this skin carries near-black at
+≥11.6:1 by construction — that is what the topbar wedge was moved onto, for
+exactly this reason — and a wash-derived ramp clears `text-primary` in both halves
+for **all six hues** with no layout condition at all (worst 4.52:1). It gives up
+the bold fill. **Read that as the general rule: a page-level mark that must be
+crossable by text is a WASH; a vivid one is a promise about layout.**
+
+**AND PINNING BAND 1 TO A FIXED VALUE MAKES THE RAMP'S LENGTH A LEFTOVER.** The
+light steps can only descend as far as the ink floor allows, so the extrude is as
+long as the gap between the fill and that floor — yellow has the full range
+(`#ffe500` → `#8f8000`), and **green has almost none** (`#09ae5c` → `#08944e`, its
+fill being only 6.19:1 on near-black to begin with), so green's three steps are
+nearly one colour and the 3D read all but disappears. Dark has room in every hue,
+because darkening away from near-white ink only ever helps. **A derived ramp
+chooses its own endpoints; a pinned one inherits whatever is left.**
+
+**AND THE 3D READ IS A FILL, BECAUSE A TRANSLUCENT DROP SHADOW IS UNAVAILABLE —
+measured in both halves, and the dark half is the familiar one.** Black over this
+skin's page at alpha **0.20** is **1.020:1** against the page's dark end: the
+shadow is invisible at any alpha worth using, which is the base library's
+`shadow.card`-in-dark finding, Industry's clip-path finding and Midgard's inset
+bevel arriving at one conclusion by three routes — **on a dark ground, elevation
+is a fill.** The light half fails for a *different* reason worth carrying
+separately: a shadow there is legal in isolation (alpha 0.10 leaves `text-muted`
+at 4.64:1) but not on these pixels, because `surface-canvas-grid` already spends
+**0.10 of a 0.115 ceiling** on them and **the alphas add**. That is the same trap
+the complementary masks on the wave and the dot ground exist to avoid, hit from a
+new direction: **a new translucent layer has to be budgeted against every other
+translucent layer that shares its pixels, not against the page.** Three opaque
+steps spend none of that budget, and the step-to-step separation (1.32:1–1.61:1
+light, 1.13:1–1.51:1 dark) is what makes the extrusion read.
+
+**IT TOOK FOUR SHAPES TO GET ONE MARK, AND EACH FAILURE IS A DIFFERENT LESSON.**
+Two corner-anchored wedges first: each took its edge angle from its own box
+aspect, so the lines were not parallel and it read as two unrelated shapes with a
+seam — **state the angle once and there is one line on screen.** Then a
+half-plane, which read as a slab rather than as a mark. Then a band with a single
+opaque face. Then this. In light the band is 1.11:1–1.24:1 off the page, so it
+**separates by chroma alone** and is invisible in greyscale and in print — the
+third instance of the yellow finding above, and why it is suppressed in
+`@media print`.
+
 **BOTH OF THOSE ARE NOW CONFIRMED TWICE, which is what promotes them from
-Endfield notes to library rules.** Midgard's aged gold `#d9ae43` is 1.94:1 on its
+Industry notes to library rules.** Midgard's aged gold `#d9ae43` is 1.94:1 on its
 own light plate and clears 4.5:1 in none of its light roles, so it lands in the
 same two places independently: a **two-tone** focus ring (a single-tone one is
 the library's one indicator, invisible) and a stepped `accent-text` /
@@ -711,7 +770,7 @@ rule is **warm + high chroma + light plate**, and the next skin with such an
 accent should budget for both from the start rather than discovering them.
 
 **`clip-path` clips the box-shadow.** That is not a bug and no property order
-fixes it, so a chamfered tile cannot carry an ambient shadow: Endfield
+fixes it, so a chamfered tile cannot carry an ambient shadow: Industry
 neutralises `shadow.card` / `cardRaise` on exactly the notched selectors, and
 `surface.cardHover` has to be a real step in **both** halves (1.14:1 / 1.30:1) —
 the base library's shadow-in-light / fill-in-dark split is unavailable. Controls
@@ -719,13 +778,13 @@ are therefore squared rather than notched, because since 2026-08-20 a white
 button's only boundary in light IS `shadow.md`.
 
 **`radius.full` is deliberately not overridden**, because it is all that keeps a
-dot a dot and a radio round. The squared-control list in `css/skins/endfield.css`
+dot a dot and a radio round. The squared-control list in `css/skins/industry.css`
 is the skin's contract: **anything new that opts into `radius.full` stays a pill
 under the skin until it is added there.** `.jrk-btn--icon` keeps the circle on
 purpose — it is the reference look's charcoal chip.
 
 **`chart.chrome.surface` must track the skin's own `surface.default`** and is
-gated. Endfield overrides **no chart slot**, and that is measured rather than
+gated. Industry overrides **no chart slot**, and that is measured rather than
 skipped: its light panel is darker than the base card, so every light mark loses
 ~8% contrast (slot 1 4.02 → 3.70) and **no slot crosses the 3:1 mark floor**, so
 the CVD-derived order carries over intact. `validate:skin` re-checks that on
@@ -733,7 +792,7 @@ every build. Dark improves slightly.
 
 ### Hazard hues — a THIRD attribute, and what they taught
 
-**`data-skin="endfield"` × `data-hazard="<hue>"` × `data-theme`.** Six hues —
+**`data-skin="industry"` × `data-hazard="<hue>"` × `data-theme`.** Six hues —
 yellow, orange, red, purple, blue, green — and **the default is the ABSENCE of
 `data-hazard`, not a value of it**, so yellow keeps its hand-derived shipped
 values and nothing that does not stamp the attribute can change. **Only the
@@ -792,11 +851,11 @@ gallery picker must offer exactly the declared variants: a hue in the token file
 with no button is invisible, a button with no variant silently shows the default,
 and neither breaks anything else.
 
-**Endfield is an EXPLORATION that shipped as real infrastructure.** It is opt-in:
+**Industry is an EXPLORATION that shipped as real infrastructure.** It is opt-in:
 nothing imports it from `css/index.css`, no default changes, and a consumer that
 never stamps `data-skin` never even fetches its typeface (`Inter Tight` is
 requested from the skin stylesheet, not `css/fonts.css`). Gallery:
-`preview/skin-endfield.html`.
+`preview/skin-industry.html`.
 
 ### `midgard` — a Norse console HUD, and the second data point
 
@@ -805,7 +864,7 @@ inscriptional caps, an engraved bevel where the base library puts a shadow, and
 aged gold `#d9ae43` used as the SELECTION signal rather than as decoration.**
 Opt-in the same way (`Cinzel` is requested from `css/skins/midgard.css`, so a
 consumer that never stamps `data-skin="midgard"` never fetches it). Gallery:
-`preview/skin-midgard.html`. **No hazard variants, on purpose:** Endfield's accent
+`preview/skin-midgard.html`. **No hazard variants, on purpose:** Industry's accent
 is a hazard *signal* and can be re-hued without touching what the design means;
 this one is a *material*, and every light gold role is stepped away from the fill
 rather than equal to it, so a hue swap would mean re-deriving all of them.
@@ -829,7 +888,7 @@ as well.
 
 **ELEVATION IS AN INSET BEVEL, WHICH IS THE THIRD ANSWER TO THE SAME PROBLEM.**
 The page is `#0b0f14`, so a black drop shadow renders nothing in dark — the base
-library answers that with a fill step and Endfield with a fill step forced by
+library answers that with a fill step and Industry with a fill step forced by
 `clip-path`, and this skin answers it with a 1px inset top highlight carried
 INSIDE every elevation token. One mechanism, per-theme values: light gets the
 bevel plus a real shadow, dark gets the bevel alone. **Two tokens may therefore
@@ -868,7 +927,7 @@ colour for every sparkline, cell bar and bar list, **the ordinary one-series cha
 is safer under this skin than in the base library**, and it is a multi-series
 chart reaching slot 2 or 4 that needs a label between the mark and a gold control.
 
-**Three of Endfield's rules did NOT reproduce, and they belong to the chamfer
+**Three of Industry's rules did NOT reproduce, and they belong to the chamfer
 rather than to skins.** `clip-path` clips the box-shadow — irrelevant here,
 because this skin has no clip-path, so overlays keep their shadows and
 `.jrk-btn--icon` is squared with everything else rather than surviving as a
@@ -884,7 +943,7 @@ near-black in light, and the base `--brand` / `--vivid` variants exist precisely
 because a dark bar needs its own ink namespace. A skin re-pointing the default
 bar's FILL would blind every control in it. What it does instead is re-point the
 bar's existing hairline COLOUR to `border.accent` — a colour change with no width
-change, so nothing reflows. Same family as Endfield's wedge decision: **do not put
+change, so nothing reflows. Same family as Industry's wedge decision: **do not put
 a fill under ink you do not own.**
 
 ## Adding a component
@@ -897,14 +956,17 @@ a fill under ink you do not own.**
    reaches the Design System pane.
 5. `npm test`, then look at the gallery.
 
-**And check it under BOTH skins** — `preview/skin-endfield.html` and
+**And check it under BOTH skins** — `preview/skin-industry.html` and
 `preview/skin-midgard.html`, which stamp `data-skin` and nothing else. A new
 component picks a skin's colours up for free (they are the same variables) but its
 GEOMETRY does not, and each skin has its own list to be added to: if it takes
 `radius.full` it stays a pill under either skin until it is named in that skin's
-squared-control list; under `endfield` a top-level tile takes no notch until it is
+squared-control list; under `industry` a top-level tile takes no notch until it is
 in the clip-path list; under `midgard` a tile with a `__header` gets no band and a
 `__footer` no lozenge until it is named. See the skins section above.
+`preview/components.html` carries a three-way skin picker of its own, which is
+the faster check: it is the FULL component set, so a base-shaped component under
+a skin shows up there rather than only on the page that skin happens to demo.
 
 ## Conventions
 

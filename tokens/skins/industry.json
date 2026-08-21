@@ -1,14 +1,14 @@
 {
   "$meta": {
-    "name": "Endfield",
+    "name": "Industry",
     "version": "0.1.0",
-    "description": "An industrial-HUD SKIN: cool concrete under a technical grid, square panels cut at 45deg, charcoal chips, and one hazard yellow. Generated into dist/jrk-skin-endfield.css by scripts/build-tokens.mjs. Never hand-edit dist/.",
-    "$axisNote": "THIS IS NOT A THIRD THEME. It has its own light and dark halves, so it is orthogonal to the light/dark axis and is stamped separately: `data-skin=\"endfield\"` crossed with `data-theme=\"light\"|\"dark\"` (or the OS setting). Four blocks, not one. Anyone who reaches for `data-theme=\"endfield\"` will get nothing — the generator emits no such selector, and it cannot, because that stamp has nowhere to put the second half of this palette.",
-    "$scopeNote": "COLOUR AND SHADOW ONLY. The chamfers, the squared controls, the wedge and the wide label tracking live in css/skins/endfield.css, which holds no colour at all. That split is not tidiness: tokens.json is the only source of truth for design values, so every hex is here; geometry is component behaviour, so it is in CSS. Neither file can do the other's job.",
+    "description": "An industrial-HUD SKIN: cool concrete under a technical grid, square panels cut at 45deg, charcoal chips, and one hazard yellow. Generated into dist/jrk-skin-industry.css by scripts/build-tokens.mjs. Never hand-edit dist/.",
+    "$axisNote": "THIS IS NOT A THIRD THEME. It has its own light and dark halves, so it is orthogonal to the light/dark axis and is stamped separately: `data-skin=\"industry\"` crossed with `data-theme=\"light\"|\"dark\"` (or the OS setting). Four blocks, not one. Anyone who reaches for `data-theme=\"industry\"` will get nothing — the generator emits no such selector, and it cannot, because that stamp has nowhere to put the second half of this palette.",
+    "$scopeNote": "COLOUR AND SHADOW ONLY. The chamfers, the squared controls, the wedge and the wide label tracking live in css/skins/industry.css, which holds no colour at all. That split is not tidiness: tokens.json is the only source of truth for design values, so every hex is here; geometry is component behaviour, so it is in CSS. Neither file can do the other's job.",
     "$measuredNote": "Every ratio in a $note below was computed by hand against the panel — #f4f6f6 light, #1e2224 dark — and the inks that land on the page were checked at BOTH ends of the gradient. scripts/validate-skin.mjs re-derives them on every `npm test`; it does not trust these strings.",
     "$chartNote": "The skin does NOT override one chart slot and that is a measured decision, not an omission. Its light panel (#f4f6f6) is darker than the base card (#ffffff), so every light mark loses about 8% contrast — slot 1 goes 4.02 to 3.70, slot 5 4.13 to 3.81, slot 6 3.65 to 3.36. No slot crosses the 3:1 mark floor and reliefRequired.light is unchanged, so the CVD-derived palette carries over intact. Dark IMPROVES slightly (#1e2224 is darker than #232326). What DID have to move is chart.chrome.surface: it is stroked as the ring around a dot, so leaving it at the base card would have painted a white ring on a #f4f6f6 panel — the same defect this library already recorded when that token sat at a stale #1c1c1e."
   },
-  "stamp": "endfield",
+  "stamp": "industry",
   "$varsNote": "Keyed by the CSS variable name WITHOUT the --jrk- prefix, deliberately. The generator's own naming is namespace-specific (color.text.onBanner -> text-on-banner, font.family.sans -> font-sans, chart.chrome.surface -> chart-surface), so a mirror of tokens.json's tree would need a second, divergent mapping table. Instead the build ASSERTS that every name here already exists in the base layer; a typo or a renamed base token fails `npm run build` instead of emitting a colour nothing reads. Skin-only names go in `skinOnly`, which is exempt from that assertion and is the only way to add one.",
   "vars": {
     "surface-canvas": {
@@ -64,7 +64,7 @@
     "surface-card-hover": {
       "light": "#e2e5e6",
       "dark": "#2b2f31",
-      "$note": "A REAL step in both halves — 1.14:1 light, 1.30:1 dark — and it has to be, because css/skins/endfield.css neutralises shadow-card and shadow-card-raise on every notched tile: clip-path clips the box-shadow, so a chamfered card cannot carry one. The base library's arrangement (shadow in light, fill in dark, each a no-op in the other) is not available here. The fill is the whole hover in both halves."
+      "$note": "A REAL step in both halves — 1.14:1 light, 1.30:1 dark — and it has to be, because css/skins/industry.css neutralises shadow-card and shadow-card-raise on every notched tile: clip-path clips the box-shadow, so a chamfered card cannot carry one. The base library's arrangement (shadow in light, fill in dark, each a no-op in the other) is not available here. The fill is the whole hover in both halves."
     },
     "surface-active": {
       "light": "#d6dadb",
@@ -351,20 +351,39 @@
       "light": "0",
       "dark": "0"
     },
-    "$radiusNote": "SQUARE IS THE DEFAULT AND THE NOTCH REPLACES THE RADIUS — the inversion of the base library's control ladder. radius-full is deliberately NOT overridden, because it is the only thing keeping a dot a dot, a spinner a circle and a radio round; .jrk-btn--icon reads as this skin's charcoal CHIP for the same reason. css/skins/endfield.css squares the named controls that would otherwise stay pills, and that named list is the skin's contract: anything new that opts into radius-full stays a pill under the skin until it is added there."
+    "$radiusNote": "SQUARE IS THE DEFAULT AND THE NOTCH REPLACES THE RADIUS — the inversion of the base library's control ladder. radius-full is deliberately NOT overridden, because it is the only thing keeping a dot a dot, a spinner a circle and a radio round; .jrk-btn--icon reads as this skin's charcoal CHIP for the same reason. css/skins/industry.css squares the named controls that would otherwise stay pills, and that named list is the skin's contract: anything new that opts into radius-full stays a pill under the skin until it is added there."
   },
   "skinOnly": {
-    "$comment": "Names with no base counterpart, exempt from the build's exists-in-base assertion. Every one of them is referenced from css/skins/endfield.css — a value here that nothing reads is dead weight, and nothing else will tell you.",
+    "$comment": "Names with no base counterpart, exempt from the build's exists-in-base assertion. Every one of them is referenced from css/skins/industry.css — a value here that nothing reads is dead weight, and nothing else will tell you.",
     "surface-canvas-grid": {
       "light": "rgba(20, 23, 26, 0.10)",
       "dark": "rgba(230, 234, 234, 0.13)",
       "$note": "The technical grid. DOTS AT THE INTERSECTIONS rather than continuous lines (2026-08-20) — the reference look's ground is a dot field. Drawn as a masked radial-gradient tile by the skin stylesheet; hand-recorded because nothing measures a colour inside a gradient.\n\nTHE ALPHA IS PINNED BY text.muted ON THE PAGE'S DARK END, not by moire, and this note used to say otherwise. The old 'roughly 0.09, it moires against an 11px label' ceiling is real but it is the SECOND constraint. On the pre-2026-08-20 ramp (dark end #d6dadb) the contrast ceiling was 0.050 — BELOW the moire figure — and the dot it painted was 1.10:1, which is measurably present and visually absent. That is what the page lightening was for: on #e4e7e7 the ceiling is 0.115. At 0.10 the dot lands at 1.22:1 with text.muted at 4.64:1 and text.secondary at 6.54:1. Dark has more room and takes 0.13 — 1.35:1, muted 4.88:1.\n\nTHE WAVE DOES NOT EAT THIS BUDGET, and that is a property of the masks rather than of the alphas: the two layers are masked complementarily, dots below the horizon and wave above, so a dot never composites on top of an arc. Break that — mask them to overlap, or drop a mask — and the two alphas ADD, which on the light half puts muted under the floor. If you want the dots to read more strongly, reach for the RADIUS in the stylesheet first: radius is free against a per-pixel contrast floor and alpha is not."
     },
-    "surface-hazard-tape": {
-      "light": "repeating-linear-gradient(45deg, #ffe500 0 10px, #14171a 10px 20px)",
-      "dark": "repeating-linear-gradient(45deg, #ffe500 0 10px, #14171a 10px 20px)",
-      "$note": "Real hazard tape, for a destructive or irreversible affordance and nothing else. IT CANNOT CARRY INK — the stripe alternates #ffe500 and #14171a, so black fails on half of it (1.00:1) and white on the other half (1.28:1). Use it as a 6px bar along one edge of a control, never as the control's ground. Below 8px it aliases into a flat olive at 100% zoom."
+    "surface-canvas-stripe": {
+      "light": "#ffe500",
+      "dark": "#4a4300",
+      "$note": "THE STRIPE — ONE near-vertical band cut across the whole viewport, with a three-step darkening face along its trailing edge so it reads as an extruded bar. Four bands in one gradient. Decoration. Hand-recorded, because nothing measures a colour inside a gradient.\n\nIT TRACKS THE HAZARD HUE, so all four bands are declared in every variant. The default (the ABSENCE of data-hazard) is yellow.\n\nLIGHT BAND 1 IS THE VIVID accent-solid AND DARK BAND 1 IS THE DEEP accent-wash — the per-half asymmetry this skin uses everywhere, and each half is pinned by a different ink. Light was DIRECTED to the vivid fill on 2026-08-20 so the stripe matches the hue swatch in the gallery picker. Dark stays on the deep wash because dark page ink is near-white and a vivid fill cannot carry it: #e6eaea on #ffe500 is 1.05:1, i.e. invisible, and the dark plate wants a deep tone regardless.\n\n*** THE LIGHT HALF OF red, purple AND blue CANNOT BE CROSSED BY PAGE TEXT, AND NO GATE SEES IT. *** Light page ink is near-black and cannot be switched. Those three hues take WHITE ink and no step of them takes black, so near-black on the vivid fill is 3.88:1 (red), 2.95:1 (purple), 3.92:1 (blue) — and because the face steps DARKEN, the whole light ramp is worse still: worst band 1.93:1, 1.62:1, 1.96:1. There is no re-stepping that fixes this; it is what the hue IS. What ships is therefore a LAYOUT CONDITION of the .jrk-topbar--brand kind, and it is the second one in this library: with data-hazard='red', 'purple' or 'blue' in LIGHT, no page-level text may cross the stripe. stripe-from and stripe-to are the tokens that move it. This was measured and declined once, when the bands were derived from accent-wash instead (every wash carries near-black at >= 11.6:1, which made one uniform rule possible); the vivid fill was then directed, and the trade is deliberate.\n\nTHE OTHER THREE HUES ARE CLEAN AND DERIVED: light steps walk down from the vivid fill and STOP at the deepest step still clearing 4.5:1 on text-primary — yellow worst 4.50:1, orange 4.58:1, green 4.59:1. NOTE GREEN'S EXTRUDE BARELY READS: its vivid fill is only 6.19:1 on near-black to begin with, so the legal darkening range is #09ae5c to #08944e and the three steps are nearly the same colour. That is the cost of pinning band 1 to the vivid value — the ramp's LENGTH is whatever the ink floor leaves, and for a hue that starts near the floor it leaves almost nothing. Dark has room in every hue (worst 4.71:1, green) because darkening away from near-white ink only ever helps.\n\nSECONDARY AND MUTED do not survive the deep steps in either half. ONLY text-primary is safe anywhere on the assembly, and on the three hues above not even that, in light.\n\nVISIBILITY: light band 1 is 1.03:1 off the page for yellow — it separates by CHROMA ALONE and is invisible in greyscale and in print, the same finding as accent-solid at 1.18:1 on the panel — and 2.02:1 to 4.90:1 for the other five, which is the one thing the vivid fill genuinely buys. Suppressed in @media print.\n\nIT TOOK FIVE SHAPES. Two corner wedges, whose edge angles came from their own box aspects and so were not parallel; a half-plane, which read as a slab rather than a mark; a band with one opaque face; a wash-derived four-band ramp; then this. The angle is stated ONCE in stripe-angle."
     },
+    "surface-canvas-stripe-shade-1": {
+      "light": "#dac300",
+      "dark": "#373200",
+      "$note": "THE FIRST STEP OF THE SHADED FACE. Three opaque steps, each darker than the last, replace what would otherwise be a drop shadow. A TRANSLUCENT SHADOW IS UNAVAILABLE AND BOTH HALVES SAY SO SEPARATELY: in dark, black over this page at alpha 0.20 measures 1.020:1 against the page's dark end, so it is invisible at any usable alpha — the base library's shadow.card-in-dark finding, endfield's clip-path finding and midgard's inset bevel arriving at one conclusion by three routes, that on a dark ground elevation is a FILL. In light a shadow is legal in isolation (alpha 0.10 leaves text-muted at 4.64:1) but not on these pixels, because surface-canvas-grid already spends 0.10 of a 0.115 ceiling there and the alphas ADD — the trap the complementary masks on the wave and the dot ground exist to avoid. Opaque steps spend none of that budget. Derivation, per-hue values and the safe-ink rule are on surface-canvas-stripe."
+    },
+    "surface-canvas-stripe-shade-2": {
+      "light": "#b4a200",
+      "dark": "#282400",
+      "$note": "A DEEPER STEP OF THE SHADED FACE. See surface-canvas-stripe-shade-1 for why the face is opaque steps rather than a shadow, and surface-canvas-stripe for the derivation and the safe-ink rule. This step carries text-primary in both halves for all six hues and does NOT carry secondary or muted."
+    },
+    "surface-canvas-stripe-shade-3": {
+      "light": "#8f8000",
+      "dark": "#1c1900",
+      "$note": "A DEEPER STEP OF THE SHADED FACE. See surface-canvas-stripe-shade-1 for why the face is opaque steps rather than a shadow, and surface-canvas-stripe for the derivation and the safe-ink rule. This step carries text-primary in both halves for all six hues and does NOT carry secondary or muted."
+    },
+    "stripe-angle": "104deg",
+    "stripe-from": "64%",
+    "stripe-to": "76%",
+    "stripe-step": "1.2%",
     "notch-sm": "6px",
     "notch-md": "10px",
     "notch-lg": "16px",
@@ -379,7 +398,7 @@
     "wave-gap": "64px"
   },
   "variants": {
-    "$comment": "HAZARD HUE VARIANTS. Stamped as a THIRD attribute — data-skin=\"endfield\" data-hazard=\"blue\" — crossed with the theme, so the axes are skin x hazard x theme. Only the ACCENT namespace moves: the steel neutrals, the status set, the geometry and the type are the skin and do not vary. That is the point of the split — a hazard hue is a hue, not a design.",
+    "$comment": "HAZARD HUE VARIANTS. Stamped as a THIRD attribute — data-skin=\"industry\" data-hazard=\"blue\" — crossed with the theme, so the axes are skin x hazard x theme. Only the ACCENT namespace moves: the steel neutrals, the status set, the geometry and the type are the skin and do not vary. That is the point of the split — a hazard hue is a hue, not a design.",
     "$axisNote": "The default is YELLOW and it is not a variant: an unstamped data-hazard leaves the skin exactly as it was, so no existing consumer changes and the yellow keeps the hand-derived values it shipped with. Every variant here is the FIVE other hues.",
     "$methodNote": "Derived by search, not picked. Each hue is one HSL anchor plus a 1%-granularity lightness ramp, and every role is the NEAREST LEGAL STEP to that hue vivid centre — light roles darken, dark roles lighten, and each stops the moment it clears its floor. Cross-check on the method: run against yellow it reproduces the hand-derived shipped values to within one step (text #6b6000 vs #6b5e00, border #9e8e00 vs #a08d00), and the hand derivation was not consulted while writing it. scripts/validate-skin.mjs re-derives every ratio below on each build.",
     "$washNote": "The washes are MIXES TOWARD THE PANEL from a floor of 0.5, not steps on the lightness ramp, and that is the one place the yellow misleads. What separates a wash from a fill on a pale hue is CHROMA: #ffe500 is already lighter than most panels, so a lightness walk returns the vivid stop itself and calls it a wash. No contrast ratio can catch that, because luminance is blind to chroma. Hence the fixed mix floor.",
@@ -395,7 +414,8 @@
         "accent.text": "5.98:1 on the light panel, 4.60:1 at the page's dark end, 6.37:1 on the dark panel",
         "border.accent": "3.10:1 light, 6.37:1 dark",
         "wash carries muted ink": "4.57:1 light, 5.17:1 dark (dark ink is text.primary, not muted)",
-        "focus ring best band": "16.59:1 light, 6.37:1 dark"
+        "focus ring best band": "16.59:1 light, 6.37:1 dark",
+        "stripe assembly": "light #ff8000 / #ed7700 / #db6e00 / #c96500 from this hue's vivid accent-solid; dark #8f5112 / #6a3c0d / #4d2c0a / #361f07 from its accent-wash. Every band clears text-primary in both halves; secondary and muted do not survive the deep steps."
       },
       "vars": {
         "accent-solid": {
@@ -454,9 +474,21 @@
           "light": "0 0 0 2px #14171a, 0 0 0 4px #ff8000",
           "dark": "0 0 0 2px #ff8000, 0 0 0 4px #14171a"
         },
-        "surface-hazard-tape": {
-          "light": "repeating-linear-gradient(45deg, #ff8000 0 10px, #14171a 10px 20px)",
-          "dark": "repeating-linear-gradient(45deg, #ff8000 0 10px, #14171a 10px 20px)"
+        "surface-canvas-stripe": {
+          "light": "#ff8000",
+          "dark": "#8f5112"
+        },
+        "surface-canvas-stripe-shade-1": {
+          "light": "#ed7700",
+          "dark": "#6a3c0d"
+        },
+        "surface-canvas-stripe-shade-2": {
+          "light": "#db6e00",
+          "dark": "#4d2c0a"
+        },
+        "surface-canvas-stripe-shade-3": {
+          "light": "#c96500",
+          "dark": "#361f07"
         }
       }
     },
@@ -470,7 +502,8 @@
         "accent.text": "5.90:1 on the light panel, 4.54:1 at the page's dark end, 4.58:1 on the dark panel",
         "border.accent": "4.27:1 light, 3.60:1 dark",
         "wash carries muted ink": "4.63:1 light, 7.90:1 dark (dark ink is text.primary, not muted)",
-        "focus ring best band": "16.59:1 light, 3.46:1 dark"
+        "focus ring best band": "16.59:1 light, 3.46:1 dark",
+        "stripe assembly": "light #e32416 / #c61f13 / #a91b10 / #8d160e from this hue's vivid accent-solid; dark #81231d / #5f1a15 / #461310 / #310d0b from its accent-wash. *** LIGHT IS UNSAFE FOR PAGE TEXT: near-black clears none of these bands (worst 1.93:1), because this hue takes white ink and the face steps darken. No page-level text may cross the stripe with this variant in light. Dark is clean. See surface-canvas-stripe."
       },
       "$acknowledgedStatusCollisions": [
         "status.critical.solid dE 4.6 (protanopia)",
@@ -535,9 +568,21 @@
           "light": "0 0 0 2px #14171a, 0 0 0 4px #e32416",
           "dark": "0 0 0 2px #e32416, 0 0 0 4px #14171a"
         },
-        "surface-hazard-tape": {
-          "light": "repeating-linear-gradient(45deg, #e32416 0 10px, #14171a 10px 20px)",
-          "dark": "repeating-linear-gradient(45deg, #e32416 0 10px, #14171a 10px 20px)"
+        "surface-canvas-stripe": {
+          "light": "#e32416",
+          "dark": "#81231d"
+        },
+        "surface-canvas-stripe-shade-1": {
+          "light": "#c61f13",
+          "dark": "#5f1a15"
+        },
+        "surface-canvas-stripe-shade-2": {
+          "light": "#a91b10",
+          "dark": "#461310"
+        },
+        "surface-canvas-stripe-shade-3": {
+          "light": "#8d160e",
+          "dark": "#310d0b"
         }
       },
       "$usageRule": "THE ONE VARIANT WITH A RESTRICTION, and it is not fixable by re-stepping. A hazard red and this skin status reds are the same hue by construction — both are the deepest step of red where white ink survives — so under protanopia the accent and the danger signal collapse (dE 3.2 to 6.3). The rule that follows: with data-hazard=red, a critical or warning badge must carry its icon AND its label, never colour alone, and a .jrk-btn--cta must not sit in the same tile as a .jrk-btn--danger-solid. That is the base library rule about a lone blue series beside a --cta, one step more severe. If a view cannot honour it, pick another hue: orange is the nearest one that clears every status colour (dE 17.0 worst)."
@@ -552,7 +597,8 @@
         "accent.text": "5.99:1 on the light panel, 4.61:1 at the page's dark end, 4.68:1 on the dark panel",
         "border.accent": "5.62:1 light, 3.09:1 dark",
         "wash carries muted ink": "4.58:1 light, 7.99:1 dark (dark ink is text.primary, not muted)",
-        "focus ring best band": "16.59:1 light, 3.09:1 dark"
+        "focus ring best band": "16.59:1 light, 3.09:1 dark",
+        "stripe assembly": "light #8f24db / #7d1fbf / #6b1ba4 / #591688 from this hue's vivid accent-solid; dark #5c2e82 / #442260 / #321946 / #231131 from its accent-wash. *** LIGHT IS UNSAFE FOR PAGE TEXT: near-black clears none of these bands (worst 1.62:1), because this hue takes white ink and the face steps darken. No page-level text may cross the stripe with this variant in light. Dark is clean. See surface-canvas-stripe."
       },
       "vars": {
         "accent-solid": {
@@ -611,9 +657,21 @@
           "light": "0 0 0 2px #14171a, 0 0 0 4px #8f24db",
           "dark": "0 0 0 2px #9a3adf, 0 0 0 4px #14171a"
         },
-        "surface-hazard-tape": {
-          "light": "repeating-linear-gradient(45deg, #8f24db 0 10px, #14171a 10px 20px)",
-          "dark": "repeating-linear-gradient(45deg, #9a3adf 0 10px, #14171a 10px 20px)"
+        "surface-canvas-stripe": {
+          "light": "#8f24db",
+          "dark": "#5c2e82"
+        },
+        "surface-canvas-stripe-shade-1": {
+          "light": "#7d1fbf",
+          "dark": "#442260"
+        },
+        "surface-canvas-stripe-shade-2": {
+          "light": "#6b1ba4",
+          "dark": "#321946"
+        },
+        "surface-canvas-stripe-shade-3": {
+          "light": "#591688",
+          "dark": "#231131"
         }
       }
     },
@@ -627,7 +685,8 @@
         "accent.text": "5.97:1 on the light panel, 4.60:1 at the page's dark end, 4.56:1 on the dark panel",
         "border.accent": "4.23:1 light, 3.88:1 dark",
         "wash carries muted ink": "4.57:1 light, 7.40:1 dark (dark ink is text.primary, not muted)",
-        "focus ring best band": "16.59:1 light, 3.49:1 dark"
+        "focus ring best band": "16.59:1 light, 3.49:1 dark",
+        "stripe assembly": "light #0070f0 / #0062d2 / #0054b3 / #004595 from this hue's vivid accent-solid; dark #0f498a / #0b3666 / #08274b / #061c34 from its accent-wash. *** LIGHT IS UNSAFE FOR PAGE TEXT: near-black clears none of these bands (worst 1.96:1), because this hue takes white ink and the face steps darken. No page-level text may cross the stripe with this variant in light. Dark is clean. See surface-canvas-stripe."
       },
       "vars": {
         "accent-solid": {
@@ -686,9 +745,21 @@
           "light": "0 0 0 2px #14171a, 0 0 0 4px #0070f0",
           "dark": "0 0 0 2px #0070f0, 0 0 0 4px #14171a"
         },
-        "surface-hazard-tape": {
-          "light": "repeating-linear-gradient(45deg, #0070f0 0 10px, #14171a 10px 20px)",
-          "dark": "repeating-linear-gradient(45deg, #0070f0 0 10px, #14171a 10px 20px)"
+        "surface-canvas-stripe": {
+          "light": "#0070f0",
+          "dark": "#0f498a"
+        },
+        "surface-canvas-stripe-shade-1": {
+          "light": "#0062d2",
+          "dark": "#0b3666"
+        },
+        "surface-canvas-stripe-shade-2": {
+          "light": "#0054b3",
+          "dark": "#08274b"
+        },
+        "surface-canvas-stripe-shade-3": {
+          "light": "#004595",
+          "dark": "#061c34"
         }
       }
     },
@@ -702,7 +773,8 @@
         "accent.text": "6.11:1 on the light panel, 4.71:1 at the page's dark end, 10.71:1 on the dark panel",
         "border.accent": "3.14:1 light, 10.71:1 dark",
         "wash carries muted ink": "5.24:1 light, 4.71:1 dark (dark ink is text.primary, not muted)",
-        "focus ring best band": "16.59:1 light, 10.71:1 dark"
+        "focus ring best band": "16.59:1 light, 10.71:1 dark",
+        "stripe assembly": "light #09ae5c / #09a557 / #089d53 / #08944e from this hue's vivid accent-solid; dark #177549 / #115736 / #0c3f27 / #092c1c from its accent-wash. Every band clears text-primary in both halves; secondary and muted do not survive the deep steps."
       },
       "vars": {
         "accent-solid": {
@@ -761,9 +833,21 @@
           "light": "0 0 0 2px #14171a, 0 0 0 4px #09ae5c",
           "dark": "0 0 0 2px #0df280, 0 0 0 4px #14171a"
         },
-        "surface-hazard-tape": {
-          "light": "repeating-linear-gradient(45deg, #09ae5c 0 10px, #14171a 10px 20px)",
-          "dark": "repeating-linear-gradient(45deg, #09ae5c 0 10px, #14171a 10px 20px)"
+        "surface-canvas-stripe": {
+          "light": "#09ae5c",
+          "dark": "#177549"
+        },
+        "surface-canvas-stripe-shade-1": {
+          "light": "#09a557",
+          "dark": "#115736"
+        },
+        "surface-canvas-stripe-shade-2": {
+          "light": "#089d53",
+          "dark": "#0c3f27"
+        },
+        "surface-canvas-stripe-shade-3": {
+          "light": "#08944e",
+          "dark": "#092c1c"
         }
       }
     }

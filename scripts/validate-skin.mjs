@@ -267,7 +267,7 @@ for (const file of files) {
       // set the wash mix in the first place.
       if (mode === 'light') floor(`[${vName}/light] text-muted on accent-wash`, v('text-muted', mode), vv('accent-wash', mode), TEXT_FLOOR);
 
-      /* THE TOPBAR WEDGE. css/skins/endfield.css paints the bar's trailing band
+      /* THE TOPBAR WEDGE. css/skins/industry.css paints the bar's trailing band
          with accent-wash and the bar is inked with text-primary, so this is the
          check that lets the wedge exist without a layout guarantee. It is here
          rather than folded into the wash checks because the reason is different:

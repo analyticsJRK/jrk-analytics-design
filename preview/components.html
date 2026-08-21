@@ -6,6 +6,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Components — JRK Analytics Design</title>
 <link rel="stylesheet" href="../css/index.css">
+<!-- BOTH SKINS, in the order a consuming app uses them: the generated colour
+     layer first, then the geometry stylesheet, both AFTER css/index.css. Every
+     selector inside is prefixed :root[data-skin='<stamp>'], so loading the pair
+     costs nothing until the picker below stamps the document. This page is the
+     FULL component set, which is what makes it the useful place to check a skin:
+     the colours come free (they are the same variables), but the GEOMETRY does
+     not — each skin squares, notches or bands a NAMED list of components, and
+     anything absent from that list keeps its base shape. A pill that is still a
+     pill under a skin is a missing entry, not a bug in the skin. -->
+<link rel="stylesheet" href="../dist/jrk-skin-industry.css">
+<link rel="stylesheet" href="../css/skins/industry.css">
+<link rel="stylesheet" href="../dist/jrk-skin-midgard.css">
+<link rel="stylesheet" href="../css/skins/midgard.css">
 <link rel="stylesheet" href="preview.css">
 </head>
 <body>
@@ -14,6 +27,27 @@
   <header class="gal-page__head">
     <h1>Components</h1>
     <p>Every element on this page is plain HTML plus a <code class="jrk-mono">jrk-*</code> class — no framework, no build step. The React wrappers emit exactly these class names.</p>
+    <p>
+      The picker stamps <code class="jrk-mono">data-skin</code> on the document
+      and nothing else — no markup on this page changes. It is orthogonal to the
+      theme toggle in the nav, because <strong>a skin is not a third theme</strong>:
+      each carries its own light and dark halves, so every skin here is
+      <strong>four combinations to check, not two</strong>.
+    </p>
+    <div style="margin-top:16px">
+      <div class="gal-note" style="margin-bottom:6px"><strong>Skin</strong></div>
+      <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Skin">
+        <button class="jrk-tab" data-skin-btn="" type="button">Base</button>
+        <button class="jrk-tab" data-skin-btn="industry" type="button">Industry</button>
+        <button class="jrk-tab" data-skin-btn="midgard" type="button">Midgard</button>
+      </div>
+      <div class="gal-note" style="margin-top:6px">
+        Each skin has a dedicated page with its own notes and, for
+        <code class="jrk-mono">industry</code>, its hazard-hue picker:
+        <a href="skin-industry.html">Industry</a> &middot;
+        <a href="skin-midgard.html">Midgard</a>.
+      </div>
+    </div>
   </header>
 
   <!-- ============================ buttons ============================ -->
@@ -1635,6 +1669,39 @@
       document.getElementById(btn.getAttribute('aria-controls')).hidden = open;
     };
   });
+
+  /* SKIN PICKER. Gallery chrome — an app stamps data-skin once on <html> and is
+     done. The stamp is all there is: :root[data-skin='<stamp>'] is (0,2,0), so
+     both loaded skins are inert until one of them matches.
+
+     aria-selected AND aria-pressed, both, on purpose: .jrk-tabs--pills styles
+     the chosen tab off aria-selected (shell.css), while the pressed state is
+     what a screen reader reads back off a toggle. Setting only one leaves the
+     picker either invisible or silent. */
+  function applySkin(v) {
+    if (v) document.documentElement.dataset.skin = v;
+    else delete document.documentElement.dataset.skin;
+    const url = new URL(location.href);
+    v ? url.searchParams.set('skin', v) : url.searchParams.delete('skin');
+    history.replaceState(null, '', url);
+    document.querySelectorAll('[data-skin-btn]').forEach((b) => {
+      const on = b.dataset.skinBtn === v;
+      b.setAttribute('aria-selected', String(on));
+      b.setAttribute('aria-pressed', String(on));
+    });
+  }
+  document.querySelectorAll('[data-skin-btn]').forEach((b) => {
+    b.addEventListener('click', () => applySkin(b.dataset.skinBtn));
+  });
+
+  /* Defaults to BASE here — this is the base component gallery, and the two
+     skin pages default the other way because each exists to show its own skin.
+     ?skin= is honoured so a link or a headless screenshot can reach any of the
+     three, and an unrecognised value falls back to base rather than stamping a
+     skin with no stylesheet behind it. */
+  const SKINS = ['industry', 'midgard'];
+  const wanted = new URL(location.href).searchParams.get('skin');
+  applySkin(SKINS.includes(wanted) ? wanted : '');
 </script>
 </body>
 </html>

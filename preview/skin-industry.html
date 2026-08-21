@@ -1,15 +1,15 @@
-<!-- @dsCard group="Skins" name="Endfield skin" -->
+<!-- @dsCard group="Skins" name="Industry skin" -->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Endfield skin — JRK Analytics Design</title>
+<title>Industry skin — JRK Analytics Design</title>
 <link rel="stylesheet" href="../css/index.css">
 <!-- The skin, in the order a consuming app uses: the generated colour layer
      first, then the geometry stylesheet. Both AFTER css/index.css. -->
-<link rel="stylesheet" href="../dist/jrk-skin-endfield.css">
-<link rel="stylesheet" href="../css/skins/endfield.css">
+<link rel="stylesheet" href="../dist/jrk-skin-industry.css">
+<link rel="stylesheet" href="../css/skins/industry.css">
 <link rel="stylesheet" href="preview.css">
 <style>
   /* Gallery chrome for the hazard picker. Not part of the library.
@@ -38,11 +38,11 @@
 
 <div class="gal-page">
   <header class="gal-page__head">
-    <h1>Endfield skin</h1>
+    <h1>Industry skin</h1>
     <p>
       An industrial-HUD skin over the same components: cool concrete under a
       technical grid, square panels cut at 45&deg;, and one hazard yellow. Use the
-      toggle below to stamp <code>data-skin="endfield"</code> on the document —
+      toggle below to stamp <code>data-skin="industry"</code> on the document —
       nothing on this page changes markup, only the stamp. The theme toggle in
       the nav still works, because <strong>the skin is orthogonal to the
       theme</strong>: it has its own light and dark halves, so there are four
@@ -53,7 +53,7 @@
         <div class="gal-note" style="margin-bottom:6px"><strong>Skin</strong></div>
         <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Skin">
           <button class="jrk-tab" data-skin-btn="" type="button">Base</button>
-          <button class="jrk-tab" data-skin-btn="endfield" type="button">Endfield</button>
+          <button class="jrk-tab" data-skin-btn="industry" type="button">Industry</button>
         </div>
       </div>
       <div>
@@ -103,9 +103,9 @@
       Controls are squared rather than chamfered, because clipping them would
       delete the <code>shadow-md</code> that is the only boundary a white button
       has in light. <code>.jrk-btn--icon</code> keeps <code>radius-full</code> on
-      purpose — it is this look's charcoal chip. The danger button wears hazard
-      tape as a 6px edge bar: the stripe alternates the accent and near-black, so
-      no ink survives it as a ground.
+      purpose — it is this look's charcoal chip. The danger button carried a 6px
+      hazard-tape edge bar until 2026-08-20; it was removed by direction, and the
+      token went with it rather than sit in the file with nothing drawing it.
     </p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
       <button class="jrk-btn jrk-btn--cta" type="button">Commit</button>
@@ -153,7 +153,7 @@
         <tbody>
           <tr><td>Talos Court</td><td>Valley</td><td>184</td><td><span class="jrk-delta jrk-delta--good">&#9650; 3.4%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
           <tr><td>Rhine Yard</td><td>North</td><td>96</td><td><span class="jrk-delta jrk-delta--bad">&#9660; 1.1%</span></td><td><span class="jrk-badge jrk-badge--warning">Watch</span></td></tr>
-          <tr><td>Endfield Row</td><td>Basin</td><td>212</td><td><span class="jrk-delta jrk-delta--good">&#9650; 8.0%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
+          <tr><td>Industry Row</td><td>Basin</td><td>212</td><td><span class="jrk-delta jrk-delta--good">&#9650; 8.0%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
           <tr><td>Kesler Flats</td><td>Valley</td><td>58</td><td><span class="jrk-delta jrk-delta--flat">&mdash; flat</span></td><td><span class="jrk-badge jrk-badge--critical">Flagged</span></td></tr>
         </tbody>
       </table>
@@ -287,7 +287,7 @@ import './preview.js';
 /* The skin stamp, kept in the URL so a reload and a shared link both hold it.
    Deliberately NOT in localStorage like the theme: the theme is a reader's
    standing preference, the skin is what this one page is demonstrating. */
-const SKIN = 'endfield';
+const SKIN = 'industry';
 function applySkin(v) {
   if (v) document.documentElement.dataset.skin = v;
   else delete document.documentElement.dataset.skin;
@@ -295,7 +295,12 @@ function applySkin(v) {
   v ? url.searchParams.set('skin', v) : url.searchParams.delete('skin');
   history.replaceState(null, '', url);
   document.querySelectorAll('[data-skin-btn]').forEach((b) => {
-    b.setAttribute('aria-pressed', String(b.dataset.skinBtn === v));
+    /* .jrk-tabs--pills styles the chosen tab off aria-selected (shell.css); the
+       pressed state is what a screen reader reads back off a toggle. Both, or
+       the picker is either invisible or silent. */
+    const on = b.dataset.skinBtn === v;
+    b.setAttribute('aria-selected', String(on));
+    b.setAttribute('aria-pressed', String(on));
   });
 }
 document.querySelectorAll('[data-skin-btn]').forEach((b) => {
@@ -310,12 +315,12 @@ const haz = document.getElementById('haz');
 haz.innerHTML = HAZARDS.map((x) => {
   const stamp = x === 'yellow' ? '' : ' data-hazard="' + x + '"';
   return '<button type="button" role="radio" aria-checked="false" aria-label="' + x +
-         '" title="' + x + '" data-haz="' + x + '" data-skin="endfield"' + stamp + '></button>';
+         '" title="' + x + '" data-haz="' + x + '" data-skin="industry"' + stamp + '></button>';
 }).join('');
 
 /* THE SWATCHES HAVE TO BE SAMPLED, not stamped, and the reason is in the
    generated CSS. Every hazard block is anchored at
-   `:root[data-skin="endfield"][data-hazard="X"]` — :root matches <html> and
+   `:root[data-skin="industry"][data-hazard="X"]` — :root matches <html> and
    nothing else — so a BUTTON carrying its own data-hazard matches none of them
    and just inherits the root's --jrk-accent-solid. That is why all six swatches
    painted the currently-selected hue instead of six different ones.

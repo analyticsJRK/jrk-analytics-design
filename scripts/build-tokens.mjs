@@ -169,7 +169,7 @@ ${dark}
    [data-skin="x"] CROSSED with the theme, which is four blocks rather than one.
    That is why `vars` above is still [name, light, dark] and must stay that way —
    a third value per token would model an axis that does not exist, and
-   `data-theme="endfield"` has nowhere to put the second half of a skin's palette.
+   `data-theme="industry"` has nowhere to put the second half of a skin's palette.
 
    A skin declares CSS variable names directly rather than mirroring tokens.json's
    tree, because the mapping from that tree to a variable name is namespace-specific

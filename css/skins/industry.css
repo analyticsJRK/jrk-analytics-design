@@ -1,7 +1,7 @@
-/* Endfield skin — GEOMETRY AND TYPE ONLY.
+/* Industry skin — GEOMETRY AND TYPE ONLY.
  *
- * The colour half of this skin is tokens/skins/endfield.json, generated into
- * dist/jrk-skin-endfield.css. This file holds NOT ONE colour value: every fill
+ * The colour half of this skin is tokens/skins/industry.json, generated into
+ * dist/jrk-skin-industry.css. This file holds NOT ONE colour value: every fill
  * and edge below is a var() reference. That split is the reason both files can
  * exist at all — tokens.json (and a skin file beside it) is the only source of
  * truth for design values, so a hex here would be unreachable to the theme
@@ -12,14 +12,14 @@
  *
  *   @import "@jrk/design/tokens.css";
  *   @import "@jrk/design/css";                        the component layer
- *   @import "@jrk/design/dist/jrk-skin-endfield.css"; the skin's colours
- *   @import "@jrk/design/css/skins/endfield.css";     this file
+ *   @import "@jrk/design/dist/jrk-skin-industry.css"; the skin's colours
+ *   @import "@jrk/design/css/skins/industry.css";     this file
  *
- * Then stamp the root: <html data-skin="endfield">. THE SKIN IS ORTHOGONAL TO
+ * Then stamp the root: <html data-skin="industry">. THE SKIN IS ORTHOGONAL TO
  * THE THEME — it has its own light and dark halves — so data-theme still means
- * what it always meant and data-theme="endfield" matches nothing anywhere.
+ * what it always meant and data-theme="industry" matches nothing anywhere.
  *
- * Every selector is prefixed :root[data-skin='endfield'], which is (0,2,0)
+ * Every selector is prefixed :root[data-skin='industry'], which is (0,2,0)
  * before the component class is counted. That is deliberate: it beats a base
  * modifier like .jrk-btn--cta (0,2,0) on specificity rather than on order, so
  * this file keeps working if a consumer's bundler reorders the imports. Do not
@@ -68,19 +68,100 @@
    clamped to just above body's own background instead of racing the root
    canvas. Without it the pair can land underneath the page ramp and paint
    nothing at all. */
-:root[data-skin='endfield'] body {
-  background: var(--jrk-surface-canvas);
+/* ── the stripe: one near-vertical band on a three-step extrude ───────────
+   A single band leaning about 14deg off vertical, with THREE opaque steps along
+   its trailing edge, each darker than the last, so it reads as an extruded bar.
+   Six stops, one gradient, one angle: page, stripe, three faces, page. The
+   angle is stated ONCE in stripe-angle — that is the correction three earlier
+   passes needed, having been two corner wedges whose box aspects gave them
+   non-parallel edges, then a half-plane that read as a slab, then a band with a
+   single face.
+
+   THE STEPS ARE OPAQUE BECAUSE A TRANSLUCENT SHADOW IS UNAVAILABLE, and both
+   halves rule it out for different reasons. In dark, black over this page at
+   alpha 0.20 measures 1.020:1 against the page's dark end — invisible at any
+   usable alpha, which is the base library's shadow-card-in-dark finding,
+   endfield's clip-path finding and midgard's inset bevel reaching one conclusion
+   by three routes: on a dark ground, elevation is a FILL. In light a shadow is
+   legal in isolation (alpha 0.10 leaves text-muted at 4.64:1) but not on these
+   pixels, because surface-canvas-grid already spends 0.10 of a 0.115 ceiling
+   there and the alphas ADD. Opaque steps spend none of that budget.
+
+   IT TRACKS THE HAZARD HUE. All four bands are declared in every variant, so
+   data-hazard re-colours the stripe with no rule here changing. Light band 1 is
+   the hue's VIVID accent-solid, so the stripe matches the swatch in the gallery
+   picker; dark band 1 is its deep accent-wash, because dark page ink is
+   near-white and #e6eaea on #ffe500 is 1.05:1.
+
+   *** WITH data-hazard='red', 'purple' OR 'blue', THE LIGHT STRIPE CANNOT BE
+   CROSSED BY PAGE TEXT. *** Those three hues take white ink and no step of them
+   takes black, so near-black measures 3.88:1 / 2.95:1 / 3.92:1 on the vivid fill
+   and worse on the darkening face — worst band 1.62:1. Light page ink cannot be
+   switched and no re-stepping fixes a hue's own luminance, so this ships as a
+   LAYOUT CONDITION of the .jrk-topbar--brand kind, the second one in this
+   library, and nothing gates it. stripe-from and stripe-to are what move the
+   band. Deriving the bands from accent-wash instead removes the condition
+   entirely (every wash carries near-black at >= 11.6:1) at the cost of the bold
+   fill; that version was measured and the bold fill was directed over it.
+
+   IT IS A BACKGROUND LAYER ON `body`, NOT A THIRD PSEUDO-ELEMENT, because there
+   is no third one to have: ::before is the wave and ::after is the dot ground,
+   and each carries a mask that is load-bearing for contrast. The visible
+   consequence is that the stripe sits BENEATH both textures — z-index -1 is
+   above body's background — so the dot field continues across it.
+
+   FIXED, like the textures. Percentages on a fixed layer resolve against the
+   VIEWPORT, so the band lands where it is written with no dependence on how
+   background propagation from body to the root canvas resolves — the one part of
+   this that has to be looked at rather than reasoned out. The cost is that the
+   stripe does not sit below the content: on a long page it stays in the port,
+   behind the cards. FOUR KNOBS, ALL TOKENS — stripe-angle for the lean,
+   stripe-from and stripe-to for the band, stripe-step for the width of each
+   face step. Widening a step widens the extrude without touching the band.
+
+   INK: on the three safe hues every band clears text-primary in both halves —
+   light worst 4.50:1 (yellow), 4.58:1 (orange), 4.59:1 (green); dark worst
+   4.71:1. Secondary and muted survive nothing below band 1. So ONLY
+   text-primary is safe anywhere on the assembly, and on red, purple and blue in
+   light not even that.
+
+   AND THE RAMP'S LENGTH IS WHATEVER THE INK FLOOR LEAVES, which is the other
+   cost of pinning band 1 to the vivid value: GREEN'S EXTRUDE BARELY READS. Its
+   fill is only 6.19:1 on near-black to start with, so the legal darkening range
+   is #09ae5c to #08944e and the three steps are nearly one colour. Yellow has
+   the full range (#ffe500 to #8f8000). Dark has room in every hue, because
+   darkening away from near-white ink only ever helps. Derivations are on
+   surface-canvas-stripe. */
+:root[data-skin='industry'] body {
+  background-image:
+    linear-gradient(
+      var(--jrk-stripe-angle),
+      transparent 0 var(--jrk-stripe-from),
+      var(--jrk-surface-canvas-stripe) var(--jrk-stripe-from) var(--jrk-stripe-to),
+      var(--jrk-surface-canvas-stripe-shade-1) var(--jrk-stripe-to)
+        calc(var(--jrk-stripe-to) + var(--jrk-stripe-step)),
+      var(--jrk-surface-canvas-stripe-shade-2)
+        calc(var(--jrk-stripe-to) + var(--jrk-stripe-step))
+        calc(var(--jrk-stripe-to) + 2 * var(--jrk-stripe-step)),
+      var(--jrk-surface-canvas-stripe-shade-3)
+        calc(var(--jrk-stripe-to) + 2 * var(--jrk-stripe-step))
+        calc(var(--jrk-stripe-to) + 3 * var(--jrk-stripe-step)),
+      transparent calc(var(--jrk-stripe-to) + 3 * var(--jrk-stripe-step)) 100%
+    ),
+    var(--jrk-surface-canvas);
+  background-repeat: no-repeat, repeat;
+  background-attachment: fixed, scroll;
   isolation: isolate;
   font-variant-numeric: tabular-nums;
 }
 
-:root[data-skin='endfield'] .jrk-app,
-:root[data-skin='endfield'] .jrk-auth {
+:root[data-skin='industry'] .jrk-app,
+:root[data-skin='industry'] .jrk-auth {
   background: transparent;
 }
 
-:root[data-skin='endfield'] body::before,
-:root[data-skin='endfield'] body::after {
+:root[data-skin='industry'] body::before,
+:root[data-skin='industry'] body::after {
   content: '';
   position: fixed;
   inset: 0;
@@ -89,7 +170,7 @@
 }
 
 /* the wave — the upper band, fading out where the ground begins */
-:root[data-skin='endfield'] body::before {
+:root[data-skin='industry'] body::before {
   background-image:
     repeating-radial-gradient(
       ellipse 130% 78% at 50% 104%,
@@ -104,7 +185,7 @@
    The dot RADIUS is the visibility lever here, not the alpha: alpha is capped by
    the muted-text floor and radius is not, so a dot that needs to read harder
    gets bigger rather than darker. */
-:root[data-skin='endfield'] body::after {
+:root[data-skin='industry'] body::after {
   background-image:
     radial-gradient(circle at center, var(--jrk-surface-canvas-grid) 1.75px, transparent 2.25px);
   background-size: var(--jrk-grid-cell) var(--jrk-grid-cell);
@@ -123,14 +204,14 @@
    The enclosure that remains is the hairline plus the fill step, which is why
    border-subtle is load-bearing in both halves here and may not be dropped on
    the grounds that a tile "looks bounded enough". */
-:root[data-skin='endfield'] .jrk-card,
-:root[data-skin='endfield'] .jrk-chart-card,
-:root[data-skin='endfield'] .jrk-stat,
-:root[data-skin='endfield'] .jrk-stat-row,
-:root[data-skin='endfield'] .jrk-table-wrap,
-:root[data-skin='endfield'] .jrk-sheet,
-:root[data-skin='endfield'] .jrk-alert,
-:root[data-skin='endfield'] .jrk-auth__panel {
+:root[data-skin='industry'] .jrk-card,
+:root[data-skin='industry'] .jrk-chart-card,
+:root[data-skin='industry'] .jrk-stat,
+:root[data-skin='industry'] .jrk-stat-row,
+:root[data-skin='industry'] .jrk-table-wrap,
+:root[data-skin='industry'] .jrk-sheet,
+:root[data-skin='industry'] .jrk-alert,
+:root[data-skin='industry'] .jrk-auth__panel {
   clip-path: polygon(
     0 0,
     calc(100% - var(--jrk-notch-md)) 0,
@@ -147,22 +228,22 @@
    full-width sheet disappears. Done by re-pointing --jrk-notch-md rather than
    by restating the clip-path, so the polygon above stays the single definition
    of the shape. */
-:root[data-skin='endfield'] .jrk-stat,
-:root[data-skin='endfield'] .jrk-alert {
+:root[data-skin='industry'] .jrk-stat,
+:root[data-skin='industry'] .jrk-alert {
   --jrk-notch-md: var(--jrk-notch-sm);
 }
-:root[data-skin='endfield'] .jrk-sheet,
-:root[data-skin='endfield'] .jrk-table-wrap {
+:root[data-skin='industry'] .jrk-sheet,
+:root[data-skin='industry'] .jrk-table-wrap {
   --jrk-notch-md: var(--jrk-notch-lg);
 }
 
 /* A NESTED tile takes no notch. Two chamfers inside each other read as a
    printing misregistration, and the inner tile's edge is already carried by
    nesting.css's neutral hairline. */
-:root[data-skin='endfield'] .jrk-card .jrk-card,
-:root[data-skin='endfield'] .jrk-card .jrk-stat,
-:root[data-skin='endfield'] .jrk-card .jrk-table-wrap,
-:root[data-skin='endfield'] .jrk-card .jrk-chart-card {
+:root[data-skin='industry'] .jrk-card .jrk-card,
+:root[data-skin='industry'] .jrk-card .jrk-stat,
+:root[data-skin='industry'] .jrk-card .jrk-table-wrap,
+:root[data-skin='industry'] .jrk-card .jrk-chart-card {
   clip-path: none;
 }
 
@@ -172,14 +253,14 @@
    corner squared and no notch. This inverts the base library's split (square
    tiles, rounded overlays) rather than abandoning it: the distinction is still
    tile-versus-overlay, and it is still drawn with geometry. */
-:root[data-skin='endfield'] .jrk-modal,
-:root[data-skin='endfield'] .jrk-menu,
-:root[data-skin='endfield'] .jrk-hovercard,
-:root[data-skin='endfield'] .jrk-tooltip,
-:root[data-skin='endfield'] .jrk-nav-flyout,
-:root[data-skin='endfield'] .jrk-spotlight,
-:root[data-skin='endfield'] .jrk-toast,
-:root[data-skin='endfield'] .jrk-chart-tooltip {
+:root[data-skin='industry'] .jrk-modal,
+:root[data-skin='industry'] .jrk-menu,
+:root[data-skin='industry'] .jrk-hovercard,
+:root[data-skin='industry'] .jrk-tooltip,
+:root[data-skin='industry'] .jrk-nav-flyout,
+:root[data-skin='industry'] .jrk-spotlight,
+:root[data-skin='industry'] .jrk-toast,
+:root[data-skin='industry'] .jrk-chart-tooltip {
   border-radius: 0;
 }
 
@@ -191,28 +272,28 @@
    signature in this skin and controls are simply square.
    THIS LIST IS THE SKIN'S CONTRACT: radius-full is not overridden in the token
    file, so a control that opts into it and is not named here stays a pill. */
-:root[data-skin='endfield'] .jrk-btn,
-:root[data-skin='endfield'] .jrk-btn-group,
-:root[data-skin='endfield'] .jrk-input,
-:root[data-skin='endfield'] .jrk-input--search,
-:root[data-skin='endfield'] .jrk-input-group,
-:root[data-skin='endfield'] .jrk-select,
-:root[data-skin='endfield'] .jrk-textarea,
-:root[data-skin='endfield'] .jrk-tab,
-:root[data-skin='endfield'] .jrk-tabs--pills .jrk-tab,
-:root[data-skin='endfield'] .jrk-nav-item,
-:root[data-skin='endfield'] .jrk-sidebar__action,
-:root[data-skin='endfield'] .jrk-section-nav__link,
-:root[data-skin='endfield'] .jrk-menu__item,
-:root[data-skin='endfield'] .jrk-list__row,
-:root[data-skin='endfield'] .jrk-badge,
-:root[data-skin='endfield'] .jrk-tag,
-:root[data-skin='endfield'] .jrk-expander__tag,
-:root[data-skin='endfield'] .jrk-chart__toggle,
-:root[data-skin='endfield'] .jrk-daterange__option,
-:root[data-skin='endfield'] .jrk-org__toggle,
-:root[data-skin='endfield'] .jrk-table__sort,
-:root[data-skin='endfield'] .jrk-pagination {
+:root[data-skin='industry'] .jrk-btn,
+:root[data-skin='industry'] .jrk-btn-group,
+:root[data-skin='industry'] .jrk-input,
+:root[data-skin='industry'] .jrk-input--search,
+:root[data-skin='industry'] .jrk-input-group,
+:root[data-skin='industry'] .jrk-select,
+:root[data-skin='industry'] .jrk-textarea,
+:root[data-skin='industry'] .jrk-tab,
+:root[data-skin='industry'] .jrk-tabs--pills .jrk-tab,
+:root[data-skin='industry'] .jrk-nav-item,
+:root[data-skin='industry'] .jrk-sidebar__action,
+:root[data-skin='industry'] .jrk-section-nav__link,
+:root[data-skin='industry'] .jrk-menu__item,
+:root[data-skin='industry'] .jrk-list__row,
+:root[data-skin='industry'] .jrk-badge,
+:root[data-skin='industry'] .jrk-tag,
+:root[data-skin='industry'] .jrk-expander__tag,
+:root[data-skin='industry'] .jrk-chart__toggle,
+:root[data-skin='industry'] .jrk-daterange__option,
+:root[data-skin='industry'] .jrk-org__toggle,
+:root[data-skin='industry'] .jrk-table__sort,
+:root[data-skin='industry'] .jrk-pagination {
   border-radius: 0;
 }
 
@@ -220,7 +301,7 @@
    own charcoal chip: a bare icon button. Everything else that is round here is
    a SHAPE rather than a control — .jrk-dot, .jrk-spinner, a radio, a legend
    dot — and those keep radius-full untouched from the base layer. */
-:root[data-skin='endfield'] .jrk-btn--icon {
+:root[data-skin='industry'] .jrk-btn--icon {
   border-radius: var(--jrk-radius-full);
 }
 
@@ -261,25 +342,12 @@
    text-primary at 4.5:1 or better, both by derivation, so the wedge is safe for
    all six hues in both themes with no layout condition at all.
    validate-skin gates it per variant. */
-:root[data-skin='endfield'] .jrk-topbar {
+:root[data-skin='industry'] .jrk-topbar {
   background-image: linear-gradient(
     calc(90deg + var(--jrk-wedge-angle)),
     transparent 0 94%,
     var(--jrk-accent-wash) 94% 100%
   );
-}
-
-/* ── hazard tape: destructive affordances only ────────────────────────────
-   A 6px bar along the top edge, never a ground. The stripe alternates the
-   accent and near-black, so NO ink survives it: black fails on half of it and
-   white on the other half. The control keeps its own fill and its own label
-   colour and wears the tape as an edge.
-   border-image is what makes this a token reference rather than a hand-drawn
-   gradient — the stripe itself lives in the skin's token file. */
-:root[data-skin='endfield'] .jrk-btn--danger,
-:root[data-skin='endfield'] .jrk-btn--danger-solid {
-  border-top: 6px solid transparent;
-  border-image: var(--jrk-surface-hazard-tape) 6;
 }
 
 /* ── type: uppercase labels, tracked wide; values never ───────────────────
@@ -288,23 +356,23 @@
    DELIBERATELY ABSENT from this list — tracking that wide makes two numbers
    harder to compare, and a stat's value is the one thing on the tile a reader
    is comparing. */
-:root[data-skin='endfield'] .jrk-stat__label,
-:root[data-skin='endfield'] .jrk-table th,
-:root[data-skin='endfield'] .jrk-list__header,
-:root[data-skin='endfield'] .jrk-section-nav__title,
-:root[data-skin='endfield'] .jrk-sheet__band-label,
-:root[data-skin='endfield'] .jrk-field__label,
-:root[data-skin='endfield'] .jrk-menu__label,
-:root[data-skin='endfield'] .jrk-chart__axis-title {
+:root[data-skin='industry'] .jrk-stat__label,
+:root[data-skin='industry'] .jrk-table th,
+:root[data-skin='industry'] .jrk-list__header,
+:root[data-skin='industry'] .jrk-section-nav__title,
+:root[data-skin='industry'] .jrk-sheet__band-label,
+:root[data-skin='industry'] .jrk-field__label,
+:root[data-skin='industry'] .jrk-menu__label,
+:root[data-skin='industry'] .jrk-chart__axis-title {
   text-transform: uppercase;
   letter-spacing: var(--jrk-tracking-caps);
 }
 
 /* Numerals line up in columns everywhere in this library; under a condensed
    face that is worth restating on the elements that hold them. */
-:root[data-skin='endfield'] .jrk-stat__value,
-:root[data-skin='endfield'] .jrk-sheet__cell--num,
-:root[data-skin='endfield'] .jrk-table td {
+:root[data-skin='industry'] .jrk-stat__value,
+:root[data-skin='industry'] .jrk-sheet__cell--num,
+:root[data-skin='industry'] .jrk-table td {
   font-variant-numeric: tabular-nums;
 }
 
@@ -312,11 +380,18 @@
    The grid and the wedge are screen furniture. On paper the grid prints as a
    grey wash over every cell and the wedge as a solid block of ink. */
 @media print {
-  :root[data-skin='endfield'] .jrk-app,
-  :root[data-skin='endfield'] .jrk-auth {
+  /* The stripe goes and the page ramp stays, which is why this restates the
+     layer list rather than saying `none`: a solid band of the light stripe is a
+     block of ink, and it is 1.03:1 off the page's dark end, so on paper it costs
+     a cartridge to print something a reader cannot see. */
+  :root[data-skin='industry'] body {
+    background-image: var(--jrk-surface-canvas);
+  }
+  :root[data-skin='industry'] .jrk-app,
+  :root[data-skin='industry'] .jrk-auth {
     background-image: none;
   }
-  :root[data-skin='endfield'] .jrk-topbar {
+  :root[data-skin='industry'] .jrk-topbar {
     background-image: none;
   }
 }

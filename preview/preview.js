@@ -12,7 +12,7 @@ const PAGES = [
   ['dashboard.html', 'Dashboard'],
   ['sections.html', 'Section index'],
   ['modules.html', 'Module picker'],
-  ['skin-endfield.html', 'Endfield skin'],
+  ['skin-industry.html', 'Industry skin'],
   ['skin-midgard.html', 'Midgard skin'],
 ];
 

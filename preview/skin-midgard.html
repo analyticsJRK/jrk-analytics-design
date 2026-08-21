@@ -45,7 +45,7 @@
   <section class="gal-sec">
     <h2>Plates, the header band, and the lozenge</h2>
     <p class="gal-note">
-      The band is this skin's tile signature the way the chamfer is Endfield's:
+      The band is this skin's tile signature the way the chamfer is Industry's:
       <code>surface-tinted</code>, a line in <code>border-default</code>, and the
       caption centred in the display face. The band's step is pinned from
       <em>below</em> as well as above — it is 1.25:1 off the dark plate, and one
@@ -155,11 +155,11 @@
     <p class="gal-note">
       Every radius token is 0, so plates, overlays, controls and data ends are all
       square — no notch and no chamfer, which is also what keeps this skin
-      visually distinct from Endfield. <code>radius-full</code> is deliberately not
+      visually distinct from Industry. <code>radius-full</code> is deliberately not
       overridden, because it is what keeps a spinner a circle, a radio round and a
       switch a switch, so the squared controls are a named list and that list is
       the skin's contract. <code>.jrk-btn--icon</code> <em>is</em> in it, unlike
-      under Endfield: this look has no chips. The status dot becomes a diamond by
+      under Industry: this look has no chips. The status dot becomes a diamond by
       rotation rather than by clip-path, so <code>--pulse</code> keeps its ring.
     </p>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
@@ -188,7 +188,7 @@
     <h2>A table, and the labels that are engraved</h2>
     <p class="gal-note">
       Column headers are uppercase at <code>tracking-caps</code>, 0.18em under
-      this skin — wider than Endfield's 0.14em, because the reference sets every
+      this skin — wider than Industry's 0.14em, because the reference sets every
       caption as an inscription. Values are deliberately left alone, in the base
       sans with tabular figures: tracking that wide makes two numbers harder to
       compare, and the display face has no tabular figures at all.
@@ -271,7 +271,7 @@
       while dark takes the anchor for every role. Read the base library's
       one-anchor-everywhere as a property of <em>its</em> accent, not of the token
       layout. And the focus ring is two-tone in both halves for the same reason
-      Endfield's is: a single-tone gold ring on the vellum plate is 1.94:1, which
+      Industry's is: a single-tone gold ring on the vellum plate is 1.94:1, which
       is the one indicator in the system, invisible.
     </p>
     <div class="jrk-alert jrk-alert--critical">
@@ -300,7 +300,7 @@
       <div class="jrk-alert__body">
         <span class="jrk-alert__title">No hazard variants, deliberately</span>
         <span class="jrk-alert__text">
-          Endfield's accent is a hazard <em>signal</em>, and a signal can be
+          Industry's accent is a hazard <em>signal</em>, and a signal can be
           re-hued without touching what the design means. This accent is a
           <em>material</em> — aged gold on slate, with a vellum half derived from
           it — so a purple or green &ldquo;gold&rdquo; is a different skin rather
@@ -331,7 +331,12 @@ function applySkin(v) {
   v ? url.searchParams.set('skin', v) : url.searchParams.delete('skin');
   history.replaceState(null, '', url);
   document.querySelectorAll('[data-skin-btn]').forEach((b) => {
-    b.setAttribute('aria-pressed', String(b.dataset.skinBtn === v));
+    /* .jrk-tabs--pills styles the chosen tab off aria-selected (shell.css); the
+       pressed state is what a screen reader reads back off a toggle. Both, or
+       the picker is either invisible or silent. */
+    const on = b.dataset.skinBtn === v;
+    b.setAttribute('aria-selected', String(on));
+    b.setAttribute('aria-pressed', String(on));
   });
 }
 document.querySelectorAll('[data-skin-btn]').forEach((b) => {
