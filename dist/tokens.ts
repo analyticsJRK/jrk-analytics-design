@@ -5,7 +5,7 @@ export type Mode = 'light' | 'dark';
 /** Categorical series colors. Assign slots in order, never cycle.
  *  A 9th series folds into "Other" or facets — it is never a generated hue. */
 export const chartSeries = {
-  light: ['#007aff', '#fa9418', '#00c7be', '#d5ab19', '#af52de', '#ff2d55', '#30b0c7', '#b27e34'],
+  light: ['#007aff', '#fa9418', '#15a7a2', '#d5ab19', '#af52de', '#ff2d55', '#30b0c7', '#b27e34'],
   dark: ['#0a84ff', '#cb7d00', '#15a7a2', '#ac8f00', '#bf5af2', '#ff375f', '#0aa3ba', '#ba863d'],
 } as const;
 
@@ -29,7 +29,7 @@ export const SERIES_CAP_ALL_PAIRS = 3;
 
 /** Sub-3:1 on the light surface — using these as fills obligates visible direct
  *  labels or a table view. Not dismissable. */
-export const reliefRequiredLight: readonly string[] = ['#fa9418', '#00c7be', '#d5ab19', '#30b0c7'];
+export const reliefRequiredLight: readonly string[] = ['#fa9418', '#15a7a2', '#d5ab19', '#30b0c7'];
 
 export const chartSequential = ['#eeeefc', '#e2e2fa', '#dcdcfa', '#c3c2f5', '#b4b3f2', '#a5a4ef', '#9190ec', '#7d7be8', '#6e6ce4', '#5e5ce6', '#5856d6', '#4a49b3', '#3f3e96'] as const;
 

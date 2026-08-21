@@ -11,6 +11,9 @@ const PAGES = [
   ['auth.html', 'Sign in'],
   ['dashboard.html', 'Dashboard'],
   ['sections.html', 'Section index'],
+  ['modules.html', 'Module picker'],
+  ['skin-endfield.html', 'Endfield skin'],
+  ['skin-midgard.html', 'Midgard skin'],
 ];
 
 const STORAGE_KEY = 'jrk-preview-theme';

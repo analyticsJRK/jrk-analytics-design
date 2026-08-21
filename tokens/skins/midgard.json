@@ -1,0 +1,345 @@
+{
+  "$meta": {
+    "name": "Midgard",
+    "version": "0.1.0",
+    "description": "A NORSE CONSOLE-HUD SKIN, taken from a console action-RPG's inventory screens: cold blue-slate plates over a near-black page, square corners with a captioned header band, engraved bevels instead of drop shadows, an aged-gold accent, and diamond pips. Its light half is vellum rather than a flip. Generated into dist/jrk-skin-midgard.css by scripts/build-tokens.mjs. Never hand-edit dist/.",
+    "$axisNote": "THIS IS NOT A THIRD THEME. Like every skin it carries its own light and dark halves, so it is orthogonal to the light/dark axis and is stamped separately: `data-skin=\"midgard\"` crossed with `data-theme=\"light\"|\"dark\"` (or the OS setting). Four blocks to check, not one. `data-theme=\"midgard\"` matches nothing and cannot be made to.",
+    "$scopeNote": "COLOUR, SHADOW, TRACKING AND RADIUS ONLY. The header band, the centred display caps, the diamond pips, the gold selection ring and the lozenge divider live in css/skins/midgard.css, which holds no colour at all.",
+    "$referenceNote": "The reference is a DARK screen, so the dark half is the faithful one and the light half is a design decision rather than a translation: warm vellum under the same gold, with every gold role re-stepped for a pale ground. That asymmetry is the honest way to skin a dark-native look — the alternative, a light half that is the dark one inverted, produces a cold grey page under a yellow that cannot be read on it.",
+    "$measuredNote": "Every ratio in a $note below was computed against the plate — #faf7ef light, #1a2028 dark — and every ink that lands on the page was checked at ALL THREE stops of the gradient, the dark end being the binding one in light. scripts/validate-skin.mjs re-derives them on each `npm test` and does not read these strings.",
+    "$cvdNote": "THE ACCENT AND THE WARM STATUS HALF COLLIDE IN DARK, IT IS NOT FIXABLE BY RE-STEPPING, AND IT IS THE HEADLINE FINDING OF THIS SKIN. accent-solid #d9ae43 against the dark marks measures dE 1.9 to status.warning (protanopia), 3.3 to status.serious and 7.6 to status.critical — all under validate's floor of 10. A search over the alternatives says the collision is intrinsic rather than badly chosen: every gold from #b8891f to #e6c15c stays under 10 against every amber a warning could plausibly be (the best pair, #b8891f against #ffb35c at 12.9, costs the metal), because an amber accent and an amber warning separate only by lightness and these two sit within 0.03 of each other. The light half is clear at 22.7 / 33.5 / 22.3, because the light status marks are deep browns and reds under a bright gold. So under this skin in dark the base library's `colour is never the only signal` stops being belt-and-braces and becomes load-bearing: a status badge carries its icon AND its label, a delta states direction in text, and a gold --cta does not share a tile with a warning chip whose only mark is its colour. Nothing gates this — validate:skin runs its CVD check on hazard VARIANTS and this skin declares none — so it is written here and in CLAUDE.md instead.",
+    "$chartNote": "The skin overrides NO chart slot and the inherited palette is safe on both plates: the light plate #faf7ef is only marginally darker than the base card, and the dark plate #1a2028 is darker than the base #232326, which improves every dark mark. What it does inherit is a new instance of the library's accent-collides-with-a-slot debt, and it lands somewhere better: the gold is dE 1.3 from slot 4 (#d5ab19) and 3.7 from slot 2 in light, so the accent IS slot 4. In the base library the accent collides with slot 1, which is the default single-series colour for every sparkline, cell bar and bar list; here slot 1 is untouched blue at dE 54, so the ordinary one-series chart is safe under this skin and it is a multi-series chart reaching slot 2 or 4 that needs a label between the mark and a gold control. Same standing rule as the base: never put a chart on an accent wash.",
+    "$noVariantsNote": "NO HAZARD VARIANTS, deliberately. Endfield's accent is a hazard signal, and a signal can be re-hued without touching what the design means. This accent is a MATERIAL — aged gold on slate, with a vellum half derived from it — and a purple or green 'gold' is a different skin rather than a variant of this one. If a hue axis is ever wanted here, the thing to vary is the METAL (steel, bronze), and every gold role in the file would have to be re-derived because the light half's roles are all stepped away from the fill rather than equal to it."
+  },
+  "stamp": "midgard",
+  "$varsNote": "Keyed by the CSS variable name WITHOUT the --jrk- prefix. The build ASSERTS every name here exists in the base layer, so a typo fails `npm run build` rather than emitting a colour nothing reads; skin-only names go in `skinOnly`, which is the only exemption.",
+  "vars": {
+    "surface-canvas": {
+      "light": "linear-gradient(180deg, #efe9dc 0%, #e8e1d1 55%, #ded6c4 100%)",
+      "dark": "linear-gradient(180deg, #0b0f14 0%, #0f151b 55%, #070a0d 100%)",
+      "$note": "A GRADIENT, legal only because every consumer sets it with the `background` shorthand (base.css, auth.css, shell.css) — a `background-color` drops it silently. It also means no single-hex gate can measure 'the page', so every ink landing here is held to the ramp's WORST stop. Vertical rather than Endfield's 168deg.",
+      "$monotonicNote": "THE DARK RAMP IS NOT MONOTONIC and that matters more than it looks. #0b0f14 -> #0f151b -> #070a0d is lit across the middle band, the way the reference screen is, so the binding stop for every dark ink is the MIDDLE one (#0f151b) and not an end. The convexity argument CLAUDE.md records for the four positional tones — 'the endpoints bound the interior' — is FALSE here, and checking only the ends would report a page that is 1.12:1 off the plate as 1.27:1. validate-skin walks every stop, which is why this is safe to ship; anything measured by hand against this token has to walk them too. The light ramp IS monotonic and bottoms out at #ded6c4.",
+      "$lightNote": "That #ded6c4 stop is what set text-muted and accent-text. Deepening it pushes both under 4.5:1 across the bottom third of the screen — the exact failure Endfield's text-muted hit twice — so if this ramp is re-stepped, re-step those two with it."
+    },
+    "surface-default": {
+      "light": "#faf7ef",
+      "dark": "#1a2028",
+      "$note": "The plate, and the surface every ratio in this file is measured against. 1.35:1 off the page's worst stop in light and 1.12:1 in dark, so it does NOT bound itself in either half — border-subtle and the bevel inside shadow-card are both load-bearing here, and neither may be dropped on the grounds that a tile looks bounded enough."
+    },
+    "surface-tinted": {
+      "light": "#ede5cf",
+      "dark": "#28313d",
+      "$note": "ALSO THE HEADER BAND, which is what set these values. css/skins/midgard.css fills every panel caption with this token, so it has to be a step a reader can actually see: 1.17:1 light and 1.25:1 dark, where the #f2ece0 / #20272f pair it started from measured 1.10:1 and 1.09:1 and read as a smudge rather than a band. It may not be pointed at surface-default for tidiness. Note the direction differs — the band is DARKER than the plate on vellum and LIGHTER than it on slate — which is fine, because a band reads as a band either way.",
+      "$pinnedNote": "IT CANNOT GO DEEPER IN DARK. A band carries a caption, captions in this skin are often muted, and text-muted is 4.68:1 on #28313d against 4.42:1 on the next step (#2b3542) — so one more step of contrast for the band puts the label it exists to hold under the floor. Light has room (6.06:1) and is held level with dark on purpose, because the band is the same object in both halves."
+    },
+    "surface-subtle": {
+      "light": "#ebe4d5",
+      "dark": "#131922",
+      "$note": "The recess. text-muted has to clear it, which is the check that pins this value: enough deepening puts a table header's own label under the floor.",
+      "$adjacencyNote": "IN LIGHT THIS IS WITHIN 1.01:1 OF surface-tinted, i.e. the recess and the header band are the same colour on vellum, and that is accepted rather than overlooked. They are never stacked on each other — the equality this library gates is a fill against the plane it SITS on — and the case where they meet is a banded card header above a flush table's thead, where the base layer already draws border-default between them and already treats two adjacent header fills as one object. In dark they diverge properly (a #131922 recess under a #28313d lift). If the band is ever re-stepped, this is the value to check it against."
+    },
+    "surface-raised": {
+      "light": "#ffffff",
+      "dark": "#252e38",
+      "$note": "Popovers. Pure white on vellum is the one place this palette uses it, so a menu reads as lifted off the plate rather than equal to it."
+    },
+    "surface-track": {
+      "light": "#ebe4d5",
+      "dark": "#131922"
+    },
+    "surface-inverse": {
+      "light": "#1b1811",
+      "dark": "#e9e4d7",
+      "$note": "Warm near-black and warm bone. The inverse plane here is the same ink family as the masthead, not a neutral grey."
+    },
+    "surface-banner": {
+      "light": "#1b1811",
+      "dark": "#0b0f14",
+      "$note": "FLAT, not a ramp: the base masthead's three-stop gradient carries a middle stop that fails and is kept legible by layout, and this skin declines that bargain the way Endfield does. Warm in light, cold in dark — the light half's chrome stays dark, which is what keeps the two halves recognisably one skin."
+    },
+    "surface-banner-deep": {
+      "light": "#100e09",
+      "dark": "#070a0d"
+    },
+    "surface-hover": {
+      "light": "#f2ece0",
+      "dark": "#20272f"
+    },
+    "surface-raised-hover": {
+      "light": "#f5f1e7",
+      "dark": "#2f3945",
+      "$note": "Deliberately NOT equal to surface-raised in either half — that equality is on this library's record as the bug that left menus with no hover at all."
+    },
+    "surface-card-hover": {
+      "light": "#f2ece0",
+      "dark": "#232b35",
+      "$note": "A real step in both halves, and in DARK it is most of the hover: a black drop shadow on a #0b0f14 page renders nothing, so shadow-card-raise contributes only its inset bevel there. In light the shadow does the lifting and this step is the quieter half. Same split the base library makes, with the bevel standing in for the fill."
+    },
+    "surface-active": {
+      "light": "#e5dcc9",
+      "dark": "#2a333e"
+    },
+    "surface-disabled": {
+      "light": "#ebe4d5",
+      "dark": "#131922",
+      "$note": "Checked against the plate it sits on — the equality this library has shipped twice."
+    },
+    "text-primary": {
+      "light": "#1c1a15",
+      "dark": "#e8e6df",
+      "$note": "WARM off-white in dark rather than #ffffff, and warm near-black rather than #000000 in light. The reference screen's ink is bone, not white."
+    },
+    "text-secondary": {
+      "light": "#4a4337",
+      "dark": "#b0b6bd"
+    },
+    "text-muted": {
+      "light": "#5a5344",
+      "dark": "#949ba3",
+      "$note": "The PAGE is the binding surface in light and that is what set #5a5344: it clears at the page's dark end, where #655c4b — a step lighter, and the value a plate-only derivation returns — lands within 0.01 of the floor and #6b6250 fails outright. Re-step against the page's worst stop, never the plate."
+    },
+    "text-disabled": {
+      "light": "#918876",
+      "dark": "#646c74",
+      "$note": "Under the floor and exempt from it (WCAG 1.4.3 excludes inactive controls). The one ink here allowed to fail."
+    },
+    "text-inverse": {
+      "light": "#f2ece0",
+      "dark": "#1b1811",
+      "$note": "Ink for surface-inverse, so it runs OPPOSITE to text-primary. Not interchangeable with accent-on-solid, which is #1b1811 in BOTH halves because the gold fill is shared."
+    },
+    "text-link": {
+      "light": "#6b5410",
+      "dark": "#e6bd57",
+      "$note": "A DEEP BRONZE in light, and it looks nothing like the brand gold on purpose — see accent-text. Dark takes the bright step."
+    },
+    "text-on-banner": {
+      "light": "#f0ece0",
+      "dark": "#e8e6df"
+    },
+    "text-on-banner-deep": {
+      "light": "#f0ece0",
+      "dark": "#e8e6df"
+    },
+    "text-on-banner-muted": {
+      "light": "#b3aa98",
+      "dark": "#a7aeb6"
+    },
+    "border-subtle": {
+      "light": "#e0d8c7",
+      "dark": "#2a323b",
+      "$note": "The plate's edge. Load-bearing in both halves — the plate is barely a step off the page, so this hairline and the bevel are the enclosure. It may not become `border: 0`, which would also kill border-style and make a later border-color paint nothing."
+    },
+    "border-default": {
+      "light": "#c7bda8",
+      "dark": "#3b454f",
+      "$note": "Dividers, and the line under a header band."
+    },
+    "border-strong": {
+      "light": "#6e6553",
+      "dark": "#8b949d",
+      "$note": "A boundary that means something, so it owes 3:1 and is gated."
+    },
+    "border-accent": {
+      "light": "#9a7b14",
+      "dark": "#d9ae43",
+      "$note": "THE LIGHT VALUE IS NOT THE BRAND GOLD and cannot be: #d9ae43 is 1.94:1 on the vellum plate, so it cannot bound itself there. This token is what the skin's gold selection ring is drawn in, which makes that ring a real 3:1 channel in both halves — the one-line fix CLAUDE.md names for the segmented thumb, taken."
+    },
+    "accent-solid": {
+      "light": "#d9ae43",
+      "dark": "#d9ae43",
+      "$note": "AGED GOLD, one value across both halves. About 1.94:1 on the vellum plate and 8:1 on the slate one — so in light the brand fill does not bound itself and needs an edge or dark ink inside it, exactly the position Endfield's yellow is in. Two skins, same finding: that is a property of warm high-chroma accents rather than of yellow."
+    },
+    "accent-solid-hover": {
+      "light": "#c9a02f",
+      "dark": "#e6bd57",
+      "$note": "The one role that moves in OPPOSITE directions per half: hover darkens the gold on vellum and brightens it on slate, because a hover has to travel away from the ground it sits on."
+    },
+    "accent-solid-active": {
+      "light": "#b58e22",
+      "dark": "#c29a30"
+    },
+    "accent-on-solid": {
+      "light": "#1b1811",
+      "dark": "#1b1811",
+      "$note": "Warm near-black in both halves. White measures about 2.1:1 on this gold and is not available at any step of the hue — the fill takes dark ink or it takes none. Re-measure if the fill ever moves, and do not borrow this token as a generic label-on-a-filled-control."
+    },
+    "accent-text": {
+      "light": "#6b5410",
+      "dark": "#e6bd57",
+      "$note": "THE FOUR-ROLES-ONE-ANCHOR ARRANGEMENT IS UNAVAILABLE IN LIGHT, for the second time in two skins. The brand gold clears 4.5:1 in none of its light roles, so accent-text and text-link are a deep bronze and border-accent is a mid gold, while DARK takes the anchor for every role. Read the base library's one-anchor-everywhere as a property of ITS accent, not of the token layout."
+    },
+    "accent-wash": {
+      "light": "#f2e2ae",
+      "dark": "#463713",
+      "$note": "Pale gold on vellum (1.21:1 off the plate), deep gold-brown on slate (1.42:1). THE TWO HALVES DISAGREE ABOUT WHICH INKS IT CARRIES, and only one of them is checked: text-primary clears on both (13.46:1 / 9.26:1) and so does text-secondary, but text-muted is 5.90:1 in light and 4.12:1 in DARK — under the floor. So a muted label may sit on this wash on vellum and must step up to secondary on slate. Deepening the dark wash to fix that costs the fill its step off the plate (#3f3111 buys muted 4.51:1 and drops the wash to 1.29:1), which is the wrong trade: the fill's job is to be seen. Same shape as the base library's finding that text.muted fails on all eight chart tints — and, as there, nothing gates it."
+    },
+    "accent-wash-hover": {
+      "light": "#eddb99",
+      "dark": "#544319"
+    },
+    "accent-wash-active": {
+      "light": "#e8d386",
+      "dark": "#635020"
+    },
+    "accent-wash-border": {
+      "light": "#dcc476",
+      "dark": "#7a6323",
+      "$note": "Kept well UNDER border-accent, because border-accent is what says SELECTED under this skin. If the two converge, a wash-filled button and a chosen segment look alike."
+    },
+    "accent-wash-text": {
+      "light": "#1c1a15",
+      "dark": "#e8e6df"
+    },
+    "status-good-mark": {
+      "light": "#0d7a4f",
+      "dark": "#33d68f"
+    },
+    "status-good-text": {
+      "light": "#0a6440",
+      "dark": "#33d68f"
+    },
+    "status-good-wash": {
+      "light": "#dfeadb",
+      "dark": "#0d2c1e",
+      "$note": "Warmed toward the vellum in light — a cool mint wash on a parchment plate reads as a different system."
+    },
+    "status-warning-mark": {
+      "light": "#a8560a",
+      "dark": "#ff9d3d",
+      "$note": "THE DARK VALUE IS dE 1.9 FROM accent-solid under protanopia, i.e. the same colour. See $cvdNote: it is intrinsic to an amber accent beside an amber warning, so under this skin a warning carries its icon and its label and never states itself in colour alone."
+    },
+    "status-warning-text": {
+      "light": "#8a4708",
+      "dark": "#ff9d3d"
+    },
+    "status-warning-wash": {
+      "light": "#f6e6d0",
+      "dark": "#38290a"
+    },
+    "status-serious-mark": {
+      "light": "#8f3a0c",
+      "dark": "#ff8a5c"
+    },
+    "status-serious-text": {
+      "light": "#8f3a0c",
+      "dark": "#ff8a5c"
+    },
+    "status-serious-wash": {
+      "light": "#f3e3d6",
+      "dark": "#37220b"
+    },
+    "status-critical-mark": {
+      "light": "#c8271f",
+      "dark": "#ff5a4d"
+    },
+    "status-critical-text": {
+      "light": "#b0231c",
+      "dark": "#ff5a4d"
+    },
+    "status-critical-wash": {
+      "light": "#fae2de",
+      "dark": "#3a1410"
+    },
+    "status-critical-solid": {
+      "light": "#c8271f",
+      "dark": "#c8271f"
+    },
+    "status-critical-on-solid": {
+      "light": "#ffffff",
+      "dark": "#ffffff",
+      "$note": "White, and NOT accent-on-solid: this skin's gold takes dark ink and its red takes white, so borrowing the accent's ink direction for a danger button would flip it every time the accent moved. That is the base library's recorded mistake with .jrk-btn--danger-solid."
+    },
+    "status-neutral-mark": {
+      "light": "#5a5344",
+      "dark": "#949ba3"
+    },
+    "status-neutral-text": {
+      "light": "#4f4739",
+      "dark": "#b0b6bd"
+    },
+    "status-neutral-wash": {
+      "light": "#ebe4d5",
+      "dark": "#20272f"
+    },
+    "focus-ring": {
+      "light": "#1b1811",
+      "dark": "#d9ae43",
+      "$note": "NEAR-BLACK IN LIGHT, and this is the second skin to reach that conclusion for the same reason: the brand gold is 1.94:1 on the vellum plate, so a gold ring is the library's one focus indicator and it is invisible. Dark takes the gold, where it is both visible and the reference look's own glow. The ring is two-tone in both halves — see shadow-focus."
+    },
+    "focus-offset": {
+      "light": "#faf7ef",
+      "dark": "#1a2028",
+      "$note": "Tracks surface-default, and validate:skin fails if it drifts: an offset band that drifts paints the WRONG colour rather than nothing, which is the quiet failure."
+    },
+    "chart-surface": {
+      "light": "#faf7ef",
+      "dark": "#1a2028",
+      "$note": "Tracks surface-default and is gated, because it is stroked as the ring around a dot: left at the base card it would paint a white ring on a vellum plate, the defect this library already recorded when the token sat at a stale #1c1c1e."
+    },
+    "shadow-none": {
+      "light": "none",
+      "dark": "none"
+    },
+    "shadow-sm": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 1px 2px rgba(28, 26, 21, 0.1)",
+      "dark": "inset 0 1px 0 rgba(232, 230, 223, 0.06)",
+      "$note": "EVERY ELEVATION TOKEN IN THIS SKIN CARRIES AN INSET TOP BEVEL, and that is the skin's answer to a problem the base library solves with a fill step: the page is #0b0f14, so a black drop shadow renders NOTHING in dark. A 1px inset highlight renders on a plate at any depth. So light gets a bevel plus a real drop shadow and dark gets the bevel alone — one mechanism, per-theme values, which is the shape the conflict register asks for. Hand-recorded, because nothing in the toolchain measures a colour inside a shadow string: the dark bevel is roughly 1.06:1 against the plate at 0.06 alpha and 1.12:1 at 0.12, and above about 0.2 it stops reading as machining and starts reading as a light leak."
+    },
+    "shadow-card": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.65), 0 1px 3px rgba(28, 26, 21, 0.1)",
+      "dark": "inset 0 1px 0 rgba(232, 230, 223, 0.07), 0 2px 6px rgba(0, 0, 0, 0.5)",
+      "$note": "The plate at rest. NOT `none` in dark, unlike the base library and unlike Endfield, and it must not be made `none`: css/skins/midgard.css composes `var(--jrk-shadow-md)` into the selection ring, and a shadow LIST containing `none` is invalid CSS that drops the whole declaration. The drop half is near-invisible on the dark page by construction; the bevel is what carries the plate there."
+    },
+    "shadow-card-raise": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 6px 18px rgba(28, 26, 21, 0.16)",
+      "dark": "inset 0 1px 0 rgba(232, 230, 223, 0.12), 0 8px 20px rgba(0, 0, 0, 0.6)",
+      "$note": "THE GAP between this and shadow-card is what makes a card answer the pointer, and in dark the whole gap is the bevel stepping 0.07 -> 0.12 plus surface-card-hover. Point rest and hover at one token, or grow one without the other, and an interactive tile goes dead in dark."
+    },
+    "shadow-md": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 2px 6px rgba(28, 26, 21, 0.14)",
+      "dark": "inset 0 1px 0 rgba(232, 230, 223, 0.1), 0 2px 8px rgba(0, 0, 0, 0.5)",
+      "$note": "The raised-control rung: since 2026-08-20 a white button's only boundary in light IS this token, and the segmented thumb's lift is this token. Composed into the skin's selection ring, so it may never be `none` either."
+    },
+    "shadow-lg": {
+      "light": "0 12px 32px rgba(28, 26, 21, 0.18)",
+      "dark": "0 12px 32px rgba(0, 0, 0, 0.6)",
+      "$note": "Popovers, which float and so take NO bevel: a bevel says machined-into-the-plate, and a menu is not in the plate."
+    },
+    "shadow-xl": {
+      "light": "0 20px 52px rgba(28, 26, 21, 0.22)",
+      "dark": "0 20px 52px rgba(0, 0, 0, 0.66)"
+    },
+    "shadow-focus": {
+      "light": "0 0 0 2px #1b1811, 0 0 0 4px #d9ae43",
+      "dark": "0 0 0 2px #d9ae43, 0 0 0 4px #0b0f14",
+      "$note": "TWO-TONE IN BOTH HALVES, and gated as such. In light the inner band is near-black and the gold is the outer halo — the reference's glow, made visible by the band it sits on rather than by itself. In dark the gold leads and the near-black band separates it from a pale control. A single-tone gold ring in light is 1.94:1: the one indicator in the system, invisible."
+    },
+    "tracking-caps": {
+      "light": "0.18em",
+      "dark": "0.18em",
+      "$note": "Wider than Endfield's 0.14em and far wider than the base. The reference sets every caption in widely-tracked caps, and 0.18em is where a four-to-six character label stops reading as a word and starts reading as an engraving. css/skins/midgard.css keeps it off VALUES for the base library's reason: tracking this wide makes two numbers harder to compare, and a value is the thing on a tile a reader is comparing."
+    },
+    "tracking-wide": {
+      "light": "0.1em",
+      "dark": "0.1em"
+    },
+    "radius-sm": { "light": "0", "dark": "0" },
+    "radius-md": { "light": "0", "dark": "0" },
+    "radius-lg": { "light": "0", "dark": "0" },
+    "radius-xl": { "light": "0", "dark": "0" },
+    "radius-2xl": { "light": "0", "dark": "0" },
+    "radius-data-end": { "light": "0", "dark": "0" },
+    "$radiusNote": "SQUARE everywhere a radius is named — plates, overlays, controls and data ends alike. This skin has no notch and no chamfer: it is machined plate, so a corner is simply a corner, which also keeps it visually distinct from Endfield's 45deg cut. radius-full is deliberately NOT overridden, because it is what keeps a spinner a circle, a radio round and a switch a switch; css/skins/midgard.css squares the named controls that would otherwise stay pills and turns the status DOT into a diamond, and that named list is the skin's contract."
+  },
+  "skinOnly": {
+    "$comment": "Names with no base counterpart, exempt from the build's exists-in-base assertion. Every one is referenced from css/skins/midgard.css — validate:skin fails on one that is not, which is the only thing standing between a value here and a token that ships and does nothing.",
+    "font-display": {
+      "light": "Cinzel, 'Trajan Pro', 'Times New Roman', Georgia, serif",
+      "dark": "Cinzel, 'Trajan Pro', 'Times New Roman', Georgia, serif",
+      "$note": "TITLES ONLY — never body copy, never a small label. Cinzel is the closest OFL-licensed stand-in for the reference's inscriptional caps; the game's own face cannot be shipped and neither can Trajan, which is why the stack names it only as a local fallback. Requested from css/skins/midgard.css rather than css/fonts.css, so a consumer that never stamps data-skin never fetches it. The skin does NOT override font-sans: the reference sets its captions and its values in a plain sans and only its titles in the display face, and Inter is already that sans."
+    },
+    "lozenge-size": "9px",
+    "$lozengeNote": "The small rotated square centred on a divider, which is the reference's own way of interrupting a rule. Drawn as a pseudo-element filled with the plate colour, so the line appears to pass behind it. A magnitude rather than a rule, which is why the size is a token and the placement is CSS."
+  }
+}

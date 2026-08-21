@@ -1,0 +1,322 @@
+/* Endfield skin — GEOMETRY AND TYPE ONLY.
+ *
+ * The colour half of this skin is tokens/skins/endfield.json, generated into
+ * dist/jrk-skin-endfield.css. This file holds NOT ONE colour value: every fill
+ * and edge below is a var() reference. That split is the reason both files can
+ * exist at all — tokens.json (and a skin file beside it) is the only source of
+ * truth for design values, so a hex here would be unreachable to the theme
+ * toggle AND would fail check:css; geometry is component behaviour, so it
+ * belongs in CSS and cannot live in the token layer.
+ *
+ * OPT-IN, in this order, and the skin CSS goes LAST:
+ *
+ *   @import "@jrk/design/tokens.css";
+ *   @import "@jrk/design/css";                        the component layer
+ *   @import "@jrk/design/dist/jrk-skin-endfield.css"; the skin's colours
+ *   @import "@jrk/design/css/skins/endfield.css";     this file
+ *
+ * Then stamp the root: <html data-skin="endfield">. THE SKIN IS ORTHOGONAL TO
+ * THE THEME — it has its own light and dark halves — so data-theme still means
+ * what it always meant and data-theme="endfield" matches nothing anywhere.
+ *
+ * Every selector is prefixed :root[data-skin='endfield'], which is (0,2,0)
+ * before the component class is counted. That is deliberate: it beats a base
+ * modifier like .jrk-btn--cta (0,2,0) on specificity rather than on order, so
+ * this file keeps working if a consumer's bundler reorders the imports. Do not
+ * "simplify" the prefix to a bare attribute selector.
+ */
+
+/* The condensed face, requested HERE rather than in css/fonts.css so a consumer
+ * that never stamps data-skin never pays for it. Same host as the base Inter
+ * request, so an app whose CSP already allows fonts.googleapis.com needs no
+ * change. The skin's font-sans token names Inter as the fallback, so if this
+ * request is blocked the type degrades to the library's own face rather than to
+ * a system serif. Must stay at the top: @import after a rule is dropped. */
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* ── the page: a receding dot ground under a wave ─────────────────────────
+   THE GROUND BELONGS TO THE DOCUMENT, so the textures go on `body` and the app
+   shell is made transparent to let them through. .jrk-app would otherwise paint
+   an opaque canvas straight over them, and putting a copy on every shell class
+   means every one of them paints its own — a page that never builds a .jrk-app
+   (a gallery page, a print view, a bare auth route) still stands on the ground
+   this way.
+
+   TWO FIXED PSEUDO-ELEMENTS, MASKED COMPLEMENTARILY. That is the whole design
+   and each half of it is load-bearing:
+
+     FIXED, because the horizon is a property of the viewport. A ground that
+     scrolls has no horizon — the fade line would travel with the content and
+     read as a band moving up the screen. Fixed also sizes the wave to the
+     viewport rather than to the document, which on a long page is the
+     difference between an arc and one enormous stretched ellipse.
+
+     COMPLEMENTARY, because it is what pays for the contrast. Masked so the dots
+     fade IN toward the bottom and the arcs fade OUT, the two never occupy the
+     same pixel, so each gets the full texture budget instead of splitting one.
+     Overlap them and the alphas ADD, which on the light half puts text.muted
+     under 4.5:1. The figures are on the two tokens; the short version is that
+     the composite in the crossfade is bounded by the LARGER alpha rather than
+     the sum, and only while these two masks stay opposites.
+
+   `black` and `transparent` in the masks are ALPHA, not colour — a mask reads
+   nothing else — which is also why they are keywords and not hexes that
+   validate:skin would reject.
+
+   z-index -1 puts both behind body's content, and `isolation` on body is what
+   makes that deterministic: it gives body its own stacking context, so -1 is
+   clamped to just above body's own background instead of racing the root
+   canvas. Without it the pair can land underneath the page ramp and paint
+   nothing at all. */
+:root[data-skin='endfield'] body {
+  background: var(--jrk-surface-canvas);
+  isolation: isolate;
+  font-variant-numeric: tabular-nums;
+}
+
+:root[data-skin='endfield'] .jrk-app,
+:root[data-skin='endfield'] .jrk-auth {
+  background: transparent;
+}
+
+:root[data-skin='endfield'] body::before,
+:root[data-skin='endfield'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* the wave — the upper band, fading out where the ground begins */
+:root[data-skin='endfield'] body::before {
+  background-image:
+    repeating-radial-gradient(
+      ellipse 130% 78% at 50% 104%,
+      transparent 0 calc(var(--jrk-wave-gap) - 2px),
+      var(--jrk-surface-canvas-wave) calc(var(--jrk-wave-gap) - 2px) var(--jrk-wave-gap)
+    );
+  -webkit-mask-image: linear-gradient(to bottom, black 6%, transparent 58%);
+  mask-image: linear-gradient(to bottom, black 6%, transparent 58%);
+}
+
+/* the ground — the lower band, fading in toward the bottom of the port.
+   The dot RADIUS is the visibility lever here, not the alpha: alpha is capped by
+   the muted-text floor and radius is not, so a dot that needs to read harder
+   gets bigger rather than darker. */
+:root[data-skin='endfield'] body::after {
+  background-image:
+    radial-gradient(circle at center, var(--jrk-surface-canvas-grid) 1.75px, transparent 2.25px);
+  background-size: var(--jrk-grid-cell) var(--jrk-grid-cell);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 34%, black 88%);
+  mask-image: linear-gradient(to bottom, transparent 34%, black 88%);
+}
+
+/* ── the notch: a 45deg corner cut, one corner, top-right ─────────────────
+   CLIP-PATH CLIPS THE BOX-SHADOW. There is no way around that — it is not a
+   Chrome bug and no property order fixes it — so a chamfered tile cannot carry
+   an ambient shadow, and the two card shadows are neutralised on exactly the
+   selectors that take a notch. That is why surface-card-hover is a real 1.14:1
+   / 1.30:1 step in this skin: with the shadow gone, the FILL is the whole
+   hover in both halves, where the base library splits the job (shadow in
+   light, fill in dark, each a deliberate no-op in the other).
+   The enclosure that remains is the hairline plus the fill step, which is why
+   border-subtle is load-bearing in both halves here and may not be dropped on
+   the grounds that a tile "looks bounded enough". */
+:root[data-skin='endfield'] .jrk-card,
+:root[data-skin='endfield'] .jrk-chart-card,
+:root[data-skin='endfield'] .jrk-stat,
+:root[data-skin='endfield'] .jrk-stat-row,
+:root[data-skin='endfield'] .jrk-table-wrap,
+:root[data-skin='endfield'] .jrk-sheet,
+:root[data-skin='endfield'] .jrk-alert,
+:root[data-skin='endfield'] .jrk-auth__panel {
+  clip-path: polygon(
+    0 0,
+    calc(100% - var(--jrk-notch-md)) 0,
+    100% var(--jrk-notch-md),
+    100% 100%,
+    0 100%
+  );
+  --jrk-shadow-card: none;
+  --jrk-shadow-card-raise: none;
+}
+
+/* The cut is scaled to the tile, in both directions: a 10px notch on a 44px
+   stat reads as damage rather than as machining, and the same 10px on a
+   full-width sheet disappears. Done by re-pointing --jrk-notch-md rather than
+   by restating the clip-path, so the polygon above stays the single definition
+   of the shape. */
+:root[data-skin='endfield'] .jrk-stat,
+:root[data-skin='endfield'] .jrk-alert {
+  --jrk-notch-md: var(--jrk-notch-sm);
+}
+:root[data-skin='endfield'] .jrk-sheet,
+:root[data-skin='endfield'] .jrk-table-wrap {
+  --jrk-notch-md: var(--jrk-notch-lg);
+}
+
+/* A NESTED tile takes no notch. Two chamfers inside each other read as a
+   printing misregistration, and the inner tile's edge is already carried by
+   nesting.css's neutral hairline. */
+:root[data-skin='endfield'] .jrk-card .jrk-card,
+:root[data-skin='endfield'] .jrk-card .jrk-stat,
+:root[data-skin='endfield'] .jrk-card .jrk-table-wrap,
+:root[data-skin='endfield'] .jrk-card .jrk-chart-card {
+  clip-path: none;
+}
+
+/* ── overlays: square, but NOT clipped ────────────────────────────────────
+   Anything that floats keeps its shadow, because the shadow is the only thing
+   telling a reader it is above the page rather than in it — so these get the
+   corner squared and no notch. This inverts the base library's split (square
+   tiles, rounded overlays) rather than abandoning it: the distinction is still
+   tile-versus-overlay, and it is still drawn with geometry. */
+:root[data-skin='endfield'] .jrk-modal,
+:root[data-skin='endfield'] .jrk-menu,
+:root[data-skin='endfield'] .jrk-hovercard,
+:root[data-skin='endfield'] .jrk-tooltip,
+:root[data-skin='endfield'] .jrk-nav-flyout,
+:root[data-skin='endfield'] .jrk-spotlight,
+:root[data-skin='endfield'] .jrk-toast,
+:root[data-skin='endfield'] .jrk-chart-tooltip {
+  border-radius: 0;
+}
+
+/* ── controls are squared, and NOT clipped either ─────────────────────────
+   Same reason: since 2026-08-20 no button in the library draws a border, and
+   .jrk-btn--secondary / --danger state "raised" with shadow-md alone. Clipping
+   a chamfer into them would delete the one boundary they have in light, where
+   surface-raised is #ffffff against a #f4f6f6 panel. So the chamfer is a TILE
+   signature in this skin and controls are simply square.
+   THIS LIST IS THE SKIN'S CONTRACT: radius-full is not overridden in the token
+   file, so a control that opts into it and is not named here stays a pill. */
+:root[data-skin='endfield'] .jrk-btn,
+:root[data-skin='endfield'] .jrk-btn-group,
+:root[data-skin='endfield'] .jrk-input,
+:root[data-skin='endfield'] .jrk-input--search,
+:root[data-skin='endfield'] .jrk-input-group,
+:root[data-skin='endfield'] .jrk-select,
+:root[data-skin='endfield'] .jrk-textarea,
+:root[data-skin='endfield'] .jrk-tab,
+:root[data-skin='endfield'] .jrk-tabs--pills .jrk-tab,
+:root[data-skin='endfield'] .jrk-nav-item,
+:root[data-skin='endfield'] .jrk-sidebar__action,
+:root[data-skin='endfield'] .jrk-section-nav__link,
+:root[data-skin='endfield'] .jrk-menu__item,
+:root[data-skin='endfield'] .jrk-list__row,
+:root[data-skin='endfield'] .jrk-badge,
+:root[data-skin='endfield'] .jrk-tag,
+:root[data-skin='endfield'] .jrk-expander__tag,
+:root[data-skin='endfield'] .jrk-chart__toggle,
+:root[data-skin='endfield'] .jrk-daterange__option,
+:root[data-skin='endfield'] .jrk-org__toggle,
+:root[data-skin='endfield'] .jrk-table__sort,
+:root[data-skin='endfield'] .jrk-pagination {
+  border-radius: 0;
+}
+
+/* THE CIRCLE SURVIVES IN EXACTLY ONE CONTROL, and it is the reference look's
+   own charcoal chip: a bare icon button. Everything else that is round here is
+   a SHAPE rather than a control — .jrk-dot, .jrk-spinner, a radio, a legend
+   dot — and those keep radius-full untouched from the base layer. */
+:root[data-skin='endfield'] .jrk-btn--icon {
+  border-radius: var(--jrk-radius-full);
+}
+
+/* ── the wedge: the 12deg diagonal, and the skin's actual mark ─────────────
+   Strip the yellow and this is what still identifies the look, which matters
+   more here than in most palettes: accent-solid is 1.18:1 against the light
+   panel, so the brand colour is the one thing that DISAPPEARS in greyscale,
+   in print and for a monochromat. The geometry is what carries identity when
+   the colour cannot.
+   Anchored to the trailing edge and clipped by the bar, so it never widens the
+   layout; pointer-events: none because it sits over the bar's own content box. */
+/* Drawn as a BACKGROUND LAYER on the bar, not as a rotated ::after, and the
+   three reasons are all things that bit on the way here:
+
+   1. `.jrk-topbar` is `position: sticky; top: 0`. Giving it `position: relative`
+      to contain an absolute pseudo-element un-sticks the bar outright. (It did
+      not need it anyway — sticky is already a positioned ancestor.)
+   2. A rotated pseudo-element overflows its box, so it needs `overflow: hidden`
+      on the bar — which CLIPS every flyout anchored inside it. A menu under an
+      avatar button would have been cut off at the bar's edge.
+   3. A background layer cannot overflow, needs no z-index against the bar's own
+      children, and takes no pointer events.
+
+   The 12deg wedge is therefore 90deg + the angle, with a hard stop: the band is
+   the last slice of the gradient line. The bar's fill stays underneath as the
+   background COLOR, so this composes rather than replacing it.
+
+   THE WEDGE TAKES accent-wash, NOT accent-solid, and the hazard variants are
+   what forced that. The bar is inked with text-primary — near-black in light —
+   and only three of the six hazard hues carry near-black on their vivid stop:
+   black measures 3.92:1 on the blue, 3.88:1 on the red and 2.95:1 on the purple.
+   A vivid wedge is therefore illegible under this bar for half the palette, and
+   the only way to keep one would be a layout guarantee that nothing is ever
+   inked over the last 6% of the bar — which is exactly the bargain the base
+   library's brand ramp makes, and exactly the note in CLAUDE.md that says a
+   change to that bar's LAYOUT is a change to its CONTRAST. Declined here.
+   Every wash carries near-black at 11.6:1 or better and the dark washes carry
+   text-primary at 4.5:1 or better, both by derivation, so the wedge is safe for
+   all six hues in both themes with no layout condition at all.
+   validate-skin gates it per variant. */
+:root[data-skin='endfield'] .jrk-topbar {
+  background-image: linear-gradient(
+    calc(90deg + var(--jrk-wedge-angle)),
+    transparent 0 94%,
+    var(--jrk-accent-wash) 94% 100%
+  );
+}
+
+/* ── hazard tape: destructive affordances only ────────────────────────────
+   A 6px bar along the top edge, never a ground. The stripe alternates the
+   accent and near-black, so NO ink survives it: black fails on half of it and
+   white on the other half. The control keeps its own fill and its own label
+   colour and wears the tape as an edge.
+   border-image is what makes this a token reference rather than a hand-drawn
+   gradient — the stripe itself lives in the skin's token file. */
+:root[data-skin='endfield'] .jrk-btn--danger,
+:root[data-skin='endfield'] .jrk-btn--danger-solid {
+  border-top: 6px solid transparent;
+  border-image: var(--jrk-surface-hazard-tape) 6;
+}
+
+/* ── type: uppercase labels, tracked wide; values never ───────────────────
+   The signature is a small uppercase label at tracking-caps (0.14em under this
+   skin). It is legible only BECAUSE it is uppercase and short. VALUES ARE
+   DELIBERATELY ABSENT from this list — tracking that wide makes two numbers
+   harder to compare, and a stat's value is the one thing on the tile a reader
+   is comparing. */
+:root[data-skin='endfield'] .jrk-stat__label,
+:root[data-skin='endfield'] .jrk-table th,
+:root[data-skin='endfield'] .jrk-list__header,
+:root[data-skin='endfield'] .jrk-section-nav__title,
+:root[data-skin='endfield'] .jrk-sheet__band-label,
+:root[data-skin='endfield'] .jrk-field__label,
+:root[data-skin='endfield'] .jrk-menu__label,
+:root[data-skin='endfield'] .jrk-chart__axis-title {
+  text-transform: uppercase;
+  letter-spacing: var(--jrk-tracking-caps);
+}
+
+/* Numerals line up in columns everywhere in this library; under a condensed
+   face that is worth restating on the elements that hold them. */
+:root[data-skin='endfield'] .jrk-stat__value,
+:root[data-skin='endfield'] .jrk-sheet__cell--num,
+:root[data-skin='endfield'] .jrk-table td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── print ───────────────────────────────────────────────────────────────
+   The grid and the wedge are screen furniture. On paper the grid prints as a
+   grey wash over every cell and the wedge as a solid block of ink. */
+@media print {
+  :root[data-skin='endfield'] .jrk-app,
+  :root[data-skin='endfield'] .jrk-auth {
+    background-image: none;
+  }
+  :root[data-skin='endfield'] .jrk-topbar {
+    background-image: none;
+  }
+}

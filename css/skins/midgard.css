@@ -1,0 +1,290 @@
+/* Midgard skin — GEOMETRY AND TYPE ONLY.
+ *
+ * The colour half of this skin is tokens/skins/midgard.json, generated into
+ * dist/jrk-skin-midgard.css. This file holds NOT ONE colour value: every fill
+ * and edge below is a var() reference. That split is the reason both files can
+ * exist at all — tokens.json (and a skin file beside it) is the only source of
+ * truth for design values, so a hex here would be unreachable to the theme
+ * toggle AND would fail check:css and validate:skin; geometry is component
+ * behaviour, so it belongs in CSS and cannot live in the token layer.
+ *
+ * OPT-IN, in this order, and the skin CSS goes LAST:
+ *
+ *   @import "@jrk/design/tokens.css";
+ *   @import "@jrk/design/css";                       the component layer
+ *   @import "@jrk/design/dist/jrk-skin-midgard.css"; the skin's colours
+ *   @import "@jrk/design/css/skins/midgard.css";     this file
+ *
+ * Then stamp the root: <html data-skin="midgard">. THE SKIN IS ORTHOGONAL TO THE
+ * THEME — it has its own light and dark halves — so data-theme still means what
+ * it always meant and data-theme="midgard" matches nothing anywhere.
+ *
+ * Every selector is prefixed :root[data-skin='midgard'], which is (0,2,0) before
+ * the component class is counted, so it beats a base modifier on SPECIFICITY
+ * rather than on order and keeps working if a consumer's bundler reorders the
+ * imports. Do not "simplify" the prefix to a bare attribute selector.
+ *
+ * WHAT THE SKIN IS: square machined plates, each with a captioned header band in
+ * inscriptional caps; an engraved bevel instead of a drop shadow; gold as the
+ * SELECTION signal rather than as decoration; and the diamond as the shape that
+ * survives with the gold removed. That last part is the same problem Endfield
+ * has and it is worth stating in the same place: accent-solid is 1.94:1 on the
+ * light plate, so the brand colour is what disappears in greyscale and in print,
+ * and the geometry is what has to carry identity when the colour cannot.
+ */
+
+/* The inscriptional face, requested HERE rather than in css/fonts.css so a
+ * consumer that never stamps data-skin never pays for it. Same host as the base
+ * Inter request, so an app whose CSP already allows fonts.googleapis.com needs no
+ * change. The font-display token names Times and Georgia as fallbacks, so a
+ * blocked request degrades to a local serif rather than to the sans and loses the
+ * distinction rather than the layout. Must stay at the top: an @import after a
+ * rule is dropped. Weights: 400 for titles, 600 for the heaviest of them. */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400..700&display=swap');
+
+/* ── square, and the list of controls that would otherwise stay pills ─────
+   The radius tokens are all 0 in the token file, which squares every plate,
+   overlay and data end at once. radius-full is deliberately NOT overridden — it
+   is what keeps a spinner a circle, a radio round and a switch a switch — so
+   anything that opts into it needs squaring by name.
+   THIS LIST IS THE SKIN'S CONTRACT: a control added to the library that takes
+   radius-full stays a pill under this skin until it is added here. */
+:root[data-skin='midgard'] .jrk-btn,
+:root[data-skin='midgard'] .jrk-btn--icon,
+:root[data-skin='midgard'] .jrk-btn-group,
+:root[data-skin='midgard'] .jrk-input,
+:root[data-skin='midgard'] .jrk-input--pill,
+:root[data-skin='midgard'] .jrk-input--search,
+:root[data-skin='midgard'] .jrk-input-group,
+:root[data-skin='midgard'] .jrk-select,
+:root[data-skin='midgard'] .jrk-select--pill,
+:root[data-skin='midgard'] .jrk-textarea,
+:root[data-skin='midgard'] .jrk-tab,
+:root[data-skin='midgard'] .jrk-tabs--pills .jrk-tab,
+:root[data-skin='midgard'] .jrk-nav-item,
+:root[data-skin='midgard'] .jrk-sidebar__action,
+:root[data-skin='midgard'] .jrk-section-nav__link,
+:root[data-skin='midgard'] .jrk-menu__item,
+:root[data-skin='midgard'] .jrk-list__row,
+:root[data-skin='midgard'] .jrk-badge,
+:root[data-skin='midgard'] .jrk-tag,
+:root[data-skin='midgard'] .jrk-expander__tag,
+:root[data-skin='midgard'] .jrk-chart__toggle,
+:root[data-skin='midgard'] .jrk-daterange__option,
+:root[data-skin='midgard'] .jrk-org__toggle,
+:root[data-skin='midgard'] .jrk-table__sort,
+:root[data-skin='midgard'] .jrk-pagination {
+  border-radius: 0;
+}
+
+/* .jrk-btn--icon IS IN THAT LIST, unlike under Endfield, and the difference is
+   the reference rather than an oversight: Endfield's round icon button is its
+   charcoal chip, and this look has no chips at all — every affordance on the
+   reference screen is a rectangle or a diamond. */
+
+/* ── the diamond: the shape that carries the look without the gold ────────
+   The reference marks a level, a rank and a state with a small rotated square,
+   so the status dot becomes one. It is a rotation rather than a clip-path
+   because .jrk-dot--pulse draws its ring with box-shadow — clipping would eat
+   the ring, and rotating carries it round with the dot.
+
+   `:not(circle)` IS LOAD-BEARING. Two different components own this class name:
+   badge.css styles an inline-block span, and chart.css styles an SVG <circle>
+   for a line-series marker. A transform on an SVG circle rotates it about the
+   SVG user-space origin, not about the dot, so an unqualified rule would fling
+   every chart marker off its own data point. Verify with a line chart before
+   touching this selector. */
+:root[data-skin='midgard'] .jrk-dot:not(circle),
+:root[data-skin='midgard'] .jrk-legend__swatch--dot {
+  border-radius: 0;
+  transform: rotate(45deg);
+}
+
+/* ── the header band: a captioned plate ───────────────────────────────────
+   Every panel on the reference screen names itself in a banded caption, and that
+   band is this skin's tile signature the way the chamfer is Endfield's. It is
+   surface-tinted rather than surface-subtle: the band is a LIFT off the plate in
+   dark and a recess in light, which is what surface-tinted already does, and the
+   token file pins both steps (1.17:1 / 1.25:1) against the muted ink a caption
+   carries. */
+:root[data-skin='midgard'] .jrk-card__header,
+:root[data-skin='midgard'] .jrk-chart-card__header,
+:root[data-skin='midgard'] .jrk-modal__header {
+  background: var(--jrk-surface-tinted);
+  border-bottom: 1px solid var(--jrk-border-default);
+  /* The base paddings are asymmetric — they were tuned for a caption that sits
+     in open air above its body, where the space below the title belongs to the
+     body. A filled band has to be even, or the fill reads as having slipped
+     down. The inline padding is left alone. */
+  padding-block: var(--jrk-space-2_5);
+}
+
+/* A BAND NEEDS THE BODY'S TOP PADDING BACK. `.jrk-card__header + .jrk-card__body`
+   zeroes it in the base layer, which is right when the header is open air and
+   wrong the moment it has a fill: the first line of content would sit against
+   the band's own edge. --flush is excluded because its whole contract is that
+   content runs to the card's edges — a table's header row lands directly under
+   the band, which is exactly what the base library wants there. */
+:root[data-skin='midgard'] .jrk-card__header + .jrk-card__body:not(.jrk-card__body--flush) {
+  padding-top: var(--jrk-space-4);
+}
+
+/* CENTRED, and the selector is `> :first-child` rather than the title class on
+   purpose. A header holds either a bare `.jrk-card__title` or — whenever there
+   is a subtitle, which is what React's Card always emits — an anonymous <div>
+   wrapping the pair. Only one of those is a flex item, so a rule on the title
+   class centres the first shape and does nothing to the second. This centres
+   whichever one is there.
+   With an actions cluster present the caption centres in the space LEFT OVER
+   rather than on the plate, which is off by half the cluster's width. That is
+   the reference's own behaviour and it is the cheaper of the two faults: the
+   alternative is absolute positioning, which takes the caption out of the flow
+   and lets a long title run under the buttons. */
+:root[data-skin='midgard'] .jrk-card__header > :first-child,
+:root[data-skin='midgard'] .jrk-chart-card__header > :first-child,
+:root[data-skin='midgard'] .jrk-modal__header > :first-child {
+  flex: 1;
+  text-align: center;
+}
+
+/* ── type: inscriptional caps for TITLES, tracked sans for LABELS ─────────
+   The reference splits the two and so does this. A title is the display face,
+   uppercased, at tracking-wide — 0.18em on a serif at 15px opens the word into
+   separate letters, so the caps tracking is for small sans labels only. */
+:root[data-skin='midgard'] .jrk-card__title,
+:root[data-skin='midgard'] .jrk-chart-card__title,
+:root[data-skin='midgard'] .jrk-modal__title,
+:root[data-skin='midgard'] .jrk-page-header__title,
+:root[data-skin='midgard'] .jrk-section__title,
+:root[data-skin='midgard'] .jrk-alert__title,
+:root[data-skin='midgard'] .jrk-auth__title,
+:root[data-skin='midgard'] .jrk-empty__title,
+:root[data-skin='midgard'] .jrk-spotlight__title,
+:root[data-skin='midgard'] .jrk-nav-flyout__title,
+:root[data-skin='midgard'] .jrk-sheet__title-name,
+:root[data-skin='midgard'] .jrk-toast__title {
+  font-family: var(--jrk-font-display);
+  text-transform: uppercase;
+  letter-spacing: var(--jrk-tracking-wide);
+}
+
+/* The small labels stay in the base sans and take the wide caps tracking. This
+   is the list Endfield draws too, for the same reason: these are the strings
+   short enough that uppercase at 0.18em still reads as a word.
+   VALUES ARE DELIBERATELY ABSENT — tracking this wide makes two numbers harder
+   to compare, and a stat's value is the thing on the tile a reader is comparing.
+   So is body copy, which is not a label and would become unreadable. */
+:root[data-skin='midgard'] .jrk-stat__label,
+:root[data-skin='midgard'] .jrk-table th,
+:root[data-skin='midgard'] .jrk-list__header,
+:root[data-skin='midgard'] .jrk-section-nav__title,
+:root[data-skin='midgard'] .jrk-sheet__band-label,
+:root[data-skin='midgard'] .jrk-field__label,
+:root[data-skin='midgard'] .jrk-menu__label,
+:root[data-skin='midgard'] .jrk-chart__axis-title,
+:root[data-skin='midgard'] .jrk-tab {
+  text-transform: uppercase;
+  letter-spacing: var(--jrk-tracking-caps);
+}
+
+/* Numerals line up in columns everywhere in this library; the reference is a
+   screen of stat blocks, so it is worth restating on the elements that hold
+   them. Not a skin invention — base.css already asks for it on body — but the
+   display face has no tabular figures and this keeps the values out of it. */
+:root[data-skin='midgard'] .jrk-stat__value,
+:root[data-skin='midgard'] .jrk-sheet__cell--num,
+:root[data-skin='midgard'] .jrk-table td {
+  font-family: var(--jrk-font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── selection is a GOLD RING, and it buys back a measured signal ─────────
+   CLAUDE.md records what the base library spends on the quiet look: no channel
+   on the segmented thumb reaches 3:1, in dark the state rides on hue and weight
+   alone, and it says the fix is one line — border.accent on the thumb rule.
+   This skin takes that line, because the reference states selection with a gold
+   edge and because border-accent is gated at 3:1 on the plate in both halves
+   (3.76:1 light, 7.87:1 dark). The wash, the wash ink and the semibold all stay:
+   the ring is an ADDITIONAL channel, not a replacement, and the semibold is
+   still the one that survives greyscale.
+
+   Drawn as an inset shadow rather than a border so it cannot reflow a control by
+   a pixel — the base layer reserves a transparent 1px on some of these and not
+   on others, and an inset ring is indifferent to which.
+   `var(--jrk-shadow-md)` is composed in because two of these rules already carry
+   it as their lift and dropping it would flatten the thumb. THAT IS WHY
+   shadow-md AND shadow-card MAY NEVER BE `none` IN THIS SKIN: a box-shadow list
+   containing `none` is invalid and the whole declaration is discarded, ring and
+   lift together. The token file says so on both. */
+:root[data-skin='midgard'] .jrk-btn-group > .jrk-btn[aria-pressed='true'],
+:root[data-skin='midgard'] .jrk-btn-group > .jrk-btn[aria-selected='true'],
+:root[data-skin='midgard'] .jrk-tabs--pills .jrk-tab[aria-selected='true'],
+:root[data-skin='midgard'] .jrk-tabs--pills .jrk-tab[aria-current='page'],
+:root[data-skin='midgard'] .jrk-nav-item[aria-current='page'],
+:root[data-skin='midgard'] .jrk-sidebar__action[aria-current='page'],
+:root[data-skin='midgard'] .jrk-list__row[aria-selected='true'] {
+  box-shadow: inset 0 0 0 1px var(--jrk-border-accent), var(--jrk-shadow-md);
+}
+
+/* ── the masthead's gold rule ─────────────────────────────────────────────
+   A COLOUR CHANGE ONLY: .jrk-topbar already draws `1px solid border-subtle` and
+   that hairline is the only thing separating the bar from the page in light, so
+   this re-points its colour and never its width. Nothing reflows.
+
+   WHAT THIS DELIBERATELY DOES NOT DO is repaint the bar. The reference's chrome
+   is a dark band, and pointing .jrk-topbar at surface-banner would take one
+   line — but the bar's contents are inked with text-primary by the consumer, and
+   in light that is near-black. Dark bar, dark ink, and every button and search
+   field in the masthead goes illegible. The base library's --brand and --vivid
+   variants exist precisely because a dark bar needs its own ink namespace; a
+   skin has no business conscripting the default bar into one. Same shape as the
+   decision Endfield records for its wedge: do not put a fill under ink you do
+   not own. */
+:root[data-skin='midgard'] .jrk-topbar {
+  border-bottom-color: var(--jrk-border-accent);
+}
+
+/* ── the lozenge: a rule interrupted by a diamond ─────────────────────────
+   The reference divides a panel with a hairline broken at its centre by a small
+   rotated square, and the card footer is the one divider in this library that is
+   always a full-width rule across a plate.
+
+   Absolutely positioned, so `position: relative` goes on the footer. That is a
+   deliberately SMALL blast radius: relative on .jrk-card itself would re-parent
+   any absolutely positioned descendant a component put there, and relative on
+   .jrk-topbar un-sticks the bar outright — a mistake already recorded in
+   Endfield's wedge comment. A footer contains buttons and nothing positioned.
+
+   The fill is surface-default because the footer sits on the plate, which is what
+   makes the line appear to pass BEHIND the diamond rather than into it. Offset by
+   half the lozenge minus the border, so the shape straddles the rule. */
+:root[data-skin='midgard'] .jrk-card__footer {
+  position: relative;
+}
+
+:root[data-skin='midgard'] .jrk-card__footer::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: calc(var(--jrk-lozenge-size) / -2 - 1px);
+  width: var(--jrk-lozenge-size);
+  height: var(--jrk-lozenge-size);
+  /* translate first, in the parent's axes, then rotate about the shape's own
+     centre. Reverse the order and the diamond walks off to the left. */
+  transform: translateX(-50%) rotate(45deg);
+  background: var(--jrk-surface-default);
+  border: 1px solid var(--jrk-border-default);
+  pointer-events: none;
+}
+
+/* ── print ───────────────────────────────────────────────────────────────
+   The band and the lozenge print correctly — they are ink, not screen furniture
+   — and the bevels are shadows, which do not print at all. The one thing that
+   goes wrong on paper is the gold rule under the masthead: it prints as a mid
+   grey identical to a divider, which is worse than no rule, because a reader
+   cannot tell the masthead from a section break. */
+@media print {
+  :root[data-skin='midgard'] .jrk-topbar {
+    border-bottom-color: var(--jrk-border-strong);
+  }
+}

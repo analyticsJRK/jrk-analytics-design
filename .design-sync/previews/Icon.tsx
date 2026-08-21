@@ -68,7 +68,7 @@ export const TheSet = () => (
     {['check', 'chevronRight', 'chevronDown', 'chevronUpDown', 'arrowUp', 'arrowDown',
       'close', 'plus', 'minus', 'search', 'filter', 'ellipsis', 'grid', 'chartBar',
       'clock', 'house', 'calendar', 'doc', 'gear', 'bell', 'download', 'sheet',
-      'trash', 'inbox'].map((n) => (
+      'trash', 'inbox', 'pin'].map((n) => (
         <span key={n} title={n}><Icon name={n} /></span>
       ))}
   </div>

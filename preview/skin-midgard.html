@@ -1,0 +1,348 @@
+<!-- @dsCard group="Skins" name="Midgard skin" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Midgard skin — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<!-- The skin, in the order a consuming app uses: the generated colour layer
+     first, then the geometry stylesheet. Both AFTER css/index.css. -->
+<link rel="stylesheet" href="../dist/jrk-skin-midgard.css">
+<link rel="stylesheet" href="../css/skins/midgard.css">
+<link rel="stylesheet" href="preview.css">
+</head>
+<body>
+
+<div class="gal-page">
+  <header class="gal-page__head">
+    <h1>Midgard skin</h1>
+    <p>
+      A Norse console-HUD skin over the same components: cold blue-slate plates on
+      a near-black page, square corners, a captioned header band in inscriptional
+      caps, an engraved bevel where the base library puts a drop shadow, and gold
+      used as the <em>selection</em> signal rather than as decoration. The toggle
+      below stamps <code>data-skin="midgard"</code> on the document — no markup on
+      this page changes, only the stamp. The theme toggle in the nav still works,
+      because <strong>a skin is orthogonal to the theme</strong>: it carries its
+      own light and dark halves, so there are four combinations to check rather
+      than three.
+    </p>
+    <p>
+      The reference is a dark screen, so <strong>dark is the faithful half and
+      light is a design decision</strong>: warm vellum under the same gold, with
+      every gold role re-stepped for a pale ground. Check both.
+    </p>
+    <div style="margin-top:16px">
+      <div class="gal-note" style="margin-bottom:6px"><strong>Skin</strong></div>
+      <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Skin">
+        <button class="jrk-tab" data-skin-btn="" type="button">Base</button>
+        <button class="jrk-tab" data-skin-btn="midgard" type="button">Midgard</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="gal-sec">
+    <h2>Plates, the header band, and the lozenge</h2>
+    <p class="gal-note">
+      The band is this skin's tile signature the way the chamfer is Endfield's:
+      <code>surface-tinted</code>, a line in <code>border-default</code>, and the
+      caption centred in the display face. The band's step is pinned from
+      <em>below</em> as well as above — it is 1.25:1 off the dark plate, and one
+      step deeper puts a muted caption under 4.5:1. The card footer's rule is
+      broken at its centre by a diamond filled with the plate colour, so the line
+      appears to pass behind it.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Occupancy index</span>
+        <span class="jrk-stat__value">94.2<span class="jrk-stat__unit">%</span></span>
+        <span class="jrk-delta jrk-delta--good">&#9650; 4.2 pts</span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Net operating income</span>
+        <span class="jrk-stat__value">2,341</span>
+        <span class="jrk-delta jrk-delta--good">&#9650; 3.1%</span>
+      </div>
+      <div class="jrk-card">
+        <div class="jrk-card__header">
+          <div>
+            <h3 class="jrk-card__title">Rent roll</h3>
+            <p class="jrk-card__subtitle">Four assets reconciling</p>
+          </div>
+        </div>
+        <div class="jrk-card__body">
+          <p>A caption, its subtitle, and a footer whose rule carries the lozenge.</p>
+        </div>
+        <div class="jrk-card__footer">
+          <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" type="button">Export</button>
+          <button class="jrk-btn jrk-btn--cta jrk-btn--sm" type="button">Commit</button>
+        </div>
+      </div>
+      <div class="jrk-card jrk-card--interactive">
+        <div class="jrk-card__header"><span class="jrk-card__title">Hover me</span></div>
+        <div class="jrk-card__body">
+          <p>In light the lift is a shadow. In dark it is the bevel stepping up plus the fill — a black shadow on a <code>#0b0f14</code> page renders nothing.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Elevation is an engraved bevel</h2>
+    <p class="gal-note">
+      Every elevation token in this skin carries an inset top highlight. That is
+      the skin's answer to a problem the base library solves with a fill step:
+      the page is near-black, so a drop shadow has nothing to darken. Light gets
+      the bevel <em>and</em> a real shadow; dark gets the bevel alone. One
+      mechanism, per-theme values. Two consequences worth knowing:
+      <code>shadow-card</code> and <code>shadow-md</code> may never be
+      <code>none</code> here, because the gold selection ring composes
+      <code>shadow-md</code> into its own declaration and a shadow list
+      containing <code>none</code> is invalid CSS that drops the lot.
+    </p>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+      <div class="jrk-card" style="min-width:200px"><div class="jrk-card__body"><p class="gal-label">rest</p></div></div>
+      <div class="jrk-card jrk-card--raised" style="min-width:200px"><div class="jrk-card__body"><p class="gal-label">--raised</p></div></div>
+      <div class="jrk-card jrk-card--seamless" style="min-width:200px"><div class="jrk-card__body"><p class="gal-label">--seamless: no edge, no bevel</p></div></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Selection is a gold ring — a measured signal bought back</h2>
+    <p class="gal-note">
+      CLAUDE.md records what the base library spends on the quiet look: no channel
+      on the segmented thumb reaches 3:1, in dark the state rides on hue and weight
+      alone, and the fix is one line — <code>border.accent</code> on the thumb
+      rule. This skin takes that line, because the reference states selection with
+      a gold edge and <code>border-accent</code> is gated at 3:1 on the plate in
+      both halves (3.76:1 light, 7.87:1 dark). The wash, the wash ink and the
+      semibold all stay: the ring is an <em>additional</em> channel, and the
+      semibold is still the one that survives greyscale.
+    </p>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+      <div class="jrk-btn-group" role="group" aria-label="Range">
+        <button class="jrk-btn" type="button" aria-pressed="true">Month</button>
+        <button class="jrk-btn" type="button" aria-pressed="false">Quarter</button>
+        <button class="jrk-btn" type="button" aria-pressed="false">YTD</button>
+      </div>
+      <div class="jrk-tabs jrk-tabs--pills" role="tablist" aria-label="View">
+        <button class="jrk-tab" role="tab" aria-selected="true" type="button">Chart</button>
+        <button class="jrk-tab" role="tab" aria-selected="false" type="button">Table</button>
+      </div>
+      <div class="jrk-tabs" role="tablist" aria-label="Section">
+        <button class="jrk-tab" role="tab" aria-selected="true" type="button">Weapons</button>
+        <button class="jrk-tab" role="tab" aria-selected="false" type="button">Armour</button>
+        <button class="jrk-tab" role="tab" aria-selected="false" type="button">Skills</button>
+      </div>
+    </div>
+    <p class="gal-note" style="margin-top:12px">
+      The plain tab row needs no rule from the skin at all — the base layer already
+      draws its 3px underline in <code>border-accent</code>, which under this skin
+      is gold. That is the whole point of a skin declaring variable names rather
+      than restyling components.
+    </p>
+    <div class="jrk-list" style="max-width:360px;margin-top:16px">
+      <div class="jrk-list__header">Heavy runic attack</div>
+      <div class="jrk-list__row"><span class="jrk-list__label">Thiazi's Talon</span><span class="jrk-list__value">L3</span></div>
+      <div class="jrk-list__row" aria-selected="true"><span class="jrk-list__label">Mists of Helheim</span><span class="jrk-list__value">L1</span></div>
+      <div class="jrk-list__row"><span class="jrk-list__label">Breath of Thamur</span><span class="jrk-list__value">L2</span></div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Square controls, and the diamond that replaces the dot</h2>
+    <p class="gal-note">
+      Every radius token is 0, so plates, overlays, controls and data ends are all
+      square — no notch and no chamfer, which is also what keeps this skin
+      visually distinct from Endfield. <code>radius-full</code> is deliberately not
+      overridden, because it is what keeps a spinner a circle, a radio round and a
+      switch a switch, so the squared controls are a named list and that list is
+      the skin's contract. <code>.jrk-btn--icon</code> <em>is</em> in it, unlike
+      under Endfield: this look has no chips. The status dot becomes a diamond by
+      rotation rather than by clip-path, so <code>--pulse</code> keeps its ring.
+    </p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="jrk-btn jrk-btn--cta" type="button">Upgrade</button>
+      <button class="jrk-btn jrk-btn--primary" type="button">Export</button>
+      <button class="jrk-btn jrk-btn--secondary" type="button">Cancel</button>
+      <button class="jrk-btn jrk-btn--danger" type="button">Dismantle</button>
+      <button class="jrk-btn jrk-btn--ghost" type="button">Ghost</button>
+      <button class="jrk-btn jrk-btn--icon" type="button" aria-label="Filter"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="filter"></svg></button>
+      <span class="jrk-badge jrk-badge--good">Stabilized</span>
+      <span class="jrk-badge jrk-badge--warning">Watch</span>
+      <span class="jrk-dot jrk-dot--good"></span>
+      <span class="jrk-dot jrk-dot--warning jrk-dot--pulse"></span>
+      <span class="jrk-spinner jrk-spinner--sm"></span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;max-width:520px">
+      <input class="jrk-input" type="text" placeholder="Asset name" aria-label="Asset name">
+      <input class="jrk-input jrk-input--search" type="search" placeholder="Search" aria-label="Search">
+      <select class="jrk-select" aria-label="Region">
+        <option>Valley</option><option>North</option><option>Basin</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>A table, and the labels that are engraved</h2>
+    <p class="gal-note">
+      Column headers are uppercase at <code>tracking-caps</code>, 0.18em under
+      this skin — wider than Endfield's 0.14em, because the reference sets every
+      caption as an inscription. Values are deliberately left alone, in the base
+      sans with tabular figures: tracking that wide makes two numbers harder to
+      compare, and the display face has no tabular figures at all.
+    </p>
+    <div class="jrk-table-wrap">
+      <table class="jrk-table jrk-table--zebra">
+        <caption class="jrk-sr-only">Assets by region</caption>
+        <thead>
+          <tr><th scope="col">Asset</th><th scope="col">Region</th><th scope="col">Units</th><th scope="col">NOI &Delta;</th><th scope="col">Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Talos Court</td><td>Valley</td><td>184</td><td><span class="jrk-delta jrk-delta--good">&#9650; 3.4%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
+          <tr><td>Rhine Yard</td><td>North</td><td>96</td><td><span class="jrk-delta jrk-delta--bad">&#9660; 1.1%</span></td><td><span class="jrk-badge jrk-badge--warning">Watch</span></td></tr>
+          <tr><td>Midgard Row</td><td>Basin</td><td>212</td><td><span class="jrk-delta jrk-delta--good">&#9650; 8.0%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
+          <tr><td>Kesler Flats</td><td>Valley</td><td>58</td><td><span class="jrk-delta jrk-delta--flat">&mdash; flat</span></td><td><span class="jrk-badge jrk-badge--critical">Flagged</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>The chart palette is inherited, and it collides somewhere better</h2>
+    <p class="gal-note">
+      No slot is overridden and none crosses the 3:1 mark floor on either plate —
+      the light plate is barely darker than the base card and the dark plate is
+      darker than the base one, which improves every dark mark.
+      <code>validate:skin</code> re-checks that on every build. What the skin
+      inherits is a new instance of the library's accent-collides-with-a-slot
+      debt, and it lands in a better place: the gold is &Delta;E 1.3 from slot 4
+      and 3.7 from slot 2, so <strong>the accent <em>is</em> slot 4</strong> —
+      but slot 1 is untouched blue at &Delta;E 54, and slot 1 is the default
+      single-series colour for every sparkline, cell bar and bar list. So the
+      ordinary one-series chart is <em>safer</em> here than in the base library,
+      and it is a multi-series chart reaching slot 2 or 4 that needs a label
+      between the mark and a gold control.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+      <div class="jrk-chart-card">
+        <div class="jrk-chart-card__header">
+          <div>
+            <h3 class="jrk-chart-card__title">Series slots</h3>
+            <p class="jrk-chart-card__subtitle">Monthly, $ thousands</p>
+          </div>
+        </div>
+        <div class="jrk-chart-card__body">
+          <div class="jrk-legend">
+            <span class="jrk-legend__item"><span class="jrk-legend__swatch jrk-s1"></span>Valley</span>
+            <span class="jrk-legend__item"><span class="jrk-legend__swatch jrk-s2"></span>North</span>
+            <span class="jrk-legend__item"><span class="jrk-legend__swatch jrk-s3"></span>Basin</span>
+            <span class="jrk-legend__item"><span class="jrk-legend__swatch jrk-s4"></span>Ridge</span>
+          </div>
+          <div class="jrk-bars" style="margin-top:12px">
+            <div class="jrk-bars__row"><span class="jrk-bars__label">Valley</span><span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:82%"></span></span><span class="jrk-bars__value">82</span></div>
+            <div class="jrk-bars__row"><span class="jrk-bars__label">North</span><span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:64%"></span></span><span class="jrk-bars__value">64</span></div>
+            <div class="jrk-bars__row"><span class="jrk-bars__label">Basin</span><span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:41%"></span></span><span class="jrk-bars__value">41</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="jrk-card">
+        <div class="jrk-card__header"><span class="jrk-card__title">Progress and meters</span></div>
+        <div class="jrk-card__body">
+          <div class="jrk-progress"><span class="jrk-progress__fill" style="width:64%"></span></div>
+          <div class="jrk-progress jrk-progress--warning" style="margin-top:10px"><span class="jrk-progress__fill" style="width:38%"></span></div>
+          <div class="jrk-progress jrk-progress--critical" style="margin-top:10px"><span class="jrk-progress__fill" style="width:12%"></span></div>
+          <p class="gal-note" style="margin-top:12px">End caps are squared — <code>radius-data-end</code> is 0 here, and a bar on a machined plate is a filled slot rather than a lozenge.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>The gold cannot be text in light, and cannot be told from amber in dark</h2>
+    <p class="gal-note">
+      Two findings, and both of them are about the accent rather than about the
+      design. <strong>In light the four-roles-one-anchor arrangement is
+      unavailable</strong>, for the second time in two skins: the brand gold
+      reaches 4.5:1 in none of its light roles, so <code>accent-text</code> and
+      <code>text-link</code> are a deep bronze (<code>#6b5410</code>, 6.76:1) and
+      <code>border-accent</code> is a mid gold (<code>#9a7b14</code>, 3.76:1),
+      while dark takes the anchor for every role. Read the base library's
+      one-anchor-everywhere as a property of <em>its</em> accent, not of the token
+      layout. And the focus ring is two-tone in both halves for the same reason
+      Endfield's is: a single-tone gold ring on the vellum plate is 1.94:1, which
+      is the one indicator in the system, invisible.
+    </p>
+    <div class="jrk-alert jrk-alert--critical">
+      <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warning"></svg>
+      <div class="jrk-alert__body">
+        <span class="jrk-alert__title">In dark, the accent and the warm status half are the same colour</span>
+        <span class="jrk-alert__text">
+          <code>accent-solid</code> measures &Delta;E 1.9 against
+          <code>status.warning.mark</code> under protanopia, 3.3 against serious
+          and 7.6 against critical — all under the floor of 10. It is not fixable
+          by re-stepping: every gold from <code>#b8891f</code> to
+          <code>#e6c15c</code> stays under 10 against every amber a warning could
+          plausibly be, because an amber accent and an amber warning separate only
+          by lightness. The light half is clear at 22.7 / 33.5 / 22.3. So under
+          this skin the library's <em>colour is never the only signal</em> stops
+          being belt-and-braces and becomes load-bearing: a status badge carries
+          its icon <em>and</em> its label, a delta states direction in text, and a
+          gold CTA does not share a tile with a warning chip whose only mark is
+          its colour. Nothing gates this — <code>validate:skin</code> runs its CVD
+          check on hazard variants and this skin declares none.
+        </span>
+      </div>
+    </div>
+    <div class="jrk-alert jrk-alert--accent" style="margin-top:12px">
+      <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="info"></svg>
+      <div class="jrk-alert__body">
+        <span class="jrk-alert__title">No hazard variants, deliberately</span>
+        <span class="jrk-alert__text">
+          Endfield's accent is a hazard <em>signal</em>, and a signal can be
+          re-hued without touching what the design means. This accent is a
+          <em>material</em> — aged gold on slate, with a vellum half derived from
+          it — so a purple or green &ldquo;gold&rdquo; is a different skin rather
+          than a variant of this one. If a hue axis is ever wanted here, the thing
+          to vary is the metal, and every gold role would have to be re-derived:
+          the light roles are all stepped away from the fill rather than equal to
+          it.
+        </span>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+/* SIDE-EFFECT IMPORT, and it must stay one. preview.js calls initChrome() and
+   hydrateIcons() at module scope — importing it IS what installs the gallery
+   bar. Calling initChrome() again here prepends a SECOND .gal-nav. */
+import './preview.js';
+
+/* The skin stamp, kept in the URL so a reload and a shared link both hold it.
+   Deliberately NOT in localStorage like the theme: the theme is a reader's
+   standing preference, the skin is what this one page is demonstrating. */
+const SKIN = 'midgard';
+function applySkin(v) {
+  if (v) document.documentElement.dataset.skin = v;
+  else delete document.documentElement.dataset.skin;
+  const url = new URL(location.href);
+  v ? url.searchParams.set('skin', v) : url.searchParams.delete('skin');
+  history.replaceState(null, '', url);
+  document.querySelectorAll('[data-skin-btn]').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.skinBtn === v));
+  });
+}
+document.querySelectorAll('[data-skin-btn]').forEach((b) => {
+  b.addEventListener('click', () => applySkin(b.dataset.skinBtn));
+});
+
+/* Default ON — this page exists to show the skin — but an explicit ?skin= in the
+   URL wins in either direction, so a link to the base comparison survives a
+   reload. */
+const param = new URL(location.href).searchParams.get('skin');
+applySkin(param === null || param === SKIN ? SKIN : '');
+</script>
+</body>
+</html>

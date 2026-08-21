@@ -16,7 +16,8 @@
     "./css/*": "./css/*",
     "./tokens": "./dist/tokens.ts",
     "./tokens.css": "./dist/jrk-tokens.css",
-    "./tailwind": "./dist/jrk-theme.tailwind.css"
+    "./tailwind": "./dist/jrk-theme.tailwind.css",
+    "./skin/*": "./dist/jrk-skin-*.css"
   },
   "scripts": {
     "build": "node scripts/build-tokens.mjs && node scripts/build-guides.mjs",
@@ -25,7 +26,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "preview": "node scripts/serve-preview.mjs",
     "sync:check": "node scripts/sync-manifest.mjs",
-    "test": "npm run build && npm run check:css && npm run validate && npm run typecheck"
+    "test": "npm run build && npm run check:css && npm run validate && npm run validate:skin && npm run typecheck",
+    "validate:skin": "node scripts/validate-skin.mjs"
   },
   "peerDependencies": {
     "react": ">=18",

@@ -5,10 +5,11 @@
  *   dist/jrk-tokens.css          CSS custom properties, light + dark
  *   dist/jrk-theme.tailwind.css  Tailwind v4 @theme mapping onto those vars
  *   dist/tokens.ts               typed JS/TS exports (chart configs, inline styles)
+ *   dist/jrk-skin-<stamp>.css    one per tokens/skins/*.json — opt-in overrides
  *
  * Never hand-edit dist/. Edit tokens/tokens.json and re-run `npm run build`.
  */
-import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, writeFileSync, mkdirSync, readdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -161,6 +162,160 @@ ${dark}
 ${dark}
 }
 `;
+
+// ============================== emit skins ==============================
+/* A SKIN IS NOT A THIRD THEME. Each one carries its own light and dark halves,
+   so it is orthogonal to the light/dark axis and gets its own stamp:
+   [data-skin="x"] CROSSED with the theme, which is four blocks rather than one.
+   That is why `vars` above is still [name, light, dark] and must stay that way —
+   a third value per token would model an axis that does not exist, and
+   `data-theme="endfield"` has nowhere to put the second half of a skin's palette.
+
+   A skin declares CSS variable names directly rather than mirroring tokens.json's
+   tree, because the mapping from that tree to a variable name is namespace-specific
+   (color.text.onBanner -> text-on-banner, font.family.sans -> font-sans,
+   chart.chrome.surface -> chart-surface) and a mirror would need a second,
+   divergent copy of it. The cost is that a typo becomes a variable nothing reads,
+   which is invisible in a browser — so the name is ASSERTED against the base layer
+   here, and only `skinOnly` is exempt. */
+const baseNames = new Set(vars.map(([n]) => n));
+const skinsDir = join(root, 'tokens/skins');
+const skinFiles = existsSync(skinsDir)
+  ? readdirSync(skinsDir).filter((f) => f.endsWith('.json')).sort()
+  : [];
+const skins = [];
+
+for (const file of skinFiles) {
+  const S = JSON.parse(readFileSync(join(skinsDir, file), 'utf8'));
+  const stamp = S.stamp;
+  if (!stamp) throw new Error(`tokens/skins/${file}: no "stamp" — nothing to key the selector on`);
+  if (!/^[a-z][a-z0-9-]*$/.test(stamp)) throw new Error(`tokens/skins/${file}: stamp "${stamp}" is not a plain lowercase ident`);
+
+  const entries = []; // [cssVarName, light, dark]
+  const collect = (obj, requireBase) => {
+    for (const [k, v] of Object.entries(obj)) {
+      if (isMeta(k)) continue;
+      const name = `--${PREFIX}-${k}`;
+      if (requireBase && !baseNames.has(name)) {
+        throw new Error(
+          `tokens/skins/${file}: "${k}" is not a token in the base layer, so ${name} would be a ` +
+          `colour nothing reads. Fix the name, or move it to "skinOnly" if the skin adds a value ` +
+          `of its own (and then make sure css/skins/${stamp}.css actually references it).`
+        );
+      }
+      if (isThemed(v)) entries.push([name, v.light, v.dark]);
+      else if (typeof v === 'string') entries.push([name, v, v]);
+      else throw new Error(`tokens/skins/${file}: "${k}" is neither a {light,dark} pair nor a scalar`);
+    }
+  };
+  collect(S.vars || {}, true);
+  collect(S.skinOnly || {}, false);
+
+  /* ---- hazard variants: a THIRD attribute, not a fourth theme.
+     `data-skin` x `data-hazard` x `data-theme`. Only the accent namespace moves;
+     the neutrals, the status set and the geometry belong to the skin and do not
+     vary, which is the whole reason a hue can be a one-attribute swap. A variant
+     name is checked against the base layer AND against this skin's own skinOnly
+     block, because the hazard tape is a skin invention and each hue restates it. */
+  const skinOwn = new Set(Object.keys(S.skinOnly ?? {}).filter((k) => !isMeta(k)).map((k) => `--${PREFIX}-${k}`));
+  const variants = [];
+  for (const [vName, V] of Object.entries(S.variants ?? {})) {
+    if (isMeta(vName)) continue;
+    if (!/^[a-z][a-z0-9-]*$/.test(vName)) throw new Error(`tokens/skins/${file}: variant "${vName}" is not a plain lowercase ident`);
+    const vEntries = [];
+    for (const [k, v] of Object.entries(V.vars ?? {})) {
+      if (isMeta(k)) continue;
+      const name = `--${PREFIX}-${k}`;
+      if (!baseNames.has(name) && !skinOwn.has(name)) {
+        throw new Error(
+          `tokens/skins/${file}: variant "${vName}" declares "${k}", which is neither a base token nor ` +
+          `one of this skin's own skinOnly names — ${name} would be a colour nothing reads.`
+        );
+      }
+      if (isThemed(v)) vEntries.push([name, v.light, v.dark]);
+      else if (typeof v === 'string') vEntries.push([name, v, v]);
+      else throw new Error(`tokens/skins/${file}: variant "${vName}" -> "${k}" is neither a {light,dark} pair nor a scalar`);
+    }
+    if (!vEntries.length) throw new Error(`tokens/skins/${file}: variant "${vName}" declares no vars`);
+    variants.push({ name: vName, entries: vEntries });
+  }
+
+  const sel = `:root[data-skin="${stamp}"]`;
+  const lightDecls = entries.map(([n, l]) => `  ${n}: ${l};`).join('\n');
+  // Only the values that actually differ are restated under the dark selectors —
+  // a skin's mode-invariant tokens (accent.solid, the tape, the notch sizes) are
+  // inherited from the block above rather than duplicated three times.
+  const darkPairs = entries.filter(([, l, d]) => d !== l);
+  const darkDecls = darkPairs.map(([n, , d]) => `    ${n}: ${d};`).join('\n');
+
+  const out = `/* GENERATED by scripts/build-tokens.mjs — do not edit. Source: tokens/skins/${file} */
+/* ${S.$meta?.name ?? stamp} skin v${S.$meta?.version ?? '0'} — ${entries.length} vars, ${darkPairs.length} theme-dependent */
+
+/* OPT-IN. Import AFTER dist/jrk-tokens.css and stamp the root:
+     <html data-skin="${stamp}">                     follows the OS light/dark setting
+     <html data-skin="${stamp}" data-theme="dark">   pinned dark
+   The skin is orthogonal to the theme — it has its own light and dark halves —
+   so data-theme="${stamp}" is not a thing and matches nothing here. */
+${sel} {
+${lightDecls}
+}
+
+@media (prefers-color-scheme: dark) {
+  ${sel}:not([data-theme="light"]) {
+${darkDecls}
+  }
+}
+
+${sel}[data-theme="dark"] {
+${darkDecls}
+}
+`;
+
+  /* Variant blocks come AFTER the skin's own, so an unstamped data-hazard leaves
+     the skin exactly as it was and no existing consumer changes. The default hue
+     is therefore not a variant at all — it is the absence of one. */
+  const variantCss = variants.map(({ name, entries: ve }) => {
+    const vsel = `${sel}[data-hazard="${name}"]`;
+    const l = ve.map(([n, lv]) => `  ${n}: ${lv};`).join('\n');
+    const dPairs = ve.filter(([, lv, dv]) => dv !== lv);
+    const d = dPairs.map(([n, , dv]) => `    ${n}: ${dv};`).join('\n');
+    return `
+/* ── hazard: ${name} ${'─'.repeat(Math.max(0, 56 - name.length))} */
+${vsel} {
+${l}
+}
+${dPairs.length ? `
+@media (prefers-color-scheme: dark) {
+  ${vsel}:not([data-theme="light"]) {
+${d}
+  }
+}
+
+${vsel}[data-theme="dark"] {
+${d}
+}
+` : ''}`;
+  }).join('');
+
+  const header = variants.length
+    ? `
+/* HAZARD HUES. A third attribute, crossed with the theme:
+     <html data-skin="${stamp}" data-hazard="${variants[0].name}">
+   Available: ${variants.map((v) => v.name).join(', ')}. Omit the attribute for the
+   default hue — it is the absence of a variant, not one of them, so nothing that
+   does not stamp it can change. Only the accent namespace varies. */
+`
+    : '';
+
+  skins.push({
+    stamp,
+    file: `dist/jrk-skin-${stamp}.css`,
+    css: out + header + variantCss,
+    count: entries.length,
+    themed: darkPairs.length,
+    variants: variants.length,
+  });
+}
 
 // ============================== emit Tailwind v4 theme ==============================
 const tw = [];
@@ -359,6 +514,7 @@ const iconTs = iconBody
 
 mkdirSync(join(root, 'dist'), { recursive: true });
 writeFileSync(join(root, 'dist/jrk-tokens.css'), css);
+for (const s of skins) writeFileSync(join(root, s.file), s.css);
 writeFileSync(join(root, 'dist/jrk-theme.tailwind.css'), tailwind);
 writeFileSync(join(root, 'dist/tokens.ts'), ts);
 writeFileSync(join(root, 'dist/icons.ts'), iconTs);
@@ -367,5 +523,6 @@ writeFileSync(join(root, 'dist/icons.js'), iconBody);
 console.log(`built dist/`);
 console.log(`  jrk-tokens.css          ${vars.length} vars (${vars.filter((v) => v[2] !== null).length} themed)`);
 console.log(`  jrk-theme.tailwind.css  ${tw.length} mappings`);
+for (const s of skins) console.log(`  jrk-skin-${s.stamp}.css${" ".repeat(Math.max(1, 15 - s.stamp.length))}${s.count} vars (${s.themed} theme-dependent, ${s.variants} hazard variants)`);
 console.log(`  tokens.ts`);
 console.log(`  icons.ts / icons.js     ${Object.keys(outline).length} outline + ${Object.keys(filled).length} filled`);

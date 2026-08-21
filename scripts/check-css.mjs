@@ -37,8 +37,17 @@ const files = walk(join(root, 'css'));
 // --jrk-transition, which every component references).
 const sources = files.map((f) => [f, strip(readFileSync(f, 'utf8'))]);
 const tokensCss = readFileSync(join(root, 'dist/jrk-tokens.css'), 'utf8');
+// Skin layers count as defined too. A skin is generated from tokens/skins/*.json
+// and is the ONLY home for its own variables — the notch sizes, the grid line,
+// the hazard tape — so without this every var() in css/skins/*.css reads as a
+// typo and the check fails on correct code. The consumer loads the skin CSS in
+// the same document as the file referencing it, which is what makes this sound.
+const skinCss = readdirSync(join(root, 'dist'))
+  .filter((f) => /^jrk-skin-.+\.css$/.test(f))
+  .map((f) => readFileSync(join(root, 'dist', f), 'utf8'));
 const defined = new Set([
   ...declared(tokensCss),
+  ...skinCss.flatMap(declared),
   ...sources.flatMap(([, src]) => declared(src)),
 ]);
 

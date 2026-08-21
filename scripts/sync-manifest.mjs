@@ -42,7 +42,11 @@ if (!moved) pass('dist/ and guides/ already matched their sources');
 
 /* 2. The gates. Never publish a failing palette as the team's reference. */
 console.log('\n=== 2. gates ===');
-for (const [label, script] of [['check:css', 'check-css.mjs'], ['validate', 'validate-colors.mjs']]) {
+// validate:skin is a separate gate because validate-colors.mjs measures against
+// $meta.surfaces — one hex per theme — and a skin's page can be a gradient. It
+// belongs here for the same reason the other two do: a skin ships to the app
+// through the same vendored css/ and dist/ directories.
+for (const [label, script] of [['check:css', 'check-css.mjs'], ['validate', 'validate-colors.mjs'], ['validate:skin', 'validate-skin.mjs']]) {
   try {
     execFileSync(process.execPath, [join(root, 'scripts', script)], { cwd: root, stdio: 'pipe' });
     pass(label);

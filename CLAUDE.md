@@ -77,7 +77,7 @@ code.** Detail lives in the `jrk-design` skill, which loads on demand.
 ## Before you change anything
 
 ```bash
-npm test    # build + check:css + validate + typecheck
+npm test    # build + check:css + validate + validate:skin + typecheck
 ```
 
 That is the gate. It is fast; run it after every change.
@@ -87,6 +87,8 @@ That is the gate. It is fast; run it after every change.
 | Fact | Single source | Generated, never edit |
 |---|---|---|
 | design values (color, space, type, radius) | `tokens/tokens.json` | `dist/jrk-tokens.css`, `dist/tokens.ts`, `dist/jrk-theme.tailwind.css` |
+| a skin's colours, shadows and hazard hues | `tokens/skins/<stamp>.json` | `dist/jrk-skin-<stamp>.css` |
+| a skin's geometry and type | `css/skins/<stamp>.css` (no colour, ever) | — |
 | icon glyph paths | `tokens/icons.json` | `dist/icons.ts`, `dist/icons.js` |
 | component behaviour | `css/components/*.css` + `react/src/*.tsx` | — |
 | design doctrine and the conflict register | `.claude/skills/jrk-design/references/philosophy.md` | — |
@@ -519,7 +521,10 @@ drop it. Two more consequences worth carrying: a neutral or white thumb must nev
 come back, because `accent.wash`'s 1.05:1 on the track is the entire margin between
 this design and the 1.00:1 white thumb this library already recorded as a failure;
 and if a 3:1 state signal is ever wanted again, the fix is one line —
-`border.accent` on the thumb rule.
+`border.accent` on the thumb rule. **The `midgard` skin takes exactly that line**
+(as an inset ring, on all four selected controls at once), which makes it the
+worked example rather than a hypothetical: the wash, the wash ink and the
+semibold all stay, and the ring is an ADDITIONAL channel.
 
 **Adopt Apple values only where they pass** — see above. The accent is not an
 Apple color; the neutrals, status colors and chart palette still are.
@@ -600,6 +605,12 @@ blocks, so ARIA roles are mandatory. In a sheet, tone comes from the metric's
   stretched by `width: 100%` scales the text and strokes too.
 - **Component CSS sizes bare `svg` with `svg:not(.jrk-icon)`.** A plain
   `.jrk-btn svg` rule out-specifies `.jrk-icon` and kills the `em` contract.
+- **`.jrk-dot` IS TWO DIFFERENT COMPONENTS.** `badge.css` styles an inline-block
+  `<span>` status dot; `chart.css` styles an SVG `<circle>` line marker. A rule
+  written for one hits the other, and the failure is not cosmetic: a `transform`
+  on an SVG circle rotates about the SVG user-space origin, not about the dot, so
+  it flings every marker off its own data point. `css/skins/midgard.css` qualifies
+  with `:not(circle)` for this reason. Grep both files before styling the class.
 - **A `position: sticky` GRID ITEM is constrained by its grid CONTAINER's content
   box, not by its grid area.** The grid-area reading is the one most people quote,
   and it would make a sticky row inside a grid impossible — its area is one row
@@ -630,6 +641,252 @@ real width (1920x1080 is the target display); a downscaled capture makes correct
 positions rather than trusting a mid-scroll capture — headless compositing
 produces convincing artifacts.
 
+## Skins — a SECOND AXIS, and the only one in this library
+
+**TWO SKINS SHIP, `endfield` and `midgard`, and the difference between them is
+the useful thing in this section.** Everything down to the end of `validate:skin`
+below is INFRASTRUCTURE and applies to both. Everything after that is per-skin,
+and the second skin's real value is that it *tested* the first one's rules: three
+of Endfield's findings reproduced (so they are rules about warm high-chroma
+accents, not about yellow) and three did not (so they were rules about a
+chamfer). Both are marked where they stand.
+
+**A SKIN IS NOT A THIRD THEME.** `tokens/skins/*.json` each carry their own
+`light` and `dark` halves, so a skin is **orthogonal** to the theme and is
+stamped separately: `data-skin="endfield"` **crossed with** `data-theme`, which
+is four blocks rather than one. `data-theme="endfield"` matches nothing and
+cannot be made to — that stamp has nowhere to put the second half of a skin's
+palette. This is why `vars` in `build-tokens.mjs` is still `[name, light, dark]`
+and must stay that way; a third value per token models an axis that does not
+exist. **Four combinations to check, not three.**
+
+**A skin is split down the middle by WHAT it declares, not by convenience.** The
+colours are `tokens/skins/<stamp>.json` → generated `dist/jrk-skin-<stamp>.css`;
+the geometry and type are `css/skins/<stamp>.css`, which holds **not one colour
+value** — every fill in it is a `var()`. Neither file can do the other's job:
+tokens.json and its skin files are the only source of truth for design values, so
+a hex in the stylesheet is unreachable to the theme toggle *and* fails
+`check:css`; geometry is component behaviour and has no home in a token file.
+`validate:skin` fails on a hex in a skin stylesheet, so this is enforced rather
+than remembered.
+
+**A skin declares CSS VARIABLE NAMES, not a mirror of tokens.json's tree**, and
+the build **asserts every one exists in the base layer** (`skinOnly` is the
+exempt escape hatch). That assertion is the point: the tree-to-variable mapping
+is namespace-specific — `color.text.onBanner` → `text-on-banner`,
+`font.family.sans` → `font-sans`, `chart.chrome.surface` → `chart-surface` — so a
+mirror needs a second, divergent copy of it, and a typo becomes a variable
+nothing reads, which is invisible in a browser. `validate:skin` closes the other
+end: a `skinOnly` token that no `css/skins/*.css` references is a **failure**, not
+a warning. It caught a dead `notch-lg` on the first run.
+
+**`npm run validate` does NOT see a skin — `npm run validate:skin` does**, and it
+exists because `validate-colors.mjs` is 568 lines written against the base tree
+and measures everything against `$meta.surfaces`, one hex per theme. **A skin's
+page can be a gradient**, and that is the check nothing else in the toolchain can
+perform: an ink is held to the page's **worst stop**, not to the panel. Endfield's
+`text-muted` was re-stepped twice for exactly this — `#5d686d` cleared 5.28:1 on
+the panel and failed at 4.07:1 on the page's dark end, i.e. it passed everywhere
+a single-hex gate would have looked and failed on the bottom third of the screen.
+
+**Two things a skin gets wrong that the base library cannot.** (1) **A saturated
+yellow is very nearly the luminance of near-white**: Endfield's `accent-solid` is
+1.18:1 on its own light panel, so the brand colour is the thing that VANISHES in
+greyscale and in print while staying vivid on screen. It separates by chroma
+alone, so it never carries a state on its own and its focus ring is **two-tone**.
+(2) **An accent that cannot be text breaks the four-roles-one-anchor
+arrangement**: the hue clears 4.5:1 in none of them in light, so `accent-text` is
+`#6b5e00` (6.00:1) and `border-accent` is `#a08d00` (3.07:1) — a *dark gold*, not
+the brand yellow — while dark takes the anchor for all four. **Read that as the
+general rule:** the base library's one-anchor-everywhere is a property of *its*
+accent, not of the token layout.
+
+**BOTH OF THOSE ARE NOW CONFIRMED TWICE, which is what promotes them from
+Endfield notes to library rules.** Midgard's aged gold `#d9ae43` is 1.94:1 on its
+own light plate and clears 4.5:1 in none of its light roles, so it lands in the
+same two places independently: a **two-tone** focus ring (a single-tone one is
+the library's one indicator, invisible) and a stepped `accent-text` /
+`border-accent` pair in light with dark taking the anchor. So the shape of the
+rule is **warm + high chroma + light plate**, and the next skin with such an
+accent should budget for both from the start rather than discovering them.
+
+**`clip-path` clips the box-shadow.** That is not a bug and no property order
+fixes it, so a chamfered tile cannot carry an ambient shadow: Endfield
+neutralises `shadow.card` / `cardRaise` on exactly the notched selectors, and
+`surface.cardHover` has to be a real step in **both** halves (1.14:1 / 1.30:1) —
+the base library's shadow-in-light / fill-in-dark split is unavailable. Controls
+are therefore squared rather than notched, because since 2026-08-20 a white
+button's only boundary in light IS `shadow.md`.
+
+**`radius.full` is deliberately not overridden**, because it is all that keeps a
+dot a dot and a radio round. The squared-control list in `css/skins/endfield.css`
+is the skin's contract: **anything new that opts into `radius.full` stays a pill
+under the skin until it is added there.** `.jrk-btn--icon` keeps the circle on
+purpose — it is the reference look's charcoal chip.
+
+**`chart.chrome.surface` must track the skin's own `surface.default`** and is
+gated. Endfield overrides **no chart slot**, and that is measured rather than
+skipped: its light panel is darker than the base card, so every light mark loses
+~8% contrast (slot 1 4.02 → 3.70) and **no slot crosses the 3:1 mark floor**, so
+the CVD-derived order carries over intact. `validate:skin` re-checks that on
+every build. Dark improves slightly.
+
+### Hazard hues — a THIRD attribute, and what they taught
+
+**`data-skin="endfield"` × `data-hazard="<hue>"` × `data-theme`.** Six hues —
+yellow, orange, red, purple, blue, green — and **the default is the ABSENCE of
+`data-hazard`, not a value of it**, so yellow keeps its hand-derived shipped
+values and nothing that does not stamp the attribute can change. **Only the
+accent namespace varies**; the steel neutrals, the status set, the geometry and
+the type belong to the skin. That is what makes a hue a one-attribute swap.
+
+**Derived by search, not picked: every role is the NEAREST LEGAL STEP to its
+hue's vivid centre** — light roles darken, dark roles lighten, each stopping the
+moment it clears its floor. The cross-check on the method is that run against
+yellow it reproduces the hand-derived values to within one step (`#6b6000` vs
+`#6b5e00`, `#9e8e00` vs `#a08d00`). **Three rules this library wrote as design
+rules turned out to be YELLOW rules:**
+
+1. **"The wedge cannot bound itself."** Yellow is 1.17:1 on the light panel and
+   green 1.38:1 — but red is 4.27:1, blue 4.23:1 and purple 5.62:1, and those
+   three **are** their own `border.accent` with no stepped value at all.
+2. **"Black ink always."** Yellow, orange and green take black; red, purple and
+   blue take white, and no step of them takes black.
+3. **Five of six share one fill across both themes.** Only purple lifts in dark
+   (`#8f24db` → `#9a3adf`) to clear 3:1 on the dark panel.
+
+**The washes are MIXES TOWARD THE PANEL from a floor of 0.5, not steps on a
+lightness ramp**, and that is the one place yellow actively misleads: what
+separates a wash from a fill on a pale hue is **chroma**, and no contrast ratio
+sees chroma, so a lightness walk returns the vivid stop itself and calls it a
+wash. The floor is what forces the desaturation.
+
+**The variants moved the topbar wedge onto `accent.wash`.** The bar is inked
+near-black and black measures 3.92:1 on the blue, 3.88:1 on the red, 2.95:1 on
+the purple — so a vivid wedge is illegible for half the palette, and keeping one
+would need a guarantee that nothing is ever inked over the bar's last 6%: exactly
+the bargain the brand ramp makes above. Declined. **Every wash carries near-black
+at ≥11.6:1 by derivation**, so the wedge is safe for all six with no layout
+condition, and `validate:skin` gates it per variant. If it ever fails, the wedge
+needs a **paler step, not a narrower band.**
+
+**Separation BETWEEN hazard hues is deliberately not a requirement**, and that is
+a real distinction rather than a lowered bar: yellow/green collide at ΔE 8.8 and
+purple/blue at 4.3, and it does not matter because exactly one hue is stamped at
+a time. **A chart slot is positional and its neighbours are on screen; a hazard
+hue is exclusive.** What IS gated is each hue against the skin's own **status**
+colours, which are on screen with it — and an unacknowledged collision **fails**.
+
+**`red` is the one variant with a restriction and it is not fixable by
+re-stepping.** A hazard red and the status reds are the same hue by construction
+(both are the deepest red where white survives), so under protanopia the accent
+and the danger signal collapse — ΔE 3.2–6.3, acknowledged on the variant and
+gated. With `data-hazard="red"`: status badges carry icon **and** label, and a
+`--cta` does not share a tile with `--danger-solid`. **Orange is the nearest hue
+that clears every status colour** (worst ΔE 17.0).
+
+**Two gates exist because these two things fail silently.** An acknowledgement
+for a collision that no longer measures is a **failure**, not stale prose left
+alone — prose drifting from a number is this file's own worst habit. And the
+gallery picker must offer exactly the declared variants: a hue in the token file
+with no button is invisible, a button with no variant silently shows the default,
+and neither breaks anything else.
+
+**Endfield is an EXPLORATION that shipped as real infrastructure.** It is opt-in:
+nothing imports it from `css/index.css`, no default changes, and a consumer that
+never stamps `data-skin` never even fetches its typeface (`Inter Tight` is
+requested from the skin stylesheet, not `css/fonts.css`). Gallery:
+`preview/skin-endfield.html`.
+
+### `midgard` — a Norse console HUD, and the second data point
+
+**Square slate plates on a near-black page, a captioned header band in
+inscriptional caps, an engraved bevel where the base library puts a shadow, and
+aged gold `#d9ae43` used as the SELECTION signal rather than as decoration.**
+Opt-in the same way (`Cinzel` is requested from `css/skins/midgard.css`, so a
+consumer that never stamps `data-skin="midgard"` never fetches it). Gallery:
+`preview/skin-midgard.html`. **No hazard variants, on purpose:** Endfield's accent
+is a hazard *signal* and can be re-hued without touching what the design means;
+this one is a *material*, and every light gold role is stepped away from the fill
+rather than equal to it, so a hue swap would mean re-deriving all of them.
+
+**THE DARK HALF IS THE FAITHFUL ONE AND THE LIGHT HALF IS A DESIGN DECISION —
+that asymmetry is how you skin a dark-native look.** The reference is a dark
+screen, so light is warm vellum (`#faf7ef` plates on a `#efe9dc` to `#ded6c4`
+page) under the same gold. Inverting the dark half instead produces a cold grey
+page under a yellow that cannot be read on it, which is the failure the stepped
+light roles exist to avoid.
+
+**A RAMP'S ENDPOINTS BOUND ITS INTERIOR ONLY IF THE RAMP IS MONOTONIC, and this
+skin's dark page is not.** `#0b0f14` / `#0f151b` / `#070a0d` is lit across the
+middle band, so the binding stop for every dark ink is the MIDDLE one, and
+checking the ends reports the plate as 1.27:1 off the page when it is really
+1.12:1. That is a third distinct way a gradient goes wrong, after the base
+topbar's failing middle stop and the "worst stop, not the panel" rule above — and
+the only one where the convexity argument the four positional tones rely on is
+simply false. `validate:skin` walks every stop; anything measured by hand has to
+as well.
+
+**ELEVATION IS AN INSET BEVEL, WHICH IS THE THIRD ANSWER TO THE SAME PROBLEM.**
+The page is `#0b0f14`, so a black drop shadow renders nothing in dark — the base
+library answers that with a fill step and Endfield with a fill step forced by
+`clip-path`, and this skin answers it with a 1px inset top highlight carried
+INSIDE every elevation token. One mechanism, per-theme values: light gets the
+bevel plus a real shadow, dark gets the bevel alone. **Two tokens may therefore
+never be `none` here — `shadow.card` and `shadow.md`** — because
+`css/skins/midgard.css` composes `var(--jrk-shadow-md)` into the selection ring,
+and **a `box-shadow` list containing `none` is invalid CSS that drops the whole
+declaration**, ring and lift together. It is stated on both tokens.
+
+**Two more things pinned from BELOW as well as above, which is the pattern to
+carry.** (1) The header band is `surface.tinted`, and it is pinned in both
+directions: below 1.17:1 / 1.25:1 it reads as a smudge rather than a band, and one
+step deeper in dark puts the muted caption it exists to hold under 4.5:1 (4.68
+becomes 4.42). (2) `accent.wash` carries `text.muted` on vellum (5.90:1) and
+**does not** on slate (4.12:1), and deepening it to fix that costs the fill its
+step off the plate — so muted steps up to secondary on a dark wash. Neither is
+gated; same shape as the base library's chart-tint finding.
+
+**THE ACCENT AND THE WARM STATUS HALF ARE THE SAME COLOUR IN DARK, AND NO GATE
+SEES IT.** `accent.solid` measures dE **1.9** against `status.warning.mark` under
+protanopia, 3.3 against serious and 7.6 against critical, where the floor is 10.
+It is not a bad pick: every gold from `#b8891f` to `#e6c15c` stays under 10
+against every amber a warning could plausibly be, because an amber accent and an
+amber warning separate only by lightness. Light is clear (22.7 / 33.5 / 22.3),
+because the light status marks are deep browns and reds. **`validate:skin` runs
+its CVD check on hazard VARIANTS only, and this skin declares none, so nothing
+fails** — which is exactly why it is written here: with `data-skin="midgard"` in
+dark, a status badge carries its icon AND its label, a delta states direction in
+text, and a gold `--cta` does not share a tile with a warning chip whose only mark
+is its colour.
+
+**The chart palette is inherited whole and the collision moves somewhere better.**
+No slot is overridden and none crosses the 3:1 mark floor on either plate. But the
+gold is dE **1.3** from slot 4 and 3.7 from slot 2 in light — the accent IS slot 4
+— while slot 1 stays blue at dE 54. Since slot 1 is the default single-series
+colour for every sparkline, cell bar and bar list, **the ordinary one-series chart
+is safer under this skin than in the base library**, and it is a multi-series
+chart reaching slot 2 or 4 that needs a label between the mark and a gold control.
+
+**Three of Endfield's rules did NOT reproduce, and they belong to the chamfer
+rather than to skins.** `clip-path` clips the box-shadow — irrelevant here,
+because this skin has no clip-path, so overlays keep their shadows and
+`.jrk-btn--icon` is squared with everything else rather than surviving as a
+circular chip. And a notch's scaling ladder (`notch-sm/md/lg`) has no analogue: a
+corner is a corner. What DID reproduce is the `radius.full` contract — the
+squared-control list in `css/skins/midgard.css` is this skin's version, and
+anything new that opts into `radius.full` stays a pill until it is added there.
+
+**Two colour decisions were declined here and the reasons generalise.** The bar
+was NOT repainted to `surface.banner` even though the reference's chrome is a dark
+band: `.jrk-topbar` is inked with `text.primary` by the consumer, which is
+near-black in light, and the base `--brand` / `--vivid` variants exist precisely
+because a dark bar needs its own ink namespace. A skin re-pointing the default
+bar's FILL would blind every control in it. What it does instead is re-point the
+bar's existing hairline COLOUR to `border.accent` — a colour change with no width
+change, so nothing reflows. Same family as Endfield's wedge decision: **do not put
+a fill under ink you do not own.**
+
 ## Adding a component
 
 1. `css/components/<name>.css`, imported from `css/index.css`. Tokens only.
@@ -639,6 +896,15 @@ produces convincing artifacts.
 4. `.design-sync/docs/<Name>.md` + `.design-sync/previews/<Name>.tsx`, so it
    reaches the Design System pane.
 5. `npm test`, then look at the gallery.
+
+**And check it under BOTH skins** — `preview/skin-endfield.html` and
+`preview/skin-midgard.html`, which stamp `data-skin` and nothing else. A new
+component picks a skin's colours up for free (they are the same variables) but its
+GEOMETRY does not, and each skin has its own list to be added to: if it takes
+`radius.full` it stays a pill under either skin until it is named in that skin's
+squared-control list; under `endfield` a top-level tile takes no notch until it is
+in the clip-path list; under `midgard` a tile with a `__header` gets no band and a
+`__footer` no lozenge until it is named. See the skins section above.
 
 ## Conventions
 

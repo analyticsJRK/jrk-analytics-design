@@ -1,0 +1,1029 @@
+<!-- @dsCard group="Patterns" name="Module picker — grouped card grid with membership" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Module picker — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="preview.css">
+<style>
+  /* The gallery bar and this page's own toolbar both want top:0. The app chrome
+     wins; the gallery bar is page furniture and scrolls away. Same call
+     dashboard.html makes, for the same reason. */
+  .gal-nav { position: static; }
+
+  /* ============================================================
+     THE PROBLEM THIS PAGE ANSWERS
+
+     45 modules were drawn as 45 identical cards, ~230x130 each, in one flat
+     six-wide raster. Three jobs were fused into it — FIND a module, UNDERSTAND
+     how the set is organised, and CHOOSE whether it is in your portal — and the
+     grid gave the most screen weight to the things that never vary (a frame, an
+     icon chip, a category footnote) and the least to the only thing that does
+     (membership: a 12px unlabelled corner glyph).
+
+     It stays a CARD GRID. What changed:
+
+     1 STRUCTURE. Category was printed on all 45 cards as a footnote and organised
+       nothing. It is now the grid's spine — sticky group header, filter, count —
+       stated once per area instead of 45 times. That freed the card's footer.
+
+     2 BEHAVIOR. The card had two affordances in one box: a chevron that navigated
+       and a corner mark that toggled membership, neither labelled. They are split
+       and the split is carried by SHAPE: the tile opens the module, a pill on it
+       pins the module to your portal. Tiles are rectangles, controls are pills.
+
+     3 RENDERING. The icon chip is gone (three glyphs shared across 45 modules
+       carried no information), the category footnote is gone, and the card lost
+       ~40% of its height. The whole catalogue is roughly one screen at 1920x1080
+       instead of five, and it is still a grid of named tiles.
+
+     4 EPISTEMICS. The search box promised "modules & submodules" and no submodule
+       was ever visible. The footer states the count, and a search that matches a
+       submodule names the match on the card.
+     ============================================================ */
+
+  .mod-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--jrk-space-5);
+  }
+
+  /* ---------------------------------------------- sticky toolbar */
+
+  /* z-index 30 clears the group headers at 20. The fill is the PAGE plane and it
+     is not optional: a sticky bar with a transparent background shows the cards
+     sliding under it. Same trap the frozen table cells in table.css record. */
+  .mod-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: var(--jrk-space-3);
+    padding: var(--jrk-space-3) 0;
+    background: var(--jrk-surface-canvas);
+    border-bottom: 1px solid var(--jrk-border-subtle);
+  }
+
+  .mod-toolbar__row {
+    display: flex;
+    align-items: center;
+    gap: var(--jrk-space-3);
+  }
+
+  .mod-toolbar__search { flex: 0 1 320px; }
+
+  /* THE CATEGORY FILTER GETS ITS OWN LINE, and the reason is the widget rather
+     than the width. .jrk-tabs--pills is a segmented well: gap 0, 2px of track
+     showing round the thumb, one raised object in the control. Eight segments
+     carrying counts is ~900px, so sharing a line with the search field and two
+     more segmented controls would have meant overriding the gap and the padding
+     — at which point it is eight loose pills, not a well, and the thumb stops
+     reading as the choice.
+
+     The scroller is the WRAPPER, never .jrk-tabs--pills itself: the selected
+     segment's shadow.md is what states "raised" in light, and an overflow box
+     clips it. The 4px padding / -4px margin pair is what keeps the bloom. */
+  .mod-cats {
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding: var(--jrk-space-1);
+    margin: calc(var(--jrk-space-1) * -1);
+  }
+  .mod-cats::-webkit-scrollbar { display: none; }
+  .mod-cats .jrk-tab { white-space: nowrap; }
+
+  .mod-count {
+    font-size: var(--jrk-text-sm);
+    color: var(--jrk-text-muted);
+    white-space: nowrap;
+  }
+
+  /* ---------------------------------------------- groups */
+
+  .mod-catalog {
+    display: flex;
+    flex-direction: column;
+    gap: var(--jrk-space-5);
+  }
+
+  .mod-group { display: flex; flex-direction: column; gap: var(--jrk-space-2); }
+  .mod-group[hidden] { display: none; }
+
+  /* Sticky is constrained to the nearest SCROLLING ancestor and to the PARENT's
+     content box. Both matter here. The parent is .mod-group, which spans exactly
+     one category — so a header rides down its own rows of cards and is pushed out
+     by the next, the same behaviour .jrk-sheet__block-head has. Nothing in the
+     chain is a scroll container, so the port is the document. */
+  .mod-group__head {
+    position: sticky;
+    top: var(--mod-toolbar-h, 96px);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: var(--jrk-space-2);
+    padding: var(--jrk-space-1_5) 0;
+    background: var(--jrk-surface-canvas);
+  }
+
+  .mod-group__icon { color: var(--jrk-text-muted); }
+
+  .mod-group__name {
+    font-size: var(--jrk-text-sm);
+    font-weight: var(--jrk-weight-semibold);
+    color: var(--jrk-text-secondary);
+  }
+
+  .mod-group__meta {
+    font-size: var(--jrk-text-xs);
+    color: var(--jrk-text-muted);
+  }
+
+  /* ---------------------------------------------- the grid */
+
+  /* auto-fill at 210px gives 8 columns of ~215px at the 1920 target and degrades
+     a column at a time. `1fr` rather than a fixed track so the last row's cards
+     are the same width as every other row's — a ragged final row of narrower
+     tiles is the tell that a grid was built with flex-wrap. */
+  .mod-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: var(--jrk-space-3);
+  }
+
+  /* ---------------------------------------------- the card */
+
+  /* THE CARD DRAWS NO EDGE, by direction (2026-08-20), and the 1px is kept
+     RESERVED as transparent rather than removed — `border: 0` also sets
+     border-style: none, after which a later border-color paints nothing at all,
+     and an edge coming back would reflow every tile in the grid by a pixel.
+     That is card.css's own rule and it is not relaxed here.
+
+     WHAT THIS COSTS, measured, because it is a real trade and not a tidy-up:
+
+       light  shadow.card is the ENTIRE boundary. The card-on-page fill step is
+              1.035:1 — a whisper, not an edge — so if the resting shadow is ever
+              dropped from these tiles they have no boundary at all. Do not add
+              --seamless on top of this; that modifier removes the shadow WITH the
+              border and would leave nothing.
+       dark   shadow.card is `none` by construction (a black shadow on #141416
+              renders nothing), so the only boundary left is the fill step,
+              #232326 on #141416 = 1.17:1. One mechanism, no second channel.
+              The library's standing rule is that a top-level tile brings its own
+              edge; this variant spends that. If it reads as too loose in dark, the
+              fix is one line — `border-color: var(--jrk-border-subtle)` inside a
+              dark-only block, which restores the hairline there and leaves light
+              borderless as asked.
+
+     The hover is untouched: .jrk-card--interactive supplies shadow.cardRaise plus
+     surface.cardHover, and each of those does the whole job in exactly one theme
+     — the shadow in light, the 1.125:1 fill lift in dark. Neither is redundant. */
+  .mod-card {
+    position: relative;
+    border-color: transparent;
+    display: flex;
+    flex-direction: column;
+    gap: var(--jrk-space-1_5);
+    min-height: 112px;
+    padding: var(--jrk-space-3);
+    /* .jrk-card--interactive transitions box-shadow and background-color; the
+       transform is this page's addition, so it needs its own entry. Duration
+       comes from --jrk-transition, which base.css zeroes under
+       prefers-reduced-motion — do not hand-roll one. */
+    transition:
+      box-shadow var(--jrk-transition),
+      background-color var(--jrk-transition),
+      transform var(--jrk-transition);
+  }
+  .mod-card[hidden] { display: none; }
+
+  /* THE TILE IS NO LONGER THE FOCUSABLE ELEMENT — it is a <div> holding a link
+     and a button, because a <button> inside a <button> is not valid HTML and the
+     pill had to become a real control. So the hover/focus states that
+     .jrk-card--interactive hangs off :hover and :focus-visible have to be
+     restated on :focus-within, or the tile goes dead to the keyboard. */
+  .mod-card:focus-within {
+    background: var(--jrk-surface-card-hover);
+    box-shadow: var(--jrk-shadow-card-raise);
+  }
+
+  /* THE LIFT. 3px, and it is doing more work than emphasis: shadow.cardRaise is
+     invisible in dark by construction, so before this the dark hover rested on
+     surface.cardHover's 1.125:1 fill step alone. A transform is theme-blind, so
+     the hover now has a channel that works identically in both — the first thing
+     on this tile that does. Keyboard gets it too, or the two states diverge. */
+  .mod-card:hover,
+  .mod-card:focus-within { transform: translateY(-3px); }
+
+  /* The whole tile opens the module: the link is stretched over the card by a
+     pseudo-element rather than by wrapping everything, which is what leaves the
+     pill free to sit on top of it and take its own clicks. `border-radius:
+     inherit` so the hit area follows the tile's corner instead of squaring it. */
+  .mod-card__open {
+    display: flex;
+    flex-direction: column;
+    gap: var(--jrk-space-1_5);
+    min-width: 0;
+    color: inherit;
+    /* base.css underlines every anchor. */
+    text-decoration: none;
+  }
+  .mod-card__open::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  /* The focus ring belongs to the tile, not to the text block inside it.
+     base.css draws the ring on the anchor; moving it to the stretched overlay is
+     what makes a keyboard user see the TILE highlighted.
+     Both declarations move, not just the outline: base.css pairs the 1.5px core
+     with `box-shadow: var(--jrk-shadow-focus)` — the bloom — and leaving that on
+     the anchor would halo the text block INSIDE the tile while the ring sat
+     around the outside. The values are base.css's verbatim; do not restyle the
+     ring here, only relocate it. (--jrk-focus-offset is a COLOUR token, the
+     bloom's backing, not a length. It is not what outline-offset takes.) */
+  .mod-card__open:focus-visible { outline: none; box-shadow: none; }
+  .mod-card__open:focus-visible::after {
+    outline: 1.5px solid var(--jrk-focus-ring);
+    outline-offset: 1px;
+    box-shadow: var(--jrk-shadow-focus);
+  }
+
+  /* The name is text.md — one step ABOVE the 13px control default, and left there
+     deliberately. Controls dropped to sm on 2026-08-20; the title-and-prose layer
+     did not, because a title smaller than the copy it heads is not a hierarchy.
+     On a grid whose whole job is "find the one you want", the name is the only
+     thing that identifies a tile now that the icon chip is gone. */
+  .mod-card__name {
+    font-size: var(--jrk-text-md);
+    font-weight: var(--jrk-weight-semibold);
+    line-height: var(--jrk-leading-snug);
+    color: var(--jrk-text-primary);
+  }
+
+  /* Two lines, then ellipsis. The description is orientation, not reference — it
+     is what tells a new reader which "Audit" this is, and a third line buys
+     nothing at the cost of a row of grid height across the whole page. */
+  .mod-card__desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    font-size: var(--jrk-text-xs);
+    line-height: var(--jrk-leading-normal);
+    color: var(--jrk-text-muted);
+  }
+
+  .mod-card__foot {
+    display: flex;
+    align-items: center;
+    gap: var(--jrk-space-2);
+    margin-top: auto;
+    font-size: var(--jrk-text-2xs);
+    color: var(--jrk-text-muted);
+  }
+
+  .mod-card__subs { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* The match line replaces the submodule count when the search hit a submodule
+     rather than the module itself — otherwise a card appears in the results with
+     nothing on it explaining why. */
+  .mod-card__match { color: var(--jrk-accent-text); }
+
+  /* ---------------------------------------------- the two actions
+
+     THE TILE AND THE PILL ARE DIFFERENT ACTS, and the shapes say which is which.
+     The card opens the module. The pill pins it to your portal. That is the pair
+     the original screen fused into one box — a chevron that navigated and an
+     unlabelled corner glyph that toggled membership, neither of them safe to aim
+     at. Splitting them is only honest if the split is visible, so it is carried
+     by the library's own geometry: tiles are radius.md rectangles, controls are
+     radius.full pills. A pill inside a tile is unambiguously a control ON the
+     tile rather than part of it, and it is the one thing in the card that is not
+     a rectangle.
+
+     THE ACCENT EDGE IS GONE AND SO IS THE WORD, both by direction, and the two
+     losses compound. What is left marking a pinned tile is a 24px square pill
+     carrying a filled glyph — no label, no edge. Three consequences, all real:
+
+       (1) PRESENCE IS NOW THE LOUDEST CHANNEL. A pinned tile has a pill at rest;
+           an unpinned one has an empty footer until you hover it. That is what a
+           reader actually scans, not the glyph inside it.
+       (2) FILLED-VS-OUTLINE IS THE ONLY OTHER ONE, and it is the only channel
+           that survives greyscale and both dichromacies, because the tinted
+           volume is a colour difference. It is load-bearing — do not let a
+           tidy-up point both states at the same glyph.
+       (3) THE GLYPH IS UNLABELLED, which is the thing the original screen got
+           wrong. It is defensible here and was not there: this pill is a control
+           with a pointer cursor, an aria-label and a title, sitting in a fixed
+           slot on every tile, and the page header says what it does. The corner
+           check it replaces had none of that. It is still the weakest state
+           signal this page has had — a 24px mark does not carry across eight
+           columns the way a 5.22:1 rule down the tile edge did.
+
+     So the group header's `n of m in portal` is the only thing left answering
+     "which of these do I have" at a glance. It is not decoration; do not tidy
+     it away. */
+
+  /* Pinned: the tinted everyday button, always visible — this one states a fact,
+     so it cannot be a reveal. Hover swaps the FILLED glyph for the outline one,
+     which is the whole of the unpin affordance now that the word is gone; the
+     button keeps its width, so nothing reflows under the pointer.
+
+     z-index lifts it clear of .mod-card__open's stretched overlay. Without it the
+     link covers the pill and the tile has one action again, which is the whole
+     thing this layout is undoing. */
+  .mod-pin {
+    position: relative;
+    z-index: 1;
+    flex-shrink: 0;
+  }
+  /* Both stated, not just the hover one: an unstyled <span> is `display: inline`,
+     and an inline box inside a square icon button does not centre the same way
+     its inline-flex replacement does — the glyph would shift by a fraction on
+     hover. */
+  .mod-pin .mod-t-on,
+  .mod-pin .mod-t-off { display: inline-flex; align-items: center; }
+  .mod-pin .mod-t-off { display: none; }
+  /* Keyed on [data-added] alone, not on .mod-card: the pill lives on a tile AND
+     in a table row, and both carry the attribute. Scoping it to the tile is how
+     the table view would silently lose its unpin affordance. */
+  [data-added='1'] .mod-pin:hover .mod-t-on { display: none; }
+  [data-added='1'] .mod-pin:hover .mod-t-off { display: inline-flex; }
+
+  /* Not pinned: revealed on hover and on focus. A permanent white pill on 26 of 45
+     tiles is 26 calls to action on a page whose job is browsing.
+
+     `opacity`, NOT `visibility: hidden` and NOT `display: none` — both of those
+     take the button out of the tab order, so a keyboard user could reach every
+     tile and add none of them. An opacity-0 button is still focusable, and
+     focusing it is what paints it. */
+  [data-added='0'] .mod-pin {
+    opacity: 0;
+    transition: opacity var(--jrk-transition);
+  }
+  [data-added='0']:hover .mod-pin,
+  [data-added='0']:focus-within .mod-pin { opacity: 1; }
+
+  /* ---------------------------------------------- table view */
+
+  /* THE TABLE IS THE LIBRARY'S, NOT A LOOKALIKE — a real <table> inside
+     .jrk-table-wrap, which is table.css's stated markup contract. Everything that
+     makes it read as this system comes from there and is deliberately NOT
+     restated here: the radius.md frame, the border.subtle hairline, shadow.card
+     at rest, the zebra, the frozen header and leading column, and the 70vh cap
+     that makes the freezing work at all. The only rules below are column widths
+     and the two things the library has no opinion about — a caret and a spinner.
+
+     Cards do not need an equivalent note: .mod-card sets no radius, no fill and
+     no shadow of its own, so it IS .jrk-card. The one thing it overrides is the
+     border colour, and that is the direction from 2026-08-20. */
+  .mod-tablewrap[hidden] { display: none; }
+  .mod-th-caret { width: 32px; }
+  .mod-th-pin { width: 56px; }
+
+  .mod-tr__name { font-weight: var(--jrk-weight-semibold); }
+  .mod-tr__desc {
+    display: block;
+    font-size: var(--jrk-text-xs);
+    color: var(--jrk-text-muted);
+  }
+
+  .mod-caret {
+    display: grid;
+    place-items: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid transparent;
+    background: none;
+    border-radius: var(--jrk-radius-sm);
+    color: var(--jrk-text-muted);
+    cursor: pointer;
+    transition: transform var(--jrk-transition);
+  }
+  .mod-caret:hover { background: var(--jrk-surface-hover); }
+  .mod-caret[aria-expanded='true'] { transform: rotate(90deg); }
+  .mod-caret[hidden] { display: none; }
+
+  /* A submodule row is a child of the row above it, and the indent is the only
+     thing saying so — zebra stripes it like any other row, and the leading column
+     is frozen, so it has to read as subordinate at the leading edge where the eye
+     lands. */
+  .mod-subrow[hidden] { display: none; }
+  .mod-subrow__cell { padding-inline-start: var(--jrk-space-8); }
+
+  .mod-sublink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--jrk-space-2);
+    color: var(--jrk-text-link);
+  }
+
+  /* ---------------------------------------------- loading
+
+     .jrk-spinner is the library's, and the only thing added here is the SLOT: a
+     fixed-size box the glyph and the spinner take turns in, so a row does not
+     reflow the instant it is clicked. The spinner is `--sm` (icon-sm) because it
+     is standing in for an icon, not covering a region — .jrk-loading is the
+     region form and it has 40px of padding.
+
+     A spinner alone announces nothing (feedback.css says so outright), so the row
+     also takes aria-busy and the link's own text is replaced by a live "Opening…"
+     — the visible label and the announced one are the same string. */
+  .mod-sublink__slot {
+    display: inline-grid;
+    place-items: center;
+    width: var(--jrk-icon-sm);
+    height: var(--jrk-icon-sm);
+    flex-shrink: 0;
+  }
+
+  /* UNDER prefers-reduced-motion THE SPINNER DOES NOT SPIN, and that is why the
+     text swap above is mandatory rather than a nicety. base.css's guard sets
+     `animation-duration: 0.01ms !important` AND `animation-iteration-count: 1
+     !important` on every element — it zeroes animations, not just transitions —
+     so .jrk-spinner renders as a static ring there. A static ring beside a
+     static glyph is not feedback. The label going to "Opening…" is the only
+     channel that survives the guard; do not "simplify" it away and leave the
+     spinner doing the work alone. */
+  .mod-subrow[aria-busy='true'] .mod-sublink { color: var(--jrk-text-muted); }
+
+  /* ---------------------------------------------- empty */
+
+  .mod-empty {
+    padding: var(--jrk-space-10) var(--jrk-space-4);
+    text-align: center;
+    color: var(--jrk-text-muted);
+    font-size: var(--jrk-text-sm);
+  }
+  .mod-empty[hidden] { display: none; }
+  .mod-empty strong { color: var(--jrk-text-primary); }
+
+  /* ---------------------------------------------- annotation */
+
+  .mod-note {
+    padding: 0 var(--jrk-space-5) var(--jrk-space-5);
+    font-size: var(--jrk-text-sm);
+    color: var(--jrk-text-secondary);
+  }
+  .mod-note ol { margin: 0; padding-inline-start: var(--jrk-space-5); }
+  .mod-note li + li { margin-top: var(--jrk-space-2); }
+  .mod-note b { color: var(--jrk-text-primary); font-weight: var(--jrk-weight-semibold); }
+</style>
+</head>
+<body>
+
+<div class="jrk-content">
+  <div class="jrk-content__inner mod-page">
+
+    <header class="jrk-page-header">
+      <div>
+        <h1 class="jrk-page-header__title">Modules</h1>
+        <p class="jrk-page-header__desc">
+          45 modules across 7 areas. <strong id="hdr-count">19</strong> are pinned to your portal —
+          those appear in your sidebar and on your home page. Click a tile to open a module;
+          use its <strong>Pin</strong> to put it in your portal. Pinning does not grant access;
+          scoping still comes from your role.
+        </p>
+      </div>
+      <div class="jrk-page-header__actions">
+        <button class="jrk-btn jrk-btn--secondary" type="button" id="btn-reset">Reset to defaults</button>
+        <button class="jrk-btn jrk-btn--cta" type="button">Done</button>
+      </div>
+    </header>
+
+    <div class="mod-toolbar" id="toolbar">
+      <div class="mod-toolbar__row">
+        <span class="jrk-input-group mod-toolbar__search">
+          <span class="jrk-input-group__icon">
+            <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="search"></svg>
+          </span>
+          <input class="jrk-input jrk-input--search" id="q" type="search"
+                 placeholder="Search modules &amp; submodules — press /"
+                 aria-label="Search modules and submodules">
+        </span>
+
+        <span class="jrk-spacer"></span>
+
+        <div class="jrk-btn-group" role="group" aria-label="View" id="view">
+          <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="true"  data-view="cards">Cards</button>
+          <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="false" data-view="table">Table</button>
+        </div>
+
+        <span class="mod-count" id="shown">45 shown</span>
+      </div>
+
+      <div class="mod-toolbar__row mod-cats">
+        <div class="jrk-tabs jrk-tabs--pills" role="tablist" aria-label="Filter by area" id="cats"></div>
+      </div>
+    </div>
+
+    <div id="views" role="tabpanel">
+    <div class="mod-catalog" id="catalog"></div>
+
+    <!-- The table view is the same 45 rows in the library's own <table>, and it
+         is where the submodules live: a grid of tiles has nowhere to put a second
+         level. .jrk-menu was the obvious alternative and it does not work here —
+         it is `position: absolute` and .jrk-card is `overflow: clip`, so a
+         dropdown opened from a tile is cut off at the tile's edge. feedback.css
+         lists three clipping ancestors; the card became a fourth when it was
+         rounded. -->
+    <div class="mod-tablewrap jrk-table-wrap" id="tablewrap" hidden>
+      <table class="jrk-table jrk-table--zebra" id="table">
+        <caption class="jrk-sr-only">Modules, with their submodules</caption>
+        <thead>
+          <tr>
+            <th scope="col" class="mod-th-caret"><span class="jrk-sr-only">Expand</span></th>
+            <th scope="col">Module</th>
+            <th scope="col">Area</th>
+            <th scope="col">Submodules</th>
+            <th scope="col" class="mod-th-pin"><span class="jrk-sr-only">In portal</span></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+    </div>
+    </div>
+
+    <p class="mod-empty" hidden id="empty">
+      Nothing matches <strong id="empty-q"></strong>.
+      <button class="jrk-btn jrk-btn--link" type="button" id="empty-clear">Clear filters</button>
+    </p>
+
+    <section class="jrk-card">
+      <div class="jrk-card__header">
+        <h2 class="jrk-card__title">What changed, and why</h2>
+        <p class="jrk-card__subtitle">Against the 45-card grid this replaces.</p>
+      </div>
+      <div class="mod-note">
+        <ol>
+          <li><b>Still a card grid, ~40% shorter.</b> The card lost its icon chip, its category
+              footnote and its chevron; the description clamps to two lines. 104px against ~130px,
+              eight columns against six, and grouped — the whole catalogue is about one screen at
+              1920&times;1080 instead of five.</li>
+          <li><b>A Table view, and it is the library's table.</b> A real
+              <code class="jrk-mono">&lt;table&gt;</code> inside
+              <code class="jrk-mono">.jrk-table-wrap</code>, so the radius, the hairline, the
+              resting shadow, the zebra, the frozen header and leading column and the 70vh cap
+              all come from <code class="jrk-mono">table.css</code> — nothing is restated here
+              but the column widths. It is also where the submodules live: a grid of tiles has
+              no room for a second level, and a <code class="jrk-mono">.jrk-menu</code> popover
+              cannot be used inside a tile because <code class="jrk-mono">.jrk-card</code> is
+              <code class="jrk-mono">overflow: clip</code> and would cut it off.</li>
+          <li><b>A clicked submodule spins until the next page arrives.</b>
+              <code class="jrk-mono">.jrk-spinner--sm</code> replaces the row's glyph in a
+              fixed-size slot so nothing reflows, the row takes
+              <code class="jrk-mono">aria-busy</code>, and the label becomes
+              &ldquo;Opening&nbsp;…&rdquo;. That label is not decoration: under
+              <code class="jrk-mono">prefers-reduced-motion</code> base.css zeroes
+              <em>animation</em>-duration as well as transitions, so the spinner does not turn
+              and the words are the only feedback left.</li>
+          <li><b>The icon chip is gone.</b> Three glyphs were shared across 45 modules, so the mark
+              on a card told you nothing about which card it was. The category glyph moved to the
+              group header, where it labels something true, and the name moved into the space —
+              text.md semibold, the largest thing on the tile.</li>
+          <li><b>Category became structure instead of a footnote.</b> It was printed on all 45 cards
+              and organised nothing. It is now the group header, the filter and the count, stated
+              once per area.</li>
+          <li><b>Two actions, two shapes.</b> The old card fused a chevron that navigated with a
+              corner glyph that toggled membership, so neither was safe to aim at. They are split
+              and the split is visible in the geometry the library already uses: tiles are
+              radius.md rectangles, controls are radius.full pills. The tile opens the module; the
+              pill pins it to your portal. The pill is the one thing on the card that is not a
+              rectangle.</li>
+          <li><b>Hover lifts the tile 3px.</b> More than emphasis: shadow.cardRaise is invisible in
+              dark by construction, so the hover used to rest on a 1.125:1 fill step there. A
+              transform is theme-blind — it is the first channel on this tile that reads the same
+              in both.</li>
+          <li><b>Submodules exist now.</b> The search field always claimed to match them and the page
+              never showed one. The footer carries the count, and a search that hits a submodule
+              names the match on the card instead.</li>
+          <li><b>In-portal sorts first inside each group</b> — on load, not on toggle, so nothing
+              jumps under the pointer. Each group header states its own <em>n of m</em>, and the
+              filter counts follow the current search rather than restating a constant. With the
+              accent edge and the In&nbsp;portal filter both removed, that <em>n of m</em> is the
+              only thing left answering &ldquo;what do I have&rdquo; without reading every tile —
+              it is not decoration.</li>
+        </ol>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script type="module">
+import { hydrateIcons } from './preview.js';
+
+const CATS = [
+  ['portfolio',    'Portfolio',         'house'],
+  ['acquisitions', 'Acquisitions',      'search'],
+  ['asset',        'Asset Management',  'chartBar'],
+  ['accounting',   'Accounting',        'sheet'],
+  ['forms',        'Forms & Approvals', 'doc'],
+  ['automation',   'Automation',        'clock'],
+  ['admin',        'Admin',             'gear'],
+];
+
+/* name, category, description, in-portal, submodules */
+const M = [
+  ['Required Repairs','portfolio','Lender-required repairs, deferred maintenance & escrow',1,['Escrow draws','Deferred items','Lender letters']],
+  ['Property Info','portfolio','Addresses, unit mix, year built & ownership basics',0,[]],
+  ['Ownership & Entities','portfolio','Legal entities, JV partners & ownership percentages',0,['Entity tree','Partner splits']],
+  ['Debt & Lender','portfolio','Loan terms, maturities, covenants & lender contacts',0,['Maturity ladder','Covenant tests']],
+  ['Budget Book','portfolio','Annual budget by property, line item & version',0,['Versions','Line detail']],
+  ['Valuations','portfolio','Cap rates, BOVs & internal marks over time',0,[]],
+
+  ['Deal Pipeline','acquisitions','Every deal the acquisitions team is tracking, filterable and rankable',1,['Stage board','Ranking','Deal notes']],
+  ['Hotel Pipeline','acquisitions','Hotel and resort deals the acquisitions team is tracking, by keys and guidance',1,['Keys & guidance','Comp set']],
+  ['Underwriting','acquisitions','Model runs, assumptions & sensitivity by deal',0,['Assumptions','Sensitivity']],
+  ['Due Diligence','acquisitions','DD checklist, document requests & findings by deal',0,['Checklist','Doc requests']],
+  ['Broker Contacts','acquisitions','Brokers, markets covered & deal history',0,[]],
+
+  ['AM Report','asset','One property&rsquo;s workbook — 12 months across, years down',1,['Operations','Financials','Occupancy']],
+  ['Lease Audit','asset','Lease document pipeline, classification & utility terms',1,['Classification','Utility terms','Exceptions']],
+  ['Portfolio Info & Assignments','asset','Property, management, accounting & contacts',1,['Assignments','Contacts']],
+  ['Make Ready','asset','Unit turn status, task completion & at-risk move-ins',1,['Turn board','At-risk move-ins']],
+  ['Pest Control','asset','Treatment coverage, cases & pest spend',1,['Cases','Spend']],
+  ['Trash Tracker','asset','Trash removal & bulk pickup cost against budget',1,['Bulk pickup','Contracts']],
+  ['Marketing','asset','Lead sources, funnel, reputation & cost per lease',1,['Funnel','Reputation','Cost per lease']],
+  ['Phone & Internet','asset','Phone, internet & cable cost per property',1,[]],
+  ['Snow Tracker','asset','Snowfall, per-push vs seasonal & contract strategy',1,['Per-push','Contracts']],
+  ['Property Mapping','asset','Site maps, buildings, amenities & the floor model',1,['Site maps','Floor model']],
+  ['Renewal Negotiations','asset','Renewal policies, expiring leases & the negotiation lifecycle',1,['Expirations','Policies']],
+  ['Turnover Cost','asset','Cost per turn by property, trade & unit type',0,['By trade','By unit type']],
+  ['Vendor Scorecard','asset','Vendor spend, response time & quality scores',0,['Response time','Spend']],
+  ['Capital Projects','asset','Capex projects, budget vs actual & completion',0,['Budget vs actual','Schedule']],
+
+  ['GL Audit','accounting','Entrata Core vs DS_ARCHIVE monthly tie-out',1,['Tie-out','Variances']],
+  ['GL Quality','accounting','GAAP expense-quality findings by property & account',1,['Findings','By account']],
+  ['Security Deposit Interest','accounting','Rates, balances, posted refunds & compliance for deposit interest',1,['Rates','Compliance']],
+  ['AP Aging','accounting','Open payables by vendor, property & age bucket',0,['By vendor','By age']],
+  ['Bank Recs','accounting','Reconciliation status, outstanding items & breaks',0,['Breaks','Status']],
+  ['Month-End Close','accounting','Close checklist, owner & days-to-close by entity',0,['Checklist','Days to close']],
+  ['Utility Billing','accounting','RUBS allocations, billbacks & recovery rate',0,['RUBS','Recovery']],
+  ['Tax & Insurance','accounting','Assessments, appeals, premiums & escrow adequacy',0,['Appeals','Escrow']],
+
+  ['Purchase Orders','forms','PO requests, approval chain & open commitments',0,['Approval chain','Open POs']],
+  ['Invoice Approvals','forms','Invoices awaiting approval, by approver and age',0,['By approver']],
+  ['Lease Exceptions','forms','Exception requests, justification & decision log',0,['Decision log']],
+  ['Expense Requests','forms','Out-of-budget spend requests and their outcomes',0,[]],
+  ['Form Builder','forms','Build and version the forms behind every approval flow',0,['Versions','Fields']],
+
+  ['Job Runs','automation','Every scheduled job, its last run, duration & outcome',0,['Failures','Durations']],
+  ['Data Syncs','automation','Source-to-warehouse syncs, freshness & row counts',0,['Freshness','Row counts']],
+  ['Alert Rules','automation','Threshold rules, who they notify & how often they fire',0,['Recipients','Fire history']],
+  ['Schedules','automation','Cron windows, blackout periods & dependency order',0,[]],
+
+  ['Users & Access','admin','Accounts, roles, scoping & permissions, plus the change log',1,['Roles','Scoping','Change log']],
+  ['Feedback','admin','Raise anything that looks wrong, and see what has been raised',1,['My reports','All reports']],
+  ['Audit Log','admin','Who saw what, who changed what, and when',0,[]],
+];
+
+const mods = M.map(([name, cat, desc, added, subs], i) => ({
+  id: 'm' + i,
+  name, cat, desc, subs,
+  added: !!added,
+  /* Pinned first inside a group, then alphabetical. Sorted ONCE, at build time —
+     re-sorting on every toggle would move the next tile under the pointer. */
+  sortKey: (added ? '0' : '1') + name.toLowerCase(),
+  self: (name + ' ' + desc).toLowerCase(),
+}));
+
+const byId = new Map(mods.map((m) => [m.id, m]));
+
+const icon = (n, cls = 'jrk-icon') =>
+  `<svg class="${cls}" viewBox="0 0 16 16" aria-hidden="true" data-icon="${n}"></svg>`;
+
+const state = { q: '', cat: 'all' };
+const catalog = document.getElementById('catalog');
+
+/* ---------------------------------------------------------------- render */
+
+catalog.innerHTML = CATS.map(([id, label, glyph]) => {
+  const cards = mods
+    .filter((m) => m.cat === id)
+    .sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+  return `
+    <section class="mod-group" data-group="${id}">
+      <div class="mod-group__head">
+        <span class="mod-group__icon">${icon(glyph)}</span>
+        <span class="mod-group__name">${label}</span>
+        <span class="mod-group__meta" data-meta="${id}"></span>
+      </div>
+      <div class="mod-grid">
+${cards.map((m) => `        <div class="jrk-card jrk-card--interactive mod-card" data-id="${m.id}" data-added="${m.added ? 1 : 0}">
+          <a class="mod-card__open" href="#" onclick="return false">
+            <span class="mod-card__name">${m.name}</span>
+            <span class="mod-card__desc">${m.desc}</span>
+          </a>
+          <span class="mod-card__foot">
+            <span class="mod-card__subs" data-subs="${m.id}">${m.subs.length ? m.subs.length + ' submodules' : ''}</span>
+            <button class="jrk-btn jrk-btn--sm mod-pin" type="button" data-add="${m.id}"></button>
+          </span>
+        </div>`).join('\n')}
+      </div>
+    </section>`;
+}).join('');
+
+/* The table carries the same 45 modules in the same order — grouped by area,
+   pinned first inside each area — so switching view never re-sorts anything
+   under the reader. The area moves from a group header into a column, which is
+   the one thing a table does better than a grid of tiles. */
+const ordered = CATS.flatMap(([id]) =>
+  mods.filter((m) => m.cat === id).sort((a, b) => a.sortKey.localeCompare(b.sortKey)));
+
+const CAT_LABEL = Object.fromEntries(CATS.map(([id, label]) => [id, label]));
+
+document.getElementById('tbody').innerHTML = ordered.map((m) => `
+  <tr class="mod-tr" data-row="${m.id}">
+    <td>${m.subs.length ? `<button class="mod-caret" type="button" aria-expanded="false"
+          aria-controls="${m.subs.map((_, i) => `sub-${m.id}-${i}`).join(' ')}"
+          aria-label="Show submodules of ${m.name}" data-caret="${m.id}">${icon('chevronRight')}</button>` : ''}</td>
+    <td>
+      <a class="jrk-link" href="#" onclick="return false">${m.name}</a>
+      <span class="mod-tr__desc">${m.desc}</span>
+    </td>
+    <td>${CAT_LABEL[m.cat]}</td>
+    <td data-subcount="${m.id}">${m.subs.length || '—'}</td>
+    <td><button class="jrk-btn jrk-btn--sm mod-pin" type="button" data-add="${m.id}"></button></td>
+  </tr>
+${m.subs.map((s, i) => `  <tr class="mod-subrow" id="sub-${m.id}-${i}" data-parent="${m.id}" hidden>
+    <td></td>
+    <td class="mod-subrow__cell" colspan="3">
+      <a class="mod-sublink" href="#" data-sub="${m.id}-${i}">
+        <span class="mod-sublink__slot">${icon('chevronRight', 'jrk-icon jrk-icon--sm')}</span>
+        <span class="mod-sublink__label">${s}</span>
+      </a>
+    </td>
+    <td></td>
+  </tr>`).join('\n')}`).join('');
+
+document.getElementById('cats').innerHTML =
+  [['all', 'All']].concat(CATS.map(([id, label]) => [id, label]))
+    .map(([id, label]) => `<button class="jrk-tab" type="button" role="tab" data-cat="${id}"
+        aria-controls="views" aria-selected="${id === 'all'}">${label}<span class="jrk-tab__count" data-cat-count="${id}"></span></button>`)
+    .join('');
+
+/* ---------------------------------------------------------------- paint */
+
+/* Takes the BUTTON, not the tile: the same pill now appears on a card and in a
+   table row, and one painter for both is what stops the two views from drifting
+   into different labels for the same state. */
+function paintState(btn, name, on) {
+  /* The library's own two volumes: tinted --primary for the state you have taken,
+     plain --secondary for the one you have not. Neither is --cta — there is
+     exactly one commit action on this page and it is "Done". */
+  /* PINNED IS ICON-ONLY, by direction, so it takes .jrk-btn--icon — the library's
+     square variant, which is `width: var(--btn-h); padding-inline: 0`. Writing it
+     as a bare glyph inside the normal pill instead would leave the button's md
+     side padding round a 16px icon and give a lopsided lozenge. */
+  btn.className = 'jrk-btn jrk-btn--sm mod-pin ' +
+    (on ? 'jrk-btn--primary jrk-btn--icon' : 'jrk-btn--secondary');
+  btn.setAttribute('aria-pressed', String(on));
+  /* button.css: "Always needs an aria-label — the icon is the only content, so
+     nothing else names it." The title is the sighted equivalent, since the word
+     that used to do this job is gone. */
+  const label = (on ? 'Unpin ' : 'Pin ') + name + (on ? ' from' : ' to') + ' your portal';
+  btn.setAttribute('aria-label', label);
+  btn.title = label;
+  /* PINNED TAKES THE FILLED GLYPH, UNPINNED THE OUTLINE — icon.css's own rule
+     that "filled variants are the norm for status and selected states". With the
+     word gone this is no longer a third channel, it is one of only two: the
+     tinted-vs-plain volume, and filled-vs-outline. Outline/solid is the one that
+     survives greyscale and both dichromacies, so it is now load-bearing — do not
+     let a tidy-up point both states at the same glyph. */
+  btn.innerHTML = on
+    ? `<span class="mod-t-on">${icon('pinFill')}</span>` +
+      `<span class="mod-t-off">${icon('pin')}</span>`
+    : `${icon('pin')} Pin`;
+}
+
+/* Which text the footer carries. Default is the submodule count; a search that
+   matched a SUBMODULE rather than the module itself names the match instead, so
+   a card never turns up in the results with nothing on it explaining why. */
+function paintSubs(m, q) {
+  const el = catalog.querySelector(`[data-subs="${m.id}"]`);
+  const hits = q && !m.self.includes(q)
+    ? m.subs.filter((s) => s.toLowerCase().includes(q))
+    : [];
+  if (hits.length) {
+    el.className = 'mod-card__subs mod-card__match';
+    el.textContent = 'Matches ' + hits.join(', ');
+  } else {
+    el.className = 'mod-card__subs';
+    el.textContent = m.subs.length ? m.subs.length + ' submodules' : '';
+  }
+}
+
+function matches(m, q) {
+  return !q || m.self.includes(q) || m.subs.some((s) => s.toLowerCase().includes(q));
+}
+
+function apply() {
+  const q = state.q.trim().toLowerCase();
+  let shown = 0;
+
+  for (const m of mods) {
+    const card = catalog.querySelector(`[data-id="${m.id}"]`);
+    const hit = matches(m, q) && (state.cat === 'all' || state.cat === m.cat);
+    card.hidden = !hit;
+
+    /* The table is filtered by the same predicate, not a parallel one. A row and
+       its submodule rows hide together; an expanded row that is filtered out
+       collapses, so it does not come back open when the filter is cleared. */
+    const row = document.querySelector(`[data-row="${m.id}"]`);
+    row.hidden = !hit;
+    if (!hit) closeRow(m.id);
+
+    if (hit) { shown++; paintSubs(m, q); }
+  }
+
+  let inPortalTotal = 0;
+
+  for (const [id] of CATS) {
+    const group = catalog.querySelector(`[data-group="${id}"]`);
+    const cards = [...group.querySelectorAll('.mod-card')];
+    group.hidden = cards.every((c) => c.hidden);
+
+    const inPortal = cards.filter((c) => c.dataset.added === '1').length;
+    inPortalTotal += inPortal;
+    group.querySelector(`[data-meta="${id}"]`).textContent =
+      `${inPortal} of ${cards.length} in portal`;
+
+    /* The pill count is the count under the CURRENT search, so the filter bar
+       tells you where the matches are instead of restating a constant. */
+    document.querySelector(`[data-cat-count="${id}"]`).textContent =
+      String(cards.filter((c) => matches(byId.get(c.dataset.id), q)).length);
+  }
+
+  document.querySelector('[data-cat-count="all"]').textContent =
+    String(mods.filter((m) => matches(m, q)).length);
+
+  document.getElementById('shown').textContent = `${shown} shown`;
+  document.getElementById('hdr-count').textContent = String(inPortalTotal);
+
+  const empty = document.getElementById('empty');
+  empty.hidden = shown > 0;
+  document.getElementById('empty-q').textContent =
+    q ? '“' + state.q.trim() + '”' : 'these filters';
+
+  hydrateIcons(document);
+}
+
+/* Both views hold a pill for every module, so both get painted. They read the
+   same data-added on their own element — there is no shared source of truth to
+   drift, because paintPills() writes every one of them from the model. */
+function paintPills() {
+  for (const m of mods) {
+    const on = catalog.querySelector(`[data-id="${m.id}"]`).dataset.added === '1';
+    document.querySelector(`[data-row="${m.id}"]`).dataset.added = on ? '1' : '0';
+    document.querySelectorAll(`[data-add="${m.id}"]`).forEach((b) => paintState(b, m.name, on));
+  }
+}
+
+function closeRow(id) {
+  const caret = document.querySelector(`[data-caret="${id}"]`);
+  if (caret) caret.setAttribute('aria-expanded', 'false');
+  document.querySelectorAll(`[data-parent="${id}"]`).forEach((r) => { r.hidden = true; });
+}
+
+paintPills();
+
+/* ---------------------------------------------------------------- events */
+
+/* One listener on the document for the pill, because it exists in both views and
+   two listeners would be two places to forget. */
+addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-add]');
+  if (!btn) return;
+  /* On a card the pill sits over a stretched link. Stopping the event is what
+     keeps the two actions separate — without it, pinning a module also opens it. */
+  e.preventDefault();
+  e.stopPropagation();
+  const card = catalog.querySelector(`[data-id="${btn.dataset.add}"]`);
+  card.dataset.added = card.dataset.added === '1' ? '0' : '1';
+  paintPills();
+  apply();
+});
+
+/* ---- the table's disclosure ---- */
+
+document.getElementById('tbody').addEventListener('click', (e) => {
+  const caret = e.target.closest('[data-caret]');
+  if (!caret) return;
+  const open = caret.getAttribute('aria-expanded') === 'true';
+  caret.setAttribute('aria-expanded', String(!open));
+  document.querySelectorAll(`[data-parent="${caret.dataset.caret}"]`)
+    .forEach((r) => { r.hidden = open; });
+});
+
+/* ---- the submodule's loading state ----
+
+   The click is the last thing that happens on THIS page: the link is a real
+   navigation, so the row stays busy until the browser replaces the document.
+   There is nothing to "finish" and no success state to render — which is exactly
+   why the row is left spinning rather than reset on a timer.
+
+   Three things change together and each covers a case the others do not:
+     - the glyph becomes .jrk-spinner--sm, which is the sighted signal;
+     - the label becomes "Opening …", which is the ONLY signal that survives
+       prefers-reduced-motion, where the spinner cannot turn (see the CSS note);
+     - the row takes aria-busy and the link aria-disabled, which is what a screen
+       reader gets and what stops a second click starting a second navigation.
+
+   In this preview there is no next page, so the navigation is stubbed with a
+   timer purely so the state is visible long enough to look at. THAT TIMER IS THE
+   DEMO, not the design — in the app, delete it and let the anchor navigate. */
+document.getElementById('tbody').addEventListener('click', (e) => {
+  const link = e.target.closest('.mod-sublink');
+  if (!link) return;
+  e.preventDefault();
+  const row = link.closest('.mod-subrow');
+  if (row.getAttribute('aria-busy') === 'true') return;
+
+  row.setAttribute('aria-busy', 'true');
+  link.setAttribute('aria-disabled', 'true');
+  const name = link.querySelector('.mod-sublink__label').textContent;
+  link.querySelector('.mod-sublink__slot').innerHTML =
+    '<span class="jrk-spinner jrk-spinner--sm" aria-hidden="true"></span>';
+  link.querySelector('.mod-sublink__label').textContent = `Opening ${name}…`;
+
+  setTimeout(() => {
+    row.removeAttribute('aria-busy');
+    link.removeAttribute('aria-disabled');
+    link.querySelector('.mod-sublink__slot').innerHTML =
+      '<svg class="jrk-icon jrk-icon--sm" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronRight"></svg>';
+    link.querySelector('.mod-sublink__label').textContent = name;
+    hydrateIcons(link);
+  }, 2200);
+});
+
+document.getElementById('q').addEventListener('input', (e) => {
+  state.q = e.target.value;
+  apply();
+});
+
+document.getElementById('cats').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-cat]');
+  if (!b) return;
+  state.cat = b.dataset.cat;
+  document.querySelectorAll('#cats .jrk-tab').forEach((o) =>
+    o.setAttribute('aria-selected', String(o === b)));
+  apply();
+});
+
+document.getElementById('view').addEventListener('click', (e) => {
+  const b = e.target.closest('[data-view]');
+  if (!b) return;
+  const table = b.dataset.view === 'table';
+  catalog.hidden = table;
+  document.getElementById('tablewrap').hidden = !table;
+  document.querySelectorAll('#view .jrk-btn').forEach((o) =>
+    o.setAttribute('aria-pressed', String(o === b)));
+});
+
+document.getElementById('empty-clear').addEventListener('click', () => {
+  state.q = '';
+  state.cat = 'all';
+  document.getElementById('q').value = '';
+  document.querySelectorAll('#cats .jrk-tab').forEach((o) =>
+    o.setAttribute('aria-selected', String(o.dataset.cat === 'all')));
+  apply();
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  for (const m of mods) {
+    catalog.querySelector(`[data-id="${m.id}"]`).dataset.added = m.added ? '1' : '0';
+  }
+  paintPills();
+  apply();
+});
+
+/* `/` focuses the search field. 45 items is a keyboard-sized set. */
+addEventListener('keydown', (e) => {
+  if (e.key === '/' && !/^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName)) {
+    e.preventDefault();
+    document.getElementById('q').focus();
+  }
+});
+
+/* The group headers pin BELOW the toolbar, so their offset is the toolbar's real
+   measured height — the same bargain --jrk-sheet-frozen-top makes, and it fails
+   the same way if the bar is restyled and nobody remeasures. Measured rather
+   than stated, because this bar holds a scroller whose height follows its pills. */
+const bar = document.getElementById('toolbar');
+const setTop = () =>
+  document.documentElement.style.setProperty('--mod-toolbar-h', bar.offsetHeight + 'px');
+new ResizeObserver(setTop).observe(bar);
+setTop();
+
+apply();
+</script>
+</body>
+</html>

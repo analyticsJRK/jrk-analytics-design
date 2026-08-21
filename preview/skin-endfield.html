@@ -1,0 +1,389 @@
+<!-- @dsCard group="Skins" name="Endfield skin" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Endfield skin — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<!-- The skin, in the order a consuming app uses: the generated colour layer
+     first, then the geometry stylesheet. Both AFTER css/index.css. -->
+<link rel="stylesheet" href="../dist/jrk-skin-endfield.css">
+<link rel="stylesheet" href="../css/skins/endfield.css">
+<link rel="stylesheet" href="preview.css">
+<style>
+  /* Gallery chrome for the hazard picker. Not part of the library.
+     The fill below is a FALLBACK: sampleHazards() in the script writes each
+     swatch's real colour as an inline style. It used to be the mechanism —
+     every swatch stamped data-skin + data-hazard on itself and filled from
+     var(--jrk-accent-solid) — and it silently painted all six the same, because
+     the generated hazard blocks are anchored at :root and a button is not the
+     root. See the note on sampleHazards for why sampling beats the two
+     alternatives. */
+  .haz { display: flex; gap: 6px; }
+  .haz button {
+    width: 30px; height: 30px; padding: 0; cursor: pointer;
+    border: 1px solid var(--jrk-border-default);
+    background: var(--jrk-accent-solid);
+    clip-path: polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+  }
+  .haz button[aria-checked='true'] {
+    outline: 2px solid var(--jrk-text-primary);
+    outline-offset: 2px;
+  }
+  .haz button:focus-visible { box-shadow: var(--jrk-shadow-focus); }
+</style>
+</head>
+<body>
+
+<div class="gal-page">
+  <header class="gal-page__head">
+    <h1>Endfield skin</h1>
+    <p>
+      An industrial-HUD skin over the same components: cool concrete under a
+      technical grid, square panels cut at 45&deg;, and one hazard yellow. Use the
+      toggle below to stamp <code>data-skin="endfield"</code> on the document —
+      nothing on this page changes markup, only the stamp. The theme toggle in
+      the nav still works, because <strong>the skin is orthogonal to the
+      theme</strong>: it has its own light and dark halves, so there are four
+      combinations to check rather than three.
+    </p>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;margin-top:16px">
+      <div>
+        <div class="gal-note" style="margin-bottom:6px"><strong>Skin</strong></div>
+        <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Skin">
+          <button class="jrk-tab" data-skin-btn="" type="button">Base</button>
+          <button class="jrk-tab" data-skin-btn="endfield" type="button">Endfield</button>
+        </div>
+      </div>
+      <div>
+        <div class="gal-note" style="margin-bottom:6px"><strong>Hazard hue</strong></div>
+        <div class="haz" role="radiogroup" aria-label="Hazard hue" id="haz"></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="gal-sec">
+    <h2>Tiles and the notch</h2>
+    <p class="gal-note">
+      The chamfer is drawn with <code>clip-path</code>, which clips the box-shadow
+      too — so under this skin a notched tile has no ambient shadow and its
+      enclosure is the hairline plus the fill step. That is also why the hover
+      fill is a real 1.14:1 / 1.30:1 step here: with the shadow gone, the fill is
+      the whole hover in both halves.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Occupancy index</span>
+        <span class="jrk-stat__value">94.2<span class="jrk-stat__unit">%</span></span>
+        <span class="jrk-delta jrk-delta--good">&#9650; 4.2 pts</span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Net operating income</span>
+        <span class="jrk-stat__value">2,341</span>
+        <span class="jrk-delta jrk-delta--good">&#9650; 3.1%</span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Delinquency</span>
+        <span class="jrk-stat__value">35</span>
+        <span class="jrk-delta jrk-delta--bad">&#9660; 1.8%</span>
+      </div>
+      <div class="jrk-card jrk-card--interactive">
+        <div class="jrk-card__header"><span class="jrk-card__title">Interactive tile</span></div>
+        <div class="jrk-card__body">
+          <p>Hover this. The lift is a fill step, not a shadow.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Controls are square; one is still a circle</h2>
+    <p class="gal-note">
+      Controls are squared rather than chamfered, because clipping them would
+      delete the <code>shadow-md</code> that is the only boundary a white button
+      has in light. <code>.jrk-btn--icon</code> keeps <code>radius-full</code> on
+      purpose — it is this look's charcoal chip. The danger button wears hazard
+      tape as a 6px edge bar: the stripe alternates the accent and near-black, so
+      no ink survives it as a ground.
+    </p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="jrk-btn jrk-btn--cta" type="button">Commit</button>
+      <button class="jrk-btn jrk-btn--primary" type="button">Export</button>
+      <button class="jrk-btn jrk-btn--secondary" type="button">Cancel</button>
+      <button class="jrk-btn jrk-btn--danger" type="button">Purge</button>
+      <button class="jrk-btn jrk-btn--ghost" type="button">Ghost</button>
+      <button class="jrk-btn jrk-btn--icon" type="button" aria-label="Filter"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="filter"></svg></button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:16px">
+      <div class="jrk-btn-group" role="group" aria-label="Range">
+        <button class="jrk-btn" type="button" aria-pressed="true">Month</button>
+        <button class="jrk-btn" type="button" aria-pressed="false">Quarter</button>
+        <button class="jrk-btn" type="button" aria-pressed="false">YTD</button>
+      </div>
+      <span class="jrk-badge jrk-badge--good">Stabilized</span>
+      <span class="jrk-badge jrk-badge--warning">Watch</span>
+      <span class="jrk-badge jrk-badge--critical">Flagged</span>
+      <span class="jrk-dot jrk-dot--good"></span>
+      <span class="jrk-spinner jrk-spinner--sm"></span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;max-width:520px">
+      <input class="jrk-input" type="text" placeholder="Asset name" aria-label="Asset name">
+      <input class="jrk-input jrk-input--search" type="search" placeholder="Search" aria-label="Search">
+      <select class="jrk-select" aria-label="Region">
+        <option>Valley</option><option>North</option><option>Basin</option>
+      </select>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>A table, and the labels that shout</h2>
+    <p class="gal-note">
+      Column headers are uppercase at <code>tracking-caps</code> (0.14em under
+      this skin) — the signature. Values are deliberately left alone: tracking
+      that wide makes two numbers harder to compare, and the numbers are what a
+      reader is comparing.
+    </p>
+    <div class="jrk-table-wrap">
+      <table class="jrk-table jrk-table--zebra">
+        <caption class="jrk-sr-only">Assets by region</caption>
+        <thead>
+          <tr><th scope="col">Asset</th><th scope="col">Region</th><th scope="col">Units</th><th scope="col">NOI &Delta;</th><th scope="col">Status</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Talos Court</td><td>Valley</td><td>184</td><td><span class="jrk-delta jrk-delta--good">&#9650; 3.4%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
+          <tr><td>Rhine Yard</td><td>North</td><td>96</td><td><span class="jrk-delta jrk-delta--bad">&#9660; 1.1%</span></td><td><span class="jrk-badge jrk-badge--warning">Watch</span></td></tr>
+          <tr><td>Endfield Row</td><td>Basin</td><td>212</td><td><span class="jrk-delta jrk-delta--good">&#9650; 8.0%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
+          <tr><td>Kesler Flats</td><td>Valley</td><td>58</td><td><span class="jrk-delta jrk-delta--flat">&mdash; flat</span></td><td><span class="jrk-badge jrk-badge--critical">Flagged</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>The chart palette is inherited, not overridden</h2>
+    <p class="gal-note">
+      The skin's light panel is <code>#f4f6f6</code> rather than white, so every
+      light mark loses about 8% contrast — and no slot crosses the 3:1 mark floor,
+      which <code>npm run validate:skin</code> checks on every build. Dark
+      improves slightly. What did have to move is
+      <code>chart.chrome.surface</code>: it is stroked as the ring around a dot,
+      so a stale value paints the wrong colour instead of failing visibly.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+      <div class="jrk-chart-card">
+        <div class="jrk-chart-card__header"><span class="jrk-chart-card__title">Series slots</span></div>
+        <div class="jrk-chart-card__body">
+          <div class="jrk-legend">
+            <span class="jrk-legend__item"><span class="jrk-legend__swatch jrk-s1"></span>Valley</span>
+            <span class="jrk-legend__item"><span class="jrk-legend__swatch jrk-s2"></span>North</span>
+            <span class="jrk-legend__item"><span class="jrk-legend__swatch jrk-s3"></span>Basin</span>
+            <span class="jrk-legend__item"><span class="jrk-legend__swatch jrk-s4"></span>Ridge</span>
+          </div>
+          <div class="jrk-bars" style="margin-top:12px">
+            <div class="jrk-bars__row"><span class="jrk-bars__label">Valley</span><span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:82%"></span></span><span class="jrk-bars__value">82</span></div>
+            <div class="jrk-bars__row"><span class="jrk-bars__label">North</span><span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:64%"></span></span><span class="jrk-bars__value">64</span></div>
+            <div class="jrk-bars__row"><span class="jrk-bars__label">Basin</span><span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:41%"></span></span><span class="jrk-bars__value">41</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="jrk-card">
+        <div class="jrk-card__header"><span class="jrk-card__title">Progress and meters</span></div>
+        <div class="jrk-card__body">
+          <div class="jrk-progress"><span class="jrk-progress__fill" style="width:64%"></span></div>
+          <div class="jrk-progress jrk-progress--warning" style="margin-top:10px"><span class="jrk-progress__fill" style="width:38%"></span></div>
+          <div class="jrk-progress jrk-progress--critical" style="margin-top:10px"><span class="jrk-progress__fill" style="width:12%"></span></div>
+          <p class="gal-note" style="margin-top:12px">End caps are squared — <code>radius-data-end</code> is 0 under this skin, because a rounded cap reads as a gauge.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Feedback, and the yellow that cannot be a letter</h2>
+    <p class="gal-note">
+      In light, <code>accent-text</code> is a deep olive-gold
+      (<code>#6b5e00</code>, 6.00:1) and <code>border-accent</code> is
+      <code>#a08d00</code> (3.07:1) — the brand yellow reaches neither floor on a
+      light panel. In dark, all four accent roles take the brand stop itself at
+      12.57:1. That asymmetry is the skin's whole discipline, and it is the
+      opposite of the base library, where one anchor serves every role.
+    </p>
+    <div class="jrk-alert jrk-alert--accent">
+      <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="info"></svg>
+      <div class="jrk-alert__body">
+        <span class="jrk-alert__title">Rent roll refreshed</span>
+        <span class="jrk-alert__text">Figures are as of 06:00. Two assets are still reconciling.</span>
+      </div>
+    </div>
+    <div class="jrk-alert jrk-alert--warning" style="margin-top:12px">
+      <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warning"></svg>
+      <div class="jrk-alert__body">
+        <span class="jrk-alert__title">Delinquency above threshold</span>
+        <span class="jrk-alert__text">Warning is a burnt orange here, not the accent — a yellow warning cannot read as a warning on a yellow accent.</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Six hazard hues, and what changed when a second one was measured</h2>
+    <p class="gal-note">
+      Only the accent namespace varies &mdash; the steel neutrals, the status set,
+      the geometry and the type belong to the skin. Three rules that read as rules
+      about the design turned out to be rules about <em>yellow</em>:
+    </p>
+    <ul class="gal-note" style="max-width:74ch">
+      <li><strong>&ldquo;The wedge cannot bound itself&rdquo; is a yellow rule.</strong>
+        Yellow is 1.17:1 on the light panel and green 1.38:1, so neither does &mdash;
+        but red is 4.27:1, blue 4.23:1 and purple 5.62:1, and those three are their
+        own <code>border-accent</code> with no stepped value at all.</li>
+      <li><strong>&ldquo;Black ink always&rdquo; is a yellow rule.</strong> Yellow,
+        orange and green take black; red, purple and blue take white, and no step of
+        them takes black.</li>
+      <li><strong>Five of six share one fill across both themes.</strong> Only purple
+        lifts in dark (<code>#8f24db</code> &rarr; <code>#9a3adf</code>) to clear 3:1
+        on the dark panel.</li>
+    </ul>
+    <p class="gal-note" style="max-width:74ch">
+      The variants also forced the topbar wedge onto <code>accent-wash</code> rather
+      than the vivid fill: the bar is inked near-black, and black measures 3.92:1 on
+      the blue, 3.88:1 on the red and 2.95:1 on the purple. Every wash carries
+      near-black at 11.6:1 or better, so the wedge is safe for all six with no
+      layout condition &mdash; which is the bargain the base library&rsquo;s brand
+      ramp makes and this skin declines.
+    </p>
+    <div class="jrk-alert jrk-alert--warning" style="margin-top:16px">
+      <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warning"></svg>
+      <div class="jrk-alert__body">
+        <span class="jrk-alert__title">Hazard red carries a restriction</span>
+        <span class="jrk-alert__text">
+          A hazard red and this skin&rsquo;s status reds are the same hue by
+          construction, so under protanopia the accent and the danger signal
+          collapse (&Delta;E 3.2&ndash;6.3, acknowledged in the token file and
+          gated). With <code>data-hazard="red"</code>, status badges must carry icon
+          and label, and a CTA must not share a tile with a solid danger button.
+          Orange is the nearest hue that clears every status colour (worst
+          &Delta;E 17.0).
+        </span>
+      </div>
+    </div>
+    <p class="gal-note" style="margin-top:16px;max-width:74ch">
+      Separation <em>between</em> hazard hues is deliberately not a requirement:
+      yellow/green collide at &Delta;E 8.8 and purple/blue at 4.3, and it does not
+      matter because exactly one is stamped at a time. A chart slot is positional
+      and its neighbours are on screen; a hazard hue is exclusive. What is gated is
+      each hue against the status colours, which <em>are</em> on screen with it.
+    </p>
+  </section>
+</div>
+
+<script type="module">
+/* SIDE-EFFECT IMPORT, and it must stay one. preview.js calls initChrome() and
+   hydrateIcons() at module scope — importing it IS what installs the gallery
+   bar. Calling initChrome() again here prepended a SECOND .gal-nav, which is
+   what shipped: two identical navs stacked down the page. */
+import './preview.js';
+
+/* The skin stamp, kept in the URL so a reload and a shared link both hold it.
+   Deliberately NOT in localStorage like the theme: the theme is a reader's
+   standing preference, the skin is what this one page is demonstrating. */
+const SKIN = 'endfield';
+function applySkin(v) {
+  if (v) document.documentElement.dataset.skin = v;
+  else delete document.documentElement.dataset.skin;
+  const url = new URL(location.href);
+  v ? url.searchParams.set('skin', v) : url.searchParams.delete('skin');
+  history.replaceState(null, '', url);
+  document.querySelectorAll('[data-skin-btn]').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.skinBtn === v));
+  });
+}
+document.querySelectorAll('[data-skin-btn]').forEach((b) => {
+  b.addEventListener('click', () => applySkin(b.dataset.skinBtn));
+});
+
+/* The hazard picker. The default hue is the ABSENCE of data-hazard, not a value
+   of it, so "yellow" REMOVES the attribute rather than setting it — which is the
+   same reason an app that never stamps it cannot change. */
+const HAZARDS = ['yellow', 'orange', 'red', 'purple', 'blue', 'green'];
+const haz = document.getElementById('haz');
+haz.innerHTML = HAZARDS.map((x) => {
+  const stamp = x === 'yellow' ? '' : ' data-hazard="' + x + '"';
+  return '<button type="button" role="radio" aria-checked="false" aria-label="' + x +
+         '" title="' + x + '" data-haz="' + x + '" data-skin="endfield"' + stamp + '></button>';
+}).join('');
+
+/* THE SWATCHES HAVE TO BE SAMPLED, not stamped, and the reason is in the
+   generated CSS. Every hazard block is anchored at
+   `:root[data-skin="endfield"][data-hazard="X"]` — :root matches <html> and
+   nothing else — so a BUTTON carrying its own data-hazard matches none of them
+   and just inherits the root's --jrk-accent-solid. That is why all six swatches
+   painted the currently-selected hue instead of six different ones.
+
+   Three ways out, and this is the least bad. Hard-coding six hexes here is a
+   seventh copy of the palette, free to drift — the note at the top of this file
+   rejects that and it is right. Emitting a second, un-anchored copy of every
+   hazard block widens the skin contract for a gallery affordance. So: stamp the
+   ROOT once per hue, read the resolved value off the cascade, put the root back.
+   It still reads the real cascade, which was the original intent; it just does
+   it through the only selector that can match. Synchronous, so nothing paints
+   between the six reads. */
+function sampleHazards() {
+  const root = document.documentElement;
+  const held = root.dataset.hazard;
+  const out = {};
+  for (const x of HAZARDS) {
+    if (x === 'yellow') delete root.dataset.hazard;
+    else root.dataset.hazard = x;
+    out[x] = getComputedStyle(root).getPropertyValue('--jrk-accent-solid').trim();
+  }
+  if (held === undefined) delete root.dataset.hazard;
+  else root.dataset.hazard = held;
+  for (const b of haz.querySelectorAll('[data-haz]')) b.style.background = out[b.dataset.haz];
+}
+
+/* Each hue has its own light and dark value, so the strip is re-sampled when the
+   theme changes. data-hazard is filtered out or applyHazard would re-enter this
+   through its own root write. */
+new MutationObserver((recs) => {
+  if (recs.some((r) => r.attributeName !== 'data-hazard')) sampleHazards();
+}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-skin'] });
+
+function applyHazard(x) {
+  const root = document.documentElement;
+  if (x && x !== 'yellow') root.dataset.hazard = x;
+  else delete root.dataset.hazard;
+  const u = new URL(location.href);
+  if (x && x !== 'yellow') u.searchParams.set('hazard', x);
+  else u.searchParams.delete('hazard');
+  history.replaceState(null, '', u);
+  haz.querySelectorAll('[data-haz]').forEach((b) => {
+    b.setAttribute('aria-checked', String(b.dataset.haz === (x || 'yellow')));
+  });
+}
+haz.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-haz]');
+  if (b) applyHazard(b.dataset.haz);
+});
+/* Arrow keys, because a radiogroup that answers only the pointer is not one. */
+haz.addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.preventDefault();
+  const cur = HAZARDS.indexOf(document.documentElement.dataset.hazard || 'yellow');
+  const next = (cur + (e.key === 'ArrowRight' ? 1 : -1) + HAZARDS.length) % HAZARDS.length;
+  applyHazard(HAZARDS[next]);
+  haz.querySelectorAll('[data-haz]')[next].focus();
+});
+/* Default ON — this page exists to show the skin — but an explicit ?skin= in the
+   URL wins in either direction, so a link to the base comparison survives a
+   reload. */
+const url0 = new URL(location.href);
+const param = url0.searchParams.get('skin');
+applySkin(param === null || param === SKIN ? SKIN : '');
+const h0 = url0.searchParams.get('hazard');
+applyHazard(HAZARDS.includes(h0) ? h0 : 'yellow');
+/* After the skin stamp lands, or every swatch samples the BASE accent. */
+sampleHazards();
+</script>
+</body>
+</html>
