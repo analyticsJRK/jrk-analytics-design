@@ -360,6 +360,11 @@
       "dark": "rgba(230, 234, 234, 0.13)",
       "$note": "The technical grid. DOTS AT THE INTERSECTIONS rather than continuous lines (2026-08-20) — the reference look's ground is a dot field. Drawn as a masked radial-gradient tile by the skin stylesheet; hand-recorded because nothing measures a colour inside a gradient.\n\nTHE ALPHA IS PINNED BY text.muted ON THE PAGE'S DARK END, not by moire, and this note used to say otherwise. The old 'roughly 0.09, it moires against an 11px label' ceiling is real but it is the SECOND constraint. On the pre-2026-08-20 ramp (dark end #d6dadb) the contrast ceiling was 0.050 — BELOW the moire figure — and the dot it painted was 1.10:1, which is measurably present and visually absent. That is what the page lightening was for: on #e4e7e7 the ceiling is 0.115. At 0.10 the dot lands at 1.22:1 with text.muted at 4.64:1 and text.secondary at 6.54:1. Dark has more room and takes 0.13 — 1.35:1, muted 4.88:1.\n\nTHE WAVE DOES NOT EAT THIS BUDGET, and that is a property of the masks rather than of the alphas: the two layers are masked complementarily, dots below the horizon and wave above, so a dot never composites on top of an arc. Break that — mask them to overlap, or drop a mask — and the two alphas ADD, which on the light half puts muted under the floor. If you want the dots to read more strongly, reach for the RADIUS in the stylesheet first: radius is free against a per-pixel contrast floor and alpha is not."
     },
+    "surface-glow": {
+      "light": "#ffe500",
+      "dark": "#ffffff",
+      "$note": "THE ILLUMINATION AT THE WIPE'S LEADING EDGE — the bloom that travels with the reveal on .jrk-hovercard--materialize, so the panel reads as loading in rather than being uncovered. Transient decoration, drawn as a gradient on a pseudo-element, so hand-recorded: nothing measures a colour inside a gradient.\n\nDARK IS THE EFFECT AND LIGHT IS A SUBSTITUTE, because YOU CANNOT ILLUMINATE WHITE. The hovercard's panel is surface-raised, which in light is #ffffff — pure white, and deliberately so; its own note explains that it is the one place this palette uses pure white, to lift a popover off the #f4f6f6 card. A white glow there measures 1.00:1. Not faint: absent. There is no brighter-than-white to bloom toward, so no re-stepping fixes it and the request cannot be met literally in that half.\n\nSO LIGHT TAKES THE BRAND YELLOW AT 1.28:1, WHICH IS A CHROMA-ONLY SIGNAL, and it is only defensible because the effect is REDUNDANTLY ENCODED. The same edge also carries the hard scanline bar in border-accent, which is 3.33:1 on this panel and therefore visible in greyscale, to a monochromat and in print. The bloom is the colour half of a two-channel signal, not the signal. If the bar is ever dropped, the light half of this glow becomes decoration nobody can see and should be dropped with it.\n\nDark takes the real thing: #ffffff at 13.52:1 on the #2b2f31 panel. No contrast floor applies to either — this is never a ground for ink and it is gone in about 320ms — so the figures above are visibility, not safety."
+    },
     "surface-canvas-stripe": {
       "light": "#ffe500",
       "dark": "#4a4300",
@@ -384,9 +389,9 @@
     "stripe-from": "64%",
     "stripe-to": "76%",
     "stripe-step": "1.2%",
-    "notch-sm": "6px",
-    "notch-md": "10px",
-    "notch-lg": "16px",
+    "notch-sm": "8px",
+    "notch-md": "14px",
+    "notch-lg": "22px",
     "$notchNote": "The 45deg corner cut, applied with clip-path. ONE corner per panel, top-right by default. This is the token the base library has no equivalent of, and it is what makes the skin recognisable with the yellow removed — which matters, because the yellow is the one colour here that disappears in greyscale.",
     "wedge-angle": "12deg",
     "grid-cell": "32px",

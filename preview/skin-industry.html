@@ -98,6 +98,101 @@
   </section>
 
   <section class="gal-sec">
+    <h2>The materialising hovercard</h2>
+    <p class="gal-note">
+      <code>.jrk-hovercard--materialize</code> wipes the panel in from the left in
+      <strong>discrete columns</strong> &mdash; <code>steps(16)</code>, so the edge
+      advances rather than glides &mdash; with a four-step alpha stair on the mask
+      edge, and a <strong>travelling illumination</strong> at the frontier: a soft
+      bloom with a hard bar at its core. Hover either tile, or tab to it:
+      the reveal is on <code>:focus-within</code> too. The class exists only in
+      this skin's stylesheet; without <code>data-skin="industry"</code> it is an
+      unknown class and the panel keeps the base fade-and-rise, which the right
+      tile shows for comparison.
+    </p>
+    <p class="gal-note">
+      It is <strong>opt-in rather than the skin's default</strong>, and the reason
+      is the base component's own: a hovercard fires on every tile hover, and a
+      320ms ceremony on each one turns a sweep across a KPI row into a light show.
+    </p>
+    <p class="gal-note">
+      Three things about the build are worth reading in
+      <code>css/skins/industry.css</code>. The mask lives <em>inside</em> the
+      keyframes and is <code>none</code> at 100%, because a mask clips the
+      box-shadow exactly as <code>clip-path</code> does and under this skin an
+      overlay's shadow is the only thing saying it floats &mdash; so this is the one
+      place in the skin where a clip costs no shadow, because it is transient. The
+      animation sits on the hover selector because the panel is
+      <code>visibility: hidden</code> rather than <code>display: none</code> and
+      would otherwise fire once at page load. And there is no reduced-motion guard
+      on purpose: <code>base.css</code> already zeroes animations, and with no
+      <code>forwards</code> fill the collapse lands on a finished card rather than
+      a frozen column.
+    </p>
+    <p class="gal-note">
+      <strong>The glow is the one place this effect cannot do what was asked.</strong>
+      You cannot illuminate white, and this panel is <code>surface-raised</code>,
+      which is pure <code>#ffffff</code> in light &mdash; deliberately, so a popover
+      lifts off the <code>#f4f6f6</code> card. A white bloom there measures
+      <strong>1.00:1</strong>: absent, not faint, and no re-stepping fixes it. So
+      dark gets the real thing (white, 13.52:1) and light gets the brand yellow at
+      1.28:1 &mdash; a <em>chroma-only</em> signal, invisible in greyscale, to a
+      monochromat and in print. It is only defensible because the same edge carries
+      the hard bar in <code>border-accent</code> at 3.33:1, which survives all
+      three. The bloom is the colour half of a two-channel signal, never the
+      signal: <strong>drop the bar and the light glow should go with it.</strong>
+    </p>
+    <p class="gal-note">
+      The bloom is pulled <em>back</em> from the frontier rather than centred on
+      it, because it is a child of the masked panel and the same mask doing the
+      reveal also clips it &mdash; centred, its leading half would be dimmed by
+      exactly the alpha stair that makes the wipe read as digital. It shares one
+      set of keyframes with the bar, so the two cannot drift apart. The whole
+      effect is LTR-only: the mask sweeps <code>to right</code> and a
+      <code>translateX</code> does not flip under <code>direction: rtl</code>.
+    </p>
+    <p class="gal-note">
+      <strong>It is a wipe, not a shard scatter.</strong> Two attempts at a
+      fragments-assembling reveal were built over this and both were dropped: a
+      pair of <code>repeating-conic-gradient</code>s on the panel's own
+      pseudo-elements, where two groups share one delay so it read as confetti over
+      an already-loaded card, and a real component with a node per sliver. If that
+      returns it belongs in <code>css/components/</code>, not in a skin.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+      <div class="jrk-hovercard-anchor">
+        <button class="jrk-stat jrk-card--interactive" style="width:100%" aria-describedby="hc-mat">
+          <span class="jrk-stat__label">Renewal pipeline</span>
+          <span class="jrk-stat__value">57<span class="jrk-stat__unit">%</span></span>
+          <span class="jrk-stat__meta">materialises &mdash; hover or tab here</span>
+        </button>
+        <div class="jrk-hovercard jrk-hovercard--materialize" id="hc-mat" role="tooltip">
+          <p class="jrk-hovercard__header">Renewal pipeline</p>
+          <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">Signed</span><span class="jrk-hovercard__value">186</span></p>
+          <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">Offered, awaiting</span><span class="jrk-hovercard__value">94</span></p>
+          <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">Notice given</span><span class="jrk-hovercard__value">46</span></p>
+          <p class="jrk-hovercard__note">326 units &middot; as of 21 Aug 2026</p>
+        </div>
+      </div>
+
+      <div class="jrk-hovercard-anchor">
+        <button class="jrk-stat jrk-card--interactive" style="width:100%" aria-describedby="hc-plain">
+          <span class="jrk-stat__label">Delinquency</span>
+          <span class="jrk-stat__value">35<span class="jrk-stat__unit">%</span></span>
+          <span class="jrk-stat__meta">base fade-and-rise, for comparison</span>
+        </button>
+        <div class="jrk-hovercard" id="hc-plain" role="tooltip">
+          <p class="jrk-hovercard__header">Delinquency</p>
+          <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">Current</span><span class="jrk-hovercard__value">212</span></p>
+          <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">30&ndash;60 days</span><span class="jrk-hovercard__value">78</span></p>
+          <p class="jrk-hovercard__row"><span class="jrk-hovercard__label">60+ days</span><span class="jrk-hovercard__value">36</span></p>
+          <p class="jrk-hovercard__note">326 units &middot; as of 21 Aug 2026</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
     <h2>Controls are square; one is still a circle</h2>
     <p class="gal-note">
       Controls are squared rather than chamfered, because clipping them would

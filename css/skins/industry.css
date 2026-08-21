@@ -223,11 +223,20 @@
   --jrk-shadow-card-raise: none;
 }
 
-/* The cut is scaled to the tile, in both directions: a 10px notch on a 44px
-   stat reads as damage rather than as machining, and the same 10px on a
+/* The cut is scaled to the tile, in both directions: a 14px notch on a 44px
+   stat reads as damage rather than as machining, and the same 14px on a
    full-width sheet disappears. Done by re-pointing --jrk-notch-md rather than
    by restating the clip-path, so the polygon above stays the single definition
-   of the shape. */
+   of the shape.
+
+   The ladder was widened from 6/10/16 on 2026-08-21, by direction, and all three
+   rungs moved together for the reason this comment already gives — bumping only
+   the middle one would have collapsed the relationship the ladder exists to
+   express. The rung to watch is notch-lg on .jrk-table-wrap: the cut is a 45deg
+   triangle at the TOP-RIGHT, which is where a numeric column's right-aligned
+   header sits, so at 22px it removes about 10px of width at the cap-height of
+   that label. It clears the header's own padding, but it is the first thing to
+   check if this ladder grows again. */
 :root[data-skin='industry'] .jrk-stat,
 :root[data-skin='industry'] .jrk-alert {
   --jrk-notch-md: var(--jrk-notch-sm);
@@ -374,6 +383,211 @@
 :root[data-skin='industry'] .jrk-sheet__cell--num,
 :root[data-skin='industry'] .jrk-table td {
   font-variant-numeric: tabular-nums;
+}
+
+/* ── the materialising hovercard: an opt-in, skin-only reveal ─────────────
+   .jrk-hovercard--materialize wipes the panel in from the left in discrete
+   columns, with an accent bar riding the leading edge. It is the HUD equivalent
+   of the base layer's fade-and-rise, and it is OPT-IN rather than the skin's
+   default for hovercards on purpose: a hovercard fires on every tile hover, and
+   .jrk-hovercard's own note explains that a panel firing instantly turns a sweep
+   across a KPI row into four flashes. A 320ms reveal on each of those four is
+   that same failure with more frames. One tile that deserves ceremony gets the
+   class; a KPI row does not.
+
+   THE CLASS EXISTS ONLY HERE. There is no base-layer rule for it, because the
+   effect has no meaning without this skin's identity and an inert modifier in
+   css/components/ would be a promise the base layer does not keep.
+
+   EVERYTHING BELOW IS DICTATED BY THREE FACTS ABOUT THE THING IT ANIMATES.
+
+   1. A MASK CLIPS THE BOX-SHADOW, exactly as clip-path does — the finding this
+      skin already records for its notched tiles, where the two card shadows had
+      to be neutralised. An overlay cannot pay that price: under this skin the
+      shadow is the ONLY thing telling a reader the panel floats above the page.
+      So the mask must not exist on the resting card, and it does not: mask-image
+      is declared INSIDE the keyframes and set to `none` at 100%. Non-interpolable
+      properties snap at each keyframe rather than being dropped, so the mask is
+      real for the length of the animation and gone afterwards, and the resting
+      rule below never mentions it. THIS IS THE ONE PLACE IN THE SKIN WHERE A CLIP
+      COSTS NO SHADOW, and the reason is that it is transient.
+
+   2. .jrk-hovercard IS ALWAYS RENDERED — hidden with visibility and opacity, not
+      display: none — so an animation on the resting selector would run once at
+      page load and be over before anyone hovered. It has to sit on the hover and
+      focus-within selectors, where re-entering the anchor re-applies it and it
+      runs again. animation-delay matches that rule's 220ms transition-delay so
+      the reveal starts when the panel starts becoming visible rather than
+      sweeping an invisible box.
+
+   3. base.css ALREADY ZEROES ANIMATIONS under prefers-reduced-motion, with
+      animation-duration: 0.01ms !important on every element and both
+      pseudo-elements. So this must COMPOSE with that guard rather than add a
+      second one, and the composition is what fill-mode buys: with no `forwards`,
+      the card's resting style is the natural, unmasked, fully-visible panel, so
+      collapsing the animation to 0.01ms lands on a finished card rather than a
+      frozen half-drawn one. A `forwards` fill here would leave a reduced-motion
+      reader looking at one column of a hovercard. The duration is the token, per
+      the same rule that forbids hand-rolled transition durations.
+
+   THE WHOLE EFFECT IS LTR-ONLY, and deliberately not dressed up as otherwise.
+   The mask sweeps `to right` and the glow's translateX does not flip under
+   direction: rtl, so while the bar and bloom use logical inset properties, the
+   motion itself is physical. A mirrored version needs its own mask and transform
+   rather than a logical property, so this is stated rather than half-solved.
+
+   The digital quality is two things, neither of them a colour: steps(16) so the
+   edge ADVANCES in columns instead of gliding, and a four-step alpha stair on
+   the mask edge so each column arrives through a short dither rather than
+   snapping. The rgba() values in the mask are ALPHA, not colour — a mask reads
+   nothing else — which is the same reason the wave and dot-ground masks above are
+   written with `black` and `transparent` keywords rather than hexes.
+
+   WHAT THIS IS NOT. It is a WIPE: the panel is revealed by a travelling edge.
+   Two attempts at a shard-scatter reveal were built over it and both were
+   dropped — a pair of repeating-conic-gradients on the panel's own
+   pseudo-elements (two groups share one delay, so it read as confetti over an
+   already-loaded card) and a real component with a node per sliver. If that
+   comes back, it belongs in css/components/, not here. */
+@keyframes jrk-industry-materialize {
+  0% {
+    -webkit-mask-image: var(--jrk-materialize-mask);
+    mask-image: var(--jrk-materialize-mask);
+    -webkit-mask-size: 200% 100%;
+    mask-size: 200% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+  }
+
+  99% {
+    -webkit-mask-image: var(--jrk-materialize-mask);
+    mask-image: var(--jrk-materialize-mask);
+    -webkit-mask-size: 200% 100%;
+    mask-size: 200% 100%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+  }
+
+  /* The mask leaves before the hover does, so the panel spends its dwell time
+     with its own shadow rather than a clipped one. */
+  100% {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* The leading edge. Rides the same step count as the mask, so the bar sits on
+   the boundary rather than drifting across it, and fades on the last column. */
+@keyframes jrk-industry-scanline {
+  0% {
+    inset-inline-start: 0;
+    opacity: 1;
+  }
+
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    inset-inline-start: 100%;
+    opacity: 0;
+  }
+}
+
+:root[data-skin='industry'] .jrk-hovercard--materialize {
+  /* Four hard alpha steps over 6% of the mask, which is about 12% of the panel
+     at this mask-size. */
+  --jrk-materialize-mask: linear-gradient(
+    to right,
+    black 0 44%,
+    rgba(0, 0, 0, 0.72) 44% 46%,
+    rgba(0, 0, 0, 0.44) 46% 48%,
+    rgba(0, 0, 0, 0.16) 48% 50%,
+    transparent 50% 100%
+  );
+}
+
+/* THE ILLUMINATION AT THE FRONTIER. A soft bloom that travels with the reveal,
+   so the panel reads as loading in rather than being uncovered. Two things about
+   it are not obvious.
+
+   IT IS PULLED BACK BEHIND THE EDGE ON PURPOSE, and the mask is why: this is a
+   CHILD of the element being masked, so the same mask doing the reveal also
+   clips the bloom. Centred on the frontier, its leading half would land in the
+   mask's alpha stair and be dimmed by exactly the dither that makes the reveal
+   read as digital. translateX(-72%) puts the bright core about 4px inside the
+   fully-opaque region, where the mask is not eating it. The trailing half then
+   spills over freshly revealed columns, which is where the light belongs anyway.
+
+   THE SOFTNESS IS IN THE GRADIENT, NOT THE OPACITY, which is what lets it share
+   jrk-industry-scanline with the hard bar instead of needing its own keyframes.
+   Two elements on one set of keyframes cannot drift apart, and drift is the
+   failure mode here — a bloom half a step behind its own core reads as two
+   objects.
+
+   THE LIGHT HALF IS A CHROMA-ONLY SIGNAL AND THAT IS A REAL COMPROMISE. You
+   cannot illuminate white: the panel is pure #ffffff in light, so the glow there
+   is the brand yellow at 1.28:1 rather than white at 1.00:1. It works only
+   because the bar below carries the same edge at 3.33:1, which survives
+   greyscale. Drop the bar and this should go with it. Full derivation is on
+   surface-glow. */
+:root[data-skin='industry'] .jrk-hovercard--materialize::before {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 48px;
+  transform: translateX(-72%);
+  background: linear-gradient(
+    to right,
+    transparent 0,
+    var(--jrk-surface-glow) 62%,
+    transparent 100%
+  );
+  opacity: 0;
+}
+
+/* The bar is inert and invisible at rest — it only has a position and a width —
+   so a panel that is never hovered draws nothing extra, and a reduced-motion
+   reader never sees it at all. */
+:root[data-skin='industry'] .jrk-hovercard--materialize::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 2px;
+  /* border-accent, NOT accent-solid: the brand yellow is 1.18:1 on this skin's
+     light panel, so a scanline in it would be invisible in exactly the half of
+     the palette where the panel is pale. This is the stepped light role — a dark
+     gold at 3.07:1 — and the anchor in dark at 12.57:1. */
+  background: var(--jrk-border-accent);
+  opacity: 0;
+}
+
+:root[data-skin='industry'] .jrk-hovercard-anchor:hover .jrk-hovercard--materialize,
+:root[data-skin='industry']
+  .jrk-hovercard-anchor:focus-within
+  .jrk-hovercard--materialize {
+  animation: jrk-industry-materialize var(--jrk-duration-slow) steps(16, end) 220ms;
+}
+
+:root[data-skin='industry']
+  .jrk-hovercard-anchor:hover
+  .jrk-hovercard--materialize::before,
+:root[data-skin='industry']
+  .jrk-hovercard-anchor:focus-within
+  .jrk-hovercard--materialize::before,
+:root[data-skin='industry']
+  .jrk-hovercard-anchor:hover
+  .jrk-hovercard--materialize::after,
+:root[data-skin='industry']
+  .jrk-hovercard-anchor:focus-within
+  .jrk-hovercard--materialize::after {
+  animation: jrk-industry-scanline var(--jrk-duration-slow) steps(16, end) 220ms;
 }
 
 /* ── print ───────────────────────────────────────────────────────────────
