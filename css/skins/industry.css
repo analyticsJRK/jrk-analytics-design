@@ -81,7 +81,7 @@
    halves rule it out for different reasons. In dark, black over this page at
    alpha 0.20 measures 1.020:1 against the page's dark end — invisible at any
    usable alpha, which is the base library's shadow-card-in-dark finding,
-   endfield's clip-path finding and midgard's inset bevel reaching one conclusion
+   this skin's own clip-path finding and midgard's inset bevel reaching one conclusion
    by three routes: on a dark ground, elevation is a FILL. In light a shadow is
    legal in isolation (alpha 0.10 leaves text-muted at 4.64:1) but not on these
    pixels, because surface-canvas-grid already spends 0.10 of a 0.115 ceiling
