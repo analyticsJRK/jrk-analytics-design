@@ -685,42 +685,81 @@
    visible to everyone and an author will notice it, while a CVD collision looks
    correct to the author and lands only on the ~8% who cannot see it. This
    library does not trade a visible failure for a silent one. */
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 1) {
+/* EACH SLOT IS ALSO REACHABLE BY NAME, `.jrk-org__node--group-N` —
+   `<OrgNode group={n}>`. Same eight declarations, so the two spellings cannot
+   drift; what differs is WHO decides the slot.
+
+   THE nth-child SPELLING DERIVES THE SLOT FROM POSITION, and that is the whole
+   of its limitation. It can only ever group the CHILDREN OF ONE NODE, because
+   position is only meaningful within one parent's list — which is why the rule
+   above is one rollup per chart and why hanging a second one restarts the
+   palette at slot 1 beside an existing slot 1. A chart that groups by something
+   OTHER than "who reports to this node" has no position to count: colour every
+   subtree by the regional manager three levels down, and the groups are spread
+   across nine different parents' child lists with no ordinal in common.
+
+   The named spelling is that case. The consumer already knows the grouping — it
+   is the thing it asked to colour by — so it assigns the slot from the group's
+   IDENTITY and the same person gets the same colour wherever they appear. That
+   is strictly more than nth-child can promise: it removes the two-palettes
+   collision by construction rather than by a rule the author has to remember,
+   because there is only one mapping from group to slot in the whole chart.
+
+   WHAT THE CONSUMER TAKES ON, and it is exactly what nth-child was doing for
+   free. Adjacency is guaranteed by CONSECUTIVE slots (see the measurements
+   above), so a caller assigning slots must number its groups in the order they
+   will be READ — left to right across a level — or it forfeits the one
+   guarantee the palette order was searched for. Number by first appearance in
+   the rendered order, never by a hash or an alphabetical key. And cycle at 8 the
+   same way: slot 9 IS slot 1.
+
+   Do not mix the two in one chart. A `rollup` branch and explicit slots inside
+   it are two mappings over one palette, which is the collision above wearing
+   different clothes; `<OrgNode>` warns in development. */
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 1),
+.jrk-org__node--group-1 {
   --jrk-org-group: var(--jrk-chart-1);
   --jrk-org-group-fill: var(--jrk-chart-tint-1);
   --jrk-org-group-texture: var(--jrk-org-tex-solid);
 }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 2) {
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 2),
+.jrk-org__node--group-2 {
   --jrk-org-group: var(--jrk-chart-2);
   --jrk-org-group-fill: var(--jrk-chart-tint-2);
   --jrk-org-group-texture: var(--jrk-org-tex-solid);
 }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 3) {
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 3),
+.jrk-org__node--group-3 {
   --jrk-org-group: var(--jrk-chart-3);
   --jrk-org-group-fill: var(--jrk-chart-tint-3);
   --jrk-org-group-texture: var(--jrk-org-tex-dash);
 }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 4) {
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 4),
+.jrk-org__node--group-4 {
   --jrk-org-group: var(--jrk-chart-4);
   --jrk-org-group-fill: var(--jrk-chart-tint-4);
   --jrk-org-group-texture: var(--jrk-org-tex-dash);
 }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 5) {
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 5),
+.jrk-org__node--group-5 {
   --jrk-org-group: var(--jrk-chart-5);
   --jrk-org-group-fill: var(--jrk-chart-tint-5);
   --jrk-org-group-texture: var(--jrk-org-tex-dot);
 }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 6) {
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 6),
+.jrk-org__node--group-6 {
   --jrk-org-group: var(--jrk-chart-6);
   --jrk-org-group-fill: var(--jrk-chart-tint-6);
   --jrk-org-group-texture: var(--jrk-org-tex-dot);
 }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 7) {
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 7),
+.jrk-org__node--group-7 {
   --jrk-org-group: var(--jrk-chart-7);
   --jrk-org-group-fill: var(--jrk-chart-tint-7);
   --jrk-org-group-texture: var(--jrk-org-tex-rail);
 }
-.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 8) {
+.jrk-org__branch--rollup > .jrk-org__node:nth-child(8n + 8),
+.jrk-org__node--group-8 {
   --jrk-org-group: var(--jrk-chart-8);
   --jrk-org-group-fill: var(--jrk-chart-tint-8);
   --jrk-org-group-texture: var(--jrk-org-tex-rail);

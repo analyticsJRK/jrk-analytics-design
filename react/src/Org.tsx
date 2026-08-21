@@ -198,6 +198,28 @@ export interface OrgNodeProps {
    *
    *  ONE PER CHART; nesting warns in development. */
   rollup?: boolean;
+  /** Put this node in rollup group `n` EXPLICITLY, instead of letting a parent's
+   *  `rollup` derive it from position. 1-based; cycles at 8, so 9 is 1 again.
+   *  Its subtree inherits the colour exactly as it does under `rollup`, because
+   *  the mechanism is the same custom property.
+   *
+   *  This is for a chart grouped by something other than "who reports to this
+   *  node". `rollup` counts children within ONE parent's list, so it can only
+   *  express that one grouping; colour a chart by the regional manager three
+   *  levels down and the groups are scattered across nine parents' lists with no
+   *  ordinal in common. Here the CALLER knows the grouping — it is the thing it
+   *  asked to colour by — so it assigns the slot from the group's identity and
+   *  one person gets one colour wherever they appear.
+   *
+   *  WHAT YOU TAKE ON BY USING IT. Adjacency is guaranteed between CONSECUTIVE
+   *  slots and nothing else (see `rollup`), so number groups in the order they
+   *  will be READ across a level — by first appearance in render order, never by
+   *  a hash or an alphabetical key, or you forfeit the one guarantee the palette
+   *  order was searched for.
+   *
+   *  Use this or `rollup`, never both in one chart: two mappings over one palette
+   *  is the same collision `rollup` warns about. Nesting warns in development. */
+  group?: number;
   /** Give the node a disclosure toggle. Ignored when it has no children. */
   collapsible?: boolean;
   /** Uncontrolled initial state. Implies `collapsible`. */
@@ -224,6 +246,7 @@ export function OrgNode({
   onClick,
   stacked,
   rollup,
+  group,
   collapsible,
   defaultCollapsed,
   collapsed,
@@ -255,6 +278,14 @@ export function OrgNode({
       );
     }
     if (rollup && filledGroups) warnGroupFill(kids.length, '<OrgNode rollup>');
+    if (group !== undefined && (rollup || alreadyGrouped)) {
+      console.warn(
+        '[jrk] <OrgNode group> is inside a rollup, or sets both. Position-derived and identity-assigned slots are two mappings over one palette, which is the collision rollup warns about. Pick one per chart.',
+      );
+    }
+    if (group !== undefined && (!Number.isInteger(group) || group < 1)) {
+      console.warn(`[jrk] <OrgNode group={${String(group)}}> — slots are 1-based integers. 9 is slot 1 again.`);
+    }
     if (rollup && alreadyGrouped) {
       console.warn(
         '[jrk] <OrgNode rollup> is nested inside another rollup. Both start at palette slot 1, so two subtrees can end up adjacent in the same colour — the one case the colouring does not survive. Use one rollup level per chart.',
@@ -296,8 +327,16 @@ export function OrgNode({
     onCollapsedChange?.(next);
   };
 
+  /* Cycled HERE rather than in the CSS, which carries eight slots and no ninth.
+     Doing it in the component means a caller may number groups 1..n and let the
+     library decide what happens past the palette — the same place the repeat is
+     documented. */
+  const slot = group !== undefined && Number.isInteger(group) && group >= 1
+    ? ((group - 1) % 8) + 1
+    : undefined;
+
   return (
-    <li className="jrk-org__node">
+    <li className={cx('jrk-org__node', slot !== undefined && `jrk-org__node--group-${slot}`)}>
       {card}
 
       {hasToggle && (
@@ -326,7 +365,10 @@ export function OrgNode({
           )}
           hidden={isCollapsed}
         >
-          <InRollup.Provider value={alreadyGrouped || Boolean(rollup)}>{children}</InRollup.Provider>
+          {/* An explicit slot seeds the guard exactly as `rollup` does — the subtree
+              INHERITS the colour either way, so a rollup hung underneath one is the
+              same two-palettes collision. */}
+          <InRollup.Provider value={alreadyGrouped || Boolean(rollup) || slot !== undefined}>{children}</InRollup.Provider>
         </ul>
       )}
     </li>
