@@ -1,4 +1,4 @@
 ---
 category: Layout
-keywords: [org node, org chart node, reports to, vacant, open position, stacked branch, collapse, current]
+keywords: [org node, org chart node, reports to, vacant, open position, stacked branch, collapse, current, rollup group, group slot, colour by level]
 ---

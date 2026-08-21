@@ -194,6 +194,35 @@ export const RollupSafeCount = () => (
   </OrgChart>
 );
 
+/* `group` takes the slot EXPLICITLY, for a chart whose grouping is not "children
+   of one node". `rollup` counts nth-child, so it can only ever express that one
+   shape; colour a chart by a level three deep and the groups are spread across
+   many parents' child lists with no ordinal in common.
+
+   Here the same regional manager reports to two different VPs and wears ONE
+   colour under both, which is what identity-assigned slots buy and what no
+   arrangement of `rollup` can give: two rollups would restart at slot 1 and
+   stand two slot-1 subtrees side by side.
+
+   The caller takes on the numbering, and the rule is the palette's: number
+   groups in the order they will be READ across the level, because adjacency is
+   guaranteed between CONSECUTIVE slots and nothing else. Slot 9 is slot 1. */
+export const ExplicitGroup = () => (
+  <OrgChart label="Coloured by regional manager">
+    <OrgNode name="Dana Whitfield" role="EVP" meta="37 assets">
+      <OrgNode name="Ana Ruiz" role="VP, Asset Management" meta="20 assets">
+        <OrgNode name="Marcus Reed" role="Regional Manager" meta="14 assets" group={1} />
+        <OrgNode name="Priya Nandi" role="Regional Manager" meta="6 assets" group={2} />
+      </OrgNode>
+      <OrgNode name="Tomas Vega" role="VP, Asset Management" meta="17 assets">
+        {/* Same person, same slot, a different parent. */}
+        <OrgNode name="Marcus Reed" role="Regional Manager" meta="9 assets" group={1} />
+        <OrgNode name="Iris Okonjo" role="Regional Manager" meta="8 assets" group={3} />
+      </OrgNode>
+    </OrgNode>
+  </OrgChart>
+);
+
 /* Controlled, so the open set can live in a URL. Every explored state being
    addressable is what separates exploration from a toy: two people in a meeting
    have to be able to reach the same screen, and an audit has to be reproducible
