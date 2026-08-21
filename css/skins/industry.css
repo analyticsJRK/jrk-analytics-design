@@ -246,14 +246,129 @@
   --jrk-notch-md: var(--jrk-notch-lg);
 }
 
+/* Cards take the LARGE cut by direction (2026-08-21). Re-pointing --jrk-notch-md
+   rather than restating the clip-path, same as the two rules above, so the
+   polygon stays the single definition of the shape — and so --jrk-notch-md keeps
+   a real consumer in .jrk-stat-row and .jrk-auth__panel rather than becoming a
+   value nothing reads. */
+:root[data-skin='industry'] .jrk-card,
+:root[data-skin='industry'] .jrk-chart-card {
+  --jrk-notch-md: var(--jrk-notch-lg);
+}
+
+/* ── the notch's own edge ─────────────────────────────────────────────────
+   CLIP-PATH CLIPS THE BORDER, not just the box-shadow. The 1px border is painted
+   on the element's box, so cutting the corner away takes the border with it and
+   the diagonal ships unstroked — a tile outlined on four sides and open on the
+   fifth. The bigger the notch the more obvious it is, which is why this arrives
+   in the same commit as the wider ladder.
+
+   IT IS PAINTED IN THE BACKGROUND, NOT WITH A PSEUDO-ELEMENT, and the reason is
+   the containing block. A rotated ::after would need `position: relative` on the
+   tile, which makes that tile the containing block for every absolutely
+   positioned descendant it has — the same class of side effect that un-stuck
+   .jrk-topbar when it was given `position: relative` for exactly this kind of
+   trick. .jrk-table-wrap and .jrk-sheet are the ones that would have paid for it.
+   A background layer needs no positioning, cannot overflow, and takes no pointer
+   events.
+
+   THE GEOMETRY: a notch-sized square at the top-right corner, holding a gradient
+   whose iso-lines run corner to corner. `to top right` on a square box puts the
+   50% line through the OTHER two corners — which is exactly the cut — so the band
+   from calc(50% - 1px) to 50% is the 1px immediately INSIDE the cut. Inside
+   matters: centred on the line, half of it would be clipped away and the edge
+   would render at half weight. 1px along the gradient axis is 1px of thickness,
+   because the axis is perpendicular to the iso-lines, so this matches the border
+   it continues rather than approximating it.
+
+   THE COLOUR IS A VARIABLE BECAUSE THE TILES DO NOT AGREE. Everything in the
+   first group draws border-subtle; .jrk-sheet is the one tile with a real
+   hairline by default and draws border-default. The card variants that change
+   their edge re-point this the same way they re-point border-color, so an
+   outlined card gets a heavier diagonal and a seamless one gets none — a card
+   with no border but a hairline on its chamfer is the exact defect this rule
+   exists to remove, arriving from the other direction.
+
+   TWO EXCLUSIONS, BOTH ABOUT WHO OWNS background-image. .jrk-alert is out
+   because its tone variants set the `background` SHORTHAND, which resets
+   background-image, so the edge would vanish on every alert that has a tone —
+   and it draws `border: 1px solid transparent` anyway, so there is no outline to
+   match. .jrk-stat--vivid is out because it owns background-image for its
+   gradient: this rule is (0,3,0) against that rule's (0,2,0), so without the
+   :not() the skin would win and paint the notch edge OVER the vivid gradient,
+   deleting it. .jrk-auth__panel draws no border, so it gets no diagonal. */
+:root[data-skin='industry'] .jrk-card,
+:root[data-skin='industry'] .jrk-chart-card,
+:root[data-skin='industry'] .jrk-stat:not(.jrk-stat--vivid),
+:root[data-skin='industry'] .jrk-stat-row,
+:root[data-skin='industry'] .jrk-table-wrap,
+:root[data-skin='industry'] .jrk-sheet {
+  background-image: linear-gradient(
+    to top right,
+    transparent 0 calc(50% - 1px),
+    var(--jrk-notch-edge) calc(50% - 1px) 50%,
+    transparent 50%
+  );
+  background-repeat: no-repeat;
+  background-position: 100% 0;
+  background-size: var(--jrk-notch-md) var(--jrk-notch-md);
+}
+
+:root[data-skin='industry'] .jrk-card,
+:root[data-skin='industry'] .jrk-chart-card,
+:root[data-skin='industry'] .jrk-stat,
+:root[data-skin='industry'] .jrk-stat-row,
+:root[data-skin='industry'] .jrk-table-wrap {
+  --jrk-notch-edge: var(--jrk-border-subtle);
+}
+
+:root[data-skin='industry'] .jrk-sheet {
+  --jrk-notch-edge: var(--jrk-border-default);
+}
+
+:root[data-skin='industry'] .jrk-card--outlined {
+  --jrk-notch-edge: var(--jrk-border-default);
+}
+
+:root[data-skin='industry'] .jrk-card--seamless,
+:root[data-skin='industry'] .jrk-card--flush {
+  --jrk-notch-edge: transparent;
+}
+
+/* .jrk-card--interactive:hover sets the `background` SHORTHAND, which resets
+   background-image AND the three longhands below it, so the diagonal would drop
+   out from under the pointer. Restated rather than reordered, so this survives a
+   bundler reshuffling the imports — the same contract the prefix at the top of
+   this file is for. */
+:root[data-skin='industry'] .jrk-card--interactive:hover {
+  background-image: linear-gradient(
+    to top right,
+    transparent 0 calc(50% - 1px),
+    var(--jrk-notch-edge) calc(50% - 1px) 50%,
+    transparent 50%
+  );
+  background-repeat: no-repeat;
+  background-position: 100% 0;
+  background-size: var(--jrk-notch-md) var(--jrk-notch-md);
+}
+
 /* A NESTED tile takes no notch. Two chamfers inside each other read as a
    printing misregistration, and the inner tile's edge is already carried by
-   nesting.css's neutral hairline. */
+   nesting.css's neutral hairline.
+
+   IT HAS TO DROP THE EDGE AS WELL AS THE CUT, and this is the one thing the
+   notch-edge rule above cannot be trusted to work out for itself. That edge is a
+   background layer, not a border, so it is completely independent of clip-path:
+   turn the cut off and the diagonal keeps painting, leaving a stray 1px line
+   across a square corner with nothing behind it. Whenever clip-path: none is set
+   on a notched tile, background-image has to go with it — the two are one
+   decision expressed in two properties. */
 :root[data-skin='industry'] .jrk-card .jrk-card,
 :root[data-skin='industry'] .jrk-card .jrk-stat,
 :root[data-skin='industry'] .jrk-card .jrk-table-wrap,
 :root[data-skin='industry'] .jrk-card .jrk-chart-card {
   clip-path: none;
+  background-image: none;
 }
 
 /* ── overlays: square, but NOT clipped ────────────────────────────────────

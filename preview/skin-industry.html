@@ -72,6 +72,29 @@
       fill is a real 1.14:1 / 1.30:1 step here: with the shadow gone, the fill is
       the whole hover in both halves.
     </p>
+    <p class="gal-note">
+      <strong><code>clip-path</code> clips the border too</strong>, which is the
+      less-noticed half of that: the 1px edge is painted on the element's box, so
+      cutting the corner takes the border with it and the diagonal ships
+      unstroked — a tile outlined on four sides and open on the fifth. The
+      diagonal now carries its own hairline, painted as a
+      <strong>background layer rather than a pseudo-element</strong>, because a
+      rotated <code>::after</code> would need <code>position: relative</code> on
+      the tile and that makes it the containing block for every absolutely
+      positioned descendant it has &mdash; the side effect that un-stuck
+      <code>.jrk-topbar</code> once already.
+    </p>
+    <p class="gal-note">
+      Two consequences worth carrying. The edge is <em>independent of</em>
+      <code>clip-path</code>, so anywhere the cut is turned off the background has
+      to be turned off with it &mdash; a nested tile would otherwise show a stray
+      1px line across a square corner. And its colour is a variable, because the
+      tiles disagree: this group draws <code>border-subtle</code>,
+      <code>.jrk-sheet</code> draws <code>border-default</code>, and the card
+      variants re-point it exactly as they re-point <code>border-color</code>, so
+      a <code>--seamless</code> card gets no diagonal rather than a hairline on a
+      tile that has no border.
+    </p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
       <div class="jrk-stat">
         <span class="jrk-stat__label">Occupancy index</span>
