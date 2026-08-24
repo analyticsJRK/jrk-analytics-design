@@ -2,12 +2,27 @@ import { Children, createContext, isValidElement, useContext, useId, useState, t
 import { Icon } from './Icon';
 import { cx } from './utils';
 
-/* Tracks whether we are already inside a --rollup subtree. Two rollup branches
- * both start at palette slot 1, so branch B's first child can land beside branch
- * A's last child wearing the same colour — the one case that breaks the
- * adjacency guarantee the colouring rests on. Context rather than a child walk,
- * because the nesting can be at any depth. */
-const InRollup = createContext(false);
+/* Tracks whether a grouping is already in force above, AND WHICH KIND, because the
+ * two kinds nest differently and treating them alike makes the guard cry wolf.
+ *
+ *   'rollup'  slots derived from nth-child. A second one below restarts the
+ *             palette at slot 1, so branch B's first child can land beside
+ *             branch A's last wearing the same colour — the one case that breaks
+ *             the adjacency guarantee the whole scheme rests on.
+ *   'group'   slots assigned by the caller from the group's identity. There is
+ *             exactly ONE mapping from group to slot in the chart, so a grouped
+ *             node inside another grouped node CANNOT collide — the caller has
+ *             already guaranteed what nth-child cannot.
+ *
+ * NESTED `group` IS THEREFORE LEGITIMATE, and it is not a corner case: a person
+ * who holds two consecutive levels is one node wearing both, so a chart coloured
+ * by the lower level has that node grouped with more grouped nodes beneath it.
+ * Warning on it fired nine times on one real chart, which is how a warning stops
+ * being read.
+ *
+ * Context rather than a child walk, because the nesting can be at any depth. */
+type Grouping = 'none' | 'rollup' | 'group';
+const InRollup = createContext<Grouping>('none');
 
 /* Whether the chart draws groups as FILLS rather than keylines. Only the dev
  * warning needs it — the styling is a descendant selector off the root class —
@@ -140,7 +155,7 @@ export function OrgChart({ label, nodeWidth, scroll = true, rollup, groupFill, c
       {/* Seeds the nesting guard, so a node that also sets `rollup` inside a
           root-grouped chart warns rather than quietly laying a second palette
           over the first. */}
-      <InRollup.Provider value={Boolean(rollup)}>
+      <InRollup.Provider value={rollup ? 'rollup' : 'none'}>
         <GroupFill.Provider value={Boolean(groupFill)}>{children}</GroupFill.Provider>
       </InRollup.Provider>
     </ul>
@@ -278,17 +293,20 @@ export function OrgNode({
       );
     }
     if (rollup && filledGroups) warnGroupFill(kids.length, '<OrgNode rollup>');
-    if (group !== undefined && (rollup || alreadyGrouped)) {
+    /* MIXING THE TWO KINDS IS THE FAULT; nesting one kind is not. Either direction of the
+       mix puts a position-derived palette and a caller-assigned one over the same slots,
+       which is the collision `rollup` has always warned about wearing a second hat. */
+    if (group !== undefined && (rollup || alreadyGrouped === 'rollup')) {
       console.warn(
-        '[jrk] <OrgNode group> is inside a rollup, or sets both. Position-derived and identity-assigned slots are two mappings over one palette, which is the collision rollup warns about. Pick one per chart.',
+        '[jrk] <OrgNode group> is inside a --rollup branch, or sets both. Position-derived and identity-assigned slots are two mappings over one palette, which is the collision rollup warns about. Pick one kind per chart.',
       );
     }
     if (group !== undefined && (!Number.isInteger(group) || group < 1)) {
       console.warn(`[jrk] <OrgNode group={${String(group)}}> — slots are 1-based integers. 9 is slot 1 again.`);
     }
-    if (rollup && alreadyGrouped) {
+    if (rollup && alreadyGrouped !== 'none') {
       console.warn(
-        '[jrk] <OrgNode rollup> is nested inside another rollup. Both start at palette slot 1, so two subtrees can end up adjacent in the same colour — the one case the colouring does not survive. Use one rollup level per chart.',
+        `[jrk] <OrgNode rollup> is nested inside a ${alreadyGrouped === 'rollup' ? 'rollup' : 'group'}. Its slots start at 1 regardless of what is already in force above, so two subtrees can end up adjacent in the same colour — the one case the colouring does not survive. Use one grouping per chart.`,
       );
     }
   }
@@ -365,10 +383,22 @@ export function OrgNode({
           )}
           hidden={isCollapsed}
         >
-          {/* An explicit slot seeds the guard exactly as `rollup` does — the subtree
-              INHERITS the colour either way, so a rollup hung underneath one is the
-              same two-palettes collision. */}
-          <InRollup.Provider value={alreadyGrouped || Boolean(rollup) || slot !== undefined}>{children}</InRollup.Provider>
+          {/* An explicit slot seeds the guard too — the subtree INHERITS the colour either
+              way, so a `rollup` hung underneath one is still the two-palettes collision.
+              What it seeds is 'group', not 'rollup', so a nested `group` stays silent while
+              a nested `rollup` still warns. A rollup in force above OUTRANKS a group set
+              here: it is the kind that cannot tolerate anything below it. */}
+          <InRollup.Provider
+            value={
+              alreadyGrouped === 'rollup' || rollup
+                ? 'rollup'
+                : slot !== undefined || alreadyGrouped === 'group'
+                  ? 'group'
+                  : 'none'
+            }
+          >
+            {children}
+          </InRollup.Provider>
         </ul>
       )}
     </li>
