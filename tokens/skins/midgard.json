@@ -324,12 +324,30 @@
       "light": "0.1em",
       "dark": "0.1em"
     },
-    "radius-sm": { "light": "0", "dark": "0" },
-    "radius-md": { "light": "0", "dark": "0" },
-    "radius-lg": { "light": "0", "dark": "0" },
-    "radius-xl": { "light": "0", "dark": "0" },
-    "radius-2xl": { "light": "0", "dark": "0" },
-    "radius-data-end": { "light": "0", "dark": "0" },
+    "radius-sm": {
+      "light": "0",
+      "dark": "0"
+    },
+    "radius-md": {
+      "light": "0",
+      "dark": "0"
+    },
+    "radius-lg": {
+      "light": "0",
+      "dark": "0"
+    },
+    "radius-xl": {
+      "light": "0",
+      "dark": "0"
+    },
+    "radius-2xl": {
+      "light": "0",
+      "dark": "0"
+    },
+    "radius-data-end": {
+      "light": "0",
+      "dark": "0"
+    },
     "$radiusNote": "SQUARE everywhere a radius is named — plates, overlays, controls and data ends alike. This skin has no notch and no chamfer: it is machined plate, so a corner is simply a corner, which also keeps it visually distinct from Industry's 45deg cut. radius-full is deliberately NOT overridden, because it is what keeps a spinner a circle, a radio round and a switch a switch; css/skins/midgard.css squares the named controls that would otherwise stay pills and turns the status DOT into a diamond, and that named list is the skin's contract."
   },
   "skinOnly": {
@@ -340,6 +358,11 @@
       "$note": "TITLES ONLY — never body copy, never a small label. Cinzel is the closest OFL-licensed stand-in for the reference's inscriptional caps; the game's own face cannot be shipped and neither can Trajan, which is why the stack names it only as a local fallback. Requested from css/skins/midgard.css rather than css/fonts.css, so a consumer that never stamps data-skin never fetches it. The skin does NOT override font-sans: the reference sets its captions and its values in a plain sans and only its titles in the display face, and Inter is already that sans."
     },
     "lozenge-size": "9px",
-    "$lozengeNote": "The small rotated square centred on a divider, which is the reference's own way of interrupting a rule. Drawn as a pseudo-element filled with the plate colour, so the line appears to pass behind it. A magnitude rather than a rule, which is why the size is a token and the placement is CSS."
+    "$lozengeNote": "The small rotated square centred on a divider, which is the reference's own way of interrupting a rule. Drawn as a pseudo-element filled with the plate colour, so the line appears to pass behind it. A magnitude rather than a rule, which is why the size is a token and the placement is CSS.",
+    "rune-glow": {
+      "light": "20%",
+      "dark": "38%",
+      "$note": "A MAGNITUDE, not a colour — the percentage of accent-solid the masthead's runic band is mixed at, which is why it can live here without being a hand-picked value. It is per-theme because the glow IS the dark half: at 38% the rune core is 2.26:1 off the dark band and reads as lit, and at 20% in light it is 1.49:1 and reads as an engraving. The mask carries the halo as alpha (a wide stroke at .3 behind a narrow one at 1), so this single figure sets both — the halo lands near 11% in dark and 6% in light. CEILING 53%: the band's own ink crosses 4.5:1 there, and the whole point of a flat masthead is that nothing on it is a layout condition. At the shipped values text-on-banner is 6.80:1 dark and 10.05:1 light ON the brightest part of a rune."
+    }
   }
 }

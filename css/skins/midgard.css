@@ -367,6 +367,75 @@
   background: var(--jrk-surface-track);
 }
 
+/* ── the inscription: a runic band that lights up in dark ─────────────────
+ *
+ * Two hairlines with a row of Elder Futhark between them, repeating along the
+ * masthead — the reference's engraved chrome, and the one place this skin gets to
+ * use its gold as light rather than as a selection signal.
+ *
+ * THE GLOW IS ALPHA IN THE MASK, NOT A FILTER, and that is a correctness point
+ * rather than a preference. CSS applies filter BEFORE clip and mask, so
+ * `filter: drop-shadow()` on a masked box blooms the whole rectangle and then has
+ * the bloom masked away by the runes — the glow would be clipped to exactly the
+ * strokes that cast it and you would see nothing. Drawing each rune twice inside
+ * the mask instead — a 9px stroke at .3 alpha behind a 2.5px stroke at 1 — puts
+ * the falloff in the mask itself, where nothing can clip it. One element, one
+ * mask, no compositing modes, no -webkit- fallback to get wrong.
+ *
+ * THE MASK IS ALPHA-ONLY. `stroke='black'` is a keyword and carries no colour
+ * information a mask can read; every visible value comes from the gold underneath
+ * it. Same convention as the page textures, and the same reason: a data: URI with
+ * its own fills would be unreachable to the theme toggle and to both gates.
+ *
+ * ONE TOKEN SETS BOTH LAYERS. --jrk-rune-glow is the percentage of accent-solid
+ * the band is mixed at, and the mask's own alphas scale off it: the core lands at
+ * the token's value and the halo at about a third of it. Per-theme, because the
+ * glow is the point — 38% in dark against 20% in light, i.e. a rune core 2.26:1
+ * off the dark band and 1.49:1 off the light one. Lit versus engraved, from one
+ * number.
+ *
+ * *** AND IT IS CAPPED BY THE INK THAT CROSSES IT, at 53%. *** Even at full
+ * brightness the band's own ink is 6.80:1 dark / 10.05:1 light on the brightest
+ * pixel of a rune, so this decorates the whole width — under the wordmark, under
+ * the account cluster, anywhere — with nothing to promise about layout. That
+ * freedom is the entire reason the masthead was made a flat band; spending it on
+ * a brighter glow would be trading the thing that was just bought.
+ *
+ * THE ENDS FADE, and that is taste rather than contrast: the gold is a horizontal
+ * ramp that reaches nothing at either edge, so the inscription lives in the open
+ * middle of the bar and never crowds the wordmark or the sign-out control. The
+ * MASK repeats; the fade is in the BACKGROUND, because a repeating mask cannot
+ * carry a one-off gradient across the whole bar.
+ *
+ * z-index -1 for the reason Industry's wordmark gives: .jrk-topbar opens a
+ * stacking context with --jrk-z-sticky, so a negative child paints after the
+ * band and before the content. It does not rotate and never overflows, so the bar
+ * needs no `overflow: hidden` and its flyouts stay unclipped. */
+:root[data-skin='midgard'] .jrk-topbar--vivid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    color-mix(in srgb, var(--jrk-accent-solid) var(--jrk-rune-glow), transparent) 24%,
+    color-mix(in srgb, var(--jrk-accent-solid) var(--jrk-rune-glow), transparent) 76%,
+    transparent 100%
+  );
+
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 56'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M0 13H200M0 43H200' stroke-width='1.5' stroke-opacity='.32'/%3E%3Cpath d='M10 37L10 19M10 23L20 19M10 29L20 25M44 37L44 19M44 23L52 27L44 31M78 37L78 19M78 25L70 19M78 25L86 19M112 37L112 19L120 22L112 27M114 27L121 37M154 19L146 28L154 37M176 37L176 19M188 37L188 19M176 19L188 31M188 19L176 31' stroke-width='9' stroke-opacity='.3'/%3E%3Cpath d='M10 37L10 19M10 23L20 19M10 29L20 25M44 37L44 19M44 23L52 27L44 31M78 37L78 19M78 25L70 19M78 25L86 19M112 37L112 19L120 22L112 27M114 27L121 37M154 19L146 28L154 37M176 37L176 19M188 37L188 19M176 19L188 31M188 19L176 31' stroke-width='2.5' stroke-opacity='1'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 56'%3E%3Cg fill='none' stroke='black' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M0 13H200M0 43H200' stroke-width='1.5' stroke-opacity='.32'/%3E%3Cpath d='M10 37L10 19M10 23L20 19M10 29L20 25M44 37L44 19M44 23L52 27L44 31M78 37L78 19M78 25L70 19M78 25L86 19M112 37L112 19L120 22L112 27M114 27L121 37M154 19L146 28L154 37M176 37L176 19M188 37L188 19M176 19L188 31M188 19L176 31' stroke-width='9' stroke-opacity='.3'/%3E%3Cpath d='M10 37L10 19M10 23L20 19M10 29L20 25M44 37L44 19M44 23L52 27L44 31M78 37L78 19M78 25L70 19M78 25L86 19M112 37L112 19L120 22L112 27M114 27L121 37M154 19L146 28L154 37M176 37L176 19M188 37L188 19M176 19L188 31M188 19L176 31' stroke-width='2.5' stroke-opacity='1'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+  -webkit-mask-size: auto 100%;
+  mask-size: auto 100%;
+  -webkit-mask-position: 0 50%;
+  mask-position: 0 50%;
+}
+
 /* ── the lozenge: a rule interrupted by a diamond ─────────────────────────
    The reference divides a panel with a hairline broken at its centre by a small
    rotated square, and the card footer is the one divider in this library that is
@@ -416,6 +485,15 @@
      a page can print, and it reads as a redaction wherever the printer drops
      backgrounds. Ink returns to text-primary. 0-4-0 on the second selector to
      clear the masthead rule, which is 0-4-0 and earlier in this file. */
+  /* And the runic inscription goes with the band. It is a decorative
+     mark whose whole argument is that it sits UNDER the bar's own ink at a
+     measured strength; on paper the band is gone, so the ground it was measured
+     against is gone too, and the same alpha over white is a smear across the
+     masthead rather than a texture. */
+  :root[data-skin='midgard'] .jrk-topbar--vivid::before {
+    display: none;
+  }
+
   :root[data-skin='midgard'] .jrk-topbar--vivid,
   :root[data-skin='midgard'] .jrk-topbar--vivid.jrk-topbar--brand {
     background-color: transparent;

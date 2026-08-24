@@ -638,6 +638,97 @@
   background: var(--jrk-surface-track);
 }
 
+/* ── the wordmark: JRK cut into the band, hatched and cropped ─────────────
+ *
+ * The reference look sets its own name in heavy condensed letters across the
+ * chrome, hatched, running off the top edge. This is that: a stencil J-R-K
+ * masked out of a diagonal hatch, cropped by the bar's own height so the letters
+ * read as a much larger wordmark the bar happens to be a window onto.
+ *
+ * THE SHAPE IS A MASK AND THE COLOUR IS A TOKEN, which is the only arrangement
+ * that survives this repo's rules. A data: URI carrying its own fills would be
+ * invisible to the theme toggle and to both gates — check-css skips data: URIs by
+ * name, and validate:skin's hex scan would only catch an unencoded one — so the
+ * SVG below states ALPHA and nothing else (stroke-opacity on a gradient, no
+ * stop-color, no fill). Every colour comes from the hatch underneath it. Same
+ * convention the page textures already use, and the same reason.
+ *
+ * THE LETTERS ARE STROKED PATHS, NOT TEXT. An SVG in a CSS mask cannot load a
+ * webfont, so <text> would resolve against whatever the machine happens to have
+ * and the wordmark would change shape per developer. Six paths, stroke-width 22,
+ * butt caps and miter joins — the letterforms ARE the geometry, which is also why
+ * they belong in this file rather than in the token layer.
+ *
+ * THE FADE IS INSIDE THE MASK. A second mask layer plus mask-composite would do
+ * it, but that is two properties, a -webkit- fallback and a compositing mode to
+ * get wrong; a linearGradient on stroke-opacity is one attribute and needs no
+ * compositing at all. It runs .16 at the top to 1 at the bottom, so the letters
+ * surface out of the band rather than sitting on it.
+ *
+ * THE HATCH IS DERIVED FROM THE WEDGE'S ANGLE rather than stated separately —
+ * 45deg + --jrk-wedge-angle — so the wordmark's texture leans with the facet on
+ * the trailing edge and the page stripe instead of against them. The 45deg offset
+ * is what makes it read as hatching: at the wedge's own angle the lines come out
+ * near-vertical and read as scratches on the band, which is the first version of
+ * this and the reason the offset is written down.
+ *
+ * *** THE TWO LAYERS COMPOSITE TO 33.4%, AND THE CEILING IS 41%. *** This mark
+ * sits UNDER the bar's own ink, so its strength is bounded by the ink rather than
+ * by taste, and it is the COMPOSITE that has to be measured — 26% over 10% is
+ * 1 - (0.74 x 0.90) = 33.4% of yellow, not 26%. Measuring either layer alone
+ * would have reported a comfortable margin that the screen does not have.
+ *
+ * On the brightest pixel — a hatch stripe over the flat wash — text-on-banner is
+ * 5.78:1 light and 6.13:1 dark, and the mark is 2.62:1 / 2.58:1 off the band. On
+ * the flat wash between stripes it is 12.01:1 / 12.90:1 at 1.26:1 / 1.23:1. The
+ * ink crosses 4.5:1 at 41% light and 42% dark, so there is roughly one more hatch
+ * step of headroom and no more. Go past it and this becomes a layout condition —
+ * the thing the flat band was introduced to get rid of. Capped here so the
+ * wordmark can sit anywhere on the bar, including under the account cluster, with
+ * nothing to promise about width.
+ *
+ * z-index -1, and it works because .jrk-topbar sets z-index: var(--jrk-z-sticky)
+ * and therefore opens a stacking context: a negative child paints after the bar's
+ * own background and before its in-flow content. Without that stacking context
+ * this would disappear behind the page. It also needs no `position: relative` on
+ * the bar — sticky is already a positioned ancestor, which the wedge note above
+ * records the hard way — and it does not rotate, so it never overflows and the
+ * bar never needs `overflow: hidden`, which would clip every flyout anchored in
+ * it. */
+:root[data-skin='industry'] .jrk-topbar--vivid::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  /* TWO LAYERS, AND THE FLAT ONE IS WHAT MAKES IT READ AS LETTERS. Hatch alone
+     was the first version and it failed: a 13px stroke crossed by a 9px hatch
+     period is chopped into three or four disconnected slivers, so the eye gets
+     texture and never assembles a letterform. The flat wash underneath restores
+     the silhouette and the hatch then decorates a shape that is already legible.
+     Finer, too — a 4.5px period puts about three stripes across every stroke. */
+  background-image:
+    repeating-linear-gradient(
+      calc(45deg + var(--jrk-wedge-angle)),
+      color-mix(in srgb, var(--jrk-accent-solid) 26%, transparent) 0 1.5px,
+      transparent 1.5px 4.5px
+    ),
+    linear-gradient(
+      color-mix(in srgb, var(--jrk-accent-solid) 10%, transparent) 0 100%
+    );
+
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 110'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-opacity='.16'/%3E%3Cstop offset='.55' stop-opacity='.7'/%3E%3Cstop offset='1' stop-opacity='1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23f)' stroke-width='22' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M96 10L96 74L44 74L44 56'/%3E%3Cpath d='M150 100L150 10L206 10L206 50L150 50'/%3E%3Cpath d='M174 50L212 100'/%3E%3Cpath d='M256 10L256 100'/%3E%3Cpath d='M316 10L264 56'/%3E%3Cpath d='M278 46L320 100'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 110'%3E%3Cdefs%3E%3ClinearGradient id='f' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-opacity='.16'/%3E%3Cstop offset='.55' stop-opacity='.7'/%3E%3Cstop offset='1' stop-opacity='1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cg fill='none' stroke='url(%23f)' stroke-width='22' stroke-linecap='butt' stroke-linejoin='miter'%3E%3Cpath d='M96 10L96 74L44 74L44 56'/%3E%3Cpath d='M150 100L150 10L206 10L206 50L150 50'/%3E%3Cpath d='M174 50L212 100'/%3E%3Cpath d='M256 10L256 100'/%3E%3Cpath d='M316 10L264 56'/%3E%3Cpath d='M278 46L320 100'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  /* Taller than the bar on purpose — the crop is the effect. */
+  -webkit-mask-size: auto 150%;
+  mask-size: auto 150%;
+  -webkit-mask-position: 14% 50%;
+  mask-position: 14% 50%;
+}
+
 /* ── type: uppercase labels, tracked wide; values never ───────────────────
    The signature is a small uppercase label at tracking-caps (0.14em under this
    skin). It is legible only BECAUSE it is uppercase and short. VALUES ARE
@@ -895,6 +986,15 @@
      goes, the facet goes with it, and the ink returns to text-primary — the same
      trade the stripe makes three rules up. 0-4-0 on the second selector to clear
      the masthead rule, which is 0-4-0 itself and earlier in this file. */
+  /* And the hatched wordmark goes with the band. It is a decorative
+     mark whose whole argument is that it sits UNDER the bar's own ink at a
+     measured strength; on paper the band is gone, so the ground it was measured
+     against is gone too, and the same alpha over white is a smear across the
+     masthead rather than a texture. */
+  :root[data-skin='industry'] .jrk-topbar--vivid::before {
+    display: none;
+  }
+
   :root[data-skin='industry'] .jrk-topbar--vivid,
   :root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand {
     background-color: transparent;
