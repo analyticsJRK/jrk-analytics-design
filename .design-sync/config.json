@@ -68,6 +68,12 @@
     },
     "Topbar": {
       "cardMode": "column"
+    },
+    "Lede": {
+      "cardMode": "column"
+    },
+    "Glossary": {
+      "cardMode": "column"
     }
   },
   "runtimeFontPrefixes": [

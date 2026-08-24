@@ -1352,3 +1352,86 @@ the sibling count.
   sync, so their recorded keys already hash CRLF and are stable. Normalizing them
   would clear Menu's grade and re-render two components for no semantic reason —
   do it as its own change, not as a side effect of a sync.
+
+## Run receipt — 2026-08-24
+
+Repo at `a63386e` (merge of PR #14: the `Lede` / `Steps` / `Glossary` explainer
+trio), clean and pushed when `prepare.mjs` ran. Two driver runs: baseline, then
+the `Lede` + `Glossary` `cardMode` overrides.
+
+Verdict: all four stages ok, `anchor: ok`, `58 unchanged / 2 changed / 3 added /
+0 removed`, `0 delete(s)`, `renderChurned: []`, `learningsUnmerged: []`.
+`styleSha`, `auxSha` and `bundleSha12` all moved; `scriptsSha` held at
+`e0316766f3bdd146`, so `_vendor/` and `fonts/` were NOT re-uploaded — that is the
+difference between this run's 38 files and the 328 of 2026-08-18. Grades: five
+components in `pendingGrade`, all `good`. Only the two documented warns,
+`[DTS_STYLE_SYSTEM]` and `[FONT_REMOTE] "Inter var"`. `[GRID_OVERFLOW] NavMenu`
+did not fire again — still recorded, still treat its absence as good news.
+
+**The anchor was verified, not assumed**, by the cheap route this file
+recommends: `DesignSync get_file _ds_sync.json` against the dated
+`ds-bundle/_ds_sync.json`, matching on all four global digests, `keyRecipe`, ten
+spot-checked `sourceKeys` / `renderHashes` / `sourceHashes`, and the 60 / 60 /
+180 counts.
+
+**`Icon` and `OrgNode` rode along**, both from merged commits that had never been
+synced — `previews/Icon.tsx`, and `Org.tsx` + `previews/OrgNode.tsx` +
+`docs/OrgNode.md` from `ea56587`/`0280841`. `OrgNode.jsx` held while its `.d.ts`
+and `.prompt.md` moved, i.e. contract-only, the `VividStat` shape from 2026-08-20.
+`git log <last-receipt-SHA>..HEAD -- react/src/<Name>.tsx` predicted both before
+the driver ran, which is the check worth keeping.
+
+**`--node-modules` MUST BE THE REPO ROOT, and the first run died on it.**
+`.ds-sync/node_modules` holds the sync toolchain but not `react`, so
+`package-build.mjs` aborts in `vendorReact`. `cfg.extraFonts` names
+`.ds-sync/node_modules/@fontsource/...` by explicit repo-relative path and is
+unaffected by the flag, so the two live in different places on purpose:
+`--node-modules node_modules`. The error message says this; the Fresh-clone
+recipe above does not, which is why it is now written here.
+
+**A capture sheet cannot show a 1px hairline, and two cards were fixed because of
+what it DID show.** `.jrk-steps`' connector is `border-subtle` at 1.26:1 on the
+card — invisible in a 3-up contact sheet, so the sheet is no evidence either way.
+It was verified instead by driving Playwright directly over
+`.design-sync/.cache/jrk-flat.css` at `deviceScaleFactor: 3` across all six
+theme x skin combinations, reading `getComputedStyle(el, '::before')`: `content`
+`""` on every step but the last and `none` on the last, `left: 11.5px` against a
+numeral centre of `11.99px`, and a fill that each skin re-points
+(`#e5e5ea` base, `#d3d8d9` industry, `#e0d8c7` midgard vellum, `#333336` dark).
+The script is not kept — the method is the point, and it is cheaper than another
+driver run.
+
+What the sheet was good for: `Lede`'s `InAPageHeader` story stacked its four-tile
+`StatRow` into one column at ~370px, and `Glossary`'s `FixedTermColumn` starved
+the gloss to ~100px — a card teaching the exact opposite of what `termWidth` is
+for. Both took `cardMode: "column"`, the `Card`/`ChartCard`/`BarList` precedent.
+`Steps` reads correctly at card width and is deliberately NOT overridden.
+
+**Re-sync risks added by this run:**
+- `cfg.overrides.{Lede,Glossary}.cardMode` is coupled to one story each —
+  `InAPageHeader`'s `StatRow` and `FixedTermColumn`'s `termWidth="14rem"`. Drop
+  either story and the override becomes cargo; keep the story and never let the
+  card go back to grid mode.
+- **`.jrk-steps__step::before` starts at a STATED `24px`**, not at a value derived
+  from the numeral's line box (measured at `bottomY: 17.89`, so ~6px of air).
+  Move `text-sm` or `leading-snug` and the connector's clearance moves with it,
+  silently — nothing measures this, and a contact sheet cannot see it.
+- `.jrk-steps__title` is not in `midgard`'s inscriptional-caps list and
+  `.jrk-lede` is not in its type list, so under that skin the trio takes the
+  skin's COLOURS and none of its type. That is the documented contract for a new
+  component, not a bug — but it is one more list the next component must be added
+  to deliberately.
+- **The working tree went dirty DURING this sync and it did not reach the
+  upload.** `css/components/form.css` (14:08) and `css/components/org.css` (14:15)
+  were edited after `prepare.mjs` ran at 13:56 — a dark-mode `<select>`
+  double-chevron fix and an org stacked-branch tick fix, neither mine. Because
+  `resync.mjs` does NOT run `prepare.mjs`, `jrk-flat.css` stayed frozen at the
+  clean tree and the shipped CSS is provably free of both (146,883 bytes shipped
+  vs 147,147 rebuilt; zero matches for the new `[data-theme='dark'] .jrk-select`
+  reset). **The gotcha that normally bites protected the upload this time** — do
+  not read that as permission. `prepare.mjs` HAS since been re-run against the
+  dirty tree, so `jrk-flat.css` and `dist/` are now ahead of both git and the
+  project: the next sync must start from a clean tree and a fresh prepare.
+- `css/components/form.css` is CRLF in the working copy. It is tracked and
+  `.gitattributes` pins `eol=lf`, so whoever commits that edit should normalize
+  it first — see the CRLF section above.
