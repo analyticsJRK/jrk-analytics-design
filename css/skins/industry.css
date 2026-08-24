@@ -509,6 +509,135 @@
   );
 }
 
+/* ── the masthead: the flat charcoal band the token file already derived ───
+ *
+ * THE VALUES WERE DERIVED AND MEASURED WHEN THIS SKIN WAS BUILT AND NOTHING WAS
+ * WIRED TO THEM. `surface-banner`'s own $note reads "FLAT CHARCOAL, not a ramp.
+ * The base masthead's three-stop gradient carries a middle stop that fails and is
+ * kept empty by layout; this skin declines that bargain outright, so the topbar's
+ * contrast is a colour fact again rather than a layout fact." That is the design;
+ * this rule is only the wire.
+ *
+ * THAT $note ALSO CARRIES A FIGURE THAT NO LONGER MEASURES, and it is flagged here
+ * rather than quietly corrected: it ends "text-on-banner is 11.38:1 on it", and
+ * #e9ecec on #14171a is 15.14:1 in light, 15.85:1 in dark. The claim is
+ * conservative rather than dangerous — the real value is better — but it is
+ * exactly the prose-drifting-from-a-number this repo names as its own worst habit,
+ * and a figure nothing re-checks is how it happens. Fix it on the token, in a
+ * change that is about the token.
+ *
+ * WHY IT IS A BUG FIX AS WELL AS A LOOK. The wedge rule above is 0-3-0 and sets
+ * `background-image`; the base library's `.jrk-topbar.jrk-topbar--vivid` is 0-2-0
+ * and sets the `background` SHORTHAND. So under this skin the wedge was winning
+ * and deleting the masthead's fill outright, leaving `background-color:
+ * transparent` under `color: #ffffff` — white ink on the page, on a bar that has
+ * no fill at all. Measured in Chrome across both themes before this rule existed.
+ * The `--brand` variant failed the same way more quietly, keeping its dark ink and
+ * losing its ramp. A skin that overrides a shorthand with a longhand has to take
+ * responsibility for the whole property, which is what this does.
+ *
+ * ONLY THE VARIANTS THAT OWN THEIR INK. The plain `.jrk-topbar` is deliberately
+ * untouched — it is inked with `text-primary` by the consumer and a fill under ink
+ * you do not own is the mistake this skin records twice already. `--vivid` and
+ * `--brand` both carry `gradient.ink`, so re-pointing that one variable re-inks
+ * every caption, status, ghost button and search field on the bar with them.
+ *
+ * BOTH VARIANTS COLLAPSE TO ONE BAND, and that is deliberate rather than lazy.
+ * `--vivid` is base's teal -> blue -> violet ribbon, which has no relationship to
+ * a steel-and-yellow palette; under this skin the masthead is the masthead.
+ *
+ * THE WEDGE SURVIVES BUT CHANGES COLOUR, and the reason is the mirror of the one
+ * the rule above gives. There the bar is inked near-BLACK, so the wedge had to be
+ * a pale wash. Here the bar is inked near-WHITE (`text-on-banner`), so a pale
+ * yellow wedge would put #e9ecec on #fff59a — 1.06:1, i.e. invisible — right
+ * where the sign-out control sits. `surface-banner-deep` instead: the same
+ * geometry read as a machined facet rather than a colour, carrying the ink at
+ * 16.17:1 light and 15.85:1 dark and the muted ink at 8.63:1 / 8.38:1, so the
+ * trailing 6% needs no layout guarantee of any kind. The
+ * brand colour comes back as the hairline below, which is 3px of ink-free rule.
+ *
+ * *** IN DARK THIS BAND IS THE PAGE COLOUR AND THE YELLOW RULE IS ITS ONLY EDGE.
+ * *** surface-banner.dark is #0d0f10, which is the LAST STOP of this skin's page
+ * ramp verbatim: 1.000:1 against it, 1.031:1 and 1.077:1 against the other two.
+ * The bar does not bound itself in dark by any margin worth the word. It is
+ * bounded, at 15.06:1, by one pixel of border-accent.
+ *
+ * Light is the opposite extreme — 16.91:1 / 15.73:1 / 14.46:1 against the same
+ * three stops — which is exactly what makes this easy to get wrong: in a
+ * light-mode screenshot the hairline is plainly redundant, because the fill step
+ * is already 17:1. It is not redundant. It is the whole boundary in the other
+ * theme. Same shape as the base library's own `--brand` hairline note, which
+ * keeps a rule in both themes for a reason that only holds in one of them.
+ *
+ * EVERY FIGURE HERE IS HAND-MEASURED. `validate` does not reach a fill stated in
+ * a gradient, and `validate:skin` measures inks against the page and the panel,
+ * not against a banner. Same standing as the base library's own topbar note. */
+:root[data-skin='industry'] .jrk-topbar--vivid,
+:root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand {
+  /* Longhand, not the shorthand, so the wedge below composes onto this fill
+     instead of the two fighting for one property. */
+  background-color: var(--jrk-surface-banner);
+  background-image: linear-gradient(
+    calc(90deg + var(--jrk-wedge-angle)),
+    transparent 0 94%,
+    var(--jrk-surface-banner-deep) 94% 100%
+  );
+  color: var(--jrk-text-on-banner);
+
+  /* THE ONE VARIABLE THAT RE-INKS THE WHOLE BAR. Base points every interior
+     element at gradient.ink; nothing below needs restating. */
+  --jrk-gradient-ink: var(--jrk-text-on-banner);
+
+  /* The ring is the brand yellow here rather than the ink: accent-solid is
+     14.10:1 on this band in light and 15.06:1 in dark, beside text-on-banner's
+     15.14:1 / 15.85:1 — so the indicator is as strong as the ink and is the only
+     yellow on the bar. This is the one place in the skin where the accent can be
+     a signifier on its own, because a charcoal ground is the only ground where a
+     saturated yellow has contrast to spend. */
+  --jrk-focus-ring: var(--jrk-accent-solid);
+
+  /* Colour only; the 1px width is untouched, per the house rule. Base zeroes this
+     on `--vivid` ("the bar bounds itself") and restores border-subtle on
+     `--brand`; a charcoal band on a near-white page bounds itself perfectly well,
+     so this is the brand rule rather than a boundary — 3px of yellow with no ink
+     on it, which is where the accent goes now that the wedge is a facet. */
+  border-bottom-color: var(--jrk-border-accent);
+
+  /* The bar is opaque now, which is not only a look decision: this skin's page
+     carries the diagonal stripe, and a translucent masthead let it run straight
+     through the chrome. See the stripe's own note. */
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* ── AND THE SEGMENTED CONTROL GETS ITS OPAQUE TRACK BACK ─────────────────
+   MEASURED 1.82:1 BEFORE THIS RULE, in light only, and the asymmetry is the
+   explanation. The base library gives `--brand` a button-group track of
+   `overlay.hoverVeil` at 45%, replacing the opaque `surface.track` every other
+   segmented control gets. That is a compensation for the base ramp: hoverVeil is
+   DIRECTIONAL, so in light it is black at a low alpha, which darkens a PALE bar
+   just enough to seat the control on it.
+
+   This band is not a pale bar. A 0.019-alpha black veil over #14171a leaves the
+   track essentially the band itself, and an unselected segment is a bare label
+   inked `text.secondary` — an ink chosen for a light ground. Near-black ink on a
+   near-black band: 1.82:1, i.e. the theme control's other option is invisible.
+   In DARK the same rule is fine (7.97:1 industry / 8.93:1 midgard) because
+   text.secondary is a LIGHT ink there and the veil is white. So this is a
+   light-theme-only fault, and only on the variant that carries the compensation:
+   `--vivid` measures 7.85:1 / 7.72:1 because it never gave up its track.
+
+   The fix is to stop inheriting a compensation for a problem this bar does not
+   have. surface.track is opaque and is already what the control is designed
+   against, which is why the two masthead variants now look identical.
+
+   NOT the ghost button's resting veil, which is the same family of rule and is
+   deliberately left alone: its ink is gradient.ink, near-white on both bands, so
+   it measures 15:1 at rest and the veil still reads as a chip in both themes. */
+:root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand .jrk-btn-group {
+  background: var(--jrk-surface-track);
+}
+
 /* ── type: uppercase labels, tracked wide; values never ───────────────────
    The signature is a small uppercase label at tracking-caps (0.14em under this
    skin). It is legible only BECAUSE it is uppercase and short. VALUES ARE
@@ -757,5 +886,21 @@
   }
   :root[data-skin='industry'] .jrk-topbar {
     background-image: none;
+  }
+
+  /* AND THE MASTHEAD GIVES UP ITS BAND ENTIRELY. On screen the charcoal is what
+     makes the bar's ink a colour fact; on paper it is a full-width block of near
+     black behind near-white ink, which is the most expensive thing a page can
+     print and reads as a redaction if the printer drops backgrounds. So the fill
+     goes, the facet goes with it, and the ink returns to text-primary — the same
+     trade the stripe makes three rules up. 0-4-0 on the second selector to clear
+     the masthead rule, which is 0-4-0 itself and earlier in this file. */
+  :root[data-skin='industry'] .jrk-topbar--vivid,
+  :root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand {
+    background-color: transparent;
+    background-image: none;
+    color: var(--jrk-text-primary);
+    --jrk-gradient-ink: var(--jrk-text-primary);
+    border-bottom-color: var(--jrk-border-strong);
   }
 }

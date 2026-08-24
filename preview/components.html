@@ -260,6 +260,89 @@
     </div>
   </section>
 
+  <!-- ============================ masthead ============================ -->
+  <section class="gal-sec">
+    <h2>Masthead</h2>
+    <p class="gal-sec__note">
+      Three bars, and the skin picker above is the point of this section. The
+      plain <code class="jrk-mono">.jrk-topbar</code> is inked with
+      <code class="jrk-mono">text.primary</code> by the consumer, so no skin
+      repaints it &mdash; do not put a fill under ink you do not own. The two
+      <strong>masthead variants own their own ink</strong> via
+      <code class="jrk-mono">gradient.ink</code>, which is what makes them
+      skinnable at all: under <code class="jrk-mono">industry</code> and
+      <code class="jrk-mono">midgard</code> both collapse to that skin&rsquo;s flat
+      banner, because a teal&ndash;blue&ndash;violet ribbon belongs to neither palette.
+    </p>
+
+    <div class="gal-demo gal-demo--plain gal-demo--stack" style="gap:14px">
+      <span class="gal-label">plain — never skinned</span>
+      <header class="jrk-topbar ">
+        <span style="display:flex;align-items:center;gap:8px;font-weight:600">
+          <span style="width:24px;height:24px;background:currentColor;opacity:.85;border-radius:6px"></span>
+          JRK Analytics
+        </span>
+        <span class="jrk-spacer"></span>
+        <div class="jrk-btn-group" role="group" aria-label="Theme">
+          <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="true" type="button">Light</button>
+          <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="false" type="button">Dark</button>
+        </div>
+        <span class="jrk-status"><span class="jrk-dot jrk-dot--good" aria-hidden="true"></span><span class="jrk-caption">Synced 4m ago</span></span>
+        <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" type="button">Sign Out</button>
+      </header>
+      <span class="gal-label">--vivid</span>
+      <header class="jrk-topbar jrk-topbar--vivid">
+        <span style="display:flex;align-items:center;gap:8px;font-weight:600">
+          <span style="width:24px;height:24px;background:currentColor;opacity:.85;border-radius:6px"></span>
+          JRK Analytics
+        </span>
+        <span class="jrk-spacer"></span>
+        <div class="jrk-btn-group" role="group" aria-label="Theme">
+          <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="true" type="button">Light</button>
+          <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="false" type="button">Dark</button>
+        </div>
+        <span class="jrk-status"><span class="jrk-dot jrk-dot--good" aria-hidden="true"></span><span class="jrk-caption">Synced 4m ago</span></span>
+        <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" type="button">Sign Out</button>
+      </header>
+      <span class="gal-label">--vivid --brand</span>
+      <header class="jrk-topbar jrk-topbar--vivid jrk-topbar--brand">
+        <span style="display:flex;align-items:center;gap:8px;font-weight:600">
+          <span style="width:24px;height:24px;background:currentColor;opacity:.85;border-radius:6px"></span>
+          JRK Analytics
+        </span>
+        <span class="jrk-spacer"></span>
+        <div class="jrk-btn-group" role="group" aria-label="Theme">
+          <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="true" type="button">Light</button>
+          <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" aria-pressed="false" type="button">Dark</button>
+        </div>
+        <span class="jrk-status"><span class="jrk-dot jrk-dot--good" aria-hidden="true"></span><span class="jrk-caption">Synced 4m ago</span></span>
+        <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" type="button">Sign Out</button>
+      </header>
+    </div>
+
+    <div class="gal-rule">
+      <strong>The base brand ramp&rsquo;s legibility is a LAYOUT fact; both skins&rsquo;
+      are a COLOUR fact.</strong> <code class="jrk-mono">#d5dfff &rarr; #245ec6 &rarr;
+      #ffffff</code> passes at both ends and fails from roughly 34% to 66% of the
+      bar&rsquo;s width &mdash; worst 2.48:1 &mdash; and ships on the guarantee that
+      <code class="jrk-mono">.jrk-spacer</code> holds the middle empty and the bar
+      stays above about 1200px. A flat band has no interior to fail in, so a
+      consumer can put anything anywhere on the skinned bars. <em>Narrow this
+      window and watch the base bar&rsquo;s middle, not the skinned ones.</em>
+    </div>
+
+    <div class="gal-rule">
+      <strong>In DARK, both skins&rsquo; bands are their own page colour and the
+      accent hairline is the only edge.</strong> Industry&rsquo;s
+      <code class="jrk-mono">#0d0f10</code> is the last stop of its page ramp and
+      midgard&rsquo;s <code class="jrk-mono">#0b0f14</code> is the first stop of
+      its own &mdash; 1.000:1 either way &mdash; against 17:1 and 15:1 in light. The
+      1px rule reads as decoration in every light-mode screenshot and is the whole
+      boundary in the other theme. Toggle the theme on this section before
+      touching it.
+    </div>
+  </section>
+
   <!-- ============================ explain ============================ -->
   <section class="gal-sec">
     <h2>Lede, steps, glossary</h2>

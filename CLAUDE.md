@@ -936,15 +936,48 @@ corner is a corner. What DID reproduce is the `radius.full` contract — the
 squared-control list in `css/skins/midgard.css` is this skin's version, and
 anything new that opts into `radius.full` stays a pill until it is added there.
 
-**Two colour decisions were declined here and the reasons generalise.** The bar
-was NOT repainted to `surface.banner` even though the reference's chrome is a dark
-band: `.jrk-topbar` is inked with `text.primary` by the consumer, which is
-near-black in light, and the base `--brand` / `--vivid` variants exist precisely
-because a dark bar needs its own ink namespace. A skin re-pointing the default
-bar's FILL would blind every control in it. What it does instead is re-point the
-bar's existing hairline COLOUR to `border.accent` — a colour change with no width
-change, so nothing reflows. Same family as Industry's wedge decision: **do not put
-a fill under ink you do not own.**
+**Two colour decisions were declined here and the reasons generalise.** The
+DEFAULT bar is still NOT repainted to `surface.banner` even though the reference's
+chrome is a dark band: `.jrk-topbar` is inked with `text.primary` by the consumer,
+which is near-black in light, and the base `--brand` / `--vivid` variants exist
+precisely because a dark bar needs its own ink namespace. A skin re-pointing the
+default bar's FILL would blind every control in it. What it does to the plain bar
+is re-point its existing hairline COLOUR to `border.accent` — a colour change with
+no width change, so nothing reflows. Same family as Industry's wedge decision:
+**do not put a fill under ink you do not own.**
+
+**BOTH SKINS NOW SKIN THE MASTHEAD VARIANTS, which is the other half of that same
+rule rather than a reversal of it** (2026-08-24). `--vivid` and `--brand` own
+their ink through `gradient.ink`, so a skin re-points ONE variable and every
+caption, status, ghost button and search field on the bar follows. Under either
+skin both variants collapse to that skin's flat `surface.banner` band — Industry
+charcoal `#14171a` / `#0d0f10`, midgard warm-black `#1b1811` / cold `#0b0f14` —
+because base's teal→blue→violet ribbon belongs to neither palette. The values were
+derived and measured when each skin was built and had simply never been wired to
+anything.
+
+**The point of a flat band is that it turns the base bar's LAYOUT fact back into a
+COLOUR fact.** The brand ramp above is legible only while `.jrk-spacer` holds the
+middle empty and the bar stays above ~1200px; a single fill has no interior to
+fail in, so a consumer can put anything anywhere on a skinned bar. **But in DARK
+each band is its own page colour** — Industry's `#0d0f10` is the last stop of its
+page ramp and midgard's `#0b0f14` the first stop of its own, 1.000:1 either way —
+**so the accent hairline is the entire boundary there** (15.06:1 / 9.23:1), while
+in light the fill step is already 17:1 / 15:1. That 1px rule reads as pure
+decoration in every light-mode screenshot and is the whole masthead in the other
+theme. Do not drop it.
+
+**Three faults were found by measuring rather than looking, and two were shipped.**
+Industry's wedge rule is `background-image` at 0-3-0 and base's `--vivid` is the
+`background` SHORTHAND at 0-2-0, so under that skin the wedge was **deleting the
+masthead's fill**, leaving white ink on a transparent bar. The wedge itself had to
+change colour with the ground — near-white ink on `accent.wash` is 1.06:1 — so it
+is `surface.bannerDeep` now, a facet rather than a colour. And base's `--brand`
+gives the segmented control a translucent `overlay.hoverVeil` track *in place of*
+its opaque one, which is a compensation for a PALE ramp: on a dark band in light
+theme the unselected label measured **1.82:1**, fixed to 7.85:1 by giving the
+track back. **A `--brand` compensation assumes a light ground in light theme; a
+skin that inverts the ground inherits the compensation and not the assumption.**
 
 ## Adding a component
 
