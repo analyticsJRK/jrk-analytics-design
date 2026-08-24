@@ -60,6 +60,9 @@ export type { AuthLayoutProps, SsoButtonProps } from './Auth';
 export { SectionNav } from './SectionNav';
 export type { SectionNavProps } from './SectionNav';
 
+export { Lede, Steps, Glossary } from './Explain';
+export type { LedeProps, StepsProps, Step, GlossaryProps, GlossaryEntry } from './Explain';
+
 export { SpotlightGuide } from './Spotlight';
 export type {
   SpotlightGuideProps,
