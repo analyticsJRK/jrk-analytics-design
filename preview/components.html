@@ -260,6 +260,106 @@
     </div>
   </section>
 
+  <!-- ============================ explain ============================ -->
+  <section class="gal-sec">
+    <h2>Lede, steps, glossary</h2>
+    <p class="gal-sec__note">
+      The three pieces an info-heavy landing zone needs so that it states a
+      <strong>finding</strong> instead of describing itself. None of them draws a
+      surface, a fill or a radius, so each is safe on the page plane and inside a
+      card — both are shown below, which is the check that matters: an explainer
+      lands on both, and this library has been bitten by a fill chosen for one
+      plane and shipped on the other.
+    </p>
+
+    <div class="gal-demo gal-demo--plain gal-demo--stack">
+      <span class="gal-label">On the page plane — the whole landing zone</span>
+      <div class="jrk-stack" style="--jrk-stack-gap:12px">
+        <div class="jrk-page-header">
+          <div>
+            <h3 class="jrk-page-header__title">Snow Tracker</h3>
+            <p class="jrk-page-header__desc">Per-push vs seasonal contracts, 21 properties.</p>
+          </div>
+          <div class="jrk-page-header__actions">
+            <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" type="button">Guide</button>
+            <button class="jrk-btn jrk-btn--cta jrk-btn--sm" type="button">Review renewals</button>
+          </div>
+        </div>
+
+        <div>
+          <p class="jrk-lede">Per-push is cheaper for <strong>14 of 21</strong> properties this season, and <strong>27 contracts</strong> need attention before you can act on it.</p>
+          <p class="jrk-lede__basis">2026&ndash;2027 season &middot; priced on completed winters only &middot; 15 expired, 12 with no end date on file.</p>
+        </div>
+
+        <dl class="jrk-glossary" style="margin-top:4px">
+          <dt class="jrk-glossary__term"><span class="jrk-badge jrk-badge--accent">Per push</span></dt>
+          <dd class="jrk-glossary__def">You pay each time the plow comes out, roughly a rate per inch. Cheaper in light winters, expensive in heavy ones &mdash; you carry the weather risk.</dd>
+          <dt class="jrk-glossary__term"><span class="jrk-badge jrk-badge--good">Seasonal</span></dt>
+          <dd class="jrk-glossary__def">One fixed price for the whole season, plus a small overage past a cap. Predictable, but you overpay in mild winters &mdash; the vendor carries the risk.</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>The term slot takes a badge</strong>, and that is the intended form
+      when the same term appears as one in the table below &mdash; the glossary
+      then shows the reader the exact object they will meet rather than a
+      paraphrase of it. The gloss is <strong>secondary ink, not muted</strong>,
+      which departs from the caption convention on purpose: this is the content,
+      not a caption under something you have already read.
+    </div>
+
+    <div class="jrk-grid jrk-grid-2">
+      <div class="gal-demo gal-demo--stack">
+        <span class="gal-label">Steps &mdash; on the card plane</span>
+        <ol class="jrk-steps" role="list">
+          <li class="jrk-steps__step">
+            <span class="jrk-steps__num" aria-hidden="true"></span>
+            <span class="jrk-steps__title">Pulls each property from Portfolio Info</span>
+            <span class="jrk-steps__detail">How snow is handled today &mdash; vendor, in-house, city or none.</span>
+          </li>
+          <li class="jrk-steps__step">
+            <span class="jrk-steps__num" aria-hidden="true"></span>
+            <span class="jrk-steps__title">Loads 30+ years of local snowfall</span>
+            <span class="jrk-steps__detail">Nearest station, completed winters only.</span>
+          </li>
+          <li class="jrk-steps__step">
+            <span class="jrk-steps__num" aria-hidden="true"></span>
+            <span class="jrk-steps__title">Prices both contract types</span>
+            <span class="jrk-steps__detail">Per-push at the vendor rate, seasonal at the quoted flat price plus overage.</span>
+          </li>
+          <li class="jrk-steps__step">
+            <span class="jrk-steps__num" aria-hidden="true"></span>
+            <span class="jrk-steps__title">Recommends the cheaper one</span>
+          </li>
+        </ol>
+      </div>
+
+      <div class="gal-demo gal-demo--stack">
+        <span class="gal-label">Glossary &mdash; stacked, for a narrow column</span>
+        <dl class="jrk-glossary jrk-glossary--stacked">
+          <dt class="jrk-glossary__term">Completed winter</dt>
+          <dd class="jrk-glossary__def">A season with snowfall recorded through 31 March. Partial seasons are excluded from pricing.</dd>
+          <dt class="jrk-glossary__term">Overage cap</dt>
+          <dd class="jrk-glossary__def">The snowfall total past which a seasonal contract starts billing per push again.</dd>
+          <dt class="jrk-glossary__term">Preference</dt>
+          <dd class="jrk-glossary__def">The contract type the asset manager has asked for, which may not be the cheaper one.</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>The step numeral is a CSS counter and has no chip behind it.</strong>
+      A filled circle wants a token, and the honest candidate &mdash;
+      <code class="jrk-mono">surface.track</code>, the one recess that works in
+      both themes &mdash; is 1.18:1 on the light page and <strong>1.04:1 on the
+      dark one</strong>, so it would look right in every screenshot taken on a
+      card and not exist on the page. Without it the numeral is the mark at
+      8.92:1 / 10.57:1 on either plane, and the component has no radius for a
+      skin to square.
+    </div>
+  </section>
+
   <!-- ============================ badges ============================ -->
   <section class="gal-sec">
     <h2>Badges, status, tags</h2>

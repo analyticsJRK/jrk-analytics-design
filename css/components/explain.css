@@ -1,0 +1,302 @@
+/* Explain — the three things a data-dense page needs in order to say what it
+ * MEANS, rather than only what it is.
+ *
+ * ------------------------------------------------------------------------
+ * SCOPE (layer 1), because three components at once is the shape of a scope
+ * failure and this one has to answer for itself
+ * ------------------------------------------------------------------------
+ * These were written against a real landing zone that opened with five stacked
+ * prose layers and no numbers: a title, a four-line paragraph, a muted
+ * provenance line, two permanent glossary tiles, and an alert — about 280px of
+ * chrome before the tool started, every pixel of it re-read on every visit.
+ * Nothing on that screen was the ANSWER; the page could only describe itself.
+ *
+ * So the three are one idea in three positions, and none of them is a tile:
+ *
+ *   .jrk-lede      what the data says THIS time. One sentence, changes with
+ *                  the data, at most one per page.
+ *   .jrk-steps     how the number was arrived at. Ordered, three or four
+ *                  short steps, replacing a paragraph of method.
+ *   .jrk-glossary  what a term in the data means. Term + one-line gloss.
+ *
+ * WHAT EACH ONE IS NOT, since the library already has a neighbour for all three
+ * and the neighbour is often the right answer:
+ *
+ *   vs .jrk-page-header__desc — the desc says what the PAGE is and is the same
+ *     every visit, which is why it is muted and 68ch. A lede is a finding. If
+ *     you cannot write one that would read differently next week, you do not
+ *     have a lede, you have a desc, and it is already built.
+ *   vs .jrk-spotlight — Spotlight teaches a term AT the figure that depends on
+ *     it, modally, on demand. That is the better answer whenever the reader is
+ *     already looking at the number. A glossary is for the two or three terms
+ *     the whole page is built on, which the reader needs BEFORE the first
+ *     figure means anything.
+ *   vs .jrk-list — a grouped list is an inset tile of key/value rows and it
+ *     draws a surface. A glossary is text on whatever plane it lands on.
+ *   vs .jrk-expander — steps and a glossary are both short enough to sit open.
+ *     If a page wants them closed, WRAP one rather than adding a modifier here;
+ *     that is composition the library already supports.
+ *
+ * NONE OF THE THREE DRAWS A SURFACE, A FILL OR A RADIUS. That is deliberate and
+ * it is what makes them safe on both planes: each is measured below against the
+ * page AND against the card, because an explainer lands on both and this library
+ * has been bitten by a fill chosen for one plane and shipped on the other. The
+ * only ink they spend is a hairline on the steps connector.
+ *
+ * MARKUP CONTRACT
+ *
+ *   <p class="jrk-lede">Per-push is cheaper for <strong>14 of 21</strong>…</p>
+ *   <p class="jrk-lede__basis">Priced on completed winters only.</p>
+ *
+ *   <ol class="jrk-steps" role="list">
+ *     <li class="jrk-steps__step">
+ *       <span class="jrk-steps__num" aria-hidden="true"></span>
+ *       <span class="jrk-steps__title">Pulls each property from Portfolio Info</span>
+ *       <span class="jrk-steps__detail">Vendor, in-house, city or none.</span>
+ *     </li>
+ *   </ol>
+ *
+ *   <dl class="jrk-glossary">
+ *     <dt class="jrk-glossary__term">Per push</dt>
+ *     <dd class="jrk-glossary__def">You pay each time the plow comes out.</dd>
+ *   </dl>
+ *
+ * role="list" on the <ol> is not redundant belt-and-braces: `list-style: none`
+ * strips list semantics in Safari/VoiceOver, and the ordinal is the whole point
+ * of a step. It is restated in <Steps> so both paths announce the same thing. */
+
+/* ============================== lede ============================== */
+
+/* THE FINDING. text-xl regular is h3's SIZE at body's weight — deliberately not
+ * a heading, because it is a sentence and it must not compete with the page
+ * title (text-2xl semibold) two lines above it. text.primary at 20.29:1 on the
+ * page and 21.00:1 on the card: this is the one line on the screen that is
+ * supposed to be read, and it is the only thing in this file inked primary.
+ *
+ * 52ch, against __desc's 68ch. A lede that wraps three times is a description
+ * wearing the wrong class; the width is a soft enforcement of the one-sentence
+ * rule. If both are present, cut the desc — a finding under a description reads
+ * as an afterthought, and the desc is the one a reader can already infer.
+ *
+ * AND IF THERE IS NO FINDING, RENDER NOTHING. A lede saying "No properties need
+ * attention" is a finding; one saying "Review the table below" is furniture, and
+ * furniture at this size costs the page its only landing zone. <Lede> returns
+ * null on empty children for that reason. */
+.jrk-lede {
+  font-size: var(--jrk-text-xl);
+  font-weight: var(--jrk-weight-regular);
+  line-height: var(--jrk-leading-snug);
+  letter-spacing: var(--jrk-tracking-tight);
+  color: var(--jrk-text-primary);
+  max-width: 52ch;
+  /* `balance`, not `pretty` — the only new CSS property this file introduces, so
+     it is worth saying which and why. Balance evens the line lengths of a short
+     display sentence and is capped by browsers at around four lines, which is
+     exactly the shape this component is; pretty only repairs the last line's
+     orphan and is the right choice for a paragraph, which this is not. Both
+     degrade to normal wrapping where unsupported. */
+  text-wrap: balance;
+}
+
+/* The figure inside the sentence. Semibold rather than a colour, because a
+   coloured number in a sentence is the identity-by-colour fault in prose form —
+   and accent.solid is 3.52:1 on the dark page, i.e. not a text colour there at
+   all. Weight survives greyscale, both dichromacies and both themes, which is
+   the same argument the segmented thumb's semibold rests on. */
+.jrk-lede strong {
+  font-weight: var(--jrk-weight-semibold);
+}
+
+/* THE BASIS. A claim needs its grounds, and on this product the grounds are
+   usually a scope condition rather than a citation — "priced on completed
+   winters only", "excludes properties acquired mid-season". Muted at 4.90:1 on
+   the page and 5.92:1 on the card, sm rather than md so it reads as the fine
+   print it is. Same role as .jrk-spotlight__basis, and the naming is deliberate:
+   two components, one idea, so a reader who has met one knows the other. */
+.jrk-lede__basis {
+  margin-top: var(--jrk-space-1_5);
+  font-size: var(--jrk-text-sm);
+  line-height: var(--jrk-leading-normal);
+  color: var(--jrk-text-muted);
+  max-width: 68ch;
+}
+
+/* ============================== steps ============================== */
+
+/* HOW THE NUMBER WAS ARRIVED AT. Three or four short steps in place of a
+ * paragraph of method — the same information, scannable, and countable at a
+ * glance, which a paragraph never is.
+ *
+ * THE NUMERAL IS A CSS COUNTER, NOT AUTHORED TEXT, and that is the one decision
+ * here worth defending. A hand-written "1." is a second source of truth for the
+ * order of a list whose order is already in the DOM, and it goes wrong the first
+ * time a step is inserted — the same drift <SectionNav> refuses an `items` prop
+ * to avoid. The cost is that the numeral is generated content, which is why the
+ * <ol> keeps its list semantics via role="list" above: the ordinal reaches a
+ * screen reader through the list, not through the glyph.
+ *
+ * THERE IS NO CHIP BEHIND THE NUMERAL, and one was drawn before this. A filled
+ * circle wants a token, and the honest candidate — surface.track, the one recess
+ * that works in both themes — is 1.18:1 on the light page and 1.04:1 on the dark
+ * one, so the chip would simply not exist on the dark page while looking correct
+ * in every screenshot taken on a card. Dropping it leaves the numeral itself as
+ * the mark at 8.92:1 / 10.57:1, identical on both planes, and spends no token at
+ * all. It also keeps this component off both skins' squared-control lists: with
+ * no radius, there is nothing for a skin to square. (surface.track's own note
+ * asks that a second consumer be justified rather than assumed. This is that
+ * justification, arriving at "do not".) */
+.jrk-steps {
+  /* One number, three consumers — the marker column, the connector's position
+     and the connector's centre — so they cannot drift out of alignment. */
+  --jrk-steps-marker: var(--jrk-space-6);
+
+  display: grid;
+  gap: var(--jrk-space-4);
+  counter-reset: jrk-step;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.jrk-steps__step {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--jrk-steps-marker) minmax(0, 1fr);
+  column-gap: var(--jrk-space-3);
+  align-items: baseline;
+}
+
+/* THE CONNECTOR. A hairline from under one numeral to the next, which is what
+   makes the column read as a sequence rather than as three unrelated lines —
+   the same job .jrk-section-nav__list's spine does, and legal on the same
+   grounds: 1.21:1 on the light page / 1.46:1 on the dark one is decorative
+   separation, which 1.4.11 permits under 3:1 because the line carries no state
+   and no target. The NUMERALS carry the meaning and they measure.
+
+   It starts below the numeral's line box and runs into the row gap, so the
+   segment is drawn between markers rather than through them. Suppressed on the
+   last step: a line trailing off under the final marker says there is another
+   one below, and there is not. */
+.jrk-steps__step::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--jrk-space-5) + var(--jrk-space-1));
+  bottom: calc(var(--jrk-space-4) * -1);
+  /* Centre of the marker column, minus half the hairline. */
+  left: calc(var(--jrk-steps-marker) / 2 - 0.5px);
+  width: 1px;
+  background: var(--jrk-border-subtle);
+}
+
+.jrk-steps__step:last-child::before {
+  content: none;
+}
+
+/* text.secondary rather than the accent: accent.solid is 3.52:1 on the dark
+   page, under the text floor, so a blue numeral would be a light-mode-only
+   decision. Secondary measures 10.57:1 / 8.92:1 on the page and 10.94:1 / 7.60:1
+   on the card — the same mark on both planes and in both themes.
+   Tabular figures so a two-digit step does not shift the column. */
+.jrk-steps__num {
+  grid-column: 1;
+  justify-self: center;
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-steps__num::before {
+  counter-increment: jrk-step;
+  content: counter(jrk-step);
+}
+
+.jrk-steps__title {
+  grid-column: 2;
+  font-size: var(--jrk-text-md);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-primary);
+}
+
+/* SECONDARY, NOT MUTED, and this is a deliberate departure from the convention
+   .jrk-list__detail and .jrk-card__subtitle follow. Those are captions UNDER a
+   thing you have already read; this is the content — the sentence the step
+   exists to deliver. Muted is the ink for chrome, and a page whose explanation
+   is entirely muted is the page this component was written to fix.
+   10.57:1 / 8.92:1. */
+.jrk-steps__detail {
+  grid-column: 2;
+  margin-top: var(--jrk-space-0_5);
+  font-size: var(--jrk-text-md);
+  line-height: var(--jrk-leading-normal);
+  color: var(--jrk-text-secondary);
+  max-width: 68ch;
+}
+
+/* ============================== glossary ============================== */
+
+/* TERM + ONE-LINE GLOSS. The two-column form aligns every gloss on one edge,
+ * which is what lets a reader skip the terms they already know — a stacked list
+ * makes them read all of it to find the one they do not.
+ *
+ * THE TERM COLUMN IS max-content, SO THE LONGEST TERM SETS IT. That is right up
+ * to about 20 characters and wrong past it: one long term starves every gloss
+ * beside it. --jrk-glossary-term is the per-instance override, and --stacked is
+ * the escape hatch when the column is genuinely narrow.
+ *
+ * THE TERM SLOT TAKES A <Badge>, and that is the intended form when the same
+ * term appears as a badge in the table below — the glossary then shows the
+ * reader the exact object they will meet, rather than a paraphrase of it. The
+ * dt sets no font-size in that case; the badge brings its own. */
+.jrk-glossary {
+  display: grid;
+  grid-template-columns: var(--jrk-glossary-term, max-content) minmax(0, 1fr);
+  column-gap: var(--jrk-space-4);
+  row-gap: var(--jrk-space-2);
+  margin: 0;
+  align-items: baseline;
+}
+
+.jrk-glossary__term {
+  grid-column: 1;
+  font-size: var(--jrk-text-md);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: var(--jrk-leading-normal);
+  color: var(--jrk-text-primary);
+}
+
+/* Secondary for the same reason .jrk-steps__detail is — the gloss IS the
+   content. margin-inline-start: 0 because a <dd> carries a UA indent of 40px
+   that would push every gloss off its own column. */
+.jrk-glossary__def {
+  grid-column: 2;
+  margin-inline-start: 0;
+  font-size: var(--jrk-text-md);
+  line-height: var(--jrk-leading-normal);
+  color: var(--jrk-text-secondary);
+  max-width: 68ch;
+}
+
+/* NARROW COLUMNS. One column, the gloss under its term, with the row gap
+   reopened between PAIRS rather than within one — a dt and its dd have to read
+   as one object or the list stops being a glossary and becomes an alternating
+   stack of unrelated lines. */
+.jrk-glossary--stacked {
+  grid-template-columns: minmax(0, 1fr);
+  row-gap: 0;
+}
+
+.jrk-glossary--stacked .jrk-glossary__term,
+.jrk-glossary--stacked .jrk-glossary__def {
+  grid-column: 1;
+}
+
+.jrk-glossary--stacked .jrk-glossary__term + .jrk-glossary__def {
+  margin-top: var(--jrk-space-0_5);
+}
+
+.jrk-glossary--stacked .jrk-glossary__def + .jrk-glossary__term {
+  margin-top: var(--jrk-space-4);
+}

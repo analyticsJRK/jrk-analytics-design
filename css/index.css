@@ -52,6 +52,12 @@
    mirrors .jrk-content__inner, so it is read alongside the shell rather than as
    a standalone widget. Nothing in it overrides a shell rule. */
 @import './components/section-nav.css';
+/* Beside the section index because it is the other half of the same job — that
+   one tells you where you are in a document, these three tell you what the
+   document is saying. Nothing in it overrides another component (no shared
+   selectors, no element selectors outside .jrk-lede strong), so the position is
+   for a reader of this list rather than for the cascade. */
+@import './components/explain.css';
 @import './components/feedback.css';
 @import './components/chart.css';
 @import './components/org.css';
