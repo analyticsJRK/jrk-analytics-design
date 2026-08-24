@@ -73,6 +73,10 @@
 :root[data-skin='midgard'] .jrk-daterange__option,
 :root[data-skin='midgard'] .jrk-org__toggle,
 :root[data-skin='midgard'] .jrk-table__sort,
+:root[data-skin='midgard'] .jrk-tabs--pills,
+:root[data-skin='midgard'] .jrk-tab__count,
+:root[data-skin='midgard'] .jrk-stat__action,
+:root[data-skin='midgard'] .jrk-topbar--vivid.jrk-topbar--brand .jrk-btn-group,
 :root[data-skin='midgard'] .jrk-pagination {
   border-radius: 0;
 }

@@ -85,6 +85,16 @@
       <code>.jrk-topbar</code> once already.
     </p>
     <p class="gal-note">
+      The alignment is <code>background-origin: border-box</code>, and it is the
+      whole rule. <strong><code>clip-path</code> and a background layer resolve
+      percentages against different boxes</strong> &mdash; clip-path against the
+      <em>border</em> box, a background against the <em>padding</em> box by
+      default. These tiles carry a 1px border, so the default put the diagonal a
+      pixel up-and-right of the cut, which on a 1px line is not a soft
+      misalignment but a separate line with a gap beside it. Naming the border box
+      makes both agree.
+    </p>
+    <p class="gal-note">
       Two consequences worth carrying. The edge is <em>independent of</em>
       <code>clip-path</code>, so anywhere the cut is turned off the background has
       to be turned off with it &mdash; a nested tile would otherwise show a stray

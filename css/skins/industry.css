@@ -281,6 +281,18 @@
    because the axis is perpendicular to the iso-lines, so this matches the border
    it continues rather than approximating it.
 
+   background-origin: border-box IS THE WHOLE ALIGNMENT, and without it this rule
+   ships visibly wrong. THE TWO PROPERTIES RESOLVE THEIR PERCENTAGES AGAINST
+   DIFFERENT BOXES: clip-path resolves against the BORDER box, while a background
+   layer defaults to background-origin: padding-box. These tiles carry a 1px
+   border, so the default puts the notch square 1px in from the top and right
+   edges the cut is measured from, and the diagonal lands a pixel up-and-right of
+   the cut — which on a 1px line is not a soft misalignment, it is a completely
+   separate line with a gap beside it. Naming the border box makes both
+   properties agree. Anything that changes these tiles' border WIDTH moves the
+   two boxes apart again, but not the alignment, because both now track the same
+   one.
+
    THE COLOUR IS A VARIABLE BECAUSE THE TILES DO NOT AGREE. Everything in the
    first group draws border-subtle; .jrk-sheet is the one tile with a real
    hairline by default and draws border-default. The card variants that change
@@ -310,6 +322,7 @@
     transparent 50%
   );
   background-repeat: no-repeat;
+  background-origin: border-box;
   background-position: 100% 0;
   background-size: var(--jrk-notch-md) var(--jrk-notch-md);
 }
@@ -348,6 +361,7 @@
     transparent 50%
   );
   background-repeat: no-repeat;
+  background-origin: border-box;
   background-position: 100% 0;
   background-size: var(--jrk-notch-md) var(--jrk-notch-md);
 }
@@ -395,7 +409,24 @@
    surface-raised is #ffffff against a #f4f6f6 panel. So the chamfer is a TILE
    signature in this skin and controls are simply square.
    THIS LIST IS THE SKIN'S CONTRACT: radius-full is not overridden in the token
-   file, so a control that opts into it and is not named here stays a pill. */
+   file, so a control that opts into it and is not named here stays a pill.
+
+   FOUR ENTRIES WERE MISSING UNTIL 2026-08-21 AND ONE OF THEM WAS PREDICTED IN
+   WRITING. .jrk-tabs--pills is the segmented WELL, and base's own rule says the
+   two segmented controls "are the same widget in two markup contracts and a
+   geometry change to one belongs in both" — .jrk-btn-group was listed here from
+   the start and its twin never was, so every skin picker in the gallery shipped
+   as a pill well holding square segments. The other three are the same shape of
+   miss: .jrk-tab__count is a chip beside .jrk-badge, which IS listed;
+   .jrk-stat__action is a control on a tile; and the brand topbar's own
+   .jrk-btn-group ground has to track the .jrk-btn-group it contains.
+
+   WHAT IS DELIBERATELY STILL ROUND, so the next audit does not "fix" it:
+   .jrk-progress, .jrk-meter and .jrk-cell-bar__track/__fill keep pill ends
+   because a rounded cap is how a bar reads as a bar rather than as a column, and
+   .jrk-switch input must stay a pill because on a switch the shape IS the
+   affordance. Those sit alongside the shape-critical set the note below
+   covers. */
 :root[data-skin='industry'] .jrk-btn,
 :root[data-skin='industry'] .jrk-btn-group,
 :root[data-skin='industry'] .jrk-input,
@@ -417,6 +448,10 @@
 :root[data-skin='industry'] .jrk-daterange__option,
 :root[data-skin='industry'] .jrk-org__toggle,
 :root[data-skin='industry'] .jrk-table__sort,
+:root[data-skin='industry'] .jrk-tabs--pills,
+:root[data-skin='industry'] .jrk-tab__count,
+:root[data-skin='industry'] .jrk-stat__action,
+:root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand .jrk-btn-group,
 :root[data-skin='industry'] .jrk-pagination {
   border-radius: 0;
 }
