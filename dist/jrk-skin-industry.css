@@ -101,7 +101,7 @@
   --jrk-masthead-fill: var(--jrk-accent-wash);
   --jrk-masthead-facet: var(--jrk-accent-wash-active);
   --jrk-masthead-ink: var(--jrk-accent-wash-text);
-  --jrk-masthead-mark: var(--jrk-border-accent);
+  --jrk-masthead-brand-fill: var(--jrk-surface-default);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -173,7 +173,7 @@
     --jrk-masthead-fill: var(--jrk-surface-banner);
     --jrk-masthead-facet: var(--jrk-surface-banner-deep);
     --jrk-masthead-ink: var(--jrk-text-on-banner);
-    --jrk-masthead-mark: var(--jrk-accent-solid);
+    --jrk-masthead-brand-fill: var(--jrk-surface-banner);
   }
 }
 
@@ -245,7 +245,7 @@
     --jrk-masthead-fill: var(--jrk-surface-banner);
     --jrk-masthead-facet: var(--jrk-surface-banner-deep);
     --jrk-masthead-ink: var(--jrk-text-on-banner);
-    --jrk-masthead-mark: var(--jrk-accent-solid);
+    --jrk-masthead-brand-fill: var(--jrk-surface-banner);
 }
 
 /* HAZARD HUES. A third attribute, crossed with the theme:

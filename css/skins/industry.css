@@ -593,6 +593,38 @@
   backdrop-filter: none;
 }
 
+/* ── the brand plate: white in light, and why that is the bolder option ───
+ *
+ * --vivid keeps the pale accent wash; --brand is a WHITE plate. Directed, and the
+ * split is what earns both variants their existence: --vivid is a quiet tinted
+ * band, --brand is a white plate carrying bold hazard marks. Dark is the same
+ * charcoal banner for both — "white" is a light-half instruction, and
+ * masthead-brand-fill resolves to surface-banner in dark for that reason.
+ *
+ * *** THE WHITE PLATE IS WHAT MAKES THE MARKS BOLD, which is the opposite of the
+ * obvious reading. *** A mark's strength is capped by the ink that CROSSES it, and
+ * that ink is measured against the MARK rather than against the band — so the
+ * band's own colour sets how much mark there is room for. On the pale yellow wash
+ * the marks had to be the stepped border-accent at 26-42%; on white they can be
+ * FULL vivid accent-solid, because near-black over accent-solid measures 14.10:1
+ * on yellow, 7.14:1 on orange and 6.19:1 on green. The three dark hues are what
+ * set the ceiling — blue 90%, red 85%, purple 75% — so 75% is the number to
+ * respect and the shipped maximum in the ink band is .55.
+ *
+ * Note that for red, purple and blue accent-solid IS border-accent — this skin
+ * derives no stepped value for the hues that cannot carry black ink — so the
+ * change from border-accent to accent-solid only brightens yellow, orange and
+ * green. Those are exactly the three that were dullest on white.
+ *
+ * WHAT IT COSTS is the fill step: white is surface-default, which is also what the
+ * PLAIN bar is filled with, so in light the brand plate and the plain bar are the
+ * same colour and the marks, the facet and the hairline are the entire difference.
+ * That is acceptable because all three are present and none of them is subtle; it
+ * would not be if the marks were ever quietened. */
+:root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand {
+  background-color: var(--jrk-masthead-brand-fill);
+}
+
 /* ── AND THE SEGMENTED CONTROL GETS ITS OPAQUE TRACK BACK ─────────────────
    MEASURED 1.82:1 BEFORE THIS RULE, in light only, and the asymmetry is the
    explanation. The base library gives `--brand` a button-group track of
@@ -634,14 +666,17 @@
  * adding another one. The bar's ink occupies roughly y19..y37 (a 13px label's
  * line box, centred in 56px):
  *
- *   crossing the ink band   capped at .35. At 35% yellow over the charcoal
- *                           text-on-banner holds about 5.2:1, against the 41%
- *                           where it crosses 4.5:1. The blocks and the three
- *                           ticks are all here.
- *   below the ink band      free to run harder — the slices and dashes at
- *                           y44..y53 go to .42, because nothing is inked over
- *                           them and the two controls tall enough to reach them
- *                           are opaque.
+ *   crossing the ink band   capped at .55, against a ceiling of .75. The ceiling
+ *                           is set by the three hazard hues that cannot carry
+ *                           black ink — purple 75%, red 85%, blue 90% — while
+ *                           yellow, orange and green would take 100%. In DARK the
+ *                           same marks are held to .41 by text-on-banner over
+ *                           accent-solid on the charcoal, so the two halves have
+ *                           different ceilings and the SHIPPED alphas satisfy
+ *                           both.
+ *   below the ink band      free to run to .8, because nothing is inked over them
+ *                           at all and the two controls tall enough to reach them
+ *                           are opaque. This is where "bold" actually lands.
  *
  * AND THE LOW MARKS ARE SCATTERED IN Y ON PURPOSE. The first version put the
  * strongest slice at y39 — two pixels under a 37px text bottom, which is legal by
@@ -682,10 +717,10 @@
   z-index: -1;
   pointer-events: none;
 
-  background-color: var(--jrk-masthead-mark);
+  background-color: var(--jrk-accent-solid);
 
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='5' fill-opacity='.32'/%3E%3Crect x='52' y='33' width='8' height='4' fill-opacity='.28'/%3E%3Crect x='130' y='28' width='26' height='4' fill-opacity='.34'/%3E%3Crect x='200' y='34' width='12' height='5' fill-opacity='.30'/%3E%3Crect x='250' y='30' width='6' height='6' fill-opacity='.26'/%3E%3Crect x='96' y='20' width='1.5' height='14' fill-opacity='.28'/%3E%3Crect x='178' y='18' width='1.5' height='18' fill-opacity='.24'/%3E%3Crect x='268' y='22' width='1.5' height='12' fill-opacity='.28'/%3E%3Crect x='74' y='44' width='30' height='2' fill-opacity='.40'/%3E%3Crect x='214' y='48' width='26' height='2' fill-opacity='.42'/%3E%3Crect x='40' y='51' width='14' height='2' fill-opacity='.30'/%3E%3Crect x='160' y='50' width='22' height='2' fill-opacity='.28'/%3E%3Crect x='230' y='52' width='9' height='2' fill-opacity='.34'/%3E%3C/g%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='5' fill-opacity='.32'/%3E%3Crect x='52' y='33' width='8' height='4' fill-opacity='.28'/%3E%3Crect x='130' y='28' width='26' height='4' fill-opacity='.34'/%3E%3Crect x='200' y='34' width='12' height='5' fill-opacity='.30'/%3E%3Crect x='250' y='30' width='6' height='6' fill-opacity='.26'/%3E%3Crect x='96' y='20' width='1.5' height='14' fill-opacity='.28'/%3E%3Crect x='178' y='18' width='1.5' height='18' fill-opacity='.24'/%3E%3Crect x='268' y='22' width='1.5' height='12' fill-opacity='.28'/%3E%3Crect x='74' y='44' width='30' height='2' fill-opacity='.40'/%3E%3Crect x='214' y='48' width='26' height='2' fill-opacity='.42'/%3E%3Crect x='40' y='51' width='14' height='2' fill-opacity='.30'/%3E%3Crect x='160' y='50' width='22' height='2' fill-opacity='.28'/%3E%3Crect x='230' y='52' width='9' height='2' fill-opacity='.34'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='7' fill-opacity='.5'/%3E%3Crect x='52' y='32' width='10' height='6' fill-opacity='.45'/%3E%3Crect x='130' y='27' width='26' height='6' fill-opacity='.55'/%3E%3Crect x='200' y='33' width='14' height='7' fill-opacity='.48'/%3E%3Crect x='250' y='29' width='8' height='8' fill-opacity='.42'/%3E%3Crect x='96' y='19' width='3' height='16' fill-opacity='.5'/%3E%3Crect x='178' y='17' width='3' height='20' fill-opacity='.42'/%3E%3Crect x='268' y='21' width='3' height='14' fill-opacity='.5'/%3E%3Crect x='74' y='46' width='34' height='3' fill-opacity='.8'/%3E%3Crect x='214' y='48' width='30' height='3' fill-opacity='.8'/%3E%3Crect x='40' y='51' width='16' height='3' fill-opacity='.7'/%3E%3Crect x='160' y='50' width='26' height='3' fill-opacity='.6'/%3E%3Crect x='230' y='52' width='11' height='3' fill-opacity='.7'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='7' fill-opacity='.5'/%3E%3Crect x='52' y='32' width='10' height='6' fill-opacity='.45'/%3E%3Crect x='130' y='27' width='26' height='6' fill-opacity='.55'/%3E%3Crect x='200' y='33' width='14' height='7' fill-opacity='.48'/%3E%3Crect x='250' y='29' width='8' height='8' fill-opacity='.42'/%3E%3Crect x='96' y='19' width='3' height='16' fill-opacity='.5'/%3E%3Crect x='178' y='17' width='3' height='20' fill-opacity='.42'/%3E%3Crect x='268' y='21' width='3' height='14' fill-opacity='.5'/%3E%3Crect x='74' y='46' width='34' height='3' fill-opacity='.8'/%3E%3Crect x='214' y='48' width='30' height='3' fill-opacity='.8'/%3E%3Crect x='40' y='51' width='16' height='3' fill-opacity='.7'/%3E%3Crect x='160' y='50' width='26' height='3' fill-opacity='.6'/%3E%3Crect x='230' y='52' width='11' height='3' fill-opacity='.7'/%3E%3C/g%3E%3C/svg%3E");
   -webkit-mask-repeat: repeat-x;
   mask-repeat: repeat-x;
   -webkit-mask-size: auto 100%;

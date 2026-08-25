@@ -643,8 +643,8 @@ produces convincing artifacts.
 
 ## Skins — a SECOND AXIS, and the only one in this library
 
-**TWO SKINS SHIP, `industry` and `midgard`, and the difference between them is
-the useful thing in this section.** Everything down to the end of `validate:skin`
+**THREE SKINS SHIP — `industry`, `midgard` and `vitrine` — and the differences
+between them are the useful thing in this section.** Everything down to the end of `validate:skin`
 below is INFRASTRUCTURE and applies to both. Everything after that is per-skin,
 and the second skin's real value is that it *tested* the first one's rules: three
 of Industry's findings reproduced (so they are rules about warm high-chroma
@@ -766,8 +766,16 @@ own light plate and clears 4.5:1 in none of its light roles, so it lands in the
 same two places independently: a **two-tone** focus ring (a single-tone one is
 the library's one indicator, invisible) and a stepped `accent-text` /
 `border-accent` pair in light with dark taking the anchor. So the shape of the
-rule is **warm + high chroma + light plate**, and the next skin with such an
-accent should budget for both from the start rather than discovering them.
+rule is **high chroma + light plate**, and the next skin with such an accent
+should budget for both from the start rather than discovering them.
+
+**IT WAS "WARM + high chroma" UNTIL `vitrine`, AND THE THIRD DATA POINT IS WHAT
+DROPPED THE ADJECTIVE.** That skin's accent is a vivid spring green — a COOL hue,
+and the opposite end of the wheel from a yellow and a gold — and it lands in
+exactly the same two places: stepped `accent-text` / `border-accent` in light with
+dark taking the anchor, and a two-tone focus ring. So the property that matters
+is **chroma against a pale plate**, not temperature. Two warm examples had made
+warmth look load-bearing; it never was.
 
 **`clip-path` clips the box-shadow.** That is not a bug and no property order
 fixes it, so a chamfered tile cannot carry an ambient shadow: Industry
@@ -951,11 +959,25 @@ rule rather than a reversal of it** (2026-08-24). `--vivid` and `--brand` own
 their ink through `gradient.ink`, so a skin re-points ONE variable and every
 caption, status, ghost button and search field on the bar follows. Base's
 teal→blue→violet ribbon belongs to neither palette, so both variants take the
-skin's own band — and **the band FOLLOWS THE THEME: a pale accent wash in light,
-the dark banner in dark.** They shipped dark in both halves for a day and were
-changed by direction, because every other surface in the library follows the theme
-and the masthead was the one that did not. `--vivid` and `--brand` differ by the
-skin's identity mark, which only `--brand` carries.
+skin's own band — and **the band FOLLOWS THE THEME: a light plate in light, the
+dark banner in dark.** They shipped dark in both halves for a day and were changed
+by direction, because every other surface in the library follows the theme and the
+masthead was the one that did not.
+
+**Under Industry the two variants take DIFFERENT light plates, and that is what
+makes its marks bold.** `--vivid` is the pale `accent.wash`; `--brand` is WHITE
+(`surface.default`). A mark's strength is capped by the ink that crosses it, and
+that ink is measured against the MARK rather than the band — so the band's colour
+decides how much mark there is room for. On the wash the marks had to be the
+stepped `border.accent` at 26–42%; on white they run full `accent.solid`, because
+near-black over it is 14.10:1 on yellow, 7.14:1 on orange, 6.19:1 on green. **The
+three hues that cannot carry black ink set the ceiling — purple 75%, red 85%, blue
+90% — so 75% is the number to respect**, against a shipped 55% in the ink band and
+80% below it. In DARK the same marks are held to 41% instead, by `text.onBanner`
+over `accent.solid` on the charcoal: two halves, two ceilings, one set of alphas
+that satisfies both. The facet carries near-black at 7.27:1 worst (purple), which
+matters because the sign-out control sits on it. `--vivid` and `--brand` also
+differ by the identity mark, which only `--brand` carries.
 
 **The masthead has its own token namespace and that is not incidental.**
 `masthead.fill` / `.facet` / `.ink` / `.mark` are `var()` indirection onto values
@@ -1040,6 +1062,57 @@ its opaque one, which is a compensation for a PALE ramp: on a dark band in light
 theme the unselected label measured **1.82:1**, fixed to 7.85:1 by giving the
 track back. **A `--brand` compensation assumes a light ground in light theme; a
 skin that inverts the ground inherits the compensation and not the assumption.**
+
+### `vitrine` — frosted glass, and the first skin the gate could not measure
+
+**Translucent panes over a dark scene, a vivid spring-green accent, generous
+radii — and one architectural problem the other two skins do not have.** Opt-in
+the same way (`Outfit` is requested from `css/skins/vitrine.css`). Gallery:
+`preview/skin-vitrine.html`.
+
+**A TRANSLUCENT TILE HAS NO FIXED INK GROUND, WHICH WOULD VOID EVERY CONTRAST
+GUARANTEE IN THE LIBRARY — and `validate:skin` refuses it outright** rather than
+measuring something meaningless: *"surface-default is not a flat colour in
+`<mode>`; every other check measures against it"*. That refusal is what forces
+the design, and the design is worth copying for any future translucent surface:
+**`surface-default` records what the glass COMPOSITES TO**, as a flat hex, so all
+420 checks run exactly as they would on an opaque skin; the translucency lives in
+`surface-glass` and is used only for rendering, inside an `@supports` guard whose
+fallback is that same composite.
+
+**THE SCRIM IS WHAT MAKES THE RECORDING TRUE, AND IT IS NOT DECORATION.** A
+consumer points `--jrk-vitrine-backdrop` at their own image; the scrim is the veil
+between it and the glass, and it **bounds** what the glass can ever sit on. At
+alpha **0.94** the dark composite spans `#151c1b`–`#19201f` whatever is behind it,
+black through white. **Every ink was solved against the PALE EXTREME rather than
+against the recorded hex**, and that is not pedantry: at 0.90 the span widened
+enough to put `text-muted` at **4.46:1** — under by 0.04, and *invisible to the
+gate*, which only ever sees the flat value. **Backdrop, scrim, glass alpha and
+`surface-default` are one decision in four places**; move any one and re-derive
+the other three in the same commit.
+
+**THE SKIN SHIPS NO IMAGE, and that is a distribution decision rather than an
+aesthetic one.** This library has never shipped a binary, and the portal's
+`sync-design.mjs` **mirrors whole directories** — so a photograph dropped into
+`css/` would be copied into the app on every sync forever, referenced or not. The
+hook plus a token-built ramp as its default means the skin looks like itself
+standalone and the gates stay honest.
+
+**ITS CONTRACT IS A ROUNDED LIST, THE INVERSE OF THE OTHER TWO — but the radius
+tokens alone round NOTHING.** The base library reaches for `radius.none`
+*directly* on tiles rather than through `radius-lg`, so overriding the token
+changes nothing and the tiles have to be named in `css/skins/vitrine.css`.
+**Anything new stays square until it is added there.** Controls need no rule at
+all, which is why this stylesheet is the shortest of the three: a rounded skin
+agrees with the base control ladder where a squared one has to fight it.
+
+**Elevation is the fourth independent arrival at the same conclusion.** A black
+shadow over this near-black page renders nothing, so every elevation token carries
+an inset top-edge highlight — the catch that makes a pane read as glass — and in
+dark that highlight IS the elevation. `shadow.card` and `shadow.md` may not be
+`none` here for the same reason midgard records. **Nested panes take no blur**: two
+frosted layers read as fog rather than depth, the inner one has nothing worth
+blurring behind it, and the composite cost is paid twice for it.
 
 ## Adding a component
 

@@ -416,10 +416,10 @@
       "dark": "var(--jrk-text-on-banner)",
       "$note": "What --jrk-gradient-ink points at on the masthead, which re-inks every caption, status, ghost button and search field on the bar in one declaration. It is ALSO the focus ring: 11.64-16.09:1 on the light washes and 15.14/15.85:1 on the dark band, where accent-solid would have been invisible on a yellow band (#ffe500 on #fff59a). The base library reaches the same answer for the same reason — gradient.topbar.ring is black in light and white in dark."
     },
-    "masthead-mark": {
-      "light": "var(--jrk-border-accent)",
-      "dark": "var(--jrk-accent-solid)",
-      "$note": "The glitch furniture's colour. accent-solid cannot be it in light — vivid yellow on a pale yellow wash is the same colour — so light takes the stepped border-accent, which is the deep gold this skin already derives for exactly the case where the vivid accent cannot carry itself. The marks' existing alphas are unchanged and still clear: the tightest hue is purple, where the ink holds 4.5:1 up to a 67% mark, against a shipped maximum of 42%."
+    "masthead-brand-fill": {
+      "light": "var(--jrk-surface-default)",
+      "dark": "var(--jrk-surface-banner)",
+      "$note": "THE BRAND MASTHEAD IS WHITE IN LIGHT, where --vivid keeps the pale wash (masthead-fill). Directed 2026-08-24, and the split is what earns both: --vivid is a quiet tinted band, --brand is a white plate carrying bold hazard marks. Dark is the same charcoal banner for both. White is stated as surface-default rather than as a literal so it tracks the skin's own panel. WHAT IT BUYS is the mark budget: near-black ink is 17.99:1 on white against 16.09:1 on the yellow wash, and — far more importantly — the marks may run FULL vivid accent-solid instead of the stepped border-accent, because ink crossing a mark is measured against the MARK, not the band. Ceilings across the six hazard hues: yellow, orange and green take 100%, blue 90%, red 85%, purple 75%. So 75% is the number to respect, against 42% before."
     }
   },
   "variants": {
