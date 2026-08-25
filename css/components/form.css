@@ -537,6 +537,33 @@
     min-width: max-content;
   }
 
+  /* THE RESET ABOVE IS NOT ENOUGH IN DARK MODE, AND `@supports` DOES NOT HELP.
+     
+     The inlined chevron is set three times up the file: once on `.jrk-select`
+     (0,1,0) and twice on a theme (`[data-theme='dark'] .jrk-select` and
+     `:root:where(:not([data-theme='light'])) .jrk-select`, both 0,2,0). A
+     `@supports` block adds no specificity, so `background-image: none` at (0,1,0)
+     beats only the first of the three. In light mode that is enough — same
+     specificity, later in source. In DARK mode the theme rule won, the background
+     chevron survived, and it drew beside `::picker-icon`: two arrows in one
+     control. Reported 2026-08-24 against the Industry skin in dark mode; it was
+     never skin-specific, it is every `<select>` in dark mode in any browser that
+     implements base-select, which is why nobody caught it in light.
+     
+     So the reset is restated at each theme's own specificity. Do NOT collapse
+     these into the rule above by raising it to `:root .jrk-select` — that would
+     out-specify a CONSUMER's own `.jrk-select` override too, and this file has no
+     business winning that argument. Matching, not exceeding. */
+  [data-theme='dark'] .jrk-select {
+    background-image: none;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme='light'])) .jrk-select {
+      background-image: none;
+    }
+  }
+
   .jrk-select::picker-icon {
     color: var(--jrk-text-muted);
     transition: transform var(--jrk-transition);
