@@ -967,6 +967,40 @@ in light the fill step is already 17:1 / 15:1. That 1px rule reads as pure
 decoration in every light-mode screenshot and is the whole masthead in the other
 theme. Do not drop it.
 
+**EACH MASTHEAD CARRIES A MARK, DRAWN AS AN ALPHA-ONLY MASK OVER A TOKEN FILL.**
+Industry spells JRK in hatched stencil letters with a vivid yellow strip and
+glitch furniture across the band; midgard runs a node network that is engraved in
+light and lit in dark. Both gates are blind to a `data:` URI — `check:css` skips
+them by name and `validate:skin`'s hex scan only catches an unencoded one — so
+**the SVGs state alpha and nothing else and every colour comes from a `var()`**.
+Two mechanics are worth carrying: an SVG gradient defaults to
+`objectBoundingBox`, which resolves **per element**, so a fade across a
+multi-path wordmark needs `gradientUnits="userSpaceOnUse"` or each letter fades
+against its own box and the joins go visibly discontinuous; and **a glow cannot be
+a `filter`**, because CSS applies filter *before* mask, so a `drop-shadow` blooms
+the whole box and then has the bloom clipped away by the very strokes that cast
+it — the falloff has to live in the mask as a wide low-alpha stroke behind a
+narrow one.
+
+**MEASURE THE COMPOSITE, NOT THE LAYER.** The wordmark's 26% hatch over its 10%
+wash is `1 - (0.74 × 0.90)` = **33.4%** of yellow; either layer measured alone
+reports a margin the screen does not have. Both marks are capped by the ink that
+crosses them — 41% for Industry's yellow, 53% for midgard's gold — and ship below
+it, which is what lets them decorate the full width with nothing to promise.
+
+**THE ONE EXCEPTION IS INDUSTRY'S YELLOW STRIP, AND IT IS A VERTICAL CONDITION.**
+`text.onBanner` on `#ffe500` is **1.06:1** — invisible, not merely poor — so the
+strip runs at FULL strength and is legal only because of where it sits, `y41..48`
+of the 56px bar. That is not the horizontal kind this file warns about: it does
+not depend on the bar's width or on what a consumer puts in the middle, only on
+values this library owns. Ink lives in roughly `y19..37` (a 13px label's line box,
+centred), the tallest control is 40px and reaches `y47.5`, and the two controls
+that cross the band are opaque so they occlude it. **Measured at 1600px with a
+`control-lg` in the bar: worst text bottom 37.0px, clearance 4.0px.** Move
+`topbar.default`, the control ladder, or the control type size and this must be
+re-measured. Everything else in that mark is capped at 35% because it sits in the
+text band and has no position argument to make.
+
 **Three faults were found by measuring rather than looking, and two were shipped.**
 Industry's wedge rule is `background-image` at 0-3-0 and base's `--vivid` is the
 `background` SHORTHAND at 0-2-0, so under that skin the wedge was **deleting the
