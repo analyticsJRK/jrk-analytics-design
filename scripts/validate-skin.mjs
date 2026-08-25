@@ -226,15 +226,21 @@ for (const file of files) {
     else pass(`${mode}: no inherited chart slot crosses the ${MARK_FLOOR}:1 mark floor on ${panel}`);
   }
 
-  /* ---- hazard variants. Each one replaces the accent namespace and NOTHING
+  /* ---- accent variants. Each one replaces the accent namespace and NOTHING
      else, so every check here is an accent check — but run against the skin's own
      surfaces, which do not vary. A variant value falls back to the skin's base
      value for anything it does not override, which is how the fallback below
-     mirrors the cascade. */
+     mirrors the cascade.
+
+     THE ATTRIBUTE IS THE SKIN'S TO NAME (variantAxis.attr — industry stamps
+     `data-hazard`, vitrine `data-tint`), so nothing here may hardcode one: this
+     loop reads it for its labels, and the picker check below reads it for the
+     identifier it expects in the gallery. */
   const STATUS_ROLES = ['critical-solid', 'critical-mark', 'warning-mark', 'serious-mark', 'good-mark'];
+  const axis = S.variantAxis ?? { attr: 'hazard', default: 'yellow' };
   for (const [vName, V] of Object.entries(S.variants ?? {})) {
     if (vName.startsWith('$')) continue;
-    console.log(`\n-- hazard variant "${vName}" --`);
+    console.log(`\n-- data-${axis.attr}="${vName}" --`);
     const vv = (name, mode) => {
       const e = V.vars?.[name];
       if (e === undefined) return v(name, mode);
@@ -303,7 +309,7 @@ for (const file of files) {
       }
     }
 
-    /* The collision that actually matters. Two hazard hues are never on screen
+    /* The collision that actually matters. Two variant hues are never on screen
        together — exactly one is stamped — so their separation from EACH OTHER is
        not a requirement, which is the real difference between an exclusive choice
        and a positional chart slot. The skin's own STATUS colours are on screen
@@ -348,13 +354,17 @@ for (const file of files) {
   const declared = Object.keys(S.variants ?? {}).filter((k) => !k.startsWith('$')).sort();
   if (declared.length && existsSync(previewPath)) {
     const html = readFileSync(previewPath, 'utf8');
-    const m = html.match(/const HAZARDS = \[([^\]]+)\]/);
+    /* The list is named for the AXIS — HAZARDS under industry, TINTS under
+       vitrine — because a gallery reads better in its own skin's vocabulary and
+       there is exactly one identifier per page to keep in step. */
+    const listName = `${axis.attr.toUpperCase()}S`;
+    const m = html.match(new RegExp(`const ${listName} = \\[([^\\]]+)\\]`));
     if (!m) {
-      fail(`preview/skin-${stamp}.html declares no HAZARDS list, so ${declared.length} variants have no picker`);
+      fail(`preview/skin-${stamp}.html declares no ${listName} list, so ${declared.length} variants have no picker`);
     } else {
       const offered = m[1].split(',').map((x) => x.trim().replace(/['"]/g, '')).filter(Boolean);
       const missing = declared.filter((d) => !offered.includes(d));
-      const extra = offered.filter((o) => o !== 'yellow' && !declared.includes(o));
+      const extra = offered.filter((o) => o !== axis.default && !declared.includes(o));
       if (missing.length || extra.length) {
         fail(`preview/skin-${stamp}.html picker is out of step — ${missing.length ? `missing ${missing.join(', ')}` : ''}${missing.length && extra.length ? '; ' : ''}${extra.length ? `offers ${extra.join(', ')} which no variant defines` : ''}`);
       } else {

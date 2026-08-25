@@ -702,35 +702,50 @@ general rule:** the base library's one-anchor-everywhere is a property of *its*
 accent, not of the token layout.
 
 **A VIVID FILL CANNOT CARRY BOTH PAGE INKS, SO A HUE-SWAPPABLE PAGE MARK EITHER
-GIVES UP THE BOLD FILL OR ACCEPTS A LAYOUT CONDITION — Industry's stripe is the
-worked example and it took the second option, by direction.** The stripe's light
-band 1 is each hue's vivid `accent-solid` (so it matches the gallery picker's
-swatch) and its dark band 1 is that hue's deep `accent-wash`; three darkening
-steps behind it make the extrude, and all four bands are declared per variant so
-`data-hazard` re-colours it. **The cost is that with `data-hazard="red"`,
-`"purple"` or `"blue"` in LIGHT, no page-level text may cross the stripe.** Those
-hues take white ink and no step of them takes black, so near-black is 3.88:1 /
-2.95:1 / 3.92:1 on the fill and worse down the darkening face — **worst band
-1.62:1.** Light page ink is near-black and cannot be switched, and no re-stepping
-fixes a hue's own luminance. This is the **second** layout-dependent contrast fact
-in the library after `.jrk-topbar--brand`, and unlike that one it has no bounded
-region to promise about — the honest form of the promise is "move the band", which
-`stripe-from` / `stripe-to` do.
+GIVES UP THE BOLD FILL OR ACCEPTS A LAYOUT CONDITION — Industry's stripe took the
+second option for five days and now takes the first, both times by direction.**
+**It was SOFTENED on 2026-08-25**: the light half was the hue's vivid
+`accent-solid` from 2026-08-20 and is now the light `accent-wash`, so **both halves
+derive from the wash** — the light one in light, the deep one in dark, each of the
+three face steps the band before it scaled by **0.88** per sRGB channel. All four
+bands are still declared per variant, so `data-hazard` re-colours it.
 
-**The alternative was built, measured, and is one commit away: derive every band
-from `accent-wash` instead.** Every wash in this skin carries near-black at
-≥11.6:1 by construction — that is what the topbar wedge was moved onto, for
-exactly this reason — and a wash-derived ramp clears `text-primary` in both halves
-for **all six hues** with no layout condition at all (worst 4.52:1). It gives up
-the bold fill. **Read that as the general rule: a page-level mark that must be
-crossable by text is a WASH; a vivid one is a promise about layout.**
+**What that bought is the retirement of a layout condition, and it is the reason
+to prefer this shape.** With the vivid fill, `data-hazard="red"`, `"purple"` or
+`"blue"` in LIGHT could not be crossed by page text at all — those hues take white
+ink and no step of them takes black, so near-black was 3.88:1 / 2.95:1 / 3.92:1 on
+the fill and worse down the darkening face, **worst band 1.62:1** — and it shipped
+that way, ungated, because light page ink cannot be switched and no re-stepping
+fixes a hue's own luminance. Every wash carries near-black at **≥11.6:1** by
+construction, which is what the topbar wedge was moved onto for exactly this
+reason, so the wash-derived ramp clears `text-primary` on every band of every hue
+in both halves — **worst 5.46:1**. **With `.jrk-topbar--brand` moving to a pale
+ramp on 2026-08-25, the library now has NO layout-dependent contrast fact left** —
+the two that ever existed were retired independently, by the same move, days apart.
+**Read that as the general rule: a page-level mark that must be crossable by text
+is a WASH; a vivid one is a promise about layout.** Both cases had the vivid
+version built, measured and shipped first, and in both the vivid fill turned out to
+be the whole cost — nothing else about either mark had to change to buy the rule
+back. If a third one is ever proposed, that is now the prior.
 
-**AND PINNING BAND 1 TO A FIXED VALUE MAKES THE RAMP'S LENGTH A LEFTOVER.** The
-light steps can only descend as far as the ink floor allows, so the extrude is as
-long as the gap between the fill and that floor — yellow has the full range
-(`#ffe500` → `#8f8000`), and **green has almost none** (`#09ae5c` → `#08944e`, its
-fill being only 6.19:1 on near-black to begin with), so green's three steps are
-nearly one colour and the 3D read all but disappears. Dark has room in every hue,
+**What it costs is greyscale, and that is the standing trade.** Light band 1 is
+1.12:1 / 1.06:1 / 1.11:1 off the page ramp's three stops for yellow and 1.20:1 to
+1.55:1 for the other five, against 1.03:1 and 2.02:1 to 4.90:1 before — so the
+light assembly now separates by **chroma alone** for every hue and is invisible in
+greyscale and in print, which is the skin's own yellow finding arriving a fourth
+time. It is `@media print`-suppressed either way. If a hue ever has to read in
+greyscale again, band 1 goes back to the vivid fill **and the layout condition
+comes back with it**; those are one decision, not two.
+
+**AND PINNING BAND 1 TO A FIXED VALUE MAKES THE RAMP'S LENGTH A LEFTOVER — which
+is the second thing the softening fixed.** While band 1 was the vivid fill the
+light steps could only descend as far as the ink floor allowed, so the extrude was
+as long as the gap between the fill and that floor: yellow had the full range
+(`#ffe500` → `#8f8000`) and **green had almost none** (`#09ae5c` → `#08944e`, its
+fill being only 6.19:1 on near-black to begin with), so green's three steps were
+nearly one colour and the 3D read all but disappeared. A wash starts far from the
+floor, so the 0.88 walk is a free choice and the separations are now 1.27:1–1.31:1
+in light against dark's 1.13:1–1.51:1, **in every hue**. Dark always had room,
 because darkening away from near-white ink only ever helps. **A derived ramp
 chooses its own endpoints; a pinned one inherits whatever is left.**
 
@@ -806,6 +821,19 @@ yellow, orange, red, purple, blue, green — and **the default is the ABSENCE of
 values and nothing that does not stamp the attribute can change. **Only the
 accent namespace varies**; the steel neutrals, the status set, the geometry and
 the type belong to the skin. That is what makes a hue a one-attribute swap.
+
+**THE ATTRIBUTE IS NOW THE SKIN'S TO NAME, and that is infrastructure two skins
+share rather than a detail of this one.** `data-hazard` was hardcoded in
+`build-tokens.mjs` until 2026-08-25, when `vitrine` gained a colour choice whose
+hue is a **material** rather than a signal — so the axis is declared per skin in
+`variantAxis: { attr, default }` and the two stamp `data-hazard` and `data-tint`
+respectively. Three things the generalisation is worth carrying: the build
+**refuses** variants that do not declare an axis (rather than defaulting to
+industry's word, which is how a name that lies gets shipped); it refuses a
+`default` that is also a declared variant (that would put a button in the gallery
+that changes nothing); and `validate:skin` looks for the gallery picker's list
+under the axis's own name — `HAZARDS` here, `TINTS` there. Industry's emitted
+selectors did not move by a byte.
 
 **Derived by search, not picked: every role is the NEAREST LEGAL STEP to its
 hue's vivid centre** — light roles darken, dark roles lighten, each stopping the
@@ -972,10 +1000,26 @@ decides how much mark there is room for. On the wash the marks had to be the
 stepped `border.accent` at 26–42%; on white they run full `accent.solid`, because
 near-black over it is 14.10:1 on yellow, 7.14:1 on orange, 6.19:1 on green. **The
 three hues that cannot carry black ink set the ceiling — purple 75%, red 85%, blue
-90% — so 75% is the number to respect**, against a shipped 55% in the ink band and
-80% below it. In DARK the same marks are held to 41% instead, by `text.onBanner`
-over `accent.solid` on the charcoal: two halves, two ceilings, one set of alphas
-that satisfies both. **The masthead draws no trailing-edge facet** — it was
+90% — so 75% is the number to respect**, against a mask that states 55% in the ink
+band and 80% below it. In DARK the same marks are held to 41% instead, by
+`text.onBanner` over `accent.solid` on the charcoal: two halves, two ceilings, one
+set of alphas that satisfies both.
+
+**THE LIGHT MARKS ARE THEN DRAWN AT HALF THAT, and the reason is the most useful
+thing this skin's light half has to say.** `masthead-mark-strength` is **0.5 light
+/ 1 dark** — applied as `opacity` on the one `::after`, because the mask is a
+single `data:` URI both themes read and there is no other way to move one half
+without restating thirteen `fill-opacity` values per theme. Directed 2026-08-25,
+softening the light marks toward how the dark ones read. **They were already
+quieter by a factor of eight in luminance** (1.13:1–1.23:1 on the white plate
+against 3.43:1–9.77:1 on the charcoal) **and still the loudest thing on the bar,
+because what a saturated yellow does against pure white is a CHROMA jump and no
+contrast ratio sees it.** So on a pale plate, softening is spending **alpha, not
+lightness**: at 0.5 the strongest yellow mark composites to `#fff599` and the
+character goes from highlighter to whisper. Every figure in the paragraph above is
+an upper bound, so going **down** needs no re-derivation and anything above 1 in
+either half re-opens the whole budget. **The masthead draws no trailing-edge
+facet** — it was
 removed because it sat behind the sign-out control and read as a coloured shape
 stuck to the corner; the PLAIN bar keeps its wedge. Its rule states
 `background-image: none` rather than omitting the property, because base declares
@@ -1080,7 +1124,7 @@ measuring something meaningless: *"surface-default is not a flat colour in
 `<mode>`; every other check measures against it"*. That refusal is what forces
 the design, and the design is worth copying for any future translucent surface:
 **`surface-default` records what the glass COMPOSITES TO**, as a flat hex, so all
-420 checks run exactly as they would on an opaque skin; the translucency lives in
+532 checks run exactly as they would on an opaque skin; the translucency lives in
 `surface-glass` and is used only for rendering, inside an `@supports` guard whose
 fallback is that same composite.
 
@@ -1117,6 +1161,63 @@ dark that highlight IS the elevation. `shadow.card` and `shadow.md` may not be
 `none` here for the same reason midgard records. **Nested panes take no blur**: two
 frosted layers read as fog rather than depth, the inner one has nothing worth
 blurring behind it, and the composite cost is paid twice for it.
+
+#### Tints — the second colour choice in the library, and the first that lights a scene
+
+**`data-skin="vitrine"` × `data-tint="<hue>"` × `data-theme`.** Five hues — azure,
+cyan, violet, magenta, amber — with the shipped spring green as **the absence of
+the attribute**, exactly as yellow is for industry. It is `tint` and not `hazard`
+because **this accent is a material rather than a signal**; see the axis note in
+the hazard section for the infrastructure that made a per-skin attribute possible.
+Derived by industry's method (HSL anchor + 1% ramp, nearest legal step, washes as
+mixes toward the composite from a floor of 0.5), and the cross-check holds: run
+against the shipped green it returns the accent fill exactly in both halves.
+
+**A TINT MOVES THE SCENE AS WELL AS THE TOKENS, which is the thing no other
+variant axis in this library does.** The default backdrop carries the accent as
+two radial pools, so a violet accent over a green scene reads as a bug — each
+variant therefore re-declares `vitrine-backdrop` with its own brand pools. **The
+re-hue is free by construction**: `vitrine-clamp` compresses whatever sits behind
+the panes into a fixed luminance band, so not one ratio in the file depends on the
+scene's hue. The teal companion pool and the diagonal rule deliberately do **not**
+move — they are the scene's second light, not the accent.
+
+**MEASURE AGAINST THE GLASS'S EXTREME, NOT THE RECORDED COMPOSITE — and it is not
+the same end in the two halves.** The glass spans `#e8e9e9`–`#fdfefe` in light and
+`#141918`–`#222726` in dark. Light-mode inks and marks under this skin are DARK,
+so the **darkest** composite binds them; dark-mode inks are LIGHT, so the
+**palest** one does. Getting the end backwards reports a mark as passing on
+near-white and ships it at 2.7:1 on the glass, which is exactly what the first
+pass of this derivation did for three of the five hues.
+
+**AND THE VARIANT GATE IS STRICTER THAN THE BASE GATE, which found a defect in the
+shipped green.** `validate:skin` holds a variant's `accent-text` to the **page's
+worst stop** and the base skin's only to the panel — so `#077c45` passed at 4.55:1
+on the recorded composite while measuring **4.20:1** at the bottom of the page ramp
+and 4.34:1 on the glass's own dark extreme. Re-stepped to `#077441` (4.66 / 4.82 /
+5.05) alongside the variants. **Same shape as industry's `text-muted`, which this
+file already records twice: on a gradient page under a translucent panel, a
+single-hex check is looking at neither binding surface.**
+
+**Two of industry's findings reproduce on a palette that shares nothing with it,
+so they are rules about pale grounds rather than about yellow.** *"The fill cannot
+bound itself"* is per-hue **and per half**: in light azure, violet and magenta
+**are** their own `border-accent` with no stepped value (cyan is 2.02:1 on the
+glass and amber 2.04:1, so those two need one), and in dark it inverts for violet —
+the one hue dark enough to need lifting off the pane. *"Black ink always"* is not a
+rule at all here — cyan and amber take near-black, violet takes
+white in both halves, and **azure and magenta disagree between their own two
+halves**, which no industry hue does.
+
+**AMBER IS THE ONE TINT WITH A RESTRICTION AND IT IS NOT FIXABLE BY RE-STEPPING.**
+An amber accent and this skin's amber warning separate only by lightness, so under
+deuteranopia the accent collapses into the status set — ΔE **8.9** against
+`status.warning.mark` and **7.0** against `status.serious.mark`, floor 10,
+acknowledged on the variant and gated. With `data-tint="amber"`: a status badge
+carries icon **and** label, a delta states direction in text, and an amber `--cta`
+does not share a tile with a warning chip whose only mark is its colour. All four
+cool tints clear the whole status set, so **this is the price of the warm one** —
+the same shape as industry's `red`, arrived at from the opposite end of the wheel.
 
 ## Adding a component
 

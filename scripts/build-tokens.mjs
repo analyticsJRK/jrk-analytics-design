@@ -211,12 +211,41 @@ for (const file of skinFiles) {
   collect(S.vars || {}, true);
   collect(S.skinOnly || {}, false);
 
-  /* ---- hazard variants: a THIRD attribute, not a fourth theme.
-     `data-skin` x `data-hazard` x `data-theme`. Only the accent namespace moves;
+  /* ---- accent variants: a THIRD attribute, not a fourth theme.
+     `data-skin` x `data-<attr>` x `data-theme`. Only the accent namespace moves;
      the neutrals, the status set and the geometry belong to the skin and do not
      vary, which is the whole reason a hue can be a one-attribute swap. A variant
      name is checked against the base layer AND against this skin's own skinOnly
-     block, because the hazard tape is a skin invention and each hue restates it. */
+     block, because the hazard tape is a skin invention and each hue restates it.
+
+     THE ATTRIBUTE IS NAMED BY THE SKIN, and that is not decoration. industry's
+     hue is a hazard SIGNAL, so `data-hazard` says what a value means; vitrine's
+     is a MATERIAL, so the same attribute would have been a name that lies. The
+     axis is declared in `variantAxis` — { attr, default } — and it is required
+     rather than defaulted, because a skin that ships hues without saying what
+     they are called is exactly the kind of silent contract this build exists to
+     refuse. `default` names the hue that is the ABSENCE of the attribute; it
+     never appears as a variant. */
+  const axis = S.variantAxis ?? null;
+  const hasVariants = Object.keys(S.variants ?? {}).some((k) => !isMeta(k));
+  if (hasVariants) {
+    if (!axis?.attr || !axis?.default) {
+      throw new Error(
+        `tokens/skins/${file}: declares variants but no "variantAxis": { attr, default }. ` +
+        `attr is the data-* attribute that stamps a hue (industry uses "hazard"), default names ` +
+        `the hue that is the absence of it.`
+      );
+    }
+    if (!/^[a-z][a-z0-9-]*$/.test(axis.attr)) throw new Error(`tokens/skins/${file}: variantAxis.attr "${axis.attr}" is not a plain lowercase ident`);
+    if (Object.keys(S.variants).includes(axis.default)) {
+      throw new Error(
+        `tokens/skins/${file}: "${axis.default}" is variantAxis.default AND a declared variant. ` +
+        `The default hue is the absence of the attribute, not a value of it — declaring both means ` +
+        `the picker offers a button that changes nothing.`
+      );
+    }
+  }
+  const vAttr = axis?.attr ?? 'hazard';
   const skinOwn = new Set(Object.keys(S.skinOnly ?? {}).filter((k) => !isMeta(k)).map((k) => `--${PREFIX}-${k}`));
   const variants = [];
   for (const [vName, V] of Object.entries(S.variants ?? {})) {
@@ -271,16 +300,16 @@ ${darkDecls}
 }
 `;
 
-  /* Variant blocks come AFTER the skin's own, so an unstamped data-hazard leaves
+  /* Variant blocks come AFTER the skin's own, so an unstamped data-<attr> leaves
      the skin exactly as it was and no existing consumer changes. The default hue
      is therefore not a variant at all — it is the absence of one. */
   const variantCss = variants.map(({ name, entries: ve }) => {
-    const vsel = `${sel}[data-hazard="${name}"]`;
+    const vsel = `${sel}[data-${vAttr}="${name}"]`;
     const l = ve.map(([n, lv]) => `  ${n}: ${lv};`).join('\n');
     const dPairs = ve.filter(([, lv, dv]) => dv !== lv);
     const d = dPairs.map(([n, , dv]) => `    ${n}: ${dv};`).join('\n');
     return `
-/* ── hazard: ${name} ${'─'.repeat(Math.max(0, 56 - name.length))} */
+/* ── ${vAttr}: ${name} ${'─'.repeat(Math.max(0, 56 - name.length - vAttr.length))} */
 ${vsel} {
 ${l}
 }
@@ -299,11 +328,11 @@ ${d}
 
   const header = variants.length
     ? `
-/* HAZARD HUES. A third attribute, crossed with the theme:
-     <html data-skin="${stamp}" data-hazard="${variants[0].name}">
-   Available: ${variants.map((v) => v.name).join(', ')}. Omit the attribute for the
-   default hue — it is the absence of a variant, not one of them, so nothing that
-   does not stamp it can change. Only the accent namespace varies. */
+/* ACCENT HUES, stamped with data-${vAttr}. A third attribute, crossed with the theme:
+     <html data-skin="${stamp}" data-${vAttr}="${variants[0].name}">
+   Available: ${variants.map((v) => v.name).join(', ')}. Omit the attribute for
+   ${axis.default} — the default hue is the ABSENCE of a variant, not one of them, so
+   nothing that does not stamp it can change. Only the accent namespace varies. */
 `
     : '';
 
@@ -314,6 +343,7 @@ ${d}
     count: entries.length,
     themed: darkPairs.length,
     variants: variants.length,
+    attr: vAttr,
   });
 }
 

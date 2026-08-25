@@ -21,6 +21,16 @@
  * before the component class is counted, so this file beats a base modifier on
  * SPECIFICITY rather than on source order and keeps working if a consumer's
  * bundler reorders the imports.
+ *
+ * THERE IS A THIRD ATTRIBUTE AND NOTHING IN THIS FILE HAS TO KNOW ABOUT IT.
+ * data-skin="vitrine" x data-tint="<hue>" x data-theme — five hues, with the
+ * shipped spring green as the ABSENCE of data-tint. The whole axis is colour, so
+ * it lives in the token file; every fill here is already a var() and re-hues for
+ * free, INCLUDING the backdrop, which is read from --jrk-vitrine-backdrop below
+ * and re-declared per hue so the scene behind the glass carries the tint too.
+ * It is `tint` rather than industry's `hazard` because this accent is a MATERIAL
+ * and not a signal; the attribute is declared in tokens/skins/vitrine.json's
+ * variantAxis, and the build refuses variants that do not name their own axis.
  */
 
 /* The reference's face is a neutral geometric sans. Requested HERE rather than

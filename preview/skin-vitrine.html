@@ -11,6 +11,26 @@
 <link rel="stylesheet" href="../dist/jrk-skin-vitrine.css">
 <link rel="stylesheet" href="../css/skins/vitrine.css">
 <link rel="stylesheet" href="preview.css">
+<style>
+  /* The tint strip. Rounded rather than industry's chamfered chip, because that
+     is this skin's whole contract — and the swatches are SAMPLED off the cascade
+     rather than stamped on themselves, for the reason industry's gallery records
+     at length: every generated tint block is anchored at :root, so a button
+     carrying its own data-tint matches none of them and inherits the root's
+     accent. Stamped swatches paint five copies of the current hue. */
+  .tint { display: flex; gap: 6px; }
+  .tint button {
+    width: 30px; height: 30px; padding: 0; cursor: pointer;
+    border: 1px solid var(--jrk-border-default);
+    border-radius: var(--jrk-radius-md);
+    background: var(--jrk-accent-solid);
+  }
+  .tint button[aria-checked='true'] {
+    outline: 2px solid var(--jrk-text-primary);
+    outline-offset: 2px;
+  }
+  .tint button:focus-visible { box-shadow: var(--jrk-shadow-focus); }
+</style>
 </head>
 <body>
 
@@ -33,14 +53,77 @@
       under a green that cannot be read on it, which is what the stepped light
       accent roles exist to avoid.
     </p>
-    <div style="margin-top:16px">
-      <div class="gal-note" style="margin-bottom:6px"><strong>Skin</strong></div>
-      <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Skin">
-        <button class="jrk-tab" data-skin-btn="" type="button">Base</button>
-        <button class="jrk-tab" data-skin-btn="vitrine" type="button">Vitrine</button>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;margin-top:16px">
+      <div>
+        <div class="gal-note" style="margin-bottom:6px"><strong>Skin</strong></div>
+        <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Skin">
+          <button class="jrk-tab" data-skin-btn="" type="button">Base</button>
+          <button class="jrk-tab" data-skin-btn="vitrine" type="button">Vitrine</button>
+        </div>
+      </div>
+      <div>
+        <div class="gal-note" style="margin-bottom:6px"><strong>Tint</strong></div>
+        <div class="tint" role="radiogroup" aria-label="Tint" id="tint"></div>
       </div>
     </div>
   </header>
+
+  <section class="gal-sec">
+    <h2>The tint is a third attribute, and it lights the scene too</h2>
+    <p class="gal-note">
+      <code>data-skin="vitrine"</code> &times; <code>data-tint="&lt;hue&gt;"</code>
+      &times; <code>data-theme</code>. Five hues &mdash; azure, cyan, violet,
+      magenta, amber &mdash; and <strong>the default is the absence of
+      <code>data-tint</code>, not a value of it</strong>, so the shipped spring
+      green keeps its hand-derived values and nothing that does not stamp the
+      attribute can change. It is <code>data-tint</code> rather than industry's
+      <code>data-hazard</code> because <strong>this accent is a material, not a
+      signal</strong> &mdash; the colour the glass is lit by &mdash; and the
+      attribute name is the first place a consumer reads what a value means.
+    </p>
+    <p class="gal-note">
+      <strong>What moves is the accent namespace <em>and</em> the default
+      scene's brand pools.</strong> Industry's hazard swap touches colour tokens
+      only; here the backdrop behind the glass carries the accent as two radial
+      pools, so a violet accent over a green scene would read as a mistake. The
+      re-hue is <strong>free by construction</strong>: <code>vitrine-clamp</code>
+      compresses whatever sits behind the panes into a fixed luminance band, so
+      no ratio in the token file depends on the scene's hue. The teal companion
+      pool and the diagonal rule do not move &mdash; they are the scene's second
+      light, not the accent.
+    </p>
+    <p class="gal-note">
+      <strong>Every value is derived by search, not picked</strong>, by
+      industry's own method: one HSL anchor plus a 1% lightness ramp, each role
+      the nearest legal step to the hue's vivid centre. Run against the shipped
+      green it returns the accent fill exactly and lands within a step or two on
+      the light roles. Two of industry's findings reproduce here on a completely
+      different palette: <strong>&ldquo;the fill cannot bound itself&rdquo; is a
+      pale-hue rule, per half</strong> &mdash; in light azure, violet and magenta
+      <em>are</em> their own <code>border-accent</code> while cyan and amber need a
+      stepped one, and in dark that inverts for violet &mdash; and
+      <strong>&ldquo;black ink always&rdquo; is not a rule at all</strong>:
+      cyan and amber take near-black, violet takes white in both halves, and
+      azure and magenta disagree between their own two halves.
+    </p>
+    <div class="jrk-alert jrk-alert--warning" style="margin-top:16px">
+      <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warning"></svg>
+      <div class="jrk-alert__body">
+        <span class="jrk-alert__title">Amber carries a restriction</span>
+        <span class="jrk-alert__text">
+          An amber accent and this skin's amber warning separate only by
+          lightness, so under deuteranopia the accent collapses into the status
+          set (&Delta;E 8.9 against <code>status.warning.mark</code>, 7.0 against
+          <code>status.serious.mark</code>, floor 10 &mdash; acknowledged in the
+          token file and gated). With <code>data-tint="amber"</code>: a status
+          badge carries icon <em>and</em> label, a delta states direction in text,
+          and an amber CTA does not share a tile with a warning chip whose only
+          mark is its colour. All four cool tints are clear of the whole status
+          set; this is the price of the warm one.
+        </span>
+      </div>
+    </div>
+  </section>
 
   <section class="gal-sec">
     <h2>The glass, and why it can be measured at all</h2>
@@ -51,7 +134,7 @@
       <em>&ldquo;surface-default is not a flat colour; every other check measures
       against it&rdquo;</em>. So <code>surface-default</code> records what the
       glass <em>composites to</em>, as a flat hex, and the gate goes on measuring
-      all 420 checks against it exactly as it would for an opaque skin. The
+      all 532 checks against it exactly as it would for an opaque skin. The
       translucency lives in <code>surface-glass</code> and is used only for
       rendering.
     </p>
@@ -187,11 +270,80 @@ document.querySelectorAll('[data-skin-btn]').forEach((b) => {
   b.addEventListener('click', () => applySkin(b.dataset.skinBtn));
 });
 
+/* The tint picker. The default hue is the ABSENCE of data-tint, not a value of
+   it, so "green" REMOVES the attribute rather than setting it — the same reason
+   an app that never stamps it cannot change. */
+const TINTS = ['green', 'azure', 'cyan', 'violet', 'magenta', 'amber'];
+const tint = document.getElementById('tint');
+tint.innerHTML = TINTS.map((x) =>
+  '<button type="button" role="radio" aria-checked="false" aria-label="' + x +
+  '" title="' + x + '" data-tint-btn="' + x + '"></button>').join('');
+
+/* SAMPLED, NOT STAMPED. Every generated tint block is anchored at
+   `:root[data-skin="vitrine"][data-tint="X"]`, and :root matches <html> and
+   nothing else — so a button carrying its own data-tint matches none of them and
+   just inherits the root's --jrk-accent-solid. Hard-coding six hexes here would
+   be a second copy of the palette, free to drift; emitting an un-anchored copy of
+   every block would widen the skin's contract for a gallery affordance. So: stamp
+   the ROOT once per hue, read the resolved value off the cascade, put the root
+   back. Synchronous, so nothing paints between the reads. */
+function sampleTints() {
+  const root = document.documentElement;
+  const held = root.dataset.tint;
+  const out = {};
+  for (const x of TINTS) {
+    if (x === 'green') delete root.dataset.tint;
+    else root.dataset.tint = x;
+    out[x] = getComputedStyle(root).getPropertyValue('--jrk-accent-solid').trim();
+  }
+  if (held === undefined) delete root.dataset.tint;
+  else root.dataset.tint = held;
+  for (const b of tint.querySelectorAll('[data-tint-btn]')) b.style.background = out[b.dataset.tintBtn];
+}
+
+/* Each hue has its own light and dark value, so the strip is re-sampled when the
+   theme changes. data-tint is filtered out or applyTint would re-enter this
+   through its own root write. */
+new MutationObserver((recs) => {
+  if (recs.some((r) => r.attributeName !== 'data-tint')) sampleTints();
+}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-skin'] });
+
+function applyTint(x) {
+  const root = document.documentElement;
+  if (x && x !== 'green') root.dataset.tint = x;
+  else delete root.dataset.tint;
+  const u = new URL(location.href);
+  if (x && x !== 'green') u.searchParams.set('tint', x);
+  else u.searchParams.delete('tint');
+  history.replaceState(null, '', u);
+  tint.querySelectorAll('[data-tint-btn]').forEach((b) => {
+    b.setAttribute('aria-checked', String(b.dataset.tintBtn === (x || 'green')));
+  });
+}
+tint.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-tint-btn]');
+  if (b) applyTint(b.dataset.tintBtn);
+});
+/* Arrow keys, because a radiogroup that answers only the pointer is not one. */
+tint.addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.preventDefault();
+  const cur = TINTS.indexOf(document.documentElement.dataset.tint || 'green');
+  const next = (cur + (e.key === 'ArrowRight' ? 1 : -1) + TINTS.length) % TINTS.length;
+  applyTint(TINTS[next]);
+  tint.querySelectorAll('[data-tint-btn]')[next].focus();
+});
+
 /* Default ON — this page exists to show the skin — but an explicit ?skin= in the
    URL wins in either direction, so a link to the base comparison survives a
    reload. */
-const param = new URL(location.href).searchParams.get('skin');
+const url0 = new URL(location.href);
+const param = url0.searchParams.get('skin');
 applySkin(param === null || param === SKIN ? SKIN : '');
+const t0 = url0.searchParams.get('tint');
+applyTint(TINTS.includes(t0) ? t0 : 'green');
+/* After the skin stamp lands, or every swatch samples the BASE accent. */
+sampleTints();
 </script>
 </body>
 </html>

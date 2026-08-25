@@ -30,8 +30,8 @@
   --jrk-accent-solid-hover: #0eb969;
   --jrk-accent-solid-active: #0ca15c;
   --jrk-accent-on-solid: #04120c;
-  --jrk-accent-text: #077c45;
-  --jrk-text-link: #077c45;
+  --jrk-accent-text: #077441;
+  --jrk-text-link: #077441;
   --jrk-border-accent: #0d9d5a;
   --jrk-accent-wash: #d6f5e7;
   --jrk-accent-wash-hover: #c5f1dd;
@@ -231,4 +231,289 @@
     --jrk-surface-glass: rgba(27, 35, 34, 0.50);
     --jrk-surface-glass-raised: rgba(33, 42, 41, 0.62);
     --jrk-vitrine-clamp: saturate(0.95) contrast(0.55) brightness(0.28);
+}
+
+/* ACCENT HUES, stamped with data-tint. A third attribute, crossed with the theme:
+     <html data-skin="vitrine" data-tint="azure">
+   Available: azure, cyan, violet, magenta, amber. Omit the attribute for
+   green — the default hue is the ABSENCE of a variant, not one of them, so
+   nothing that does not stamp it can change. Only the accent namespace varies. */
+
+/* ── tint: azure ─────────────────────────────────────────────── */
+:root[data-skin="vitrine"][data-tint="azure"] {
+  --jrk-accent-solid: #0d78c9;
+  --jrk-accent-solid-hover: #0b69b1;
+  --jrk-accent-solid-active: #0a5b99;
+  --jrk-accent-on-solid: #ffffff;
+  --jrk-accent-text: #0b67ad;
+  --jrk-accent-wash: #e1e7ec;
+  --jrk-accent-wash-hover: #cfdde9;
+  --jrk-accent-wash-active: #bdd4e6;
+  --jrk-accent-wash-border: #a8c9e3;
+  --jrk-accent-wash-text: #0b69b1;
+  --jrk-border-accent: #0d78c9;
+  --jrk-text-link: #0b67ad;
+  --jrk-focus-ring: #0d78c9;
+  --jrk-shadow-focus: 0 0 0 2px #eeeeee, 0 0 0 4px #0d78c9;
+  --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(13, 120, 201, 0.20) 0%, rgba(13, 120, 201, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="vitrine"][data-tint="azure"]:not([data-theme="light"]) {
+    --jrk-accent-solid: #2c9cf2;
+    --jrk-accent-solid-hover: #44a7f3;
+    --jrk-accent-solid-active: #5cb2f5;
+    --jrk-accent-on-solid: #04120c;
+    --jrk-accent-text: #2c9cf2;
+    --jrk-accent-wash: #20445c;
+    --jrk-accent-wash-hover: #214e6d;
+    --jrk-accent-wash-active: #23587e;
+    --jrk-accent-wash-border: #246391;
+    --jrk-accent-wash-text: #61b5f5;
+    --jrk-border-accent: #2c9cf2;
+    --jrk-text-link: #2c9cf2;
+    --jrk-focus-ring: #2c9cf2;
+    --jrk-shadow-focus: 0 0 0 2px #2c9cf2, 0 0 0 4px #171e1d;
+    --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(44, 156, 242, 0.30) 0%, rgba(44, 156, 242, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(44, 156, 242, 0.14) 0%, rgba(44, 156, 242, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%);
+  }
+}
+
+:root[data-skin="vitrine"][data-tint="azure"][data-theme="dark"] {
+    --jrk-accent-solid: #2c9cf2;
+    --jrk-accent-solid-hover: #44a7f3;
+    --jrk-accent-solid-active: #5cb2f5;
+    --jrk-accent-on-solid: #04120c;
+    --jrk-accent-text: #2c9cf2;
+    --jrk-accent-wash: #20445c;
+    --jrk-accent-wash-hover: #214e6d;
+    --jrk-accent-wash-active: #23587e;
+    --jrk-accent-wash-border: #246391;
+    --jrk-accent-wash-text: #61b5f5;
+    --jrk-border-accent: #2c9cf2;
+    --jrk-text-link: #2c9cf2;
+    --jrk-focus-ring: #2c9cf2;
+    --jrk-shadow-focus: 0 0 0 2px #2c9cf2, 0 0 0 4px #171e1d;
+    --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(44, 156, 242, 0.30) 0%, rgba(44, 156, 242, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(44, 156, 242, 0.14) 0%, rgba(44, 156, 242, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%);
+}
+
+/* ── tint: cyan ──────────────────────────────────────────────── */
+:root[data-skin="vitrine"][data-tint="cyan"] {
+  --jrk-accent-solid: #12b5ce;
+  --jrk-accent-solid-hover: #10a1b7;
+  --jrk-accent-solid-active: #0e8ca0;
+  --jrk-accent-on-solid: #04120c;
+  --jrk-accent-text: #0b6f7f;
+  --jrk-accent-wash: #d8e8eb;
+  --jrk-accent-wash-hover: #c6e4e8;
+  --jrk-accent-wash-active: #b5dfe6;
+  --jrk-accent-wash-border: #a1dae3;
+  --jrk-accent-wash-text: #0b6f7f;
+  --jrk-border-accent: #0e90a4;
+  --jrk-text-link: #0b6f7f;
+  --jrk-focus-ring: #0e90a4;
+  --jrk-shadow-focus: 0 0 0 2px #eeeeee, 0 0 0 4px #0e90a4;
+  --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(18, 181, 206, 0.20) 0%, rgba(18, 181, 206, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="vitrine"][data-tint="cyan"]:not([data-theme="light"]) {
+    --jrk-accent-solid: #31d4ed;
+    --jrk-accent-solid-hover: #48d9ef;
+    --jrk-accent-solid-active: #5fdef1;
+    --jrk-accent-text: #31d4ed;
+    --jrk-accent-wash: #20464a;
+    --jrk-accent-wash-hover: #21545b;
+    --jrk-accent-wash-active: #23636b;
+    --jrk-accent-wash-border: #25737e;
+    --jrk-accent-wash-text: #31d4ed;
+    --jrk-border-accent: #31d4ed;
+    --jrk-text-link: #31d4ed;
+    --jrk-focus-ring: #31d4ed;
+    --jrk-shadow-focus: 0 0 0 2px #31d4ed, 0 0 0 4px #171e1d;
+    --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(49, 212, 237, 0.30) 0%, rgba(49, 212, 237, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(49, 212, 237, 0.14) 0%, rgba(49, 212, 237, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%);
+  }
+}
+
+:root[data-skin="vitrine"][data-tint="cyan"][data-theme="dark"] {
+    --jrk-accent-solid: #31d4ed;
+    --jrk-accent-solid-hover: #48d9ef;
+    --jrk-accent-solid-active: #5fdef1;
+    --jrk-accent-text: #31d4ed;
+    --jrk-accent-wash: #20464a;
+    --jrk-accent-wash-hover: #21545b;
+    --jrk-accent-wash-active: #23636b;
+    --jrk-accent-wash-border: #25737e;
+    --jrk-accent-wash-text: #31d4ed;
+    --jrk-border-accent: #31d4ed;
+    --jrk-text-link: #31d4ed;
+    --jrk-focus-ring: #31d4ed;
+    --jrk-shadow-focus: 0 0 0 2px #31d4ed, 0 0 0 4px #171e1d;
+    --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(49, 212, 237, 0.30) 0%, rgba(49, 212, 237, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(49, 212, 237, 0.14) 0%, rgba(49, 212, 237, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%);
+}
+
+/* ── tint: violet ────────────────────────────────────────────── */
+:root[data-skin="vitrine"][data-tint="violet"] {
+  --jrk-accent-solid: #6a12ce;
+  --jrk-accent-solid-hover: #5e10b7;
+  --jrk-accent-solid-active: #520ea0;
+  --jrk-accent-on-solid: #ffffff;
+  --jrk-accent-text: #6a12ce;
+  --jrk-accent-wash: #e9e5ed;
+  --jrk-accent-wash-hover: #ded4ea;
+  --jrk-accent-wash-active: #d4c2e8;
+  --jrk-accent-wash-border: #c8aee5;
+  --jrk-accent-wash-text: #6a12ce;
+  --jrk-border-accent: #6a12ce;
+  --jrk-text-link: #6a12ce;
+  --jrk-focus-ring: #6a12ce;
+  --jrk-shadow-focus: 0 0 0 2px #eeeeee, 0 0 0 4px #6a12ce;
+  --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(106, 18, 206, 0.20) 0%, rgba(106, 18, 206, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="vitrine"][data-tint="violet"]:not([data-theme="light"]) {
+    --jrk-accent-solid: #8931ed;
+    --jrk-accent-solid-hover: #9648ef;
+    --jrk-accent-solid-active: #a35ff1;
+    --jrk-accent-text: #ae72f3;
+    --jrk-accent-wash: #522986;
+    --jrk-accent-wash-hover: #5b2a96;
+    --jrk-accent-wash-active: #642ba7;
+    --jrk-accent-wash-border: #6e2dba;
+    --jrk-accent-wash-text: #c498f6;
+    --jrk-border-accent: #9343ef;
+    --jrk-text-link: #ae72f3;
+    --jrk-focus-ring: #9343ef;
+    --jrk-shadow-focus: 0 0 0 2px #9343ef, 0 0 0 4px #171e1d;
+    --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(137, 49, 237, 0.30) 0%, rgba(137, 49, 237, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(137, 49, 237, 0.14) 0%, rgba(137, 49, 237, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%);
+  }
+}
+
+:root[data-skin="vitrine"][data-tint="violet"][data-theme="dark"] {
+    --jrk-accent-solid: #8931ed;
+    --jrk-accent-solid-hover: #9648ef;
+    --jrk-accent-solid-active: #a35ff1;
+    --jrk-accent-text: #ae72f3;
+    --jrk-accent-wash: #522986;
+    --jrk-accent-wash-hover: #5b2a96;
+    --jrk-accent-wash-active: #642ba7;
+    --jrk-accent-wash-border: #6e2dba;
+    --jrk-accent-wash-text: #c498f6;
+    --jrk-border-accent: #9343ef;
+    --jrk-text-link: #ae72f3;
+    --jrk-focus-ring: #9343ef;
+    --jrk-shadow-focus: 0 0 0 2px #9343ef, 0 0 0 4px #171e1d;
+    --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(137, 49, 237, 0.30) 0%, rgba(137, 49, 237, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(137, 49, 237, 0.14) 0%, rgba(137, 49, 237, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%);
+}
+
+/* ── tint: magenta ───────────────────────────────────────────── */
+:root[data-skin="vitrine"][data-tint="magenta"] {
+  --jrk-accent-solid: #cc1489;
+  --jrk-accent-solid-hover: #b51279;
+  --jrk-accent-solid-active: #9e106a;
+  --jrk-accent-on-solid: #ffffff;
+  --jrk-accent-text: #be137f;
+  --jrk-accent-wash: #ece3e9;
+  --jrk-accent-wash-hover: #ead2e1;
+  --jrk-accent-wash-active: #e7c0d9;
+  --jrk-accent-wash-border: #e4add0;
+  --jrk-accent-wash-text: #be137f;
+  --jrk-border-accent: #cc1489;
+  --jrk-text-link: #be137f;
+  --jrk-focus-ring: #cc1489;
+  --jrk-shadow-focus: 0 0 0 2px #eeeeee, 0 0 0 4px #cc1489;
+  --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(204, 20, 137, 0.20) 0%, rgba(204, 20, 137, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="vitrine"][data-tint="magenta"]:not([data-theme="light"]) {
+    --jrk-accent-solid: #eb33a7;
+    --jrk-accent-solid-hover: #ed4ab1;
+    --jrk-accent-solid-active: #ef61bb;
+    --jrk-accent-on-solid: #04120c;
+    --jrk-accent-text: #ee4fb3;
+    --jrk-accent-wash: #6a2753;
+    --jrk-accent-wash-hover: #7b295e;
+    --jrk-accent-wash-active: #8b2a68;
+    --jrk-accent-wash-border: #9e2c75;
+    --jrk-accent-wash-text: #f48bcd;
+    --jrk-border-accent: #eb33a7;
+    --jrk-text-link: #ee4fb3;
+    --jrk-focus-ring: #eb33a7;
+    --jrk-shadow-focus: 0 0 0 2px #eb33a7, 0 0 0 4px #171e1d;
+    --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(235, 51, 167, 0.30) 0%, rgba(235, 51, 167, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(235, 51, 167, 0.14) 0%, rgba(235, 51, 167, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%);
+  }
+}
+
+:root[data-skin="vitrine"][data-tint="magenta"][data-theme="dark"] {
+    --jrk-accent-solid: #eb33a7;
+    --jrk-accent-solid-hover: #ed4ab1;
+    --jrk-accent-solid-active: #ef61bb;
+    --jrk-accent-on-solid: #04120c;
+    --jrk-accent-text: #ee4fb3;
+    --jrk-accent-wash: #6a2753;
+    --jrk-accent-wash-hover: #7b295e;
+    --jrk-accent-wash-active: #8b2a68;
+    --jrk-accent-wash-border: #9e2c75;
+    --jrk-accent-wash-text: #f48bcd;
+    --jrk-border-accent: #eb33a7;
+    --jrk-text-link: #ee4fb3;
+    --jrk-focus-ring: #eb33a7;
+    --jrk-shadow-focus: 0 0 0 2px #eb33a7, 0 0 0 4px #171e1d;
+    --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(235, 51, 167, 0.30) 0%, rgba(235, 51, 167, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(235, 51, 167, 0.14) 0%, rgba(235, 51, 167, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%);
+}
+
+/* ── tint: amber ─────────────────────────────────────────────── */
+:root[data-skin="vitrine"][data-tint="amber"] {
+  --jrk-accent-solid: #d79909;
+  --jrk-accent-solid-hover: #bf8808;
+  --jrk-accent-solid-active: #a67707;
+  --jrk-accent-on-solid: #04120c;
+  --jrk-accent-text: #845e06;
+  --jrk-accent-wash: #ebe5d5;
+  --jrk-accent-wash-hover: #eadec2;
+  --jrk-accent-wash-active: #e8d7b0;
+  --jrk-accent-wash-border: #e6cf9c;
+  --jrk-accent-wash-text: #845e06;
+  --jrk-border-accent: #ab7a07;
+  --jrk-text-link: #845e06;
+  --jrk-focus-ring: #ab7a07;
+  --jrk-shadow-focus: 0 0 0 2px #eeeeee, 0 0 0 4px #ab7a07;
+  --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(215, 153, 9, 0.20) 0%, rgba(215, 153, 9, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="vitrine"][data-tint="amber"]:not([data-theme="light"]) {
+    --jrk-accent-solid: #f6b828;
+    --jrk-accent-solid-hover: #f7c040;
+    --jrk-accent-solid-active: #f8c859;
+    --jrk-accent-text: #f6b828;
+    --jrk-accent-wash: #494021;
+    --jrk-accent-wash-hover: #5b4c22;
+    --jrk-accent-wash-active: #6c5822;
+    --jrk-accent-wash-border: #806623;
+    --jrk-accent-wash-text: #f6b828;
+    --jrk-border-accent: #f6b828;
+    --jrk-text-link: #f6b828;
+    --jrk-focus-ring: #f6b828;
+    --jrk-shadow-focus: 0 0 0 2px #f6b828, 0 0 0 4px #171e1d;
+    --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(246, 184, 40, 0.30) 0%, rgba(246, 184, 40, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(246, 184, 40, 0.14) 0%, rgba(246, 184, 40, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%);
+  }
+}
+
+:root[data-skin="vitrine"][data-tint="amber"][data-theme="dark"] {
+    --jrk-accent-solid: #f6b828;
+    --jrk-accent-solid-hover: #f7c040;
+    --jrk-accent-solid-active: #f8c859;
+    --jrk-accent-text: #f6b828;
+    --jrk-accent-wash: #494021;
+    --jrk-accent-wash-hover: #5b4c22;
+    --jrk-accent-wash-active: #6c5822;
+    --jrk-accent-wash-border: #806623;
+    --jrk-accent-wash-text: #f6b828;
+    --jrk-border-accent: #f6b828;
+    --jrk-text-link: #f6b828;
+    --jrk-focus-ring: #f6b828;
+    --jrk-shadow-focus: 0 0 0 2px #f6b828, 0 0 0 4px #171e1d;
+    --jrk-vitrine-backdrop: radial-gradient(58% 44% at 20% 26%, rgba(246, 184, 40, 0.30) 0%, rgba(246, 184, 40, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(246, 184, 40, 0.14) 0%, rgba(246, 184, 40, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%);
 }

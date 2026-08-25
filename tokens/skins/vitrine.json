@@ -109,12 +109,14 @@
       "dark": "#04120c"
     },
     "accent-text": {
-      "light": "#077c45",
-      "dark": "#24db86"
+      "light": "#077441",
+      "dark": "#24db86",
+      "$note": "*** RE-STEPPED ON 2026-08-25 FROM #077c45, AND FOUND BY THE VARIANT GATE RATHER THAN BY THIS ONE. *** validate-skin holds a VARIANT's accent-text to the page's worst stop and the base skin's only to the panel, so the shipped value passed at 4.55:1 on the recorded composite while measuring 4.20:1 at the bottom of the page ramp and 4.34:1 on the glass's own dark extreme — under the floor on part of every screen. #077441 is 4.66:1 on the page's worst stop, 4.82:1 on the glass's dark extreme and 5.05:1 on the composite. THE LESSON IS THE ONE INDUSTRY'S text-muted ALREADY TAUGHT TWICE: on a gradient page with a translucent panel, a single-hex check is looking at neither binding surface."
     },
     "text-link": {
-      "light": "#077c45",
-      "dark": "#24db86"
+      "light": "#077441",
+      "dark": "#24db86",
+      "$note": "Moved with accent-text on 2026-08-25 — the two are one value under this skin, and the reason for the step is recorded there."
     },
     "border-accent": {
       "light": "#0d9d5a",
@@ -352,6 +354,447 @@
       "light": "var(--jrk-text-on-banner)",
       "dark": "var(--jrk-text-on-banner)",
       "$note": "One variable re-inks the whole interior of the bar — captions, statuses, ghost buttons, the search field — because base pipes all of them through gradient-ink."
+    }
+  },
+  "variantAxis": {
+    "attr": "tint",
+    "default": "green",
+    "$note": "THE AXIS IS NAMED FOR WHAT A VALUE MEANS, WHICH IS WHY THIS IS NOT data-hazard. Industry's hue is a hazard SIGNAL and its attribute says so; this skin's accent is a MATERIAL — the colour the glass is lit by — so `tint` is the honest word and `hazard` would have been a name that lies about the design. The build refuses variants without this block rather than defaulting to industry's attribute, because a skin that ships hues without saying what they are called is the kind of silent contract this toolchain exists to catch.\n\n`default` is green, and green is NOT a variant: it is the ABSENCE of data-tint, so nothing that does not stamp the attribute can change and the shipped skin is untouched by this whole section. Declaring it in `variants` as well would put a button in the gallery that changes nothing, which the build also refuses."
+  },
+  "variants": {
+    "$comment": "TINT VARIANTS. Stamped as a THIRD attribute — data-skin=\"vitrine\" data-tint=\"violet\" — crossed with the theme, so the axes are skin x tint x theme. Only the ACCENT namespace moves, plus the default scene's brand pools: the steel-green neutrals, the status set, the glass, the scrim, the clamp, the radii and the type belong to the skin and do not vary. That is what makes a tint a one-attribute swap.",
+    "$axisNote": "The default is GREEN and it is not a variant: an unstamped data-tint leaves the skin exactly as it shipped, so the hand-derived spring green keeps its values and no existing consumer changes. Every entry here is one of the five OTHER hues.",
+    "$methodNote": "Derived by search, not picked, and the method is industry's: one HSL anchor per hue plus a 1%-granularity lightness ramp, with every role the NEAREST LEGAL STEP to that hue's vivid centre — light roles darken, dark roles lighten, and each stops the moment it clears its floor. The centre is l44 light / l56 dark, read off the shipped green rather than invented. Washes are MIXES TOWARD THE COMPOSITE from a floor of 0.5, because what separates a wash from a fill is CHROMA and no contrast ratio sees chroma; hover, active and the wash edge then step BACK TOWARD THE FILL by 8, 16 and 25 points, which is the one place this differs from industry — un-mixing collapses onto the 0.5 floor and silently ships three tokens with one value.\n\nCROSS-CHECK ON THE METHOD: run against the shipped green it returns the accent fill EXACTLY in both halves (#10d177 / #2eef95) and lands within a step or two on the light roles (#097241 vs #077c45 for accent-text, #0b9856 vs #0d9d5a for border-accent). Where it diverges is dark, and in the honest direction: it returns the fill itself for accent-text and border-accent because the fill already clears every dark floor, while the hand-derived values stepped down for character.",
+    "$groundNote": "*** THE BINDING GROUND IS NOT THE RECORDED COMPOSITE, AND IT IS NOT THE SAME END IN BOTH HALVES. *** surface-default records what the glass composites to, which is what lets the gate run at all — but the glass SPANS #e8e9e9..#fdfefe in light and #141918..#222726 in dark. Light-mode inks and marks under this skin are DARK, so the DARKEST composite binds them; dark-mode inks are LIGHT, so the PALEST composite binds those. Every value here was solved against that extreme and against the page's worst stop, both of which are stricter than the hex the validator measures. Getting the end backwards reports a mark as passing on near-white and ships it at 2.7:1 on the glass — which is how the first pass of this derivation produced three failing marks that measured fine.",
+    "$gateNote": "THE VARIANT GATE IS STRICTER THAN THE BASE GATE, and that asymmetry found a real defect. validate-skin holds a variant's accent-text to the PAGE's worst stop and holds the base skin's only to the panel — so the shipped green's own #077c45 was 4.20:1 at the bottom of the page and 4.34:1 on the glass's dark extreme, i.e. it passed everywhere the gate looked and failed on part of the screen. It was re-stepped to #077441 in the same commit that added these variants. Same shape as industry's text-muted, twice.",
+    "azure": {
+      "$note": "A deep sky blue, and the one tint whose light half needs WHITE ink — near-black is under 4.5:1 on it, so accent-on-solid flips per hue exactly as industry's red, purple and blue do. Its fill also bounds itself in light (3.98:1 on the composite), so border-accent IS accent-solid here.",
+      "$measured": {
+        "hue anchor": "hue 206deg, saturation 88% — derived by search, not picked; see $methodNote.",
+        "solid vs the light panel": "3.98:1 on #eeeeee, 3.80:1 on the glass's binding extreme #e8e9e9",
+        "ink on solid (light)": "white #ffffff at 4.62:1",
+        "accent-text (light)": "#0b67ad — 4.69:1 on the page's worst stop #e2e6e6, 4.85:1 on the glass's binding extreme, 5.09:1 on the recorded composite",
+        "border-accent (light)": "#0d78c9 — 3.80:1 on the binding extreme, 3.98:1 on the composite. THE FILL BOUNDS ITSELF on this hue: border-accent IS accent-solid, with no stepped value at all.",
+        "wash (light)": "#e1e7ec — text-primary 12.17:1, text-secondary 7.09:1, text-muted 4.65:1; accent-wash-text #0b69b1 at 4.59:1",
+        "wash edge under border-accent (light)": "1.49:1 vs 3.98:1 on the composite, so a wash-filled control never reads as selected",
+        "focus ring best band (light)": "3.98:1 against the composite — two-tone, halo inside, hue outside",
+        "solid vs the dark panel": "5.61:1 on #1b201f, 5.15:1 on the glass's binding extreme #222726",
+        "ink on solid (dark)": "near-black #04120c at 6.51:1",
+        "accent-text (dark)": "#2c9cf2 — 6.26:1 on the page's worst stop #111514, 5.15:1 on the glass's binding extreme, 5.61:1 on the recorded composite",
+        "border-accent (dark)": "#2c9cf2 — 5.15:1 on the binding extreme, 5.61:1 on the composite. THE FILL BOUNDS ITSELF on this hue: border-accent IS accent-solid, with no stepped value at all.",
+        "wash (dark)": "#20445c — text-primary 7.96:1, text-secondary 4.60:1, text-muted 3.24:1 (FAILS — muted must step up to secondary on this wash, the same finding midgard records); accent-wash-text #61b5f5 at 4.62:1",
+        "wash edge under border-accent (dark)": "2.57:1 vs 5.61:1 on the composite, so a wash-filled control never reads as selected",
+        "focus ring best band (dark)": "5.61:1 against the composite — two-tone, hue inside, shade outside",
+        "CVD vs this skin's status set": "clear of every status colour at dE 10.",
+        "backdrop": "the default scene's brand pools re-hued to rgba(13, 120, 201) light / rgba(44, 156, 242) dark. FREE BY CONSTRUCTION: vitrine-clamp compresses whatever is behind the glass into a fixed luminance band, so no ratio in this file depends on the scene's hue. The teal companion pool and the diagonal rule do NOT move — they are the scene's second light, not the accent."
+      },
+      "vars": {
+        "accent-solid": {
+          "light": "#0d78c9",
+          "dark": "#2c9cf2"
+        },
+        "accent-solid-hover": {
+          "light": "#0b69b1",
+          "dark": "#44a7f3"
+        },
+        "accent-solid-active": {
+          "light": "#0a5b99",
+          "dark": "#5cb2f5"
+        },
+        "accent-on-solid": {
+          "light": "#ffffff",
+          "dark": "#04120c"
+        },
+        "accent-text": {
+          "light": "#0b67ad",
+          "dark": "#2c9cf2"
+        },
+        "accent-wash": {
+          "light": "#e1e7ec",
+          "dark": "#20445c"
+        },
+        "accent-wash-hover": {
+          "light": "#cfdde9",
+          "dark": "#214e6d"
+        },
+        "accent-wash-active": {
+          "light": "#bdd4e6",
+          "dark": "#23587e"
+        },
+        "accent-wash-border": {
+          "light": "#a8c9e3",
+          "dark": "#246391"
+        },
+        "accent-wash-text": {
+          "light": "#0b69b1",
+          "dark": "#61b5f5"
+        },
+        "border-accent": {
+          "light": "#0d78c9",
+          "dark": "#2c9cf2"
+        },
+        "text-link": {
+          "light": "#0b67ad",
+          "dark": "#2c9cf2"
+        },
+        "focus-ring": {
+          "light": "#0d78c9",
+          "dark": "#2c9cf2"
+        },
+        "shadow-focus": {
+          "light": "0 0 0 2px #eeeeee, 0 0 0 4px #0d78c9",
+          "dark": "0 0 0 2px #2c9cf2, 0 0 0 4px #171e1d"
+        },
+        "vitrine-backdrop": {
+          "light": "radial-gradient(58% 44% at 20% 26%, rgba(13, 120, 201, 0.20) 0%, rgba(13, 120, 201, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%)",
+          "dark": "radial-gradient(58% 44% at 20% 26%, rgba(44, 156, 242, 0.30) 0%, rgba(44, 156, 242, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(44, 156, 242, 0.14) 0%, rgba(44, 156, 242, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%)",
+          "$note": "The brand pools follow the tint; the teal companion and the diagonal rule do not. Unmeasurable and safe to re-hue for the same reason: vitrine-clamp bounds the scene by LUMINANCE, so the composite every ink is held to does not move when the scene's hue does."
+        }
+      }
+    },
+    "cyan": {
+      "$note": "Ice. The palest tint at full chroma, which is why its light accent-text has to walk furthest from the fill (l44 to l27) and why its border-accent is stepped rather than the fill itself — a cyan at l44 is 1.9:1 on the glass. Near-black ink on the fill in both halves.",
+      "$measured": {
+        "hue anchor": "hue 188deg, saturation 84% — derived by search, not picked; see $methodNote.",
+        "solid vs the light panel": "2.12:1 on #eeeeee, 2.02:1 on the glass's binding extreme #e8e9e9",
+        "ink on solid (light)": "near-black #04120c at 7.77:1",
+        "accent-text (light)": "#0b6f7f — 4.64:1 on the page's worst stop #e2e6e6, 4.80:1 on the glass's binding extreme, 5.04:1 on the recorded composite",
+        "border-accent (light)": "#0e90a4 — 3.11:1 on the binding extreme, 3.26:1 on the composite. Stepped away from the fill, which is only 2.02:1 on the binding extreme and cannot draw its own edge.",
+        "wash (light)": "#d8e8eb — text-primary 12.04:1, text-secondary 7.02:1, text-muted 4.60:1; accent-wash-text #0b6f7f at 4.64:1",
+        "wash edge under border-accent (light)": "1.33:1 vs 3.26:1 on the composite, so a wash-filled control never reads as selected",
+        "focus ring best band (light)": "3.26:1 against the composite — two-tone, halo inside, hue outside",
+        "solid vs the dark panel": "9.25:1 on #1b201f, 8.49:1 on the glass's binding extreme #222726",
+        "ink on solid (dark)": "near-black #04120c at 10.73:1",
+        "accent-text (dark)": "#31d4ed — 10.31:1 on the page's worst stop #111514, 8.49:1 on the glass's binding extreme, 9.25:1 on the recorded composite",
+        "border-accent (dark)": "#31d4ed — 8.49:1 on the binding extreme, 9.25:1 on the composite. THE FILL BOUNDS ITSELF on this hue: border-accent IS accent-solid, with no stepped value at all.",
+        "wash (dark)": "#20464a — text-primary 7.98:1, text-secondary 4.62:1, text-muted 3.25:1 (FAILS — muted must step up to secondary on this wash, the same finding midgard records); accent-wash-text #31d4ed at 5.78:1",
+        "wash edge under border-accent (dark)": "3.01:1 vs 9.25:1 on the composite, so a wash-filled control never reads as selected",
+        "focus ring best band (dark)": "9.25:1 against the composite — two-tone, hue inside, shade outside",
+        "CVD vs this skin's status set": "clear of every status colour at dE 10.",
+        "backdrop": "the default scene's brand pools re-hued to rgba(18, 181, 206) light / rgba(49, 212, 237) dark. FREE BY CONSTRUCTION: vitrine-clamp compresses whatever is behind the glass into a fixed luminance band, so no ratio in this file depends on the scene's hue. The teal companion pool and the diagonal rule do NOT move — they are the scene's second light, not the accent."
+      },
+      "vars": {
+        "accent-solid": {
+          "light": "#12b5ce",
+          "dark": "#31d4ed"
+        },
+        "accent-solid-hover": {
+          "light": "#10a1b7",
+          "dark": "#48d9ef"
+        },
+        "accent-solid-active": {
+          "light": "#0e8ca0",
+          "dark": "#5fdef1"
+        },
+        "accent-on-solid": {
+          "light": "#04120c",
+          "dark": "#04120c"
+        },
+        "accent-text": {
+          "light": "#0b6f7f",
+          "dark": "#31d4ed"
+        },
+        "accent-wash": {
+          "light": "#d8e8eb",
+          "dark": "#20464a"
+        },
+        "accent-wash-hover": {
+          "light": "#c6e4e8",
+          "dark": "#21545b"
+        },
+        "accent-wash-active": {
+          "light": "#b5dfe6",
+          "dark": "#23636b"
+        },
+        "accent-wash-border": {
+          "light": "#a1dae3",
+          "dark": "#25737e"
+        },
+        "accent-wash-text": {
+          "light": "#0b6f7f",
+          "dark": "#31d4ed"
+        },
+        "border-accent": {
+          "light": "#0e90a4",
+          "dark": "#31d4ed"
+        },
+        "text-link": {
+          "light": "#0b6f7f",
+          "dark": "#31d4ed"
+        },
+        "focus-ring": {
+          "light": "#0e90a4",
+          "dark": "#31d4ed"
+        },
+        "shadow-focus": {
+          "light": "0 0 0 2px #eeeeee, 0 0 0 4px #0e90a4",
+          "dark": "0 0 0 2px #31d4ed, 0 0 0 4px #171e1d"
+        },
+        "vitrine-backdrop": {
+          "light": "radial-gradient(58% 44% at 20% 26%, rgba(18, 181, 206, 0.20) 0%, rgba(18, 181, 206, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%)",
+          "dark": "radial-gradient(58% 44% at 20% 26%, rgba(49, 212, 237, 0.30) 0%, rgba(49, 212, 237, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(49, 212, 237, 0.14) 0%, rgba(49, 212, 237, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%)",
+          "$note": "The brand pools follow the tint; the teal companion and the diagonal rule do not. Unmeasurable and safe to re-hue for the same reason: vitrine-clamp bounds the scene by LUMINANCE, so the composite every ink is held to does not move when the scene's hue does."
+        }
+      }
+    },
+    "violet": {
+      "$note": "The most legible tint in light and the least in dark, which is the same fact twice: a violet is dark, so it clears every light-mode floor at its vivid centre — accent-text, border-accent and the ring are all the fill itself — and in dark it has to be lifted for all three. Both halves take WHITE ink; no step of this hue takes black.",
+      "$measured": {
+        "hue anchor": "hue 268deg, saturation 84% — derived by search, not picked; see $methodNote.",
+        "solid vs the light panel": "6.99:1 on #eeeeee, 6.66:1 on the glass's binding extreme #e8e9e9",
+        "ink on solid (light)": "white #ffffff at 8.11:1",
+        "accent-text (light)": "#6a12ce — 6.44:1 on the page's worst stop #e2e6e6, 6.66:1 on the glass's binding extreme, 6.99:1 on the recorded composite",
+        "border-accent (light)": "#6a12ce — 6.66:1 on the binding extreme, 6.99:1 on the composite. THE FILL BOUNDS ITSELF on this hue: border-accent IS accent-solid, with no stepped value at all.",
+        "wash (light)": "#e9e5ed — text-primary 12.21:1, text-secondary 7.12:1, text-muted 4.67:1; accent-wash-text #6a12ce at 6.52:1",
+        "wash edge under border-accent (light)": "1.70:1 vs 6.99:1 on the composite, so a wash-filled control never reads as selected",
+        "focus ring best band (light)": "6.99:1 against the composite — two-tone, halo inside, hue outside",
+        "solid vs the dark panel": "2.93:1 on #1b201f, 2.69:1 on the glass's binding extreme #222726",
+        "ink on solid (dark)": "white #ffffff at 5.64:1",
+        "accent-text (dark)": "#ae72f3 — 5.70:1 on the page's worst stop #111514, 4.69:1 on the glass's binding extreme, 5.11:1 on the recorded composite",
+        "border-accent (dark)": "#9343ef — 3.09:1 on the binding extreme, 3.37:1 on the composite. Stepped away from the fill, which is only 2.69:1 on the binding extreme and cannot draw its own edge.",
+        "wash (dark)": "#522986 — text-primary 8.05:1, text-secondary 4.65:1, text-muted 3.28:1 (FAILS — muted must step up to secondary on this wash, the same finding midgard records); accent-wash-text #c498f6 at 4.54:1",
+        "wash edge under border-accent (dark)": "2.16:1 vs 3.37:1 on the composite, so a wash-filled control never reads as selected",
+        "focus ring best band (dark)": "3.37:1 against the composite — two-tone, hue inside, shade outside",
+        "CVD vs this skin's status set": "clear of every status colour at dE 10.",
+        "backdrop": "the default scene's brand pools re-hued to rgba(106, 18, 206) light / rgba(137, 49, 237) dark. FREE BY CONSTRUCTION: vitrine-clamp compresses whatever is behind the glass into a fixed luminance band, so no ratio in this file depends on the scene's hue. The teal companion pool and the diagonal rule do NOT move — they are the scene's second light, not the accent."
+      },
+      "vars": {
+        "accent-solid": {
+          "light": "#6a12ce",
+          "dark": "#8931ed"
+        },
+        "accent-solid-hover": {
+          "light": "#5e10b7",
+          "dark": "#9648ef"
+        },
+        "accent-solid-active": {
+          "light": "#520ea0",
+          "dark": "#a35ff1"
+        },
+        "accent-on-solid": {
+          "light": "#ffffff",
+          "dark": "#ffffff"
+        },
+        "accent-text": {
+          "light": "#6a12ce",
+          "dark": "#ae72f3"
+        },
+        "accent-wash": {
+          "light": "#e9e5ed",
+          "dark": "#522986"
+        },
+        "accent-wash-hover": {
+          "light": "#ded4ea",
+          "dark": "#5b2a96"
+        },
+        "accent-wash-active": {
+          "light": "#d4c2e8",
+          "dark": "#642ba7"
+        },
+        "accent-wash-border": {
+          "light": "#c8aee5",
+          "dark": "#6e2dba"
+        },
+        "accent-wash-text": {
+          "light": "#6a12ce",
+          "dark": "#c498f6"
+        },
+        "border-accent": {
+          "light": "#6a12ce",
+          "dark": "#9343ef"
+        },
+        "text-link": {
+          "light": "#6a12ce",
+          "dark": "#ae72f3"
+        },
+        "focus-ring": {
+          "light": "#6a12ce",
+          "dark": "#9343ef"
+        },
+        "shadow-focus": {
+          "light": "0 0 0 2px #eeeeee, 0 0 0 4px #6a12ce",
+          "dark": "0 0 0 2px #9343ef, 0 0 0 4px #171e1d"
+        },
+        "vitrine-backdrop": {
+          "light": "radial-gradient(58% 44% at 20% 26%, rgba(106, 18, 206, 0.20) 0%, rgba(106, 18, 206, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%)",
+          "dark": "radial-gradient(58% 44% at 20% 26%, rgba(137, 49, 237, 0.30) 0%, rgba(137, 49, 237, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(137, 49, 237, 0.14) 0%, rgba(137, 49, 237, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%)",
+          "$note": "The brand pools follow the tint; the teal companion and the diagonal rule do not. Unmeasurable and safe to re-hue for the same reason: vitrine-clamp bounds the scene by LUMINANCE, so the composite every ink is held to does not move when the scene's hue does."
+        }
+      }
+    },
+    "magenta": {
+      "$note": "The one tint whose halves disagree about ink: white in light, near-black in dark. Its fill bounds itself in both (4.49:1 / 4.37:1), so border-accent is the fill.",
+      "$measured": {
+        "hue anchor": "hue 322deg, saturation 82% — derived by search, not picked; see $methodNote.",
+        "solid vs the light panel": "4.49:1 on #eeeeee, 4.29:1 on the glass's binding extreme #e8e9e9",
+        "ink on solid (light)": "white #ffffff at 5.21:1",
+        "accent-text (light)": "#be137f — 4.65:1 on the page's worst stop #e2e6e6, 4.81:1 on the glass's binding extreme, 5.04:1 on the recorded composite",
+        "border-accent (light)": "#cc1489 — 4.29:1 on the binding extreme, 4.49:1 on the composite. THE FILL BOUNDS ITSELF on this hue: border-accent IS accent-solid, with no stepped value at all.",
+        "wash (light)": "#ece3e9 — text-primary 12.09:1, text-secondary 7.05:1, text-muted 4.62:1; accent-wash-text #be137f at 4.66:1",
+        "wash edge under border-accent (light)": "1.62:1 vs 4.49:1 on the composite, so a wash-filled control never reads as selected",
+        "focus ring best band (light)": "4.49:1 against the composite — two-tone, halo inside, hue outside",
+        "solid vs the dark panel": "4.37:1 on #1b201f, 4.01:1 on the glass's binding extreme #222726",
+        "ink on solid (dark)": "near-black #04120c at 5.07:1",
+        "accent-text (dark)": "#ee4fb3 — 5.61:1 on the page's worst stop #111514, 4.62:1 on the glass's binding extreme, 5.03:1 on the recorded composite",
+        "border-accent (dark)": "#eb33a7 — 4.01:1 on the binding extreme, 4.37:1 on the composite. THE FILL BOUNDS ITSELF on this hue: border-accent IS accent-solid, with no stepped value at all.",
+        "wash (dark)": "#6a2753 — text-primary 8.02:1, text-secondary 4.64:1, text-muted 3.27:1 (FAILS — muted must step up to secondary on this wash, the same finding midgard records); accent-wash-text #f48bcd at 4.65:1",
+        "wash edge under border-accent (dark)": "2.41:1 vs 4.37:1 on the composite, so a wash-filled control never reads as selected",
+        "focus ring best band (dark)": "4.37:1 against the composite — two-tone, hue inside, shade outside",
+        "CVD vs this skin's status set": "clear of every status colour at dE 10.",
+        "backdrop": "the default scene's brand pools re-hued to rgba(204, 20, 137) light / rgba(235, 51, 167) dark. FREE BY CONSTRUCTION: vitrine-clamp compresses whatever is behind the glass into a fixed luminance band, so no ratio in this file depends on the scene's hue. The teal companion pool and the diagonal rule do NOT move — they are the scene's second light, not the accent."
+      },
+      "vars": {
+        "accent-solid": {
+          "light": "#cc1489",
+          "dark": "#eb33a7"
+        },
+        "accent-solid-hover": {
+          "light": "#b51279",
+          "dark": "#ed4ab1"
+        },
+        "accent-solid-active": {
+          "light": "#9e106a",
+          "dark": "#ef61bb"
+        },
+        "accent-on-solid": {
+          "light": "#ffffff",
+          "dark": "#04120c"
+        },
+        "accent-text": {
+          "light": "#be137f",
+          "dark": "#ee4fb3"
+        },
+        "accent-wash": {
+          "light": "#ece3e9",
+          "dark": "#6a2753"
+        },
+        "accent-wash-hover": {
+          "light": "#ead2e1",
+          "dark": "#7b295e"
+        },
+        "accent-wash-active": {
+          "light": "#e7c0d9",
+          "dark": "#8b2a68"
+        },
+        "accent-wash-border": {
+          "light": "#e4add0",
+          "dark": "#9e2c75"
+        },
+        "accent-wash-text": {
+          "light": "#be137f",
+          "dark": "#f48bcd"
+        },
+        "border-accent": {
+          "light": "#cc1489",
+          "dark": "#eb33a7"
+        },
+        "text-link": {
+          "light": "#be137f",
+          "dark": "#ee4fb3"
+        },
+        "focus-ring": {
+          "light": "#cc1489",
+          "dark": "#eb33a7"
+        },
+        "shadow-focus": {
+          "light": "0 0 0 2px #eeeeee, 0 0 0 4px #cc1489",
+          "dark": "0 0 0 2px #eb33a7, 0 0 0 4px #171e1d"
+        },
+        "vitrine-backdrop": {
+          "light": "radial-gradient(58% 44% at 20% 26%, rgba(204, 20, 137, 0.20) 0%, rgba(204, 20, 137, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%)",
+          "dark": "radial-gradient(58% 44% at 20% 26%, rgba(235, 51, 167, 0.30) 0%, rgba(235, 51, 167, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(235, 51, 167, 0.14) 0%, rgba(235, 51, 167, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%)",
+          "$note": "The brand pools follow the tint; the teal companion and the diagonal rule do not. Unmeasurable and safe to re-hue for the same reason: vitrine-clamp bounds the scene by LUMINANCE, so the composite every ink is held to does not move when the scene's hue does."
+        }
+      }
+    },
+    "amber": {
+      "$note": "*** THE ONE TINT WITH A RESTRICTION, AND IT IS NOT FIXABLE BY RE-STEPPING. *** An amber accent and this skin's amber warning separate only by lightness, so under deuteranopia the accent collapses into the status set: dE 8.9 against status.warning.mark and 7.0 against status.serious.mark, floor 10. With data-tint=\"amber\": a status badge carries its icon AND its label, a delta states direction in text, and an amber --cta does not share a tile with a warning chip whose only mark is its colour. Every cool tint here is clear of the whole status set, so this is the price of the warm one — the same shape as industry's red.",
+      "$measured": {
+        "hue anchor": "hue 42deg, saturation 92% — derived by search, not picked; see $methodNote.",
+        "solid vs the light panel": "2.14:1 on #eeeeee, 2.04:1 on the glass's binding extreme #e8e9e9",
+        "ink on solid (light)": "near-black #04120c at 7.70:1",
+        "accent-text (light)": "#845e06 — 4.66:1 on the page's worst stop #e2e6e6, 4.82:1 on the glass's binding extreme, 5.05:1 on the recorded composite",
+        "border-accent (light)": "#ab7a07 — 3.13:1 on the binding extreme, 3.28:1 on the composite. Stepped away from the fill, which is only 2.04:1 on the binding extreme and cannot draw its own edge.",
+        "wash (light)": "#ebe5d5 — text-primary 12.07:1, text-secondary 7.03:1, text-muted 4.61:1; accent-wash-text #845e06 at 4.66:1",
+        "wash edge under border-accent (light)": "1.31:1 vs 3.28:1 on the composite, so a wash-filled control never reads as selected",
+        "focus ring best band (light)": "3.28:1 against the composite — two-tone, halo inside, hue outside",
+        "solid vs the dark panel": "9.27:1 on #1b201f, 8.52:1 on the glass's binding extreme #222726",
+        "ink on solid (dark)": "near-black #04120c at 10.76:1",
+        "accent-text (dark)": "#f6b828 — 10.34:1 on the page's worst stop #111514, 8.52:1 on the glass's binding extreme, 9.27:1 on the recorded composite",
+        "border-accent (dark)": "#f6b828 — 8.52:1 on the binding extreme, 9.27:1 on the composite. THE FILL BOUNDS ITSELF on this hue: border-accent IS accent-solid, with no stepped value at all.",
+        "wash (dark)": "#494021 — text-primary 7.97:1, text-secondary 4.61:1, text-muted 3.25:1 (FAILS — muted must step up to secondary on this wash, the same finding midgard records); accent-wash-text #f6b828 at 5.79:1",
+        "wash edge under border-accent (dark)": "3.02:1 vs 9.27:1 on the composite, so a wash-filled control never reads as selected",
+        "focus ring best band (dark)": "9.27:1 against the composite — two-tone, hue inside, shade outside",
+        "CVD vs this skin's status set": "COLLIDES: warning.mark dE 8.9 (deuteranopia); serious.mark dE 7.0 (deuteranopia) — acknowledged below, and the cost is on the variant's $note.",
+        "backdrop": "the default scene's brand pools re-hued to rgba(215, 153, 9) light / rgba(246, 184, 40) dark. FREE BY CONSTRUCTION: vitrine-clamp compresses whatever is behind the glass into a fixed luminance band, so no ratio in this file depends on the scene's hue. The teal companion pool and the diagonal rule do NOT move — they are the scene's second light, not the accent."
+      },
+      "$acknowledgedStatusCollisions": [
+        "status.warning.mark dE 8.9 (deuteranopia)",
+        "status.serious.mark dE 7.0 (deuteranopia)"
+      ],
+      "vars": {
+        "accent-solid": {
+          "light": "#d79909",
+          "dark": "#f6b828"
+        },
+        "accent-solid-hover": {
+          "light": "#bf8808",
+          "dark": "#f7c040"
+        },
+        "accent-solid-active": {
+          "light": "#a67707",
+          "dark": "#f8c859"
+        },
+        "accent-on-solid": {
+          "light": "#04120c",
+          "dark": "#04120c"
+        },
+        "accent-text": {
+          "light": "#845e06",
+          "dark": "#f6b828"
+        },
+        "accent-wash": {
+          "light": "#ebe5d5",
+          "dark": "#494021"
+        },
+        "accent-wash-hover": {
+          "light": "#eadec2",
+          "dark": "#5b4c22"
+        },
+        "accent-wash-active": {
+          "light": "#e8d7b0",
+          "dark": "#6c5822"
+        },
+        "accent-wash-border": {
+          "light": "#e6cf9c",
+          "dark": "#806623"
+        },
+        "accent-wash-text": {
+          "light": "#845e06",
+          "dark": "#f6b828"
+        },
+        "border-accent": {
+          "light": "#ab7a07",
+          "dark": "#f6b828"
+        },
+        "text-link": {
+          "light": "#845e06",
+          "dark": "#f6b828"
+        },
+        "focus-ring": {
+          "light": "#ab7a07",
+          "dark": "#f6b828"
+        },
+        "shadow-focus": {
+          "light": "0 0 0 2px #eeeeee, 0 0 0 4px #ab7a07",
+          "dark": "0 0 0 2px #f6b828, 0 0 0 4px #171e1d"
+        },
+        "vitrine-backdrop": {
+          "light": "radial-gradient(58% 44% at 20% 26%, rgba(215, 153, 9, 0.20) 0%, rgba(215, 153, 9, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%)",
+          "dark": "radial-gradient(58% 44% at 20% 26%, rgba(246, 184, 40, 0.30) 0%, rgba(246, 184, 40, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(246, 184, 40, 0.14) 0%, rgba(246, 184, 40, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%)",
+          "$note": "The brand pools follow the tint; the teal companion and the diagonal rule do not. Unmeasurable and safe to re-hue for the same reason: vitrine-clamp bounds the scene by LUMINANCE, so the composite every ink is held to does not move when the scene's hue does."
+        }
+      }
     }
   }
 }
