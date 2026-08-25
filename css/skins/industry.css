@@ -560,11 +560,20 @@
   /* Longhand, not the shorthand, so the wedge below composes onto this fill
      instead of the two fighting for one property. */
   background-color: var(--jrk-masthead-fill);
-  background-image: linear-gradient(
-    calc(90deg + var(--jrk-wedge-angle)),
-    transparent 0 94%,
-    var(--jrk-masthead-facet) 94% 100%
-  );
+  /* NO FACET ON THE MASTHEAD. The trailing-edge wedge was removed by direction —
+     it sat behind the sign-out control and read as a coloured shape stuck to the
+     corner rather than as machining. The PLAIN bar keeps its wedge; that rule is
+     the skin's original mark and is untouched.
+
+     `none` RATHER THAN OMITTING THE PROPERTY, and this is the trap. Base declares
+     the ramp through the `background` SHORTHAND at 0-2-0, which sets
+     background-image as well as background-color. This rule only sets the colour,
+     so dropping the image half would leave base's teal -> blue -> violet gradient
+     painting straight over the fill — the same shorthand-versus-longhand fault
+     that had this skin deleting the masthead's fill entirely before any of this
+     existed. midgard's masthead states `background-image: none` for exactly this
+     reason and says so. */
+  background-image: none;
   color: var(--jrk-masthead-ink);
 
   /* THE ONE VARIABLE THAT RE-INKS THE WHOLE BAR. Base points every interior
@@ -618,9 +627,11 @@
  *
  * WHAT IT COSTS is the fill step: white is surface-default, which is also what the
  * PLAIN bar is filled with, so in light the brand plate and the plain bar are the
- * same colour and the marks, the facet and the hairline are the entire difference.
- * That is acceptable because all three are present and none of them is subtle; it
- * would not be if the marks were ever quietened. */
+ * same colour and the MARKS AND THE HAIRLINE are the entire difference — the
+ * facet used to be the third and was removed. Two channels is thinner than three,
+ * and it is why the marks may not be quietened: they are now half of what says
+ * this bar is the masthead. (The plain bar has its own pale wedge, which is the
+ * one thing still telling the two apart at the trailing edge.) */
 :root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand {
   background-color: var(--jrk-masthead-brand-fill);
 }

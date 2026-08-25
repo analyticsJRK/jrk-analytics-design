@@ -975,9 +975,13 @@ three hues that cannot carry black ink set the ceiling — purple 75%, red 85%, 
 90% — so 75% is the number to respect**, against a shipped 55% in the ink band and
 80% below it. In DARK the same marks are held to 41% instead, by `text.onBanner`
 over `accent.solid` on the charcoal: two halves, two ceilings, one set of alphas
-that satisfies both. The facet carries near-black at 7.27:1 worst (purple), which
-matters because the sign-out control sits on it. `--vivid` and `--brand` also
-differ by the identity mark, which only `--brand` carries.
+that satisfies both. **The masthead draws no trailing-edge facet** — it was
+removed because it sat behind the sign-out control and read as a coloured shape
+stuck to the corner; the PLAIN bar keeps its wedge. Its rule states
+`background-image: none` rather than omitting the property, because base declares
+the ramp through the `background` SHORTHAND and the image half would otherwise
+paint through. `--vivid` and `--brand` also differ by the identity mark, which
+only `--brand` carries.
 
 **The masthead has its own token namespace and that is not incidental.**
 `masthead.fill` / `.facet` / `.ink` / `.mark` are `var()` indirection onto values

@@ -406,11 +406,6 @@
       "dark": "var(--jrk-surface-banner)",
       "$note": "THE MASTHEAD FOLLOWS THE THEME as of 2026-08-24: a pale band in light, the dark banner in dark. It is stated as var() indirection rather than as literal hexes so that it cannot drift from the values it is derived from — and, under industry, so that data-hazard re-hues the masthead for free. NOT surface-banner in light: that token is the SHEET's metric block-head (css/components/sheet.css reads it in six places) and a light banner there would repaint every workbook header. The masthead needed its own namespace. The wash is the right light value because every one of the six hazard washes carries accent-wash-text (#14171a) at 11.64:1 or better BY DERIVATION — measured across all six: yellow 16.09, green 12.09, red 11.80, purple 11.67, orange and blue 11.64 — so the ink is safe for every hue with no per-variant work. *** IN LIGHT THIS BAND SEPARATES FROM THE PAGE BY CHROMA, NOT LUMINANCE: the yellow wash is 1.05/1.02/1.11 against the page ramp's three stops, so it is all but invisible in greyscale and in print. That is the third instance of this skin's own yellow finding, and it is why the hairline is load-bearing in light as well as dark. The five hazard hues carry more of a step (1.20-1.45) but none of them is a boundary either."
     },
-    "masthead-facet": {
-      "light": "var(--jrk-accent-wash-active)",
-      "dark": "var(--jrk-surface-banner-deep)",
-      "$note": "The wedge on the trailing 6%. It has to invert with the band: surface-banner-deep is near-black, which on a pale wash is not a machined facet but a hole. accent-wash-active is the same hue one step deeper and reads as the fold in both halves."
-    },
     "masthead-ink": {
       "light": "var(--jrk-accent-wash-text)",
       "dark": "var(--jrk-text-on-banner)",
