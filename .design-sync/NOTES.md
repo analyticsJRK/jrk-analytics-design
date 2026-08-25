@@ -1435,3 +1435,98 @@ for. Both took `cardMode: "column"`, the `Card`/`ChartCard`/`BarList` precedent.
 - `css/components/form.css` is CRLF in the working copy. It is tracked and
   `.gitattributes` pins `eol=lf`, so whoever commits that edit should normalize
   it first — see the CRLF section above.
+
+## Run receipt — 2026-08-25
+
+Repo at `31cfe74` ("Stop vitrine's glass eating the fill of every surface that
+brings its own"), pushed. Two driver runs: baseline, then a re-run after grading
+four force-captured components.
+
+Verdict: build/diff/validate ok, **capture skipped** (`capture: null`) — the
+no-change path, which is the first time this repo has taken it. `anchor: ok`,
+**63 unchanged / 0 changed / 0 added / 0 removed**, `pendingGrade: []`,
+`renderChurned: []`, `0 delete(s)`. Only the two documented warns.
+
+**Upload was `styling` ALONE: three files.** `styleSha` moved
+(`70970723` -> `af1a50a3`) and `auxSha`, `bundleSha12` and `scriptsSha` all held,
+with **zero** `sourceHashes` moving. So the payload is `_ds_bundle.css`,
+`styles.css` and the sidecar — against 38 files on 2026-08-24 and 328 on
+2026-08-18. `styles.css` turns out to be a two-line `@import` shim; the actual
+156KB of CSS is `_ds_bundle.css`, which is where the changed tokens live
+(`#cee0ff` and fifteen `[data-accent]` blocks). Worth knowing for the next
+styling-only run: **`bundle: false` does not mean the CSS did not move.**
+
+**THE ANCHOR WAS VERIFIED AND `updatedAt` WAS NOT USED, because it lied.**
+`list_projects` still reports the project at `2026-08-21T00:32:47Z` despite the
+confirmed 38-file upload of 2026-08-24. The 2026-08-20 receipt recommends
+`updatedAt` as a cheap "has anyone uploaded since" signal; **it did not move for
+a real upload here, so it is not that signal.** The digest comparison against a
+live `get_file _ds_sync.json` is — matched on all four globals, `keyRecipe`, five
+spot-checked `sourceKeys` including the three components added last run, and the
+63/189 counts.
+
+**NOTHING OF THIS SESSION'S OWN WORK REACHED THE BUNDLE, and that is worth
+stating because it looks wrong at first glance.** Two days of masthead work went
+into `css/skins/*.css` and `tokens/skins/*.json`, and a frosted-scene section into
+`preview/`. **The bundle's CSS is `css/index.css` flattened, which imports no
+skin** — verified by grepping the flat CSS: fifteen `data-skin` hits, all of them
+the bare `[data-skin]` attribute from the token layer, and **zero** occurrences of
+`industry`, `midgard` or `vitrine`. `preview/` is not in the bundle at all. So the
+Design System project has never carried a skin and still does not; what shipped
+here is the BASE-library work committed by the other session.
+
+**THE TREE WAS DIRTY AND IT WAS PROVED HARMLESS RATHER THAN ASSUMED.** Another
+session had uncommitted edits to `CLAUDE.md`, `css/skins/industry.css`,
+`tokens/skins/industry.json` and `dist/jrk-skin-industry.css` throughout. The
+first three cannot reach the bundle by the paragraph above; `CLAUDE.md` is not
+published at all — `guidelinesGlob` is `guides/*.md`, built from the jrk-design
+skill, and the only hit for "CLAUDE" in `guides/` is `philosophy.md` naming the
+file. Checked by content, not by reasoning: CLAUDE.md's own distinctive strings
+appear in no guide. **The standing rule "sync from a clean tree" is still the
+right default** — this run only survived it because the dirty paths happened to
+be outside the bundle, and that is a fact about this week rather than a general
+one.
+
+**WHAT THE STYLING CHANGE ACTUALLY WAS, and why it needed eyes.** Three commits:
+`426cf06` (dark-mode `<select>` drawing two chevrons), `66dd4c6` (a stacked
+branch's last tick erased by the bus trim) and `41e51a9` (the `data-accent` hue
+axis, plus a re-step of the brand topbar ramp — `gradient.topbar.from` `#d5dfff`
+-> `#ffffff` and `.via` `#245ec6` -> `#cee0ff`, retiring that bar's layout
+condition). The accent axis is additive and blue stays the default, so **the only
+default token values that moved are those two topbar stops** — confirmed by
+diffing the `:root` block of `dist/jrk-tokens.css` against the last published
+build rather than trusting the commit message.
+
+NOTES' own rule fires here: *"styling churn never re-verifies components, which
+is right until the CSS change is a big one"*, and its prescription is to read the
+contact sheets. **Capture had been skipped, so there were none from after the
+change.** `package-capture.mjs --components Topbar,Select,OrgChart,OrgNode
+--force` re-shot the four the three commits could touch, and all four graded
+`good` from the fresh sheets: Topbar's four cells legible across the ribbon,
+Select single-chevroned everywhere, OrgNode's Stacked cell showing the restored
+per-leaf tick, and **OrgChart's FilledGroups rendering all four groups uncropped**
+— the wide-crop risk this file records twice is still held by the 1120x800
+viewport override.
+
+**`--force` CLEARS GRADES, so budget for re-grading whatever you capture.** It
+cleared all four and demanded 23 cell verdicts; those are written back to
+`.design-sync/.cache/review/<Name>.grade.json` and the second driver run came back
+`pendingGrade: []`. Forcing a capture to LOOK at something is not free — it makes
+work.
+
+**Re-sync risks added by this run:**
+- **`updatedAt` is now known not to move on upload.** Do not use it as the
+  freshness signal the 2026-08-20 receipt suggests; fetch the sidecar and compare
+  digests.
+- **A styling-only run uploads no component HTML, so every card's stored render
+  is now one brand-ramp behind.** The cards themselves reference
+  `_ds_bundle.css` and will pick the new tokens up live; it is the local
+  `_screenshots/` that are stale for the 59 components not re-captured. Harmless
+  until someone reads a sheet as evidence of current state.
+- `_ds_needs_recompile` was deliberately NOT uploaded. No card was added, removed
+  or renamed, so there is no manifest to rebuild. If the pane's card index ever
+  looks stale after a styling-only run, that omission is the first thing to try.
+- `conventions.md` was checked and needs no change — `auxSha` held, and the two
+  token values that moved are gradient stops it does not quote. The standing
+  hazard in this file (it goes stale the moment a token value changes, and nothing
+  gates it) is unaffected but not retired.
