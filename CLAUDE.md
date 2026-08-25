@@ -949,23 +949,45 @@ no width change, so nothing reflows. Same family as Industry's wedge decision:
 **BOTH SKINS NOW SKIN THE MASTHEAD VARIANTS, which is the other half of that same
 rule rather than a reversal of it** (2026-08-24). `--vivid` and `--brand` own
 their ink through `gradient.ink`, so a skin re-points ONE variable and every
-caption, status, ghost button and search field on the bar follows. Under either
-skin both variants collapse to that skin's flat `surface.banner` band — Industry
-charcoal `#14171a` / `#0d0f10`, midgard warm-black `#1b1811` / cold `#0b0f14` —
-because base's teal→blue→violet ribbon belongs to neither palette. The values were
-derived and measured when each skin was built and had simply never been wired to
-anything.
+caption, status, ghost button and search field on the bar follows. Base's
+teal→blue→violet ribbon belongs to neither palette, so both variants take the
+skin's own band — and **the band FOLLOWS THE THEME: a pale accent wash in light,
+the dark banner in dark.** They shipped dark in both halves for a day and were
+changed by direction, because every other surface in the library follows the theme
+and the masthead was the one that did not. `--vivid` and `--brand` differ by the
+skin's identity mark, which only `--brand` carries.
+
+**The masthead has its own token namespace and that is not incidental.**
+`masthead.fill` / `.facet` / `.ink` / `.mark` are `var()` indirection onto values
+each skin already derives — light is `accent.wash` under `accent.washText`, dark
+is `surface.banner` under `text.onBanner` — so nothing here is hand-picked, and
+under Industry the whole band **re-hues with `data-hazard` for free**. It could
+NOT reuse `surface.banner` for the light half: that token is `.jrk-sheet`'s metric
+block-head, read in six places in `sheet.css`, so a light value there would
+repaint every workbook header in the product. **The ink is safe for all six hazard
+hues by derivation** — every wash carries `accent.washText` at 11.64:1 or better
+(yellow 16.09, green 12.09, red 11.80, purple 11.67, orange and blue 11.64) — so
+this needed no per-variant work. The focus ring is that same ink rather than
+`accent.solid`, because vivid yellow on a pale yellow wash is the same colour and
+midgard's gold is 1.94:1 on its own light plate.
 
 **The point of a flat band is that it turns the base bar's LAYOUT fact back into a
 COLOUR fact.** The brand ramp above is legible only while `.jrk-spacer` holds the
 middle empty and the bar stays above ~1200px; a single fill has no interior to
-fail in, so a consumer can put anything anywhere on a skinned bar. **But in DARK
-each band is its own page colour** — Industry's `#0d0f10` is the last stop of its
-page ramp and midgard's `#0b0f14` the first stop of its own, 1.000:1 either way —
-**so the accent hairline is the entire boundary there** (15.06:1 / 9.23:1), while
-in light the fill step is already 17:1 / 15:1. That 1px rule reads as pure
-decoration in every light-mode screenshot and is the whole masthead in the other
-theme. Do not drop it.
+fail in, so a consumer can put anything anywhere on a skinned bar.
+
+**AND THE ACCENT HAIRLINE IS NOW THE BAND'S ONLY BOUNDARY IN BOTH THEMES.** In
+dark each band is its own page colour — Industry's `#0d0f10` is the last stop of
+its page ramp and midgard's `#0b0f14` the first stop of its own, 1.000:1 either
+way. In light the pale wash separates from the page **by chroma and not by
+luminance**: 1.05 / 1.02 / 1.11 for Industry's yellow against the page ramp's
+three stops, 1.07 / 1.01 / 1.12 for midgard, i.e. all but invisible in greyscale
+and in print. So there is no theme in which the fill step bounds this bar; it is
+bounded by `border.accent` at 15.06:1 / 9.23:1 in dark and 2.98:1 / 3.12:1 in
+light. **This paragraph previously said the opposite about the light half** — that
+the step was already 17:1 and the hairline was plainly redundant there — which was
+true of a dark band on a light page and false the moment the band went pale. Do
+not drop that 1px.
 
 **MIDGARD'S MASTHEAD CARRIES A MARK; INDUSTRY'S IS A BARE BAND, AND THAT WAS A
 DECISION RATHER THAN AN OMISSION.** Midgard runs a node network across its band,

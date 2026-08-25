@@ -509,65 +509,48 @@
   );
 }
 
-/* ── the masthead: the flat charcoal band the token file already derived ───
+/* ── the masthead: a band that follows the theme ──────────────────────────
  *
- * THE VALUES WERE DERIVED AND MEASURED WHEN THIS SKIN WAS BUILT AND NOTHING WAS
- * WIRED TO THEM. `surface-banner`'s own $note reads "FLAT CHARCOAL, not a ramp.
- * The base masthead's three-stop gradient carries a middle stop that fails and is
- * kept empty by layout; this skin declines that bargain outright, so the topbar's
- * contrast is a colour fact again rather than a layout fact." That is the design;
- * this rule is only the wire.
+ * A PALE ACCENT WASH IN LIGHT, THE FLAT CHARCOAL BAND IN DARK. It shipped dark in
+ * both halves for one day and was changed by direction: every other surface in
+ * this library follows the theme and the masthead was the one that did not.
  *
- * THAT $note ALSO CARRIES A FIGURE THAT NO LONGER MEASURES, and it is flagged here
- * rather than quietly corrected: it ends "text-on-banner is 11.38:1 on it", and
- * #e9ecec on #14171a is 15.14:1 in light, 15.85:1 in dark. The claim is
- * conservative rather than dangerous — the real value is better — but it is
- * exactly the prose-drifting-from-a-number this repo names as its own worst habit,
- * and a figure nothing re-checks is how it happens. Fix it on the token, in a
- * change that is about the token.
+ * THE VALUES ARE NOT NEW. Light is `accent-wash` with `accent-wash-text` on it,
+ * both of which this skin already derives, and dark is the `surface-banner` the
+ * token file had been carrying with no consumer. Nothing was hand-picked; the
+ * masthead-* tokens are var() indirection, which is also what makes the band
+ * re-hue for free under data-hazard — the whole variant namespace is reachable
+ * through one token instead of six.
  *
- * WHY IT IS A BUG FIX AS WELL AS A LOOK. The wedge rule above is 0-3-0 and sets
- * `background-image`; the base library's `.jrk-topbar.jrk-topbar--vivid` is 0-2-0
- * and sets the `background` SHORTHAND. So under this skin the wedge was winning
- * and deleting the masthead's fill outright, leaving `background-color:
- * transparent` under `color: #ffffff` — white ink on the page, on a bar that has
- * no fill at all. Measured in Chrome across both themes before this rule existed.
- * The `--brand` variant failed the same way more quietly, keeping its dark ink and
- * losing its ramp. A skin that overrides a shorthand with a longhand has to take
- * responsibility for the whole property, which is what this does.
+ * *** WHY NOT surface-banner IN LIGHT. *** That token is the SHEET's metric
+ * block-head — css/components/sheet.css reads it in six places — so pointing it
+ * at a light value would repaint every workbook header in the product. The
+ * masthead needed a namespace of its own, which is what masthead-fill is.
  *
- * ONLY THE VARIANTS THAT OWN THEIR INK. The plain `.jrk-topbar` is deliberately
- * untouched — it is inked with `text-primary` by the consumer and a fill under ink
- * you do not own is the mistake this skin records twice already. `--vivid` and
- * `--brand` both carry `gradient.ink`, so re-pointing that one variable re-inks
- * every caption, status, ghost button and search field on the bar with them.
+ * THE INK IS SAFE FOR ALL SIX HAZARD HUES BY DERIVATION, not by luck: every wash
+ * carries accent-wash-text at 11.64:1 or better — yellow 16.09, green 12.09, red
+ * 11.80, purple 11.67, orange and blue 11.64 — which is the same guarantee the
+ * topbar wedge was moved onto and the reason this needed no per-variant work.
+ * Dark is 15.85:1. The FOCUS RING is that same ink rather than accent-solid,
+ * because vivid yellow on a pale yellow wash is the same colour; the base library
+ * reaches the identical answer with gradient.topbar.ring, black in light and
+ * white in dark.
  *
- * BOTH VARIANTS COLLAPSE TO ONE BAND, and that is deliberate rather than lazy.
- * `--vivid` is base's teal -> blue -> violet ribbon, which has no relationship to
- * a steel-and-yellow palette; under this skin the masthead is the masthead.
+ * *** AND NOW THE HAIRLINE IS LOAD-BEARING IN BOTH HALVES, WHICH IS NEW. ***
+ * In DARK the band is the page colour — surface-banner.dark #0d0f10 is the last
+ * stop of this skin's page ramp verbatim, 1.000:1 against it — and in LIGHT the
+ * wash separates from the page BY CHROMA AND NOT BY LUMINANCE: 1.05 / 1.02 / 1.11
+ * against the ramp's three stops for yellow, 1.20-1.45 for the other five. So
+ * there is no theme in which the fill step bounds this bar. It is bounded by
+ * border-accent, at 15.06:1 in dark and 2.98:1 on the yellow wash in light
+ * (2.18-3.96 across the hues).
  *
- * THE WEDGE SURVIVES BUT CHANGES COLOUR, and the reason is the mirror of the one
- * the rule above gives. There the bar is inked near-BLACK, so the wedge had to be
- * a pale wash. Here the bar is inked near-WHITE (`text-on-banner`), so a pale
- * yellow wedge would put #e9ecec on #fff59a — 1.06:1, i.e. invisible — right
- * where the sign-out control sits. `surface-banner-deep` instead: the same
- * geometry read as a machined facet rather than a colour, carrying the ink at
- * 16.17:1 light and 15.85:1 dark and the muted ink at 8.63:1 / 8.38:1, so the
- * trailing 6% needs no layout guarantee of any kind. The
- * brand colour comes back as the hairline below, which is 3px of ink-free rule.
- *
- * *** IN DARK THIS BAND IS THE PAGE COLOUR AND THE YELLOW RULE IS ITS ONLY EDGE.
- * *** surface-banner.dark is #0d0f10, which is the LAST STOP of this skin's page
- * ramp verbatim: 1.000:1 against it, 1.031:1 and 1.077:1 against the other two.
- * The bar does not bound itself in dark by any margin worth the word. It is
- * bounded, at 15.06:1, by one pixel of border-accent.
- *
- * Light is the opposite extreme — 16.91:1 / 15.73:1 / 14.46:1 against the same
- * three stops — which is exactly what makes this easy to get wrong: in a
- * light-mode screenshot the hairline is plainly redundant, because the fill step
- * is already 17:1. It is not redundant. It is the whole boundary in the other
- * theme. Same shape as the base library's own `--brand` hairline note, which
- * keeps a rule in both themes for a reason that only holds in one of them.
+ * That is a REVERSAL of what this comment said a day ago, when the light band was
+ * charcoal and the note read "light is the opposite extreme, 16.91:1, and the
+ * hairline is plainly redundant there". It was true of a dark band on a light
+ * page and it is false now. A yellow that is nearly the luminance of near-white
+ * is this skin's oldest finding — the accent is 1.18:1 on its own light panel —
+ * and this is the third place it has surfaced.
  *
  * EVERY FIGURE HERE IS HAND-MEASURED. `validate` does not reach a fill stated in
  * a gradient, and `validate:skin` measures inks against the page and the panel,
@@ -576,17 +559,17 @@
 :root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand {
   /* Longhand, not the shorthand, so the wedge below composes onto this fill
      instead of the two fighting for one property. */
-  background-color: var(--jrk-surface-banner);
+  background-color: var(--jrk-masthead-fill);
   background-image: linear-gradient(
     calc(90deg + var(--jrk-wedge-angle)),
     transparent 0 94%,
-    var(--jrk-surface-banner-deep) 94% 100%
+    var(--jrk-masthead-facet) 94% 100%
   );
-  color: var(--jrk-text-on-banner);
+  color: var(--jrk-masthead-ink);
 
   /* THE ONE VARIABLE THAT RE-INKS THE WHOLE BAR. Base points every interior
      element at gradient.ink; nothing below needs restating. */
-  --jrk-gradient-ink: var(--jrk-text-on-banner);
+  --jrk-gradient-ink: var(--jrk-masthead-ink);
 
   /* The ring is the brand yellow here rather than the ink: accent-solid is
      14.10:1 on this band in light and 15.06:1 in dark, beside text-on-banner's
@@ -594,7 +577,7 @@
      yellow on the bar. This is the one place in the skin where the accent can be
      a signifier on its own, because a charcoal ground is the only ground where a
      saturated yellow has contrast to spend. */
-  --jrk-focus-ring: var(--jrk-accent-solid);
+  --jrk-focus-ring: var(--jrk-masthead-ink);
 
   /* Colour only; the 1px width is untouched, per the house rule. Base zeroes this
      on `--vivid` ("the bar bounds itself") and restores border-subtle on
@@ -699,7 +682,7 @@
   z-index: -1;
   pointer-events: none;
 
-  background-color: var(--jrk-accent-solid);
+  background-color: var(--jrk-masthead-mark);
 
   -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='5' fill-opacity='.32'/%3E%3Crect x='52' y='33' width='8' height='4' fill-opacity='.28'/%3E%3Crect x='130' y='28' width='26' height='4' fill-opacity='.34'/%3E%3Crect x='200' y='34' width='12' height='5' fill-opacity='.30'/%3E%3Crect x='250' y='30' width='6' height='6' fill-opacity='.26'/%3E%3Crect x='96' y='20' width='1.5' height='14' fill-opacity='.28'/%3E%3Crect x='178' y='18' width='1.5' height='18' fill-opacity='.24'/%3E%3Crect x='268' y='22' width='1.5' height='12' fill-opacity='.28'/%3E%3Crect x='74' y='44' width='30' height='2' fill-opacity='.40'/%3E%3Crect x='214' y='48' width='26' height='2' fill-opacity='.42'/%3E%3Crect x='40' y='51' width='14' height='2' fill-opacity='.30'/%3E%3Crect x='160' y='50' width='22' height='2' fill-opacity='.28'/%3E%3Crect x='230' y='52' width='9' height='2' fill-opacity='.34'/%3E%3C/g%3E%3C/svg%3E");
   mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='5' fill-opacity='.32'/%3E%3Crect x='52' y='33' width='8' height='4' fill-opacity='.28'/%3E%3Crect x='130' y='28' width='26' height='4' fill-opacity='.34'/%3E%3Crect x='200' y='34' width='12' height='5' fill-opacity='.30'/%3E%3Crect x='250' y='30' width='6' height='6' fill-opacity='.26'/%3E%3Crect x='96' y='20' width='1.5' height='14' fill-opacity='.28'/%3E%3Crect x='178' y='18' width='1.5' height='18' fill-opacity='.24'/%3E%3Crect x='268' y='22' width='1.5' height='12' fill-opacity='.28'/%3E%3Crect x='74' y='44' width='30' height='2' fill-opacity='.40'/%3E%3Crect x='214' y='48' width='26' height='2' fill-opacity='.42'/%3E%3Crect x='40' y='51' width='14' height='2' fill-opacity='.30'/%3E%3Crect x='160' y='50' width='22' height='2' fill-opacity='.28'/%3E%3Crect x='230' y='52' width='9' height='2' fill-opacity='.34'/%3E%3C/g%3E%3C/svg%3E");

@@ -248,74 +248,57 @@
   border-bottom-color: var(--jrk-border-accent);
 }
 
-/* ── the masthead: the dark band the paragraph above said to build properly ──
+/* ── the masthead: a band that follows the theme ──────────────────────────
  *
- * The note above declines to repaint the DEFAULT bar and gives the reason: its
- * contents are inked with `text-primary` by the consumer, so a dark fill under
- * near-black ink blinds every control in the masthead. It then names the way
- * through — "the base library's --brand and --vivid variants exist precisely
- * because a dark bar needs its own ink namespace". This is that, and nothing
- * about the paragraph above changes: the plain bar is still untouched.
+ * A PALE GOLD WASH IN LIGHT, THE COLD NEAR-BLACK BAND IN DARK. The note above
+ * declines to repaint the DEFAULT bar and gives the reason — its contents are
+ * inked with `text-primary` by the consumer — and then names the way through:
+ * "the base library's --brand and --vivid variants exist precisely because a dark
+ * bar needs its own ink namespace". This is that, and the plain bar is still
+ * untouched.
  *
- * `surface-banner` was derived for this when the skin was built and had no
- * consumer. Its $note: "FLAT, not a ramp: the base masthead's three-stop gradient
- * carries a middle stop that fails and is kept legible by layout, and this skin
- * declines that bargain the way Industry does. Warm in light, cold in dark — the
- * light half's chrome stays dark, which is what keeps the two halves recognisably
- * one skin." So the values are not chosen here; they are finally read.
+ * IT SHIPPED DARK IN BOTH HALVES FOR ONE DAY and was changed by direction. The
+ * token file's own note argued for that — "warm in light, cold in dark, the light
+ * half's chrome stays dark, which is what keeps the two halves recognisably one
+ * skin" — and the instruction overrode it: every other surface here follows the
+ * theme and the masthead was the one that did not. surface-banner still holds
+ * those values and the SHEET still uses them; the masthead simply no longer reads
+ * that token in light.
  *
- * WHAT THE FLAT BAND BUYS is the same thing it buys Industry, and it is worth
- * stating in both places because it is the actual argument for doing this at all:
- * the base ramp's ink is a LAYOUT fact — legible only while `.jrk-spacer` holds
- * the middle empty and the bar stays above ~1200px — and a single flat fill turns
- * it back into a colour fact that holds at every width and in every arrangement.
- * A consumer can put whatever it likes in the middle of this bar.
+ * *** WHY NOT surface-banner IN LIGHT. *** It is the sheet's metric block-head —
+ * css/components/sheet.css reads it in six places — so a light value there would
+ * repaint every workbook header in the product. masthead-fill is the namespace
+ * this needed.
  *
- * `--vivid` collapses into the same band, deliberately: base's teal -> blue ->
- * violet ribbon is three hues this palette does not contain.
+ * NOTHING WAS HAND-PICKED. Light is `accent-wash` with `accent-wash-text` on it
+ * at 13.46:1, both already derived by this skin; dark is unchanged at 15.39:1.
+ * The FOCUS RING is that ink rather than accent-solid, which matters more here
+ * than under Industry: the gold is 1.94:1 on this skin's own light plate and no
+ * better on its pale wash, so it cannot be an indicator on a light band at all.
  *
- * THE GOLD RULE UNDER THE BAR IS THE WHOLE MARK. It is already there from the
- * rule above — this only has to stop the base library taking it away, which
- * `--vivid` does unconditionally (`border-bottom-color: transparent`, on the
- * grounds that a saturated ribbon bounds itself) and `--brand` re-points to
- * `border-subtle`. On a near-black band over vellum the hairline is not a
- * boundary, it is the skin's signature, and it is the one place gold sits with no
- * ink anywhere near it.
- *
- * *** IN DARK THIS BAND IS THE PAGE COLOUR AND THE GOLD RULE IS ITS ONLY EDGE. ***
- * surface-banner.dark is #0b0f14, which is the FIRST STOP of this skin's page
- * ramp verbatim — so at the top of the document, where the bar actually sits, the
- * step is 1.000:1, and 1.046:1 / 1.033:1 against the ramp's other two stops. The
- * bar does not bound itself in dark by any margin at all. It is bounded, at
- * 9.23:1, by one pixel of gold.
- *
- * That is a deliberate value rather than an oversight — the token's own note
- * chooses "cold in dark" to keep the two halves one skin — and it is the same
- * shape the base library already ships and documents on `--brand`, where
- * gradient.barDeep is surface.canvas in dark and the hairline is what makes it "a
- * bar dissolving into the page" instead of nothing. Light is the opposite
- * extreme: 14.65:1 / 13.60:1 / 12.25:1 against the same three stops.
- *
- * SO THE HAIRLINE ON THIS RULE IS STRUCTURE, NOT THE SKIN'S SIGNATURE, and the
- * two readings want opposite things from a tidy-up. Delete it as decoration —
- * which is exactly what it looks like in a light-mode screenshot, where the fill
- * step is already 14:1 — and the dark masthead ceases to exist as an object.
+ * *** THE GOLD HAIRLINE IS NOW THE BOUNDARY IN BOTH HALVES. *** In dark the band
+ * is the page's first stop verbatim (1.000:1) and in light the wash separates
+ * from the page BY CHROMA — 1.07 / 1.01 / 1.12 against the ramp's three stops —
+ * so there is no theme in which the fill step bounds this bar. It is bounded by
+ * border-accent at 9.23:1 dark and 3.12:1 light. The previous version of this
+ * comment said light was "the opposite extreme, 14.65:1", which was true of a
+ * dark band on vellum and is false of a pale one.
  *
  * HAND-MEASURED, all of it, because nothing gates a banner: `validate:skin` walks
  * this skin's page gradient and its plate, and this is neither. */
 :root[data-skin='midgard'] .jrk-topbar--vivid,
 :root[data-skin='midgard'] .jrk-topbar--vivid.jrk-topbar--brand {
-  background-color: var(--jrk-surface-banner);
+  background-color: var(--jrk-masthead-fill);
   /* Base sets the ramp through the `background` shorthand, so the image half has
      to be cleared explicitly or the gradient survives on top of this fill. */
   background-image: none;
-  color: var(--jrk-text-on-banner);
+  color: var(--jrk-masthead-ink);
 
   /* One variable re-inks the bar's whole interior — captions, statuses, ghost
      buttons, the search field. text-on-banner is 15.00:1 on the light band and
      15.39:1 on the dark one; text-on-banner-muted, which carries the account name
      and the sync caption, is 7.69:1 and 8.58:1. */
-  --jrk-gradient-ink: var(--jrk-text-on-banner);
+  --jrk-gradient-ink: var(--jrk-masthead-ink);
 
   /* The gold IS the focus ring here, where the base bar uses black-or-white.
      accent-solid measures 8.51:1 on the light band and 9.23:1 on the dark one —
@@ -327,7 +310,7 @@
      stepped away from it everywhere else and why the skin's focus ring is
      two-tone. A near-black band is the exception, and it is an exception because
      of the ground, not because the rule was relaxed. */
-  --jrk-focus-ring: var(--jrk-accent-solid);
+  --jrk-focus-ring: var(--jrk-masthead-ink);
 
   /* Colour only, 1px untouched. This is the declaration that stops `--vivid`
      zeroing the hairline and `--brand` neutralising it to border-subtle. */
@@ -444,8 +427,8 @@
   background-image: linear-gradient(
     90deg,
     transparent 0%,
-    color-mix(in srgb, var(--jrk-accent-solid) var(--jrk-node-glow), transparent) 24%,
-    color-mix(in srgb, var(--jrk-accent-solid) var(--jrk-node-glow), transparent) 76%,
+    color-mix(in srgb, var(--jrk-masthead-mark) var(--jrk-node-glow), transparent) 24%,
+    color-mix(in srgb, var(--jrk-masthead-mark) var(--jrk-node-glow), transparent) 76%,
     transparent 100%
   );
 

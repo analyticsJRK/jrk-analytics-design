@@ -363,6 +363,21 @@
       "light": "20%",
       "dark": "38%",
       "$note": "A MAGNITUDE, not a colour — the percentage of accent-solid the masthead's node network is mixed at, which is why it can live here without being a hand-picked value. It is per-theme because the glow IS the dark half: at 38% a trace's core is 2.26:1 off the dark band and reads as lit, and at 20% in light it is 1.49:1 and reads as engraved. The mask carries the falloff as alpha (a 7px stroke at .26 behind a 1.6px stroke at 1), so this single figure sets both layers — the halo lands near 11% in dark and 6% in light. CEILING 53%: the band's own ink crosses 4.5:1 there, and the whole point of a flat masthead is that nothing on it is a layout condition. At the shipped values text-on-banner is 6.80:1 dark and 10.05:1 light on the brightest pixel of a trace."
+    },
+    "masthead-fill": {
+      "light": "var(--jrk-accent-wash)",
+      "dark": "var(--jrk-surface-banner)",
+      "$note": "THE MASTHEAD FOLLOWS THE THEME as of 2026-08-24: a pale band in light, the dark banner in dark. It is stated as var() indirection rather than as literal hexes so that it cannot drift from the values it is derived from — and, under industry, so that data-hazard re-hues the masthead for free. NOT surface-banner in light: that token is the SHEET's metric block-head and a light banner there would repaint every workbook header. accent-wash carries accent-wash-text at 13.46:1. *** LIKE INDUSTRY'S, THIS BAND SEPARATES FROM THE PAGE BY CHROMA IN LIGHT — 1.07/1.01/1.12 against the page ramp — so the gold hairline is the boundary in BOTH halves now, not only in dark."
+    },
+    "masthead-ink": {
+      "light": "var(--jrk-accent-wash-text)",
+      "dark": "var(--jrk-text-on-banner)",
+      "$note": "13.46:1 on the light band, 15.39:1 on the dark one, and the focus ring as well — accent-solid is 1.94:1 on this skin's own pale gold and could not be an indicator there."
+    },
+    "masthead-mark": {
+      "light": "var(--jrk-border-accent)",
+      "dark": "var(--jrk-accent-solid)",
+      "$note": "The node network's colour. The gold is 1.94:1 on this skin's light plate and no better on its pale wash, so light takes the stepped border-accent (#9a7b14, 3.12:1 on the band). The ink holds 4.5:1 up to a 96% mark there against a shipped 38%."
     }
   }
 }
