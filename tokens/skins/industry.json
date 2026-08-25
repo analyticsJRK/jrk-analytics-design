@@ -9,6 +9,11 @@
     "$chartNote": "The skin does NOT override one chart slot and that is a measured decision, not an omission. Its light panel (#f4f6f6) is darker than the base card (#ffffff), so every light mark loses about 8% contrast — slot 1 goes 4.02 to 3.70, slot 5 4.13 to 3.81, slot 6 3.65 to 3.36. No slot crosses the 3:1 mark floor and reliefRequired.light is unchanged, so the CVD-derived palette carries over intact. Dark IMPROVES slightly (#1e2224 is darker than #232326). What DID have to move is chart.chrome.surface: it is stroked as the ring around a dot, so leaving it at the base card would have painted a white ring on a #f4f6f6 panel — the same defect this library already recorded when that token sat at a stale #1c1c1e."
   },
   "stamp": "industry",
+  "variantAxis": {
+    "attr": "hazard",
+    "default": "yellow",
+    "$note": "THE ATTRIBUTE, DECLARED RATHER THAN ASSUMED. It was hardcoded in build-tokens.mjs until 2026-08-25, when vitrine gained a colour choice of its own and `hazard` stopped being the right word for every skin: this skin's hue is a hazard SIGNAL, vitrine's is a MATERIAL, and they stamp data-hazard and data-tint respectively. Nothing about this skin changed — the emitted selectors are byte-identical — but the name is now a fact in the token file instead of an assumption in the generator. `default` is yellow, and yellow is the ABSENCE of the attribute rather than a value of it."
+  },
   "$varsNote": "Keyed by the CSS variable name WITHOUT the --jrk- prefix, deliberately. The generator's own naming is namespace-specific (color.text.onBanner -> text-on-banner, font.family.sans -> font-sans, chart.chrome.surface -> chart-surface), so a mirror of tokens.json's tree would need a second, divergent mapping table. Instead the build ASSERTS that every name here already exists in the base layer; a typo or a renamed base token fails `npm run build` instead of emitting a colour nothing reads. Skin-only names go in `skinOnly`, which is exempt from that assertion and is the only way to add one.",
   "vars": {
     "surface-canvas": {
@@ -366,22 +371,22 @@
       "$note": "THE ILLUMINATION AT THE WIPE'S LEADING EDGE — the bloom that travels with the reveal on .jrk-hovercard--materialize, so the panel reads as loading in rather than being uncovered. Transient decoration, drawn as a gradient on a pseudo-element, so hand-recorded: nothing measures a colour inside a gradient.\n\nDARK IS THE EFFECT AND LIGHT IS A SUBSTITUTE, because YOU CANNOT ILLUMINATE WHITE. The hovercard's panel is surface-raised, which in light is #ffffff — pure white, and deliberately so; its own note explains that it is the one place this palette uses pure white, to lift a popover off the #f4f6f6 card. A white glow there measures 1.00:1. Not faint: absent. There is no brighter-than-white to bloom toward, so no re-stepping fixes it and the request cannot be met literally in that half.\n\nSO LIGHT TAKES THE BRAND YELLOW AT 1.28:1, WHICH IS A CHROMA-ONLY SIGNAL, and it is only defensible because the effect is REDUNDANTLY ENCODED. The same edge also carries the hard scanline bar in border-accent, which is 3.33:1 on this panel and therefore visible in greyscale, to a monochromat and in print. The bloom is the colour half of a two-channel signal, not the signal. If the bar is ever dropped, the light half of this glow becomes decoration nobody can see and should be dropped with it.\n\nDark takes the real thing: #ffffff at 13.52:1 on the #2b2f31 panel. No contrast floor applies to either — this is never a ground for ink and it is gone in about 320ms — so the figures above are visibility, not safety."
     },
     "surface-canvas-stripe": {
-      "light": "#ffe500",
+      "light": "#fff59a",
       "dark": "#4a4300",
-      "$note": "THE STRIPE — ONE near-vertical band cut across the whole viewport, with a three-step darkening face along its trailing edge so it reads as an extruded bar. Four bands in one gradient. Decoration. Hand-recorded, because nothing measures a colour inside a gradient.\n\nIT TRACKS THE HAZARD HUE, so all four bands are declared in every variant. The default (the ABSENCE of data-hazard) is yellow.\n\nLIGHT BAND 1 IS THE VIVID accent-solid AND DARK BAND 1 IS THE DEEP accent-wash — the per-half asymmetry this skin uses everywhere, and each half is pinned by a different ink. Light was DIRECTED to the vivid fill on 2026-08-20 so the stripe matches the hue swatch in the gallery picker. Dark stays on the deep wash because dark page ink is near-white and a vivid fill cannot carry it: #e6eaea on #ffe500 is 1.05:1, i.e. invisible, and the dark plate wants a deep tone regardless.\n\n*** THE LIGHT HALF OF red, purple AND blue CANNOT BE CROSSED BY PAGE TEXT, AND NO GATE SEES IT. *** Light page ink is near-black and cannot be switched. Those three hues take WHITE ink and no step of them takes black, so near-black on the vivid fill is 3.88:1 (red), 2.95:1 (purple), 3.92:1 (blue) — and because the face steps DARKEN, the whole light ramp is worse still: worst band 1.93:1, 1.62:1, 1.96:1. There is no re-stepping that fixes this; it is what the hue IS. What ships is therefore a LAYOUT CONDITION of the .jrk-topbar--brand kind, and it is the second one in this library: with data-hazard='red', 'purple' or 'blue' in LIGHT, no page-level text may cross the stripe. stripe-from and stripe-to are the tokens that move it. This was measured and declined once, when the bands were derived from accent-wash instead (every wash carries near-black at >= 11.6:1, which made one uniform rule possible); the vivid fill was then directed, and the trade is deliberate.\n\nTHE OTHER THREE HUES ARE CLEAN AND DERIVED: light steps walk down from the vivid fill and STOP at the deepest step still clearing 4.5:1 on text-primary — yellow worst 4.50:1, orange 4.58:1, green 4.59:1. NOTE GREEN'S EXTRUDE BARELY READS: its vivid fill is only 6.19:1 on near-black to begin with, so the legal darkening range is #09ae5c to #08944e and the three steps are nearly the same colour. That is the cost of pinning band 1 to the vivid value — the ramp's LENGTH is whatever the ink floor leaves, and for a hue that starts near the floor it leaves almost nothing. Dark has room in every hue (worst 4.71:1, green) because darkening away from near-white ink only ever helps.\n\nSECONDARY AND MUTED do not survive the deep steps in either half. ONLY text-primary is safe anywhere on the assembly, and on the three hues above not even that, in light.\n\nVISIBILITY: light band 1 is 1.03:1 off the page for yellow — it separates by CHROMA ALONE and is invisible in greyscale and in print, the same finding as accent-solid at 1.18:1 on the panel — and 2.02:1 to 4.90:1 for the other five, which is the one thing the vivid fill genuinely buys. Suppressed in @media print.\n\nIT TOOK FIVE SHAPES. Two corner wedges, whose edge angles came from their own box aspects and so were not parallel; a half-plane, which read as a slab rather than a mark; a band with one opaque face; a wash-derived four-band ramp; then this. The angle is stated ONCE in stripe-angle."
+      "$note": "THE STRIPE — ONE near-vertical band cut across the whole viewport, with a three-step darkening face along its trailing edge so it reads as an extruded bar. Four bands in one gradient. Decoration. Hand-recorded, because nothing measures a colour inside a gradient.\n\nIT TRACKS THE HAZARD HUE, so all four bands are declared in every variant. The default (the ABSENCE of data-hazard) is yellow.\n\nBOTH HALVES DERIVE FROM accent-wash, AND THAT IS THE FIRST TIME THIS TOKEN HAS HAD ONE RULE RATHER THAN TWO. Light band 1 is the light wash, dark band 1 the dark wash, and each face step is the band before it scaled by 0.88 per sRGB channel. The vivid accent-solid was DIRECTED into the light half on 2026-08-20, so the stripe would match the hue swatch in the gallery picker, and SOFTENED BACK OUT on 2026-08-25, also by direction: the light stripe was to read as quietly as the dark one already does. Dark did not move and never could — dark page ink is near-white and a vivid fill cannot carry it (#e6eaea on #ffe500 is 1.05:1).\n\n*** THE LAYOUT CONDITION IS GONE, AND IT IS WHAT THE SOFTENING BOUGHT. *** With the vivid fill, red, purple and blue in LIGHT could not be crossed by page text at all — near-black measured 3.88:1 / 2.95:1 / 3.92:1 on the fill and 1.93:1 / 1.62:1 / 1.96:1 on the deepest face, so what shipped was a promise about layout of the .jrk-topbar--brand kind, and nothing gated it. Every wash carries near-black at 11.6:1 or better BY DERIVATION, so the wash-derived ramp clears text-primary on every band of every hue in both halves: worst 5.46:1 (purple band 4), and per hue, band 1 to band 4 — yellow 16.09 / 12.29 / 9.43 / 7.31, orange 11.64 / 8.94 / 6.95 / 5.48, red 11.80 / 9.07 / 7.06 / 5.52, purple 11.67 / 8.97 / 6.98 / 5.46, blue 11.64 / 8.98 / 6.93 / 5.47, green 12.09 / 9.31 / 7.22 / 5.63. This library has ONE layout-dependent contrast fact again, the base topbar brand ramp, and this is no longer it.\n\nTHE RAMP LENGTH IS CHOSEN RATHER THAN LEFT OVER, which is the second thing the wash bought. Pinning band 1 to the vivid fill made the extrude as long as the gap between that fill and the ink floor, so GREEN’S EXTRUDE BARELY READ — its fill is only 6.19:1 on near-black to begin with, the legal range was #09ae5c to #08944e, and the three steps were nearly one colour. A wash starts far from the floor, so the 0.88 walk is a free choice: separations run 1.27:1 to 1.31:1 in light against the dark half’s 1.13:1 to 1.51:1, in every hue, and the extrusion reads without the ramp having to reach for anything.\n\nSECONDARY AND MUTED still do not survive the deep steps in either half — secondary is 3.02:1 to 4.04:1 on band 4. ONLY text-primary is safe anywhere on the assembly; what changed is that it is now safe on ALL of it, for all six hues, in both halves.\n\nVISIBILITY IS THE PRICE AND IT IS ALSO THE POINT. Light band 1 is 1.12:1 / 1.06:1 / 1.11:1 off the page ramp’s three stops for yellow and 1.20:1 to 1.55:1 for the other five, against 1.03:1 and 2.02:1 to 4.90:1 before — so every hue now separates from the page largely by CHROMA, and the light assembly is invisible in greyscale and in print. Same finding as accent-solid at 1.18:1 on the panel and masthead-fill at 1.02:1 to 1.11:1 on the page: under this skin a QUIET light mark is a chroma mark, because there is no luminance room between a pale hue and a near-white page. Suppressed in @media print either way. If a hue ever has to read in greyscale again, band 1 goes back to the vivid fill and the layout condition comes back with it — those are one decision, not two.\n\nIT TOOK SIX SHAPES. Two corner wedges, whose edge angles came from their own box aspects and so were not parallel; a half-plane, which read as a slab rather than a mark; a band with one opaque face; a wash-derived four-band ramp; a vivid-derived one; and the wash again, gently stepped. The angle is stated ONCE in stripe-angle."
     },
     "surface-canvas-stripe-shade-1": {
-      "light": "#dac300",
+      "light": "#e0d888",
       "dark": "#373200",
       "$note": "THE FIRST STEP OF THE SHADED FACE. Three opaque steps, each darker than the last, replace what would otherwise be a drop shadow. A TRANSLUCENT SHADOW IS UNAVAILABLE AND BOTH HALVES SAY SO SEPARATELY: in dark, black over this page at alpha 0.20 measures 1.020:1 against the page's dark end, so it is invisible at any usable alpha — the base library's shadow.card-in-dark finding, this skin's own clip-path finding and midgard's inset bevel arriving at one conclusion by three routes, that on a dark ground elevation is a FILL. In light a shadow is legal in isolation (alpha 0.10 leaves text-muted at 4.64:1) but not on these pixels, because surface-canvas-grid already spends 0.10 of a 0.115 ceiling there and the alphas ADD — the trap the complementary masks on the wave and the dot ground exist to avoid. Opaque steps spend none of that budget. Derivation, per-hue values and the safe-ink rule are on surface-canvas-stripe."
     },
     "surface-canvas-stripe-shade-2": {
-      "light": "#b4a200",
+      "light": "#c5be77",
       "dark": "#282400",
       "$note": "A DEEPER STEP OF THE SHADED FACE. See surface-canvas-stripe-shade-1 for why the face is opaque steps rather than a shadow, and surface-canvas-stripe for the derivation and the safe-ink rule. This step carries text-primary in both halves for all six hues and does NOT carry secondary or muted."
     },
     "surface-canvas-stripe-shade-3": {
-      "light": "#8f8000",
+      "light": "#aea769",
       "dark": "#1c1900",
       "$note": "A DEEPER STEP OF THE SHADED FACE. See surface-canvas-stripe-shade-1 for why the face is opaque steps rather than a shadow, and surface-canvas-stripe for the derivation and the safe-ink rule. This step carries text-primary in both halves for all six hues and does NOT carry secondary or muted."
     },
@@ -414,7 +419,12 @@
     "masthead-brand-fill": {
       "light": "var(--jrk-surface-default)",
       "dark": "var(--jrk-surface-banner)",
-      "$note": "THE BRAND MASTHEAD IS WHITE IN LIGHT, where --vivid keeps the pale wash (masthead-fill). Directed 2026-08-24, and the split is what earns both: --vivid is a quiet tinted band, --brand is a white plate carrying bold hazard marks. Dark is the same charcoal banner for both. White is stated as surface-default rather than as a literal so it tracks the skin's own panel. WHAT IT BUYS is the mark budget: near-black ink is 17.99:1 on white against 16.09:1 on the yellow wash, and — far more importantly — the marks may run FULL vivid accent-solid instead of the stepped border-accent, because ink crossing a mark is measured against the MARK, not the band. Ceilings across the six hazard hues: yellow, orange and green take 100%, blue 90%, red 85%, purple 75%. So 75% is the number to respect, against 42% before."
+      "$note": "THE BRAND MASTHEAD IS WHITE IN LIGHT, where --vivid keeps the pale wash (masthead-fill). Directed 2026-08-24, and the split is what earns both: --vivid is a quiet tinted band, --brand is a white plate carrying bold hazard marks. Dark is the same charcoal banner for both. White is stated as surface-default rather than as a literal so it tracks the skin's own panel. WHAT IT BUYS is the mark budget: near-black ink is 17.99:1 on white against 16.09:1 on the yellow wash, and — far more importantly — the marks may run FULL vivid accent-solid instead of the stepped border-accent, because ink crossing a mark is measured against the MARK, not the band. Ceilings across the six hazard hues: yellow, orange and green take 100%, blue 90%, red 85%, purple 75%. So 75% is the number to respect, against 42% before. *** THE MARKS NO LONGER SPEND THAT BUDGET IN LIGHT. *** masthead-mark-strength halves them there as of 2026-08-25, by direction, so the ceilings above are headroom rather than a description of what ships — see that token. What white still buys is the OPTION: on the yellow wash the marks could not have run at full accent-solid at all, and on white they can, so the strength is a knob rather than a limit."
+    },
+    "masthead-mark-strength": {
+      "light": "0.5",
+      "dark": "1",
+      "$note": "THE STRENGTH OF THE GLITCH FURNITURE, applied as `opacity` on the ::after that carries it — ONE value scaling the whole mask, which is the only way to move one half without restating thirteen fill-opacities per theme: the mask is a single data URI and both themes read it.\n\nDARK IS 1 AND IS THE REFERENCE. On the charcoal band the marks composite to #736909 through #cfba03, 3.43:1 to 9.77:1, and read as dim technical noise.\n\nLIGHT WAS HALVED ON 2026-08-25, BY DIRECTION — the marks were to read as softly as the dark ones do. THE MEASUREMENT TO CARRY IS WHY THEY DID NOT ALREADY: the light band is white (masthead-brand-fill), so the marks were 1.13:1 to 1.23:1 in luminance — quieter than the dark half by a factor of eight — and still the loudest thing on the bar, because what a saturated yellow does against pure white is a CHROMA jump and no contrast ratio sees it. Softening this half therefore means spending ALPHA, not lightness: at 0.5 the strongest yellow mark composites to #fff599 (1.12:1) and the character goes from highlighter to whisper. Across the six hazard hues the light marks now land at 1.06:1 to 1.99:1 on the white plate, against 1.13:1 to 4.33:1 before.\n\nGOING DOWN IS FREE AND GOING UP IS NOT. Every figure on masthead-brand-fill is an upper bound (yellow, orange and green 100%, blue 90%, red 85%, purple 75%), so a lower strength only relaxes them; anything above 1 in either half needs the whole mark budget re-derived."
     }
   },
   "variants": {
@@ -435,7 +445,7 @@
         "border.accent": "3.10:1 light, 6.37:1 dark",
         "wash carries muted ink": "4.57:1 light, 5.17:1 dark (dark ink is text.primary, not muted)",
         "focus ring best band": "16.59:1 light, 6.37:1 dark",
-        "stripe assembly": "light #ff8000 / #ed7700 / #db6e00 / #c96500 from this hue's vivid accent-solid; dark #8f5112 / #6a3c0d / #4d2c0a / #361f07 from its accent-wash. Every band clears text-primary in both halves; secondary and muted do not survive the deep steps."
+        "stripe assembly": "light #f8c794 / #daaf82 / #c09a73 / #a98865 from this hue's accent-wash, each face step the band before it scaled by 0.88; dark #8f5112 / #6a3c0d / #4d2c0a / #361f07 from the dark wash the same way. Text-primary clears every band in both halves — light 11.64 / 8.94 / 6.95 / 5.48 — so this variant carries NO layout condition, where the vivid-derived light ramp it replaced on 2026-08-25 did. Secondary and muted still do not survive the deep steps. Band 1 is 1.55 / 1.47 / 1.24 off the page ramp's three stops, i.e. quiet by design. See surface-canvas-stripe."
       },
       "vars": {
         "accent-solid": {
@@ -495,19 +505,19 @@
           "dark": "0 0 0 2px #ff8000, 0 0 0 4px #14171a"
         },
         "surface-canvas-stripe": {
-          "light": "#ff8000",
+          "light": "#f8c794",
           "dark": "#8f5112"
         },
         "surface-canvas-stripe-shade-1": {
-          "light": "#ed7700",
+          "light": "#daaf82",
           "dark": "#6a3c0d"
         },
         "surface-canvas-stripe-shade-2": {
-          "light": "#db6e00",
+          "light": "#c09a73",
           "dark": "#4d2c0a"
         },
         "surface-canvas-stripe-shade-3": {
-          "light": "#c96500",
+          "light": "#a98865",
           "dark": "#361f07"
         }
       }
@@ -523,7 +533,7 @@
         "border.accent": "4.27:1 light, 3.60:1 dark",
         "wash carries muted ink": "4.63:1 light, 7.90:1 dark (dark ink is text.primary, not muted)",
         "focus ring best band": "16.59:1 light, 3.46:1 dark",
-        "stripe assembly": "light #e32416 / #c61f13 / #a91b10 / #8d160e from this hue's vivid accent-solid; dark #81231d / #5f1a15 / #461310 / #310d0b from its accent-wash. *** LIGHT IS UNSAFE FOR PAGE TEXT: near-black clears none of these bands (worst 1.93:1), because this hue takes white ink and the face steps darken. No page-level text may cross the stripe with this variant in light. Dark is clean. See surface-canvas-stripe."
+        "stripe assembly": "light #f0c8c5 / #d3b0ad / #ba9b99 / #a48886 from this hue's accent-wash, each face step the band before it scaled by 0.88; dark #81231d / #5f1a15 / #461310 / #310d0b from the dark wash the same way. Text-primary clears every band in both halves — light 11.80 / 9.07 / 7.06 / 5.52 — so this variant carries NO layout condition, where the vivid-derived light ramp it replaced on 2026-08-25 did. Secondary and muted still do not survive the deep steps. Band 1 is 1.52 / 1.45 / 1.23 off the page ramp's three stops, i.e. quiet by design. See surface-canvas-stripe."
       },
       "$acknowledgedStatusCollisions": [
         "status.critical.solid dE 4.6 (protanopia)",
@@ -589,19 +599,19 @@
           "dark": "0 0 0 2px #e32416, 0 0 0 4px #14171a"
         },
         "surface-canvas-stripe": {
-          "light": "#e32416",
+          "light": "#f0c8c5",
           "dark": "#81231d"
         },
         "surface-canvas-stripe-shade-1": {
-          "light": "#c61f13",
+          "light": "#d3b0ad",
           "dark": "#5f1a15"
         },
         "surface-canvas-stripe-shade-2": {
-          "light": "#a91b10",
+          "light": "#ba9b99",
           "dark": "#461310"
         },
         "surface-canvas-stripe-shade-3": {
-          "light": "#8d160e",
+          "light": "#a48886",
           "dark": "#310d0b"
         }
       },
@@ -618,7 +628,7 @@
         "border.accent": "5.62:1 light, 3.09:1 dark",
         "wash carries muted ink": "4.58:1 light, 7.99:1 dark (dark ink is text.primary, not muted)",
         "focus ring best band": "16.59:1 light, 3.09:1 dark",
-        "stripe assembly": "light #8f24db / #7d1fbf / #6b1ba4 / #591688 from this hue's vivid accent-solid; dark #5c2e82 / #442260 / #321946 / #231131 from its accent-wash. *** LIGHT IS UNSAFE FOR PAGE TEXT: near-black clears none of these bands (worst 1.62:1), because this hue takes white ink and the face steps darken. No page-level text may cross the stripe with this variant in light. Dark is clean. See surface-canvas-stripe."
+        "stripe assembly": "light #dec8f0 / #c3b0d3 / #ac9bba / #9788a4 from this hue's accent-wash, each face step the band before it scaled by 0.88; dark #5c2e82 / #442260 / #321946 / #231131 from the dark wash the same way. Text-primary clears every band in both halves — light 11.67 / 8.97 / 6.98 / 5.46 — so this variant carries NO layout condition, where the vivid-derived light ramp it replaced on 2026-08-25 did. Secondary and muted still do not survive the deep steps. Band 1 is 1.54 / 1.46 / 1.24 off the page ramp's three stops, i.e. quiet by design. See surface-canvas-stripe."
       },
       "vars": {
         "accent-solid": {
@@ -678,19 +688,19 @@
           "dark": "0 0 0 2px #9a3adf, 0 0 0 4px #14171a"
         },
         "surface-canvas-stripe": {
-          "light": "#8f24db",
+          "light": "#dec8f0",
           "dark": "#5c2e82"
         },
         "surface-canvas-stripe-shade-1": {
-          "light": "#7d1fbf",
+          "light": "#c3b0d3",
           "dark": "#442260"
         },
         "surface-canvas-stripe-shade-2": {
-          "light": "#6b1ba4",
+          "light": "#ac9bba",
           "dark": "#321946"
         },
         "surface-canvas-stripe-shade-3": {
-          "light": "#591688",
+          "light": "#9788a4",
           "dark": "#231131"
         }
       }
@@ -706,7 +716,7 @@
         "border.accent": "4.23:1 light, 3.88:1 dark",
         "wash carries muted ink": "4.57:1 light, 7.40:1 dark (dark ink is text.primary, not muted)",
         "focus ring best band": "16.59:1 light, 3.49:1 dark",
-        "stripe assembly": "light #0070f0 / #0062d2 / #0054b3 / #004595 from this hue's vivid accent-solid; dark #0f498a / #0b3666 / #08274b / #061c34 from its accent-wash. *** LIGHT IS UNSAFE FOR PAGE TEXT: near-black clears none of these bands (worst 1.96:1), because this hue takes white ink and the face steps darken. No page-level text may cross the stripe with this variant in light. Dark is clean. See surface-canvas-stripe."
+        "stripe assembly": "light #b5d3f4 / #9fbad7 / #8ca3bd / #7b90a6 from this hue's accent-wash, each face step the band before it scaled by 0.88; dark #0f498a / #0b3666 / #08274b / #061c34 from the dark wash the same way. Text-primary clears every band in both halves — light 11.64 / 8.98 / 6.93 / 5.47 — so this variant carries NO layout condition, where the vivid-derived light ramp it replaced on 2026-08-25 did. Secondary and muted still do not survive the deep steps. Band 1 is 1.55 / 1.47 / 1.24 off the page ramp's three stops, i.e. quiet by design. See surface-canvas-stripe."
       },
       "vars": {
         "accent-solid": {
@@ -766,19 +776,19 @@
           "dark": "0 0 0 2px #0070f0, 0 0 0 4px #14171a"
         },
         "surface-canvas-stripe": {
-          "light": "#0070f0",
+          "light": "#b5d3f4",
           "dark": "#0f498a"
         },
         "surface-canvas-stripe-shade-1": {
-          "light": "#0062d2",
+          "light": "#9fbad7",
           "dark": "#0b3666"
         },
         "surface-canvas-stripe-shade-2": {
-          "light": "#0054b3",
+          "light": "#8ca3bd",
           "dark": "#08274b"
         },
         "surface-canvas-stripe-shade-3": {
-          "light": "#004595",
+          "light": "#7b90a6",
           "dark": "#061c34"
         }
       }
@@ -794,7 +804,7 @@
         "border.accent": "3.14:1 light, 10.71:1 dark",
         "wash carries muted ink": "5.24:1 light, 4.71:1 dark (dark ink is text.primary, not muted)",
         "focus ring best band": "16.59:1 light, 10.71:1 dark",
-        "stripe assembly": "light #09ae5c / #09a557 / #089d53 / #08944e from this hue's vivid accent-solid; dark #177549 / #115736 / #0c3f27 / #092c1c from its accent-wash. Every band clears text-primary in both halves; secondary and muted do not survive the deep steps."
+        "stripe assembly": "light #95e4bd / #83c9a6 / #73b192 / #669b81 from this hue's accent-wash, each face step the band before it scaled by 0.88; dark #177549 / #115736 / #0c3f27 / #092c1c from the dark wash the same way. Text-primary clears every band in both halves — light 12.09 / 9.31 / 7.22 / 5.63 — so this variant carries NO layout condition, where the vivid-derived light ramp it replaced on 2026-08-25 did. Secondary and muted still do not survive the deep steps. Band 1 is 1.49 / 1.41 / 1.20 off the page ramp's three stops, i.e. quiet by design. See surface-canvas-stripe."
       },
       "vars": {
         "accent-solid": {
@@ -854,19 +864,19 @@
           "dark": "0 0 0 2px #0df280, 0 0 0 4px #14171a"
         },
         "surface-canvas-stripe": {
-          "light": "#09ae5c",
+          "light": "#95e4bd",
           "dark": "#177549"
         },
         "surface-canvas-stripe-shade-1": {
-          "light": "#09a557",
+          "light": "#83c9a6",
           "dark": "#115736"
         },
         "surface-canvas-stripe-shade-2": {
-          "light": "#089d53",
+          "light": "#73b192",
           "dark": "#0c3f27"
         },
         "surface-canvas-stripe-shade-3": {
-          "light": "#08944e",
+          "light": "#669b81",
           "dark": "#092c1c"
         }
       }

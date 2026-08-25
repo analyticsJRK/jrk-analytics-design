@@ -88,21 +88,25 @@
    there and the alphas ADD. Opaque steps spend none of that budget.
 
    IT TRACKS THE HAZARD HUE. All four bands are declared in every variant, so
-   data-hazard re-colours the stripe with no rule here changing. Light band 1 is
-   the hue's VIVID accent-solid, so the stripe matches the swatch in the gallery
-   picker; dark band 1 is its deep accent-wash, because dark page ink is
-   near-white and #e6eaea on #ffe500 is 1.05:1.
+   data-hazard re-colours the stripe with no rule here changing. BOTH HALVES
+   DERIVE FROM accent-wash — the light wash in light, the deep dark wash in dark,
+   each face step the band before it scaled by 0.88 — which is the first time
+   this assembly has had one rule rather than two. The light half carried the
+   hue's VIVID accent-solid from 2026-08-20 until 2026-08-25 and was softened by
+   direction: the light stripe was to read as quietly as the dark one already
+   does. Dark never moved, because dark page ink is near-white and a vivid fill
+   cannot carry it (#e6eaea on #ffe500 is 1.05:1).
 
-   *** WITH data-hazard='red', 'purple' OR 'blue', THE LIGHT STRIPE CANNOT BE
-   CROSSED BY PAGE TEXT. *** Those three hues take white ink and no step of them
-   takes black, so near-black measures 3.88:1 / 2.95:1 / 3.92:1 on the vivid fill
-   and worse on the darkening face — worst band 1.62:1. Light page ink cannot be
-   switched and no re-stepping fixes a hue's own luminance, so this ships as a
-   LAYOUT CONDITION of the .jrk-topbar--brand kind, the second one in this
-   library, and nothing gates it. stripe-from and stripe-to are what move the
-   band. Deriving the bands from accent-wash instead removes the condition
-   entirely (every wash carries near-black at >= 11.6:1) at the cost of the bold
-   fill; that version was measured and the bold fill was directed over it.
+   *** THE LAYOUT CONDITION WENT WITH THE VIVID FILL, AND THAT IS WHAT THE
+   SOFTENING BOUGHT. *** With data-hazard='red', 'purple' or 'blue' the light
+   stripe could not be crossed by page text at all: those hues take white ink and
+   no step of them takes black, so near-black measured 3.88:1 / 2.95:1 / 3.92:1
+   on the fill and worse down the darkening face — worst band 1.62:1 — and it
+   shipped as a promise about layout of the .jrk-topbar--brand kind that nothing
+   gated. Every wash carries near-black at 11.6:1 or better BY DERIVATION, so the
+   wash-derived ramp clears text-primary on every band of every hue in both
+   halves, worst 5.46:1. stripe-from and stripe-to still move the band; there is
+   now nothing they have to be moved away from.
 
    IT IS A BACKGROUND LAYER ON `body`, NOT A THIRD PSEUDO-ELEMENT, because there
    is no third one to have: ::before is the wave and ::after is the dot ground,
@@ -119,19 +123,24 @@
    stripe-from and stripe-to for the band, stripe-step for the width of each
    face step. Widening a step widens the extrude without touching the band.
 
-   INK: on the three safe hues every band clears text-primary in both halves —
-   light worst 4.50:1 (yellow), 4.58:1 (orange), 4.59:1 (green); dark worst
-   4.71:1. Secondary and muted survive nothing below band 1. So ONLY
-   text-primary is safe anywhere on the assembly, and on red, purple and blue in
-   light not even that.
+   INK: every band clears text-primary on every hue in both halves — light worst
+   5.46:1 (purple band 4), dark worst 4.71:1. Secondary is 3.02:1 to 4.04:1 on
+   band 4 and muted survives nothing below band 1, so ONLY text-primary is safe
+   anywhere on the assembly — the change is that it is now safe on ALL of it.
 
-   AND THE RAMP'S LENGTH IS WHATEVER THE INK FLOOR LEAVES, which is the other
-   cost of pinning band 1 to the vivid value: GREEN'S EXTRUDE BARELY READS. Its
-   fill is only 6.19:1 on near-black to start with, so the legal darkening range
-   is #09ae5c to #08944e and the three steps are nearly one colour. Yellow has
-   the full range (#ffe500 to #8f8000). Dark has room in every hue, because
-   darkening away from near-white ink only ever helps. Derivations are on
-   surface-canvas-stripe. */
+   AND THE RAMP'S LENGTH IS CHOSEN RATHER THAN LEFT OVER, which is the other
+   thing the wash bought. Pinning band 1 to the vivid fill made the extrude as
+   long as the gap between that fill and the ink floor, so GREEN'S EXTRUDE BARELY
+   READ: its fill is only 6.19:1 on near-black to start with, the legal range was
+   #09ae5c to #08944e, and the three steps were nearly one colour. A wash starts
+   far from the floor, so the 0.88 walk is a free choice — separations 1.27:1 to
+   1.31:1 in light against the dark half's 1.13:1 to 1.51:1, in every hue.
+
+   THE PRICE IS GREYSCALE. Light band 1 is 1.12:1 / 1.06:1 / 1.11:1 off the page
+   ramp's three stops for yellow and 1.20:1 to 1.55:1 for the other five, against
+   1.03:1 and 2.02:1 to 4.90:1 before, so the whole light assembly now separates
+   by CHROMA and is invisible in print — which is what @media print below was
+   already doing to it. Derivations are on surface-canvas-stripe. */
 :root[data-skin='industry'] body {
   background-image:
     linear-gradient(
@@ -673,6 +682,19 @@
  * the only thing on the bar carrying a layout condition. These are what was
  * actually wanted. Do not put the long one back — see CLAUDE.md for what it cost.
  *
+ * THE LIGHT HALF IS DRAWN AT HALF STRENGTH, and the reason is the one thing about
+ * this skin's light half worth carrying off this rule: masthead-mark-strength is
+ * 0.5 in light and 1 in dark, applied as `opacity` below, because the mask is a
+ * single data URI both themes read and there is no other way to move one half
+ * without restating thirteen fill-opacities. Directed 2026-08-25 — the marks were
+ * to read as softly as the dark ones do. They were ALREADY quieter in luminance
+ * by a factor of eight (1.13:1 to 1.23:1 on the white plate against 3.43:1 to
+ * 9.77:1 on the charcoal) and still the loudest thing on the bar, because what a
+ * saturated yellow does against pure white is a CHROMA jump and no contrast ratio
+ * sees it. So softening this half is spending ALPHA, not lightness. Every figure
+ * below is an upper bound, so going down is free; anything above 1 in either half
+ * re-opens the whole budget.
+ *
  * TWO ALPHA BUDGETS, SPLIT BY WHERE A MARK SITS, and this is the whole rule for
  * adding another one. The bar's ink occupies roughly y19..y37 (a 13px label's
  * line box, centred in 56px):
@@ -718,6 +740,37 @@
  * would diverge in light and collapse in dark — a difference that exists in half
  * the product is worse than none. The mark works the same in both themes.
  *
+ * THE MARKS COME FROM THE TWO ENDS AND FADE OUT, directed 2026-08-25, and it is
+ * a SECOND MASK LAYER rather than a rewritten tile. The glitch tile still repeats
+ * across the full width; a `linear-gradient(to right, black 0% 6%, transparent
+ * 42% 58%, black 94% 100%)` is intersected with it, so the marks run at full
+ * strength for the first and last 6% of the bar, fade to nothing by 42% / 58%,
+ * and the middle 16% is empty. Two layers, one composite, and the tile is
+ * untouched — which is the point: every fill-opacity in the data URI, and every
+ * figure in the budgets above, still means what it says.
+ *
+ * THAT IS ALSO WHY THIS COSTS NOTHING TO VERIFY. Intersecting with a mask whose
+ * alpha is <= 1 everywhere can only REDUCE a mark's coverage, and the alphas
+ * above are upper bounds by construction. No mark got louder anywhere, so both
+ * budgets — .55 crossing the ink band, .8 below it — hold unchanged without
+ * re-deriving one of them. Widening the clear middle is free for the same
+ * reason; NARROWING it is too, because full strength at the ends is what the
+ * shipped alphas were already measured at.
+ *
+ * IT DOES NOT MAKE THE BAR'S LAYOUT LOAD-BEARING, which is the trap this rule
+ * exists downstream of. The fade is stated in PERCENTAGES of the bar, so it
+ * tracks the width instead of promising anything about it, and the marks are
+ * densest exactly where the bar's own content sits — the wordmark at the left,
+ * the control cluster at the right. That is safe only because the ink-band cap
+ * was sized for marks crossing text ANYWHERE and never depended on where they
+ * fell. The removed yellow strip is the counter-example: it was legal by
+ * POSITION, so it made the bar's height and control ladder load-bearing.
+ *
+ * FOUR PER-LAYER PROPERTIES HAVE TO GROW A SECOND VALUE or the layer counts
+ * disagree and the browser cycles the shorter list: mask-repeat, mask-size and
+ * mask-position each carry the tile's value first and the fade's second. Add a
+ * third layer and all three lists grow again.
+ *
  * Drawn on ::after so it can repeat across the width; the mask is alpha-only, the
  * colour is the accent token, and z-index -1 puts it behind the bar's content
  * inside the stacking context .jrk-topbar already opens with --jrk-z-sticky. */
@@ -729,15 +782,22 @@
   pointer-events: none;
 
   background-color: var(--jrk-accent-solid);
+  opacity: var(--jrk-masthead-mark-strength);
 
-  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='7' fill-opacity='.5'/%3E%3Crect x='52' y='32' width='10' height='6' fill-opacity='.45'/%3E%3Crect x='130' y='27' width='26' height='6' fill-opacity='.55'/%3E%3Crect x='200' y='33' width='14' height='7' fill-opacity='.48'/%3E%3Crect x='250' y='29' width='8' height='8' fill-opacity='.42'/%3E%3Crect x='96' y='19' width='3' height='16' fill-opacity='.5'/%3E%3Crect x='178' y='17' width='3' height='20' fill-opacity='.42'/%3E%3Crect x='268' y='21' width='3' height='14' fill-opacity='.5'/%3E%3Crect x='74' y='46' width='34' height='3' fill-opacity='.8'/%3E%3Crect x='214' y='48' width='30' height='3' fill-opacity='.8'/%3E%3Crect x='40' y='51' width='16' height='3' fill-opacity='.7'/%3E%3Crect x='160' y='50' width='26' height='3' fill-opacity='.6'/%3E%3Crect x='230' y='52' width='11' height='3' fill-opacity='.7'/%3E%3C/g%3E%3C/svg%3E");
-  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='7' fill-opacity='.5'/%3E%3Crect x='52' y='32' width='10' height='6' fill-opacity='.45'/%3E%3Crect x='130' y='27' width='26' height='6' fill-opacity='.55'/%3E%3Crect x='200' y='33' width='14' height='7' fill-opacity='.48'/%3E%3Crect x='250' y='29' width='8' height='8' fill-opacity='.42'/%3E%3Crect x='96' y='19' width='3' height='16' fill-opacity='.5'/%3E%3Crect x='178' y='17' width='3' height='20' fill-opacity='.42'/%3E%3Crect x='268' y='21' width='3' height='14' fill-opacity='.5'/%3E%3Crect x='74' y='46' width='34' height='3' fill-opacity='.8'/%3E%3Crect x='214' y='48' width='30' height='3' fill-opacity='.8'/%3E%3Crect x='40' y='51' width='16' height='3' fill-opacity='.7'/%3E%3Crect x='160' y='50' width='26' height='3' fill-opacity='.6'/%3E%3Crect x='230' y='52' width='11' height='3' fill-opacity='.7'/%3E%3C/g%3E%3C/svg%3E");
-  -webkit-mask-repeat: repeat-x;
-  mask-repeat: repeat-x;
-  -webkit-mask-size: auto 100%;
-  mask-size: auto 100%;
-  -webkit-mask-position: 0 50%;
-  mask-position: 0 50%;
+  -webkit-mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='7' fill-opacity='.5'/%3E%3Crect x='52' y='32' width='10' height='6' fill-opacity='.45'/%3E%3Crect x='130' y='27' width='26' height='6' fill-opacity='.55'/%3E%3Crect x='200' y='33' width='14' height='7' fill-opacity='.48'/%3E%3Crect x='250' y='29' width='8' height='8' fill-opacity='.42'/%3E%3Crect x='96' y='19' width='3' height='16' fill-opacity='.5'/%3E%3Crect x='178' y='17' width='3' height='20' fill-opacity='.42'/%3E%3Crect x='268' y='21' width='3' height='14' fill-opacity='.5'/%3E%3Crect x='74' y='46' width='34' height='3' fill-opacity='.8'/%3E%3Crect x='214' y='48' width='30' height='3' fill-opacity='.8'/%3E%3Crect x='40' y='51' width='16' height='3' fill-opacity='.7'/%3E%3Crect x='160' y='50' width='26' height='3' fill-opacity='.6'/%3E%3Crect x='230' y='52' width='11' height='3' fill-opacity='.7'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(to right, black 0% 6%, transparent 42% 58%, black 94% 100%);
+  mask-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='7' fill-opacity='.5'/%3E%3Crect x='52' y='32' width='10' height='6' fill-opacity='.45'/%3E%3Crect x='130' y='27' width='26' height='6' fill-opacity='.55'/%3E%3Crect x='200' y='33' width='14' height='7' fill-opacity='.48'/%3E%3Crect x='250' y='29' width='8' height='8' fill-opacity='.42'/%3E%3Crect x='96' y='19' width='3' height='16' fill-opacity='.5'/%3E%3Crect x='178' y='17' width='3' height='20' fill-opacity='.42'/%3E%3Crect x='268' y='21' width='3' height='14' fill-opacity='.5'/%3E%3Crect x='74' y='46' width='34' height='3' fill-opacity='.8'/%3E%3Crect x='214' y='48' width='30' height='3' fill-opacity='.8'/%3E%3Crect x='40' y='51' width='16' height='3' fill-opacity='.7'/%3E%3Crect x='160' y='50' width='26' height='3' fill-opacity='.6'/%3E%3Crect x='230' y='52' width='11' height='3' fill-opacity='.7'/%3E%3C/g%3E%3C/svg%3E"),
+    linear-gradient(to right, black 0% 6%, transparent 42% 58%, black 94% 100%);
+  -webkit-mask-composite: source-in;
+  mask-composite: intersect;
+  -webkit-mask-repeat: repeat-x, no-repeat;
+  mask-repeat: repeat-x, no-repeat;
+  -webkit-mask-size: auto 100%, 100% 100%;
+  mask-size: auto 100%, 100% 100%;
+  -webkit-mask-position: 0 50%, 0 0;
+  mask-position: 0 50%, 0 0;
 }
 
 /* ── type: uppercase labels, tracked wide; values never ───────────────────
