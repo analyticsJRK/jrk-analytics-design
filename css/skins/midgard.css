@@ -415,11 +415,26 @@
  * MASK repeats; the fade is in the BACKGROUND, because a repeating mask cannot
  * carry a one-off gradient across the whole bar.
  *
+ *
+ * *** THE MARK IS WHAT SEPARATES --vivid FROM --brand UNDER THIS SKIN. *** Both
+ * variants take the same flat band, the same ink and the same accent hairline;
+ * only --brand carries this. That is the base library's own distinction read
+ * through a skin: --vivid is a generic chrome band and --brand is THE product
+ * masthead, so identity belongs on the second one and a secondary bar does not
+ * get to claim it. It also means an app can run a marked masthead at the top of
+ * the shell and an unmarked one over a sub-view without the two competing.
+ *
+ * The two were identical for a day, which is a variant wasted. What is NOT
+ * available is giving --vivid a different FILL: surface.bannerDeep is the only
+ * other band this skin has and it equals surface.banner in dark, so the pair
+ * would diverge in light and collapse in dark — a difference that exists in half
+ * the product is worse than none. The mark works the same in both themes.
+ *
  * z-index -1 for the reason Industry's wordmark gives: .jrk-topbar opens a
  * stacking context with --jrk-z-sticky, so a negative child paints after the
  * band and before the content. It does not rotate and never overflows, so the bar
  * needs no `overflow: hidden` and its flyouts stay unclipped. */
-:root[data-skin='midgard'] .jrk-topbar--vivid::before {
+:root[data-skin='midgard'] .jrk-topbar--vivid.jrk-topbar--brand::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -498,7 +513,7 @@
      measured strength; on paper the band is gone, so the ground it was measured
      against is gone too, and the same alpha over white is a smear across the
      masthead rather than a texture. */
-  :root[data-skin='midgard'] .jrk-topbar--vivid::before {
+  :root[data-skin='midgard'] .jrk-topbar--vivid.jrk-topbar--brand::before {
     display: none;
   }
 

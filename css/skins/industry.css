@@ -674,10 +674,25 @@
  * category except three short marks in the last 17px of the bar, and none of
  * them spans the width, so none of them is a thing a reader can be reading over.
  *
+ *
+ * *** THE MARK IS WHAT SEPARATES --vivid FROM --brand UNDER THIS SKIN. *** Both
+ * variants take the same flat band, the same ink and the same accent hairline;
+ * only --brand carries this. That is the base library's own distinction read
+ * through a skin: --vivid is a generic chrome band and --brand is THE product
+ * masthead, so identity belongs on the second one and a secondary bar does not
+ * get to claim it. It also means an app can run a marked masthead at the top of
+ * the shell and an unmarked one over a sub-view without the two competing.
+ *
+ * The two were identical for a day, which is a variant wasted. What is NOT
+ * available is giving --vivid a different FILL: surface.bannerDeep is the only
+ * other band this skin has and it equals surface.banner in dark, so the pair
+ * would diverge in light and collapse in dark — a difference that exists in half
+ * the product is worse than none. The mark works the same in both themes.
+ *
  * Drawn on ::after so it can repeat across the width; the mask is alpha-only, the
  * colour is the accent token, and z-index -1 puts it behind the bar's content
  * inside the stacking context .jrk-topbar already opens with --jrk-z-sticky. */
-:root[data-skin='industry'] .jrk-topbar--vivid::after {
+:root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand::after {
   content: '';
   position: absolute;
   inset: 0;
@@ -955,7 +970,7 @@
      the masthead rule, which is 0-4-0 itself and earlier in this file. */
   /* The glitch furniture goes with the band. It is measured against the charcoal;
      print removes the charcoal, and the same alpha over white is a smear. */
-  :root[data-skin='industry'] .jrk-topbar--vivid::after {
+  :root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand::after {
     display: none;
   }
 

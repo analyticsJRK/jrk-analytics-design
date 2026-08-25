@@ -55,8 +55,9 @@
     <p>
       Every masthead this library ships, in <strong>both themes at once</strong>:
       base, <code class="jrk-mono">industry</code> and
-      <code class="jrk-mono">midgard</code>, each as the plain bar and as the
-      <code class="jrk-mono">--vivid --brand</code> variant.
+      <code class="jrk-mono">midgard</code>, each as the plain bar, as
+      <code class="jrk-mono">--vivid</code> and as
+      <code class="jrk-mono">--vivid --brand</code> &mdash; eighteen bars.
     </p>
     <p>
       <strong>Each bar is an iframe, and it has to be.</strong> The token layer
@@ -79,9 +80,9 @@
       consumer, so <strong>no skin repaints it</strong> — do not put a fill under
       ink you do not own. The masthead variants own their ink through
       <code class="jrk-mono">gradient.ink</code>, which is what makes them
-      skinnable: under either skin they collapse to that skin&rsquo;s flat banner,
-      because base&rsquo;s teal&ndash;blue&ndash;violet ribbon belongs to neither
-      palette.
+      skinnable: under either skin both take that skin&rsquo;s flat banner, because
+      base&rsquo;s teal&ndash;blue&ndash;violet ribbon belongs to neither palette.
+      They are not identical &mdash; the identity mark separates them; see below.
     </p>
 
     <div class="mh-grid" id="grid"></div>
@@ -94,6 +95,23 @@
       first stop of its own, 1.000:1 either way &mdash; so the accent hairline is
       the entire boundary there, at 15.06:1 and 9.23:1. In light the fill step is
       already 16.91:1 and 14.65:1 and that same 1px reads as decoration. It is not.
+    </div>
+
+    <div class="gal-rule">
+      <strong>Under a skin, the identity mark is the whole difference between
+      <code class="jrk-mono">--vivid</code> and
+      <code class="jrk-mono">--brand</code>.</strong> Both take the same flat band,
+      the same ink and the same accent hairline; only
+      <code class="jrk-mono">--brand</code> carries the glitch marks or the node
+      network. That is base&rsquo;s own distinction read through a skin &mdash;
+      <code class="jrk-mono">--vivid</code> is generic chrome,
+      <code class="jrk-mono">--brand</code> is <em>the</em> product masthead
+      &mdash; so an app can run a marked bar at the top of the shell and an
+      unmarked one over a sub-view without the two competing. A different FILL was
+      not available: <code class="jrk-mono">surface.bannerDeep</code> is the only
+      other band either skin has and it equals
+      <code class="jrk-mono">surface.banner</code> in dark, so the pair would
+      diverge in light and collapse in dark.
     </div>
 
     <div class="gal-rule">
@@ -120,7 +138,8 @@
   ];
   const VARIANTS = [
     ['plain', 'plain — never skinned'],
-    ['brand', '--vivid --brand'],
+    ['vivid', '--vivid — the band, no mark'],
+    ['brand', '--vivid --brand — the masthead'],
   ];
 
   const grid = document.getElementById('grid');
