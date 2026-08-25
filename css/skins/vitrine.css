@@ -1,0 +1,319 @@
+/* Vitrine skin — GEOMETRY, GLASS AND TYPE ONLY.
+ *
+ * The colour half is tokens/skins/vitrine.json, generated into
+ * dist/jrk-skin-vitrine.css. This file holds NOT ONE colour value: every fill,
+ * edge and veil below is a var() reference. tokens.json and its skin files are
+ * the only source of truth for design values, so a hex here would be
+ * unreachable to the theme toggle AND would fail check:css and validate:skin.
+ *
+ * OPT-IN, in this order, and the skin CSS goes LAST:
+ *
+ *   @import "@jrk/design/tokens.css";
+ *   @import "@jrk/design/css";                       the component layer
+ *   @import "@jrk/design/dist/jrk-skin-vitrine.css"; the skin's colours
+ *   @import "@jrk/design/css/skins/vitrine.css";     this file
+ *
+ * Then stamp the root: <html data-skin="vitrine">. THE SKIN IS ORTHOGONAL TO
+ * THE THEME — it has its own light and dark halves — so data-theme still means
+ * what it always meant and data-theme="vitrine" matches nothing anywhere.
+ *
+ * Every selector is prefixed :root[data-skin='vitrine'], which is (0,2,0)
+ * before the component class is counted, so this file beats a base modifier on
+ * SPECIFICITY rather than on source order and keeps working if a consumer's
+ * bundler reorders the imports.
+ */
+
+/* The reference's face is a neutral geometric sans. Requested HERE rather than
+ * in css/fonts.css so a consumer that never stamps data-skin never pays for it.
+ * Same host as the base Inter request, so an app whose CSP already allows
+ * fonts.googleapis.com needs no change. Must stay at the top: an @import after
+ * a rule is dropped. */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+/* ── the ground: three fixed layers, and each one earns its place ─────────
+   body            the token ramp, a fallback for a backdrop set to none
+   body::before    THE BACKDROP, clamped                          z-index -2
+   body::after     the scrim, a tint over it                      z-index -1
+
+   THE SKIN SHIPS NO IMAGE, and that is a distribution decision rather than an
+   aesthetic one: this library has never shipped a binary, and the consuming
+   app's sync script MIRRORS whole directories — css/, dist/, tokens/,
+   react/src/ — so a photograph dropped in here would be copied into the app on
+   every sync, forever, whether or not anything referenced it.
+
+   BUT THE DEFAULT IS NOT `none`, AND THAT WAS THE FIRST VERSION'S REAL MISTAKE.
+   backdrop-filter blurs WHAT IS BEHIND THE ELEMENT; over a flat fill it returns
+   the same flat fill and the blur is a no-op. Shipping `none` gave a pane with
+   nothing behind it — measurably correct and visibly not glass. So
+   vitrine-backdrop defaults to a token-built scene with STRUCTURE in it, and a
+   consumer replaces it wholesale:
+
+     :root[data-skin='vitrine'] { --jrk-vitrine-backdrop: url('/factory.webp'); }
+
+   FIXED, because the backdrop is a property of the viewport rather than of the
+   document — the same reasoning the other skins' page textures record. On a long
+   page a scrolling backdrop turns a scene into a moving wall. */
+:root[data-skin='vitrine'] body {
+  background: var(--jrk-surface-canvas);
+  background-attachment: fixed;
+  isolation: isolate;
+  font-family: 'Outfit', var(--jrk-font-sans);
+}
+
+:root[data-skin='vitrine'] .jrk-app,
+:root[data-skin='vitrine'] .jrk-auth {
+  background: transparent;
+}
+
+/* THE BACKDROP, CLAMPED. vitrine-clamp is what bounds the composite, and it
+   bounds it by LUMINANCE rather than by coverage: any image a consumer supplies
+   is compressed into a narrow band before it reaches the glass, so the recorded
+   surface-default stays true while the image KEEPS ITS STRUCTURE. That is the
+   whole difference from the first version, which bounded by coverage with a
+   0.94-alpha veil — every ratio was true and the skin was not frosted, because
+   six percent of an image is nothing to blur.
+
+   THE FILTER ORDER IS LOAD-BEARING. CSS applies filters in the order listed;
+   contrast() pulls toward mid-grey and brightness() scales. contrast-then-
+   brightness lands a dark band, which is what the dark half needs. Reverse them
+   and blacks lift to grey before they are scaled, and the bound is gone. */
+:root[data-skin='vitrine'] body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background-image: var(--jrk-vitrine-backdrop);
+  background-size: cover;
+  background-position: center;
+  filter: var(--jrk-vitrine-clamp);
+}
+
+/* THE SCRIM: A TINT NOW, NOT A VEIL. This rule used to be the load-bearing one
+   and is not any more. The bound moved to vitrine-clamp on the layer above,
+   which constrains the backdrop's luminance instead of hiding it, so this is
+   left carrying only the palette's cast and sits at 0.30 where it was 0.94.
+
+   What has not changed: backdrop, clamp, scrim, glass alpha and surface-default
+   are ONE DECISION IN FIVE PLACES. Every ink in this skin was solved against the
+   PALE EXTREME of the composite — dark #141918..#222726, light #e8e9e9..#fdfefe
+   — rather than against the recorded hex, because that hex is only ever the
+   middle of a range that moves with the consumer's image. */
+:root[data-skin='vitrine'] body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: var(--jrk-vitrine-scrim);
+}
+
+/* ── the glass ─────────────────────────────────────────────────────────────
+   A pane is three things and none of them can be dropped without the tile
+   ceasing to read as glass:
+
+     1. THE TRANSLUCENT FILL, surface-glass. Never surface-default — that token
+        is the COMPOSITE this fill produces over the scrim, and pointing a tile
+        at it would give an opaque panel that measures correctly and looks
+        nothing like the reference.
+     2. THE BLUR. backdrop-filter is what separates frosted glass from a tinted
+        rectangle. It is also the expensive part: a blurred backdrop is a
+        full-viewport composite per element, so this is applied to TOP-LEVEL
+        tiles only and explicitly removed from nested ones below.
+     3. THE TOP-EDGE CATCH, carried inside shadow-card as an inset highlight.
+        On the dark page a drop shadow renders nothing — a black shadow over a
+        near-black ground, the finding this library has now reached four
+        independent ways — so in dark the highlight IS the elevation.
+
+   @supports IS NOT OPTIONAL HERE. Where backdrop-filter is unavailable the fill
+   alone is far too transparent to carry ink, so the fallback is the opaque
+   composite. That is the one place surface-default is used as a fill, and it is
+   used precisely because it is what the glass would have resolved to. */
+:root[data-skin='vitrine'] .jrk-card,
+:root[data-skin='vitrine'] .jrk-chart-card,
+:root[data-skin='vitrine'] .jrk-stat,
+:root[data-skin='vitrine'] .jrk-stat-row,
+:root[data-skin='vitrine'] .jrk-table-wrap,
+:root[data-skin='vitrine'] .jrk-sheet,
+:root[data-skin='vitrine'] .jrk-alert,
+:root[data-skin='vitrine'] .jrk-auth__panel {
+  background: var(--jrk-surface-default);
+  border-radius: var(--jrk-radius-lg);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  :root[data-skin='vitrine'] .jrk-card,
+  :root[data-skin='vitrine'] .jrk-chart-card,
+  :root[data-skin='vitrine'] .jrk-stat,
+  :root[data-skin='vitrine'] .jrk-stat-row,
+  :root[data-skin='vitrine'] .jrk-table-wrap,
+  :root[data-skin='vitrine'] .jrk-sheet,
+  :root[data-skin='vitrine'] .jrk-alert,
+  :root[data-skin='vitrine'] .jrk-auth__panel {
+    background: var(--jrk-surface-glass);
+    -webkit-backdrop-filter: blur(var(--jrk-glass-blur)) saturate(1.4);
+    backdrop-filter: blur(var(--jrk-glass-blur)) saturate(1.4);
+  }
+}
+
+/* A NESTED pane takes no blur and no glass. Two frosted layers over each other
+   read as fog rather than as depth, the inner one has nothing behind it worth
+   blurring, and the cost is paid twice for it. It takes the opaque composite
+   and the neutral hairline nesting.css already gives it. */
+:root[data-skin='vitrine'] .jrk-card .jrk-card,
+:root[data-skin='vitrine'] .jrk-card .jrk-stat,
+:root[data-skin='vitrine'] .jrk-card .jrk-table-wrap,
+:root[data-skin='vitrine'] .jrk-card .jrk-chart-card {
+  background: var(--jrk-surface-default);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+/* ── overlays: glass too, and they keep their shadow ──────────────────────
+   Nothing here is clipped, so unlike the chamfered skin these keep box-shadow
+   and get the blur as well. An overlay is the one place the blur is worth its
+   cost twice over: it is what tells a reader the panel is IN FRONT of the page
+   rather than part of it. */
+:root[data-skin='vitrine'] .jrk-modal,
+:root[data-skin='vitrine'] .jrk-menu,
+:root[data-skin='vitrine'] .jrk-hovercard,
+:root[data-skin='vitrine'] .jrk-nav-flyout,
+:root[data-skin='vitrine'] .jrk-spotlight,
+:root[data-skin='vitrine'] .jrk-toast {
+  border-radius: var(--jrk-radius-xl);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  :root[data-skin='vitrine'] .jrk-modal,
+  :root[data-skin='vitrine'] .jrk-menu,
+  :root[data-skin='vitrine'] .jrk-hovercard,
+  :root[data-skin='vitrine'] .jrk-nav-flyout,
+  :root[data-skin='vitrine'] .jrk-spotlight,
+  :root[data-skin='vitrine'] .jrk-toast {
+    background: var(--jrk-surface-glass-raised);
+    -webkit-backdrop-filter: blur(var(--jrk-glass-blur-raised)) saturate(1.5);
+    backdrop-filter: blur(var(--jrk-glass-blur-raised)) saturate(1.5);
+  }
+}
+
+/* ── the masthead: frosted too, which is the opposite of midgard's answer ──
+   Base's `--vivid` and `--brand` paint a teal-to-violet ribbon that belongs to
+   neither of this skin's halves, so both variants are re-pointed here. Only the
+   VARIANTS: the plain .jrk-topbar is inked with text-primary by the consumer, so
+   a skin that repainted its fill would blind every control on it.
+
+   THE BAND STAYS GLASS, AND THAT IS A DELIBERATE SPLIT FROM MIDGARD, which turns
+   backdrop-filter off on its bar to get "one flat, certain plane". A frosted
+   masthead over the scene IS the reference here, and the clamp on the backdrop
+   is what makes it safe to keep. surface-banner records the band COMPOSITED —
+   the same arrangement surface-default uses for tiles — and every banner ink was
+   solved against BOTH ends of that composite rather than the recorded middle:
+   #efefef..#fefefe light, #191f1f..#242a29 dark.
+
+   background-image: none IS REQUIRED, not tidiness. Base sets the ramp through
+   the `background` SHORTHAND, so a fill alone leaves the gradient painted on top
+   of it — the same trap industry's wedge hit from the other direction, where a
+   background-image at (0,3,0) deleted the shorthand's fill and left ink on a
+   transparent bar.
+
+   HAND-MEASURED, all of it: validate:skin walks this skin's page ramp and its
+   panel, and a banner is neither. */
+:root[data-skin='vitrine'] .jrk-topbar--vivid,
+:root[data-skin='vitrine'] .jrk-topbar--vivid.jrk-topbar--brand {
+  background-color: var(--jrk-masthead-fill);
+  background-image: none;
+  color: var(--jrk-masthead-ink);
+
+  /* One variable re-inks the bar's whole interior — captions, statuses, ghost
+     buttons, the search field — because base pipes all of them through it.
+     text-on-banner is 11.09:1 at the worst end of the band in both halves;
+     text-on-banner-muted, which carries the account name, is 4.61:1. */
+  --jrk-gradient-ink: var(--jrk-masthead-ink);
+
+  /* Colour only, 1px untouched — this is what stops `--vivid` zeroing the
+     hairline and `--brand` neutralising it to border-subtle. It matters more
+     here than on an opaque bar: a frosted band takes its luminance from whatever
+     is behind it, so the fill step against the page is not a boundary you can
+     rely on. The accent rule is. */
+  border-bottom-color: var(--jrk-border-accent);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  :root[data-skin='vitrine'] .jrk-topbar--vivid,
+  :root[data-skin='vitrine'] .jrk-topbar--vivid.jrk-topbar--brand {
+    -webkit-backdrop-filter: blur(var(--jrk-glass-blur-raised)) saturate(1.5);
+    backdrop-filter: blur(var(--jrk-glass-blur-raised)) saturate(1.5);
+  }
+}
+
+/* ── AND THE SEGMENTED CONTROL GETS ITS OPAQUE TRACK BACK ─────────────────
+   Base gives `--brand` a button-group track of overlay-hover-veil at 45%, in
+   place of the opaque surface-track every other segmented control gets. That is
+   a COMPENSATION FOR A PALE RAMP: hoverVeil is directional, so in light it is
+   black at a low alpha, which darkens a pale bar just enough to seat the control
+   on it.
+
+   This band is not that bar in either half — it is a frosted pane whose
+   luminance follows the backdrop — so the compensation is inherited without its
+   assumption, exactly as midgard records for its own dark band. Giving the track
+   back is the fix, and it is the same one-line answer in both skins. */
+:root[data-skin='vitrine'] .jrk-topbar--vivid.jrk-topbar--brand .jrk-btn-group {
+  background: var(--jrk-surface-track);
+}
+
+/* ── the rounded contract, which is this skin's version of the squared list ─
+   industry and midgard each name a list of controls that must be SQUARED,
+   because radius-full is not overridden in either token file. This skin
+   inverts that: the radius tokens ARE overridden, generously, but the base
+   library reaches for radius.none DIRECTLY on tiles rather than through
+   radius-lg — so overriding the token rounds nothing and the tiles have to be
+   named. THAT LIST IS THE ONE ABOVE, and it is this skin's contract:
+
+     anything new that should read as glass stays SQUARE until it is added to
+     the tile list, and anything that should float stays square until it is
+     added to the overlay list.
+
+   Controls need no rule at all: they take radius-full or radius-md from the
+   base layer, and both already suit a soft look. That is the whole reason this
+   file is shorter than the other two skins' — a rounded skin agrees with the
+   base library's control ladder where a squared one has to fight it. */
+
+/* ── type: light weights, because glass wants air ─────────────────────────
+   Outfit runs visually heavier than Inter at the same numeric weight, so the
+   ladder steps DOWN rather than matching. Values are deliberately absent from
+   this list: a stat's value is the one thing a reader compares, and thinning it
+   costs legibility over a busy backdrop for nothing. */
+:root[data-skin='vitrine'] .jrk-stat__label,
+:root[data-skin='vitrine'] .jrk-table th,
+:root[data-skin='vitrine'] .jrk-section__title,
+:root[data-skin='vitrine'] .jrk-page-header__desc {
+  font-weight: 400;
+  letter-spacing: var(--jrk-tracking-wide);
+}
+
+/* ── print ────────────────────────────────────────────────────────────────
+   The backdrop and the scrim are screen furniture: on paper the backdrop is a
+   full-bleed photograph nobody asked to print and the scrim is a grey wash over
+   every page. The blur goes too — it costs a composite per tile and renders as
+   nothing once the thing behind it is white. */
+@media print {
+  :root[data-skin='vitrine'] body::before,
+  :root[data-skin='vitrine'] body::after {
+    display: none;
+  }
+
+  :root[data-skin='vitrine'] .jrk-card,
+  :root[data-skin='vitrine'] .jrk-chart-card,
+  :root[data-skin='vitrine'] .jrk-stat,
+  :root[data-skin='vitrine'] .jrk-stat-row,
+  :root[data-skin='vitrine'] .jrk-table-wrap,
+  :root[data-skin='vitrine'] .jrk-sheet,
+  :root[data-skin='vitrine'] .jrk-alert,
+  :root[data-skin='vitrine'] .jrk-auth__panel,
+  :root[data-skin='vitrine'] .jrk-modal,
+  :root[data-skin='vitrine'] .jrk-menu {
+    background: var(--jrk-surface-default);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}

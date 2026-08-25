@@ -1,0 +1,357 @@
+{
+  "$meta": {
+    "name": "Vitrine",
+    "version": "0.1.0",
+    "description": "A frosted-glass SKIN: translucent panes over a dark scene, a vivid spring-green accent, generous radii. Generated into dist/jrk-skin-vitrine.css by scripts/build-tokens.mjs. Never hand-edit dist/.",
+    "$axisNote": "THIS IS NOT A THIRD THEME. It carries its own light and dark halves, so it is orthogonal to the theme and is stamped separately: data-skin=\"vitrine\" crossed with data-theme. Four blocks, not one.",
+    "$scopeNote": "COLOUR, SHADOW, RADIUS AND TRACKING ONLY. The glass itself — the blur, the scrim, the backdrop hook and the rounded tile list — lives in css/skins/vitrine.css, which holds no colour at all.",
+    "$glassNote": "THE ONE THING TO UNDERSTAND BEFORE CHANGING ANYTHING: surface-default is the glass COMPOSITED over the scrim, recorded flat so the gate can measure it. The scrim is not decoration — it is what BOUNDS the composite. Without it a pale backdrop behind a translucent pane composites far lighter than the recorded hex and every ink ratio in this file becomes fiction. Backdrop, scrim, glass alpha and surface-default are one decision in four places.",
+    "$darkNote": "DARK IS THE FAITHFUL HALF AND LIGHT IS A DESIGN DECISION, the arrangement midgard records. The reference is a dark scene lit from within; inverting it produces a pale ground under a green that cannot be read on it, which is what the stepped light accent roles exist to avoid."
+  },
+  "stamp": "vitrine",
+  "vars": {
+    "$comment": "Keyed by CSS variable name without the --jrk- prefix. The build asserts every one exists in the base layer; skin-only names go in skinOnly.",
+    "surface-canvas": {
+      "light": "linear-gradient(155deg, #f3f4f4 0%, #ebeded 55%, #e2e6e6 100%)",
+      "dark": "linear-gradient(155deg, #111514 0%, #0a0d0c 55%, #060808 100%)",
+      "$note": "A three-stop cool ramp standing in for the reference photograph. THE SKIN SHIPS NO IMAGE: this library has never shipped a binary, and sync-design.mjs mirrors whole directories into the consuming app, so a photograph would ride along on every sync. A consumer points --jrk-vitrine-backdrop at its own image instead and this ramp is what shows when nothing does. Every ink is held to the ramp's WORST stop, not to the panel."
+    },
+    "surface-default": {
+      "light": "#eeeeee",
+      "dark": "#1b201f",
+      "$note": "THE COMPOSITED VALUE OF THE GLASS, NOT ITS FILL, and that distinction is the whole architecture of this skin. A frosted tile is translucent, so its ink ground is whatever happens to be behind it — which would void every contrast guarantee in the library. scripts/validate-skin.mjs refuses that outright: it fails with 'surface-default is not a flat colour; every other check measures against it'. So this token records what the glass RESOLVES TO over the scrim and the clamped backdrop, as a flat hex, and the gate goes on measuring all 73 checks against it exactly as it does for an opaque skin. The translucency lives in surface-glass and is used only for rendering. If the glass alpha or the scrim moves, THIS VALUE MUST BE RE-COMPOSITED IN THE SAME COMMIT — it is the one number in the file that is derived from two others and cannot be checked against them."
+    },
+    "surface-tinted": {
+      "light": "#ebeded",
+      "dark": "#202a28"
+    },
+    "surface-subtle": {
+      "light": "#f0f2f1",
+      "dark": "#111515"
+    },
+    "surface-raised": {
+      "light": "#f8f9f9",
+      "dark": "#232c2a"
+    },
+    "surface-track": {
+      "light": "#eceeee",
+      "dark": "#101413"
+    },
+    "surface-inverse": {
+      "light": "#1a2120",
+      "dark": "#f0f2f1"
+    },
+    "surface-banner": {
+      "light": "#f6f7f6",
+      "dark": "#1e2524",
+      "$note": "THE MASTHEAD IS GLASS TOO, so this records the band COMPOSITED over the clamped backdrop and the scrim — the same arrangement surface-default uses for tiles, and for the same reason: validate:skin needs a flat hex to measure against. The band spans #efefef..#fefefe in light and #191f1f..#242a29 in dark whatever the consumer puts behind it, and every banner ink was solved against BOTH ends, not against this recorded middle. Unlike midgard, which turns backdrop-filter off on its bar to get one flat certain plane, this skin leaves it on: a frosted masthead over the scene IS the reference, and the clamp is what makes it safe."
+    },
+    "surface-banner-deep": {
+      "light": "#e9eceb",
+      "dark": "#161c1b"
+    },
+    "surface-hover": {
+      "light": "#edf0ef",
+      "dark": "#1e2725"
+    },
+    "surface-raised-hover": {
+      "light": "#f3f4f4",
+      "dark": "#2c3835"
+    },
+    "surface-card-hover": {
+      "light": "#f6f7f6",
+      "dark": "#1f2826"
+    },
+    "surface-active": {
+      "light": "#e5e9e8",
+      "dark": "#2a3533"
+    },
+    "surface-disabled": {
+      "light": "#eceeee",
+      "dark": "#121616"
+    },
+    "text-primary": {
+      "light": "#1d2826",
+      "dark": "#e0e3e2"
+    },
+    "text-secondary": {
+      "light": "#3b4e4a",
+      "dark": "#a4b0ae"
+    },
+    "text-muted": {
+      "light": "#536a66",
+      "dark": "#809591",
+      "$note": "SOLVED AGAINST THE COMPOSITE RANGE, NOT THE RECORDED PANEL, and it is the one ink where that distinction bites. On surface-default it measures comfortably; but surface-default is what the glass resolves to over a MID backdrop, and the real ground moves as the consumer's image does. Across the full range the scrim allows, the first value tried landed at 4.46:1 — under by 0.04, and invisible to validate:skin, which only ever sees the flat recorded hex. Held to the pale extreme instead, and to status-neutral-wash, which is the lightest ground any dark ink here sits on."
+    },
+    "text-disabled": {
+      "light": "#96a6a3",
+      "dark": "#637470"
+    },
+    "text-inverse": {
+      "light": "#ffffff",
+      "dark": "#0d1111"
+    },
+    "accent-solid": {
+      "light": "#10d177",
+      "dark": "#2eef95",
+      "$note": "The vivid spring green of the reference. Vivid in both halves as a FILL; every text role steps away from it in light, because a saturated green on a white panel clears 4.5:1 in none of them. That is the warm-high-chroma-accent finding this library has now recorded three times — industry's yellow, midgard's gold, and now this — so the shape of the rule is confirmed for a COOL high-chroma accent too: it is about chroma against a pale plate, not about hue."
+    },
+    "accent-solid-hover": {
+      "light": "#0eb969",
+      "dark": "#4bf1a4"
+    },
+    "accent-solid-active": {
+      "light": "#0ca15c",
+      "dark": "#67f4b2"
+    },
+    "accent-on-solid": {
+      "light": "#04120c",
+      "dark": "#04120c"
+    },
+    "accent-text": {
+      "light": "#077c45",
+      "dark": "#24db86"
+    },
+    "text-link": {
+      "light": "#077c45",
+      "dark": "#24db86"
+    },
+    "border-accent": {
+      "light": "#0d9d5a",
+      "dark": "#20df86"
+    },
+    "accent-wash": {
+      "light": "#d6f5e7",
+      "dark": "#123d29"
+    },
+    "accent-wash-hover": {
+      "light": "#c5f1dd",
+      "dark": "#164d34"
+    },
+    "accent-wash-active": {
+      "light": "#b5eed3",
+      "dark": "#1b5d3e"
+    },
+    "accent-wash-border": {
+      "light": "#98e1bf",
+      "dark": "#26734f"
+    },
+    "accent-wash-text": {
+      "light": "#037c44",
+      "dark": "#19e686"
+    },
+    "focus-ring": {
+      "light": "#0a9d58",
+      "dark": "#38f09a"
+    },
+    "focus-offset": {
+      "light": "#eeeeee",
+      "dark": "#1b201f"
+    },
+    "chart-surface": {
+      "light": "#eeeeee",
+      "dark": "#1b201f"
+    },
+    "status-good-mark": {
+      "light": "#199d5b",
+      "dark": "#24db80"
+    },
+    "status-good-text": {
+      "light": "#057c41",
+      "dark": "#20df80"
+    },
+    "status-good-wash": {
+      "light": "#d6f5e6",
+      "dark": "#133926"
+    },
+    "status-warning-mark": {
+      "light": "#bd7a05",
+      "dark": "#f9a006"
+    },
+    "status-warning-text": {
+      "light": "#925f06",
+      "dark": "#df9920"
+    },
+    "status-warning-wash": {
+      "light": "#f5ead6",
+      "dark": "#392b13"
+    },
+    "status-serious-mark": {
+      "light": "#e75c0c",
+      "dark": "#f2610d"
+    },
+    "status-serious-text": {
+      "light": "#af4507",
+      "dark": "#e06c29"
+    },
+    "status-serious-wash": {
+      "light": "#f5e1d6",
+      "dark": "#392113"
+    },
+    "status-critical-mark": {
+      "light": "#eb4d47",
+      "dark": "#e62019"
+    },
+    "status-critical-text": {
+      "light": "#c50e08",
+      "dark": "#e65550"
+    },
+    "status-critical-wash": {
+      "light": "#f5d7d6",
+      "dark": "#391413"
+    },
+    "status-critical-solid": {
+      "light": "#a7201b",
+      "dark": "#b8231e"
+    },
+    "status-critical-on-solid": {
+      "light": "#ffffff",
+      "dark": "#ffffff"
+    },
+    "status-neutral-mark": {
+      "light": "#758e89",
+      "dark": "#738c87"
+    },
+    "status-neutral-text": {
+      "light": "#536a66",
+      "dark": "#809591",
+      "$note": "RE-STEPPED OFF text-muted, which it otherwise mirrors. Muted clears the panel and the page but lands at 4.00:1 on status-neutral-wash — the neutral wash is the LIGHTEST ground any dark ink sits on in this palette, so it binds where the panel does not. Solved against all three grounds at once."
+    },
+    "status-neutral-wash": {
+      "light": "#edf0ef",
+      "dark": "#232c2a"
+    },
+    "border-subtle": {
+      "light": "#e2e6e6",
+      "dark": "#2e3836"
+    },
+    "border-default": {
+      "light": "#d1d9d7",
+      "dark": "#3c4946"
+    },
+    "border-strong": {
+      "light": "#758e89",
+      "dark": "#738c87"
+    },
+    "text-on-banner": {
+      "light": "#283533",
+      "dark": "#dee1e0"
+    },
+    "text-on-banner-deep": {
+      "light": "#273331",
+      "dark": "#cbd0cf"
+    },
+    "text-on-banner-muted": {
+      "light": "#58706b",
+      "dark": "#809591"
+    },
+    "shadow-none": {
+      "light": "none",
+      "dark": "none"
+    },
+    "shadow-sm": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.7), 0 1px 2px rgba(9, 20, 17, 0.08)",
+      "dark": "inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 1px 2px rgba(0, 0, 0, 0.45)"
+    },
+    "shadow-card": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 2px 8px rgba(9, 20, 17, 0.10)",
+      "dark": "inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 4px 14px rgba(0, 0, 0, 0.55)",
+      "$note": "MAY NEVER BE none. css/skins/vitrine.css composes var(--jrk-shadow-card) into the glass edge, and a box-shadow list containing none is invalid CSS that drops the whole declaration. Same constraint midgard records for the same reason. The inset highlight is the top-edge catch that makes a pane read as glass; on the dark page it is the ONLY thing that reads, because a black shadow over a near-black ground renders nothing — the fourth independent arrival at on a dark ground, elevation is a fill."
+    },
+    "shadow-card-raise": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 8px 24px rgba(9, 20, 17, 0.14)",
+      "dark": "inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 10px 30px rgba(0, 0, 0, 0.62)"
+    },
+    "shadow-md": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.8), 0 4px 12px rgba(9, 20, 17, 0.12)",
+      "dark": "inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 6px 18px rgba(0, 0, 0, 0.55)",
+      "$note": "MAY NEVER BE none — see shadow-card."
+    },
+    "shadow-lg": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.85), 0 12px 32px rgba(9, 20, 17, 0.16)",
+      "dark": "inset 0 1px 0 rgba(255, 255, 255, 0.11), 0 14px 38px rgba(0, 0, 0, 0.65)"
+    },
+    "shadow-xl": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.9), 0 20px 48px rgba(9, 20, 17, 0.20)",
+      "dark": "inset 0 1px 0 rgba(255, 255, 255, 0.13), 0 22px 56px rgba(0, 0, 0, 0.70)"
+    },
+    "shadow-focus": {
+      "light": "0 0 0 2px #eeeeee, 0 0 0 4px #0a9d58",
+      "dark": "0 0 0 2px #38f09a, 0 0 0 4px #171e1d",
+      "$note": "TWO-TONE IN BOTH HALVES, and gated as such for every skin. A single-tone ring in the accent is invisible against a pale panel, and the ring is the library's one focus indicator."
+    },
+    "tracking-caps": {
+      "light": "0.08em",
+      "dark": "0.08em"
+    },
+    "tracking-wide": {
+      "light": "0.01em",
+      "dark": "0.01em"
+    },
+    "radius-sm": {
+      "light": "8px",
+      "dark": "8px"
+    },
+    "radius-md": {
+      "light": "12px",
+      "dark": "12px"
+    },
+    "radius-lg": {
+      "light": "16px",
+      "dark": "16px",
+      "$note": "ROUNDED IS THIS SKIN'S SIGNATURE, the inverse of both existing skins. industry and midgard each square a NAMED LIST of controls; vitrine rounds a named list of TILES in css/skins/vitrine.css. Note the base library reaches for radius.none directly on tiles rather than radius-lg, so overriding this token alone rounds nothing — the stylesheet has to name the tiles. Anything new that wants the glass treatment stays square until it is added there."
+    },
+    "radius-xl": {
+      "light": "22px",
+      "dark": "22px"
+    },
+    "radius-2xl": {
+      "light": "28px",
+      "dark": "28px"
+    },
+    "radius-data-end": {
+      "light": "999px",
+      "dark": "999px"
+    }
+  },
+  "skinOnly": {
+    "$comment": "Names with no base counterpart, exempt from the build exists-in-base assertion. Every one is referenced from css/skins/vitrine.css — validate:skin FAILS on a skinOnly token nothing draws.",
+    "vitrine-backdrop": {
+      "light": "radial-gradient(58% 44% at 20% 26%, rgba(16, 209, 119, 0.20) 0%, rgba(16, 209, 119, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%)",
+      "dark": "radial-gradient(58% 44% at 20% 26%, rgba(46, 239, 149, 0.30) 0%, rgba(46, 239, 149, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(46, 239, 149, 0.14) 0%, rgba(46, 239, 149, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%)",
+      "$note": "THE DEFAULT BACKDROP, AND IT HAS TO HAVE STRUCTURE OR THE SKIN IS NOT FROSTED. backdrop-filter blurs WHAT IS BEHIND THE ELEMENT: over a flat fill it returns the same flat fill and the blur is a no-op. The first version of this skin defaulted to none and shipped a pane with nothing behind it — measurably correct, and visibly not glass. So the default is a scene: two coloured pools, a dim floor wash, and a fine diagonal rule at 54px. THE RULE IS THE PART THAT READS — a gradient blurs to almost itself, but repeating hairlines smear into soft bands, which is what a viewer recognises as frosting. A consumer replaces this wholesale with their own url(); anything they supply is bounded by vitrine-clamp before it reaches the glass."
+    },
+    "vitrine-scrim": {
+      "light": "rgba(238, 242, 241, 0.25)",
+      "dark": "rgba(6, 10, 9, 0.30)",
+      "$note": "A TINT NOW, NOT A VEIL. With vitrine-clamp doing the bounding, the scrim only has to carry the palette cast — so it dropped from 0.94 to 0.30 and 75% of the backdrop reaches the glass. It is still measured as part of the composite; it is no longer what makes the composite safe."
+    },
+    "surface-glass": {
+      "light": "rgba(255, 255, 255, 0.55)",
+      "dark": "rgba(27, 35, 34, 0.50)",
+      "$note": "HALF-TRANSPARENT, where the first version was 0.70/0.72 and read as a tinted rectangle. Every ink was solved against the PALE EXTREME of the composite this produces over the clamped backdrop, not against the recorded surface-default: dark spans #141918..#222726, light spans #e8e9e9..#fdfefe."
+    },
+    "surface-glass-raised": {
+      "light": "rgba(255, 255, 255, 0.68)",
+      "dark": "rgba(33, 42, 41, 0.62)",
+      "$note": "Overlays sit closer to the reader and take a denser pane, so a menu over a card still reads as in front of it rather than merged with it."
+    },
+    "glass-blur": "22px",
+    "glass-blur-raised": "30px",
+    "vitrine-clamp": {
+      "light": "saturate(0.9) contrast(0.18) brightness(1.85)",
+      "dark": "saturate(0.95) contrast(0.55) brightness(0.28)",
+      "$note": "THE BOUND, AND IT REPLACED A NEARLY-OPAQUE SCRIM. The first version bounded the backdrop by COVERAGE — a 0.94-alpha veil — which made every ratio true and destroyed the effect, because 6% of an image is nothing to blur. This bounds it by LUMINANCE instead: any image a consumer supplies is compressed into #101010..#373737 in dark and #c1c1c1..#ffffff in light, so the composite stays measurable while the image keeps its STRUCTURE, which is what the blur needs. THE FILTER ORDER IS LOAD-BEARING: CSS applies filters in the order listed, and contrast() pulls toward mid-grey while brightness() scales. contrast-then-brightness lands a dark band; brightness-then-contrast lifts blacks to grey and the bound is lost. Do not reorder."
+    },
+    "masthead-fill": {
+      "light": "var(--jrk-surface-glass-raised)",
+      "dark": "var(--jrk-surface-glass-raised)",
+      "$note": "An indirection, not a new colour — the same denser pane overlays use, so the bar reads as the topmost plane. Kept as its own name so a future change to the masthead does not repaint every menu and modal with it."
+    },
+    "masthead-ink": {
+      "light": "var(--jrk-text-on-banner)",
+      "dark": "var(--jrk-text-on-banner)",
+      "$note": "One variable re-inks the whole interior of the bar — captions, statuses, ghost buttons, the search field — because base pipes all of them through gradient-ink."
+    }
+  }
+}

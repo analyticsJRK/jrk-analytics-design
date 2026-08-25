@@ -14,6 +14,7 @@ const PAGES = [
   ['modules.html', 'Module picker'],
   ['skin-industry.html', 'Industry skin'],
   ['skin-midgard.html', 'Midgard skin'],
+  ['skin-vitrine.html', 'Vitrine skin'],
 ];
 
 const STORAGE_KEY = 'jrk-preview-theme';

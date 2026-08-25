@@ -1,0 +1,197 @@
+<!-- @dsCard group="Skins" name="Vitrine skin" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vitrine skin — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<!-- The skin, in the order a consuming app uses: the generated colour layer
+     first, then the geometry stylesheet. Both AFTER css/index.css. -->
+<link rel="stylesheet" href="../dist/jrk-skin-vitrine.css">
+<link rel="stylesheet" href="../css/skins/vitrine.css">
+<link rel="stylesheet" href="preview.css">
+</head>
+<body>
+
+<div class="gal-page">
+  <header class="gal-page__head">
+    <h1>Vitrine skin</h1>
+    <p>
+      Frosted panes over a dark scene: translucent tiles with a real
+      <code>backdrop-filter</code> blur, a vivid spring-green accent, and
+      generous radii. The toggle below stamps <code>data-skin="vitrine"</code> on
+      the document &mdash; no markup on this page changes, only the stamp. The
+      theme toggle in the nav still works, because <strong>a skin is orthogonal
+      to the theme</strong>: it carries its own light and dark halves, so there
+      are four combinations to check rather than two.
+    </p>
+    <p>
+      <strong>Dark is the faithful half and light is a design decision</strong>,
+      the arrangement <a href="skin-midgard.html">midgard</a> records. The
+      reference is a dark scene lit from within; inverting it gives a pale ground
+      under a green that cannot be read on it, which is what the stepped light
+      accent roles exist to avoid.
+    </p>
+    <div style="margin-top:16px">
+      <div class="gal-note" style="margin-bottom:6px"><strong>Skin</strong></div>
+      <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Skin">
+        <button class="jrk-tab" data-skin-btn="" type="button">Base</button>
+        <button class="jrk-tab" data-skin-btn="vitrine" type="button">Vitrine</button>
+      </div>
+    </div>
+  </header>
+
+  <section class="gal-sec">
+    <h2>The glass, and why it can be measured at all</h2>
+    <p class="gal-note">
+      <strong>A translucent tile has no fixed ink ground</strong>, which would
+      void every contrast guarantee in the library.
+      <code>validate-skin.mjs</code> refuses it outright &mdash;
+      <em>&ldquo;surface-default is not a flat colour; every other check measures
+      against it&rdquo;</em>. So <code>surface-default</code> records what the
+      glass <em>composites to</em>, as a flat hex, and the gate goes on measuring
+      all 420 checks against it exactly as it would for an opaque skin. The
+      translucency lives in <code>surface-glass</code> and is used only for
+      rendering.
+    </p>
+    <p class="gal-note">
+      <strong>That recording is only honest because the scrim bounds it.</strong>
+      A consumer points <code>--jrk-vitrine-backdrop</code> at their own image;
+      the scrim is the veil between it and the glass. At alpha
+      <strong>0.94</strong> the composite spans <code>#151c1b</code> to
+      <code>#19201f</code> in dark <em>whatever</em> sits behind it &mdash; black
+      through white &mdash; and every ink was solved against the <em>pale
+      extreme</em> rather than against the recorded hex. At 0.90 the span widened
+      enough to put <code>text-muted</code> at <strong>4.46:1</strong>, under by
+      0.04 and invisible to the gate, which only ever sees the flat value.
+      Backdrop, scrim, glass alpha and <code>surface-default</code> are one
+      decision in four places.
+    </p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Capacity</span>
+        <span class="jrk-stat__value">90<span class="jrk-stat__unit">%</span></span>
+        <span class="jrk-delta jrk-delta--good">&#9650; 12.8%</span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Daily total</span>
+        <span class="jrk-stat__value">1,259<span class="jrk-stat__unit"> t</span></span>
+        <span class="jrk-stat__meta">across four plants</span>
+      </div>
+      <div class="jrk-stat">
+        <span class="jrk-stat__label">Daily pass</span>
+        <span class="jrk-stat__value">919<span class="jrk-stat__unit"> t</span></span>
+        <span class="jrk-delta jrk-delta--critical">&#9660; 2.8%</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>The rounded contract</h2>
+    <p class="gal-note">
+      <code>industry</code> and <code>midgard</code> each name a list of controls
+      that must be <strong>squared</strong>. This skin inverts that &mdash; but
+      the radius tokens alone round <em>nothing</em>, because the base library
+      reaches for <code>radius.none</code> <em>directly</em> on tiles rather than
+      through <code>radius-lg</code>. So the tiles have to be named, and that list
+      is this skin's contract: <strong>anything new stays square until it is added
+      to it.</strong>
+    </p>
+    <p class="gal-note">
+      Controls need no rule at all here. They take <code>radius-full</code> or
+      <code>radius-md</code> from the base layer and both already suit a soft
+      look &mdash; which is why this stylesheet is shorter than the other two
+      skins have to be. A rounded skin agrees with the base control ladder where a
+      squared one has to fight it.
+    </p>
+    <div class="gal-demo" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="jrk-btn jrk-btn--cta" type="button">Run report</button>
+      <button class="jrk-btn jrk-btn--primary" type="button">New view</button>
+      <button class="jrk-btn jrk-btn--secondary" type="button">Export</button>
+      <button class="jrk-btn jrk-btn--danger" type="button">Purge</button>
+      <span class="jrk-badge jrk-badge--good">Passing</span>
+      <span class="jrk-badge jrk-badge--warning">Review</span>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>Nested panes take no blur</h2>
+    <p class="gal-note">
+      Two frosted layers over each other read as fog rather than as depth, the
+      inner one has nothing behind it worth blurring, and the composite cost is
+      paid twice for it. A nested tile takes the opaque composite and the neutral
+      hairline <code>nesting.css</code> already gives it.
+    </p>
+    <div class="jrk-card">
+      <p class="jrk-card__title">Plant A</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-top:12px">
+        <div class="jrk-stat">
+          <span class="jrk-stat__label">Throughput</span>
+          <span class="jrk-stat__value">902.5<span class="jrk-stat__unit"> t</span></span>
+        </div>
+        <div class="jrk-stat">
+          <span class="jrk-stat__label">Yield</span>
+          <span class="jrk-stat__value">1,105.8<span class="jrk-stat__unit"> t</span></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>The backdrop belongs to the app, never to the library</h2>
+    <p class="gal-note">
+      This library has never shipped a binary, and the portal's sync script
+      <strong>mirrors whole directories</strong> &mdash; so a photograph dropped
+      into <code>css/</code> would be copied into the app on every sync forever,
+      referenced or not. The skin exposes a hook instead and ships a token-built
+      ramp as its default, so it looks like itself standalone:
+    </p>
+    <pre class="gal-code"><code>:root[data-skin='vitrine'] {
+  --jrk-vitrine-backdrop: url('/factory.webp');
+}</code></pre>
+    <p class="gal-note">
+      Set it in this page's devtools to watch the scrim do its job: the panes stay
+      legible over anything you point it at, which is the entire purpose of
+      bounding the composite.
+    </p>
+  </section>
+</div>
+
+<script type="module">
+/* SIDE-EFFECT IMPORT, and it must stay one. preview.js calls initChrome() and
+   hydrateIcons() at module scope — importing it IS what installs the gallery
+   bar. Calling initChrome() again here prepends a SECOND .gal-nav. */
+import './preview.js';
+
+/* The skin stamp, kept in the URL so a reload and a shared link both hold it.
+   Deliberately NOT in localStorage like the theme: the theme is a reader's
+   standing preference, the skin is what this one page is demonstrating. */
+const SKIN = 'vitrine';
+function applySkin(v) {
+  if (v) document.documentElement.dataset.skin = v;
+  else delete document.documentElement.dataset.skin;
+  const url = new URL(location.href);
+  v ? url.searchParams.set('skin', v) : url.searchParams.delete('skin');
+  history.replaceState(null, '', url);
+  document.querySelectorAll('[data-skin-btn]').forEach((b) => {
+    /* .jrk-tabs--pills styles the chosen tab off aria-selected (shell.css); the
+       pressed state is what a screen reader reads back off a toggle. Both, or
+       the picker is either invisible or silent. */
+    const on = b.dataset.skinBtn === v;
+    b.setAttribute('aria-selected', String(on));
+    b.setAttribute('aria-pressed', String(on));
+  });
+}
+document.querySelectorAll('[data-skin-btn]').forEach((b) => {
+  b.addEventListener('click', () => applySkin(b.dataset.skinBtn));
+});
+
+/* Default ON — this page exists to show the skin — but an explicit ?skin= in the
+   URL wins in either direction, so a link to the base comparison survives a
+   reload. */
+const param = new URL(location.href).searchParams.get('skin');
+applySkin(param === null || param === SKIN ? SKIN : '');
+</script>
+</body>
+</html>
