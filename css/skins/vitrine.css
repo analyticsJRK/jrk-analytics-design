@@ -139,26 +139,57 @@
    alone is far too transparent to carry ink, so the fallback is the opaque
    composite. That is the one place surface-default is used as a fill, and it is
    used precisely because it is what the glass would have resolved to. */
-:root[data-skin='vitrine'] .jrk-card,
+/* ── WHAT IS NOT GLASS ────────────────────────────────────────────────────
+   A SURFACE THAT BRINGS ITS OWN MEANINGFUL FILL IS NOT A PANE, and the eight
+   selectors below are guarded so it stays that way. This was a real fault, not a
+   precaution: `:root[data-skin='vitrine'] .jrk-stat` is 0-3-0 and base's vivid
+   tile is `.jrk-stat.jrk-stat--vivid` at 0-2-0 — already doubled, for exactly
+   this class of collision, and still lower. So under this skin every vivid tile
+   lost its gradient and kept its white ink: white text on a 0.55-alpha white
+   pane, i.e. invisible in light. Measured across the whole toned set, thirteen
+   surfaces collapsed to one fill.
+
+   THE ALERTS WERE THE WORSE HALF. `.jrk-alert--warning` and friends are 0-1-0, so
+   all five tones rendered identical to a plain alert — a status wash silently
+   deleted. The icon and the label survive (this library never lets colour be the
+   only signal, which is what kept it from being a total failure) but the wash is
+   half of what an alert is.
+
+   GUARDS RATHER THAN A RESTORE RULE, deliberately. Un-glassing these afterwards
+   would mean restating base's own fills here — the alert washes as tokens, and
+   the vivid tile's gradient ANGLE, which is a geometry decision this file has no
+   business owning a second copy of. A :not() says the thing that is true: these
+   were never panes.
+
+   THE NESTED BLOCK BELOW CARRIES THE SAME GUARDS, and that is not symmetry for
+   its own sake. `:not()` takes the specificity of its argument, so guarding the
+   stat here moves it from 0-3-0 to 0-5-0 — past the 0-4-0 nested rule, which
+   would have re-frosted every stat inside a card. Both move together or the
+   fix breaks something else. A nested VIVID stat now matches neither and keeps
+   base's gradient, which is correct.
+
+   ADDING A COMPONENT: if it brings its own fill, add its modifier to the guard
+   here AND below. If it does not, it needs no entry. */
+:root[data-skin='vitrine'] .jrk-card:not(.jrk-card--tinted),
 :root[data-skin='vitrine'] .jrk-chart-card,
-:root[data-skin='vitrine'] .jrk-stat,
-:root[data-skin='vitrine'] .jrk-stat-row,
+:root[data-skin='vitrine'] .jrk-stat:not(.jrk-stat--vivid):not(.jrk-stat--tinted),
+:root[data-skin='vitrine'] .jrk-stat-row:not(.jrk-stat-row--tinted),
 :root[data-skin='vitrine'] .jrk-table-wrap,
 :root[data-skin='vitrine'] .jrk-sheet,
-:root[data-skin='vitrine'] .jrk-alert,
+:root[data-skin='vitrine'] .jrk-alert:not(.jrk-alert--warning):not(.jrk-alert--serious):not(.jrk-alert--critical):not(.jrk-alert--good):not(.jrk-alert--accent),
 :root[data-skin='vitrine'] .jrk-auth__panel {
   background: var(--jrk-surface-default);
   border-radius: var(--jrk-radius-lg);
 }
 
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  :root[data-skin='vitrine'] .jrk-card,
+  :root[data-skin='vitrine'] .jrk-card:not(.jrk-card--tinted),
   :root[data-skin='vitrine'] .jrk-chart-card,
-  :root[data-skin='vitrine'] .jrk-stat,
-  :root[data-skin='vitrine'] .jrk-stat-row,
+  :root[data-skin='vitrine'] .jrk-stat:not(.jrk-stat--vivid):not(.jrk-stat--tinted),
+  :root[data-skin='vitrine'] .jrk-stat-row:not(.jrk-stat-row--tinted),
   :root[data-skin='vitrine'] .jrk-table-wrap,
   :root[data-skin='vitrine'] .jrk-sheet,
-  :root[data-skin='vitrine'] .jrk-alert,
+  :root[data-skin='vitrine'] .jrk-alert:not(.jrk-alert--warning):not(.jrk-alert--serious):not(.jrk-alert--critical):not(.jrk-alert--good):not(.jrk-alert--accent),
   :root[data-skin='vitrine'] .jrk-auth__panel {
     background: var(--jrk-surface-glass);
     -webkit-backdrop-filter: blur(var(--jrk-glass-blur)) saturate(1.4);
@@ -170,8 +201,8 @@
    read as fog rather than as depth, the inner one has nothing behind it worth
    blurring, and the cost is paid twice for it. It takes the opaque composite
    and the neutral hairline nesting.css already gives it. */
-:root[data-skin='vitrine'] .jrk-card .jrk-card,
-:root[data-skin='vitrine'] .jrk-card .jrk-stat,
+:root[data-skin='vitrine'] .jrk-card .jrk-card:not(.jrk-card--tinted),
+:root[data-skin='vitrine'] .jrk-card .jrk-stat:not(.jrk-stat--vivid):not(.jrk-stat--tinted),
 :root[data-skin='vitrine'] .jrk-card .jrk-table-wrap,
 :root[data-skin='vitrine'] .jrk-card .jrk-chart-card {
   background: var(--jrk-surface-default);
