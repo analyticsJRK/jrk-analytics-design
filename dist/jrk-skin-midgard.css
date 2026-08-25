@@ -82,7 +82,7 @@
   --jrk-radius-data-end: 0;
   --jrk-font-display: Cinzel, 'Trajan Pro', 'Times New Roman', Georgia, serif;
   --jrk-lozenge-size: 9px;
-  --jrk-rune-glow: 20%;
+  --jrk-node-glow: 20%;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -147,7 +147,7 @@
     --jrk-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
     --jrk-shadow-xl: 0 20px 52px rgba(0, 0, 0, 0.66);
     --jrk-shadow-focus: 0 0 0 2px #d9ae43, 0 0 0 4px #0b0f14;
-    --jrk-rune-glow: 38%;
+    --jrk-node-glow: 38%;
   }
 }
 
@@ -212,5 +212,5 @@
     --jrk-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.6);
     --jrk-shadow-xl: 0 20px 52px rgba(0, 0, 0, 0.66);
     --jrk-shadow-focus: 0 0 0 2px #d9ae43, 0 0 0 4px #0b0f14;
-    --jrk-rune-glow: 38%;
+    --jrk-node-glow: 38%;
 }

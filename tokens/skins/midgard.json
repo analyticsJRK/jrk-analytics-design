@@ -359,10 +359,10 @@
     },
     "lozenge-size": "9px",
     "$lozengeNote": "The small rotated square centred on a divider, which is the reference's own way of interrupting a rule. Drawn as a pseudo-element filled with the plate colour, so the line appears to pass behind it. A magnitude rather than a rule, which is why the size is a token and the placement is CSS.",
-    "rune-glow": {
+    "node-glow": {
       "light": "20%",
       "dark": "38%",
-      "$note": "A MAGNITUDE, not a colour — the percentage of accent-solid the masthead's runic band is mixed at, which is why it can live here without being a hand-picked value. It is per-theme because the glow IS the dark half: at 38% the rune core is 2.26:1 off the dark band and reads as lit, and at 20% in light it is 1.49:1 and reads as an engraving. The mask carries the halo as alpha (a wide stroke at .3 behind a narrow one at 1), so this single figure sets both — the halo lands near 11% in dark and 6% in light. CEILING 53%: the band's own ink crosses 4.5:1 there, and the whole point of a flat masthead is that nothing on it is a layout condition. At the shipped values text-on-banner is 6.80:1 dark and 10.05:1 light ON the brightest part of a rune."
+      "$note": "A MAGNITUDE, not a colour — the percentage of accent-solid the masthead's node network is mixed at, which is why it can live here without being a hand-picked value. It is per-theme because the glow IS the dark half: at 38% a trace's core is 2.26:1 off the dark band and reads as lit, and at 20% in light it is 1.49:1 and reads as engraved. The mask carries the falloff as alpha (a 7px stroke at .26 behind a 1.6px stroke at 1), so this single figure sets both layers — the halo lands near 11% in dark and 6% in light. CEILING 53%: the band's own ink crosses 4.5:1 there, and the whole point of a flat masthead is that nothing on it is a layout condition. At the shipped values text-on-banner is 6.80:1 dark and 10.05:1 light on the brightest pixel of a trace."
     }
   }
 }
