@@ -259,9 +259,24 @@
    That is exactly why the classic version of this technique has to hand the
    stem back on a different pseudo-element for :last-child; changing only a
    colour means it never leaves. An only child matches both rules, loses the
-   whole bus, and keeps its stem. */
-.jrk-org__branch > .jrk-org__node:first-child::before,
-.jrk-org__branch > .jrk-org__node:last-child::after {
+   whole bus, and keeps its stem.
+
+   NOT ON A STACKED BRANCH, and the `:not()` is a fix rather than a tidy-up.
+   `--stacked` is a MODIFIER, so a stacked branch carries `.jrk-org__branch` too,
+   and it repurposes these two pseudo-elements: down there `::before` is the
+   child's share of the vertical spine and `::after` is the TICK across into its
+   card, both on `border-block-start`/`border-inline-start` swapped round. So this
+   rule matched the stacked branch's last child at 0-3-1 — one class more specific
+   than the `--stacked` block that draws the tick at 0-2-1 — and painted that
+   tick transparent whatever the order of the two. Every stacked branch's last
+   leaf was drawn with a spine arriving beside it and nothing joining the two,
+   which reads as a card that belongs to no one.
+
+   The trim is a property of the horizontal BUS, and a stacked branch has no bus:
+   excluding it here is the accurate statement, where raising the `--stacked`
+   block's specificity to out-shout this rule would only be the louder one. */
+.jrk-org__branch:not(.jrk-org__branch--stacked) > .jrk-org__node:first-child::before,
+.jrk-org__branch:not(.jrk-org__branch--stacked) > .jrk-org__node:last-child::after {
   border-block-start-color: transparent;
 }
 
