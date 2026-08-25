@@ -30,6 +30,73 @@
     outline-offset: 2px;
   }
   .tint button:focus-visible { box-shadow: var(--jrk-shadow-focus); }
+
+  /* ── the frosted scene ───────────────────────────────────────────────────
+     A SECTION-LOCAL BACKDROP, which is not how the skin's own backdrop works and
+     has to be. --jrk-vitrine-backdrop is painted by body::before at
+     position: fixed, because a backdrop is a property of the viewport; that layer
+     cannot be scoped to one section of a page. So this scene brings its own photo
+     layer, and the frosted panes above it blur THAT — backdrop-filter blurs
+     whatever is painted behind the element, an ancestor's background included,
+     which is the ordinary glass-over-hero arrangement.
+
+     THE CLAMP IS APPLIED HERE TOO, and it is the part that would be easy to skip.
+     Every ink in this skin was solved against the pale extreme of the composite
+     rather than against the recorded hex, and --jrk-vitrine-clamp is what keeps
+     an arbitrary photograph inside that band. body::before applies it; a
+     section-local layer gets none of that for free, so it states it. Without this
+     line the panes are still glass and the ink is no longer guaranteed.
+
+     overflow: hidden AND isolation: isolate are both load-bearing: the first
+     keeps the photo inside the rounded box, and together they make this section
+     the backdrop root, so the panes blur the scene rather than the page. */
+  .vt-scene {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: var(--jrk-radius-lg);
+    padding: var(--jrk-space-8);
+  }
+
+  /* TWO LAYERS, PHOTO OVER RAMP. The photographs are optional — see
+     assets/README.md — so each is the FIRST layer of a two-layer background with
+     a token-built ramp underneath. A missing file falls through to the ramp and
+     the section still works; it just shows the weaker case it exists to improve
+     on. */
+  .vt-scene__photo {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-image:
+      url("assets/vitrine-scene-light.jpg"),
+      var(--jrk-vitrine-backdrop);
+    background-size: cover;
+    background-position: center;
+    filter: var(--jrk-vitrine-clamp);
+  }
+
+  /* Explicit dark, plus the prefers-color-scheme half for the gallery's SYSTEM
+     setting, which stamps no data-theme at all. Guarded with :not([data-theme])
+     so an explicit light choice still wins inside the media query. */
+  :root[data-theme="dark"] .vt-scene__photo {
+    background-image:
+      url("assets/vitrine-scene-dark.jpg"),
+      var(--jrk-vitrine-backdrop);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .vt-scene__photo {
+      background-image:
+        url("assets/vitrine-scene-dark.jpg"),
+        var(--jrk-vitrine-backdrop);
+    }
+  }
+
+  .vt-scene__content {
+    position: relative;
+    z-index: 1;
+  }
 </style>
 </head>
 <body>
@@ -239,6 +306,108 @@
       bounding the composite.
     </p>
   </section>
+
+  <section class="gal-sec">
+    <h2>The glass over a photograph</h2>
+    <p class="gal-note">
+      The section above sets the backdrop for the whole viewport. This one carries
+      its own, because that is what a real app looks like &mdash; a hero with panes
+      floating on it &mdash; and because <strong>six percent of an image is nothing
+      to blur</strong>. A gradient has no high-frequency detail, so it is the
+      weakest possible test of frosted glass: the blur has nothing to smear. Point
+      it at a photograph and the material finally reads.
+    </p>
+
+    <div class="vt-scene">
+      <div class="vt-scene__photo" aria-hidden="true"></div>
+      <div class="vt-scene__content jrk-stack">
+        <div class="jrk-stat-row">
+          <div class="jrk-stat">
+            <span class="jrk-stat__label">Occupancy</span>
+            <span class="jrk-stat__value">94.2<span class="jrk-stat__unit">%</span></span>
+            <span class="jrk-stat__caption">+1.4 pt vs prior month</span>
+          </div>
+          <div class="jrk-stat">
+            <span class="jrk-stat__label">Collected</span>
+            <span class="jrk-stat__value">$4.28<span class="jrk-stat__unit">M</span></span>
+            <span class="jrk-stat__caption">98.1% of billed</span>
+          </div>
+          <div class="jrk-stat">
+            <span class="jrk-stat__label">Work orders open</span>
+            <span class="jrk-stat__value">212</span>
+            <span class="jrk-stat__caption">31 over SLA</span>
+          </div>
+        </div>
+
+        <div class="jrk-grid jrk-grid-2">
+          <div class="jrk-card">
+            <div class="jrk-card__header">
+              <h3 class="jrk-card__title">Summit at Red Rocks</h3>
+              <p class="jrk-card__subtitle">316 units &middot; accrual basis</p>
+            </div>
+            <div class="jrk-card__body">
+              <div class="jrk-list">
+                <ul class="jrk-list__group">
+                  <li class="jrk-list__row"><span class="jrk-list__label">NOI</span><span class="jrk-list__value">$1.92M</span></li>
+                  <li class="jrk-list__row"><span class="jrk-list__label">Delinquency</span><span class="jrk-list__value">1.8%</span></li>
+                  <li class="jrk-list__row"><span class="jrk-list__label">Renewals signed</span><span class="jrk-list__value">64 of 71</span></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <div class="jrk-card">
+            <div class="jrk-card__header">
+              <h3 class="jrk-card__title">Why this pane stays legible</h3>
+            </div>
+            <div class="jrk-card__body">
+              <p class="jrk-body-sm">
+                The photograph is clamped by
+                <code class="jrk-mono">--jrk-vitrine-clamp</code> before it reaches
+                the glass &mdash; by luminance, not by coverage &mdash; so it keeps
+                its structure while the composite stays inside the band every ink
+                here was solved against. The pane itself is
+                <code class="jrk-mono">surface.glass</code> plus the blur, never
+                <code class="jrk-mono">surface.default</code>: that token is the
+                composite this fill <em>produces</em>.
+              </p>
+            </div>
+            <div class="jrk-card__footer">
+              <span class="jrk-badge jrk-badge--accent">frosted</span>
+              <span class="jrk-badge jrk-badge--outline">clamped</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="jrk-alert jrk-alert--accent" role="note">
+          <span class="jrk-alert__icon" aria-hidden="true">
+            <svg class="jrk-icon" viewBox="0 0 16 16" data-icon="info"></svg>
+          </span>
+          <div class="jrk-alert__body">
+            <p class="jrk-alert__title">An alert is a top-level pane, so it frosts too</p>
+            <p class="jrk-alert__text">
+              The grouped list inside the card on the left does not &mdash; two
+              frosted layers over each other read as fog rather than as depth, and
+              the inner one has nothing behind it worth blurring.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>The photographs are optional and are not part of the library.</strong>
+      They live in <code class="jrk-mono">preview/assets/</code>, which the
+      portal&rsquo;s sync script does not mirror &mdash; unlike
+      <code class="jrk-mono">css/</code>, where a binary would be copied into the
+      app on every sync forever, referenced or not. Each is the first layer of a
+      two-layer <code class="jrk-mono">background-image</code> with the skin&rsquo;s
+      own token ramp underneath, so a missing file falls through to the ramp and
+      this section still demonstrates the glass. See
+      <code class="jrk-mono">assets/README.md</code> for the two filenames.
+    </div>
+  </section>
+
 </div>
 
 <script type="module">
