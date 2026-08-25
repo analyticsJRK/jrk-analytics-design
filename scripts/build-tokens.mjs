@@ -163,6 +163,94 @@ ${dark}
 }
 `;
 
+// ============================== emit accent variants ==============================
+/* THE UNSKINNED LIBRARY'S OWN HUE AXIS, stamped with data-accent and crossed with
+   the theme. Same shape as a skin's variants and validated the same way, with one
+   difference that is the whole point of the selector below.
+
+   SCOPED :root:not([data-skin]), DELIBERATELY. A skin OWNS its accent — that is
+   what industry's data-hazard and vitrine's data-tint are — so data-accent under a
+   skin is a question with two answers. Left unscoped it would also leak: a skin
+   overrides only the accent tokens it happens to declare, so any variable here that
+   a skin does not restate would survive into it at equal specificity and paint one
+   base hue into a skinned palette. :not() makes the axis unambiguous and total.
+
+   Variant blocks come AFTER the base block, so the default hue is the ABSENCE of
+   the attribute and no existing consumer changes by one value. */
+const AV = T.accentVariants ?? null;
+const accentVariants = [];
+if (AV) {
+  const ax = AV.variantAxis;
+  if (!ax?.attr || !ax?.default) {
+    throw new Error('tokens.json: accentVariants declares no "variantAxis": { attr, default }.');
+  }
+  if (Object.keys(AV.variants ?? {}).includes(ax.default)) {
+    throw new Error(
+      `tokens.json: "${ax.default}" is variantAxis.default AND a declared variant. The default hue is ` +
+      `the absence of the attribute, not a value of it — declaring both means a picker button that changes nothing.`
+    );
+  }
+  const known = new Set(vars.map(([n]) => n));
+  for (const [vName, V] of Object.entries(AV.variants ?? {})) {
+    if (isMeta(vName)) continue;
+    if (!/^[a-z][a-z0-9-]*$/.test(vName)) throw new Error(`tokens.json: accent variant "${vName}" is not a plain lowercase ident`);
+    const ve = [];
+    for (const [k, v] of Object.entries(V.vars ?? {})) {
+      if (isMeta(k)) continue;
+      const name = `--${PREFIX}-${k}`;
+      /* The same assertion the skins get, and for the same reason: the tree-to-
+         variable mapping is namespace-specific, so a typo here becomes a variable
+         nothing reads, which is invisible in a browser. */
+      if (!known.has(name)) {
+        throw new Error(
+          `tokens.json: accent variant "${vName}" declares "${k}", which is not a base token — ` +
+          `${name} would be a colour nothing reads.`
+        );
+      }
+      if (isThemed(v)) ve.push([name, v.light, v.dark]);
+      else if (typeof v === 'string') ve.push([name, v, v]);
+      else throw new Error(`tokens.json: accent variant "${vName}" -> "${k}" is neither a {light,dark} pair nor a scalar`);
+    }
+    if (!ve.length) throw new Error(`tokens.json: accent variant "${vName}" declares no vars`);
+    accentVariants.push({ name: vName, entries: ve });
+  }
+}
+
+const accentCss = accentVariants.map(({ name, entries: ve }) => {
+  const vsel = `:root:not([data-skin])[data-${AV.variantAxis.attr}="${name}"]`;
+  const l = ve.map(([n, lv]) => `  ${n}: ${lv};`).join('\n');
+  const dPairs = ve.filter(([, lv, dv]) => dv !== lv);
+  const d = dPairs.map(([n, , dv]) => `    ${n}: ${dv};`).join('\n');
+  return `
+/* ── accent: ${name} ${'─'.repeat(Math.max(0, 60 - name.length))} */
+${vsel} {
+${l}
+}
+${dPairs.length ? `
+@media (prefers-color-scheme: dark) {
+  ${vsel}:not([data-theme="light"]) {
+${d}
+  }
+}
+
+${vsel}[data-theme="dark"] {
+${d}
+}
+` : ''}`;
+}).join('');
+
+const accentHeader = accentVariants.length
+  ? `
+/* ACCENT HUES, stamped with data-${AV.variantAxis.attr}. A second attribute, crossed with the theme:
+     <html data-${AV.variantAxis.attr}="${accentVariants[0].name}">
+   Available: ${accentVariants.map((v) => v.name).join(', ')}. Omit the attribute for
+   ${AV.variantAxis.default} — the default hue is the ABSENCE of a variant, not one of them, so
+   nothing that does not stamp it changes. Scoped :root:not([data-skin]) because a
+   skin owns its own accent axis; see tokens.json -> accentVariants for the
+   derivation and for what deliberately does NOT follow the hue. */
+`
+  : '';
+
 // ============================== emit skins ==============================
 /* A SKIN IS NOT A THIRD THEME. Each one carries its own light and dark halves,
    so it is orthogonal to the light/dark axis and gets its own stamp:
@@ -543,7 +631,7 @@ const iconTs = iconBody
            'export function iconSvg(name: string, extraClass = \'\'): string');
 
 mkdirSync(join(root, 'dist'), { recursive: true });
-writeFileSync(join(root, 'dist/jrk-tokens.css'), css);
+writeFileSync(join(root, 'dist/jrk-tokens.css'), css + accentHeader + accentCss);
 for (const s of skins) writeFileSync(join(root, s.file), s.css);
 writeFileSync(join(root, 'dist/jrk-theme.tailwind.css'), tailwind);
 writeFileSync(join(root, 'dist/tokens.ts'), ts);
@@ -551,8 +639,8 @@ writeFileSync(join(root, 'dist/icons.ts'), iconTs);
 writeFileSync(join(root, 'dist/icons.js'), iconBody);
 
 console.log(`built dist/`);
-console.log(`  jrk-tokens.css          ${vars.length} vars (${vars.filter((v) => v[2] !== null).length} themed)`);
+console.log(`  jrk-tokens.css          ${vars.length} vars (${vars.filter((v) => v[2] !== null).length} themed, ${accentVariants.length} data-accent variants)`);
 console.log(`  jrk-theme.tailwind.css  ${tw.length} mappings`);
-for (const s of skins) console.log(`  jrk-skin-${s.stamp}.css${" ".repeat(Math.max(1, 15 - s.stamp.length))}${s.count} vars (${s.themed} theme-dependent, ${s.variants} hazard variants)`);
+for (const s of skins) console.log(`  jrk-skin-${s.stamp}.css${" ".repeat(Math.max(1, 15 - s.stamp.length))}${s.count} vars (${s.themed} theme-dependent, ${s.variants ? `${s.variants} data-${s.attr} variants` : 'no variants'})`);
 console.log(`  tokens.ts`);
 console.log(`  icons.ts / icons.js     ${Object.keys(outline).length} outline + ${Object.keys(filled).length} filled`);

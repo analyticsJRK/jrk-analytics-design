@@ -52,6 +52,36 @@
         <a href="skin-vitrine.html">Vitrine</a>.
       </div>
     </div>
+
+    <div style="margin-top:16px">
+      <div class="gal-note" style="margin-bottom:6px"><strong>Accent hue</strong></div>
+      <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Accent hue">
+        <button class="jrk-tab" data-accent-btn="" type="button">Blue</button>
+        <button class="jrk-tab" data-accent-btn="cerulean" type="button">Cerulean</button>
+        <button class="jrk-tab" data-accent-btn="indigo" type="button">Indigo</button>
+        <button class="jrk-tab" data-accent-btn="violet" type="button">Violet</button>
+        <button class="jrk-tab" data-accent-btn="purple" type="button">Purple</button>
+        <button class="jrk-tab" data-accent-btn="magenta" type="button">Magenta</button>
+      </div>
+      <div class="gal-note" style="margin-top:6px">
+        Stamps <code class="jrk-mono">data-accent</code> on the document. <strong>Blue is
+        the absence of the attribute</strong>, not a value of it, so nothing that does
+        not stamp it changes by one value. The axis is scoped
+        <code class="jrk-mono">:root:not([data-skin])</code> — a skin owns its own accent,
+        which is what <code class="jrk-mono">data-hazard</code> and
+        <code class="jrk-mono">data-tint</code> are, so <strong>picking a skin above
+        disables this row</strong>.
+      </div>
+      <div class="gal-note" style="margin-top:6px">
+        <strong>Only the accent namespace moves.</strong> The four positional
+        <code class="jrk-mono">gradient.*</code> tile tones, the
+        <code class="jrk-mono">--brand</code> masthead ramp and all eight chart slots
+        stay where they are — the ramp carries a measured layout condition and the chart
+        order is the colourblind-safety mechanism, and neither is re-derived per hue. So
+        a stamped hue changes buttons, links, focus rings, selected controls and the
+        sheet banner, and leaves every chart mark alone.
+      </div>
+    </div>
   </header>
 
   <!-- ============================ buttons ============================ -->
@@ -1905,6 +1935,45 @@
   const SKINS = ['industry', 'midgard', 'vitrine'];
   const wanted = new URL(location.href).searchParams.get('skin');
   applySkin(SKINS.includes(wanted) ? wanted : '');
+
+  /* ACCENT PICKER — the base layer's own hue axis, the same shape as a skin's
+     data-hazard / data-tint and stamped the same way. The default hue is the
+     ABSENCE of the attribute, so its button carries an empty value; validate
+     checks that this list and tokens.json -> accentVariants agree exactly, in
+     both directions, because a hue with no button is invisible and a button with
+     no hue silently shows the default.
+
+     DISABLED UNDER A SKIN, and that is the selector being honest rather than the
+     picker being coy: the emitted rule is :root:not([data-skin])[data-accent=...],
+     so under a skin these buttons would stamp an attribute nothing reads. A skin
+     owns its accent. Leaving them live would look like a bug in the tokens. */
+  function applyAccent(v) {
+    if (v) document.documentElement.dataset.accent = v;
+    else delete document.documentElement.dataset.accent;
+    const url = new URL(location.href);
+    v ? url.searchParams.set('accent', v) : url.searchParams.delete('accent');
+    history.replaceState(null, '', url);
+    document.querySelectorAll('[data-accent-btn]').forEach((b) => {
+      const on = b.dataset.accentBtn === v;
+      b.setAttribute('aria-selected', String(on));
+      b.setAttribute('aria-pressed', String(on));
+    });
+  }
+  function syncAccentEnabled() {
+    const skinned = Boolean(document.documentElement.dataset.skin);
+    document.querySelectorAll('[data-accent-btn]').forEach((b) => { b.disabled = skinned; });
+  }
+  document.querySelectorAll('[data-accent-btn]').forEach((b) => {
+    b.addEventListener('click', () => applyAccent(b.dataset.accentBtn));
+  });
+  document.querySelectorAll('[data-skin-btn]').forEach((b) => {
+    b.addEventListener('click', syncAccentEnabled);
+  });
+
+  const ACCENTS = ['cerulean', 'indigo', 'violet', 'purple', 'magenta'];
+  const wantedAccent = new URL(location.href).searchParams.get('accent');
+  applyAccent(ACCENTS.includes(wantedAccent) ? wantedAccent : '');
+  syncAccentEnabled();
 </script>
 </body>
 </html>

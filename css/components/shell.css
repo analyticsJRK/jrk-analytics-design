@@ -629,40 +629,35 @@
 
 /* A GHOST BUTTON ON THIS VARIANT BRINGS ITS OWN GROUND AT REST, not only on hover.
  *
- * This is the one rule on the bar that exists because of WHERE things are rather
- * than what colour they are, and gradient.topbar.$measured is the argument. The
- * light ramp was re-specified on 2026-08-20 as #d5dfff -> #245ec6 -> #ffffff under
- * ink #1d273d. Both ENDS measure — 11.23:1 and 14.90:1 — and the INTERIOR does not:
- * the ink falls under 4.5:1 from roughly 34% to 66% of the bar's width, worst at
- * the 52% stop where it is 2.48:1.
+ * THIS RULE OUTLIVED ITS REASON, AND IT IS KEPT DELIBERATELY. It was the one rule
+ * on the bar that existed because of WHERE things are rather than what colour they
+ * are: the light ramp shipped 2026-08-20 as #d5dfff -> #245ec6 -> #ffffff under ink
+ * #1d273d, whose ENDS measured (11.23:1, 14.90:1) and whose INTERIOR did not — under
+ * 4.5:1 from roughly 34% to 66% of the width, worst 2.48:1 at the 52% stop. That
+ * shipped on a layout guarantee (`.jrk-spacer` holding the middle empty) which was
+ * THIN: the trailing cluster is around 400px, so below ~1200px of bar it slid left
+ * into the band and a ghost button that was 7.7:1 on a desktop became 2.9:1 on a
+ * laptop. No gate in this library measures a control against the interpolated middle
+ * of a gradient it happens to sit over.
  *
- * That shipped on a layout guarantee: `.jrk-spacer` holds the middle of this bar
- * empty, the drawer button and wordmark sit in the leading fifth, and the theme
- * control, account name and sign-out sit in the trailing fifth. Both safe. The
- * guarantee is THIN, though, and thin in a way nothing would catch — the trailing
- * cluster is around 400px wide, so somewhere below ~1200px of bar it slides left
- * into the band, and a ghost button that was 7.7:1 on a desktop becomes 2.9:1 on a
- * laptop with the sidebar open. No gate in this library measures a control against
- * the interpolated middle of a gradient it happens to be sitting over.
+ * ON 2026-08-25 THE RAMP BECAME #ffffff -> #cee0ff -> #ffffff AND THE BAND WENT AWAY.
+ * Worst ink anywhere is now 11.16:1, so nothing here is rescuing anything: a resting
+ * ghost button reads 14.15:1 on the white ends and 10.55:1 over the bloom with or
+ * without this fill. What the rule still buys is a RESTING BOUNDARY — the control is
+ * a hit target on a bar with no other edges — and the rest/hover step, since the
+ * hover rule above is the same veil at full strength (1.045:1 apart). Keep it as
+ * styling. It is also the shape a skin inherits, which is the other reason not to
+ * delete it: a skin that re-points the band to a dark fill gets the ground for free.
  *
- * So the fix is the one the bar already uses twice, made explicit: a control whose
- * ink is measured against its OWN fill does not care what is behind it. That is
- * exactly the reasoning the note further down gives for leaving
- * `.jrk-topbar__search` and `.jrk-btn--secondary` alone — accent.wash at 5.31:1 on
- * itself, a white fill at 4.86:1+ — and a resting ghost button is the same problem
- * without the same answer, because its fill is `transparent`.
+ * DO NOT REBUILD THE ARGUMENT ON A CONTRAST FIGURE. If this fill is ever needed for
+ * legibility again, that means the ramp went back to a failing interior, and the
+ * thing to fix is the ramp — see gradient.topbar.$restepNote, where the same request
+ * has now been answered three times and the last answer was to re-step rather than
+ * to compensate.
  *
  * overlay.hoverVeil at a fraction of its strength: DIRECTIONAL, so it darkens the
  * pale ends and lightens nothing, which is what keeps a resting control from
- * reading as a pressed one. The hover rule above stays at full strength and still
- * outranks this, so the rest/hover step survives.
- *
- * WHY NOT JUST RE-STEP THE VIA STOP. Because #245ec6 is what was asked for and the
- * band it creates carries nothing. $restepNote records the opposite call being made
- * on an earlier request, and the difference is which part of the bar the failure
- * lands on: that one put it under the account menu, this one puts it under empty
- * space. If text ever has to sit mid-bar, re-step the token — do not thin this rule
- * out to compensate.
+ * reading as a pressed one.
  *
  * 0-3-0 to clear the 0-2-0 `.jrk-topbar--vivid .jrk-btn--ghost` ink rule below
  * without disturbing it; that rule sets `color` and this sets `background`, so they
@@ -671,12 +666,22 @@
   background: color-mix(in srgb, var(--jrk-overlay-hover-veil) 55%, transparent);
 }
 
-/* AND THE SEGMENTED CONTROL, for the same reason and with a stronger claim on it.
+/* AND THE SEGMENTED CONTROL, for the same reason and with the numbers now in its
+ * favour rather than against it.
  *
- * The theme control is the widest thing in the trailing cluster and therefore the
- * first to enter the band as the bar narrows. It is also the one control on the bar
- * whose unselected segments carry ink with no fill of their own, so at rest all
- * three read straight off the ramp.
+ * It is the one control on the bar whose unselected segments carry ink with no fill
+ * of their own, so at rest all three read straight off the ramp. That was the risk
+ * when the ramp had a failing interior and the control was the widest thing in the
+ * trailing cluster, i.e. the first to slide into the band. On the pale ramp the
+ * unselected label measures 14.27:1 at the white ends and 10.66:1 over the bloom, so
+ * the track is no longer holding it up.
+ *
+ * WHAT THE TRACK STILL DOES IS CARRY THE SELECTION, and here it beats the base
+ * library. Off `surface.track` the thumb's fill is 1.05:1 — the whole margin between
+ * this design and the 1.00:1 white thumb already on record as a failure. Over this
+ * veil it is 1.11:1 on the white ends and 1.20:1 over the bloom. The semibold is
+ * still the structural channel and still may not be dropped; the fill just has more
+ * room here than it does anywhere else in the library.
  *
  * A track rather than a per-segment fill: the group is one object and its own
  * boundary is what makes the selected segment legible as a selection instead of as

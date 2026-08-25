@@ -142,24 +142,34 @@ namespaces, whose figures are hand-recorded on their tokens. **If you put a colo
 in a shadow, a gradient or a `data:` URL, nothing will check it — measure by hand
 and write the number down.**
 
-**AND THE LIBRARY NOW HAS ONE GRADIENT WHOSE SAFETY IS A LAYOUT FACT RATHER THAN A
-COLOUR ONE.** The `.jrk-topbar--brand` light ramp was reversed on 2026-08-20 to
-`#d5dfff → #245ec6 → #ffffff` under ink `#1d273d`. **Its middle stop measures
-2.48:1 and it ships that way deliberately.** Both ENDS pass (11.23:1 leading,
-14.90:1 trailing) and the ink fails from roughly 34% to 66% of the bar width —
-note this is the *opposite* of the convexity argument the four positional tones
-rely on, where the endpoints bound the interior; here the endpoints pass and the
-interior fails, because this ink sits between the two ends in luminance rather
-than below both. **On a ramp like that, checking the stops is not enough — the
-spans between them have to be checked too.** What makes it shippable is that
-`.jrk-topbar--brand` keeps the leading fifth and the trailing fifth inked and
-holds the middle empty with `.jrk-spacer`. **So a change to the topbar's layout is
-a change to its contrast**, which is true of nothing else in this file. The
-guarantee is thin: the right-hand cluster is about 400px, so below roughly 1200px
-of bar width it slides into the failing band. Put NOTHING ELSE on that bar in
-plain ink — the segmented control and the ghost buttons there are given a bounded
-ground of their own for this reason — and if the middle ever has to carry text,
-re-step `via` toward `#4d94ff` (4.83:1 under this ink) rather than re-inking.
+**THE BASE LIBRARY NO LONGER HAS A LAYOUT-DEPENDENT CONTRAST FACT — the
+`.jrk-topbar--brand` ramp gave its saturated middle up on 2026-08-25** and is now
+`#ffffff → #cee0ff → #ffffff` under ink `#1d273d`: a white bar with a soft blue
+bloom. **Worst ink ANYWHERE on the bar is 11.16:1** and there is no failing span,
+so nothing about where things sit on it affects whether they can be read. Dark is
+untouched.
+
+**Keep the retired version in mind, because the shape of the mistake recurs.** The
+old ramp was `#d5dfff → #245ec6 → #ffffff`: both ENDS passed (11.23:1, 14.90:1)
+and the INTERIOR failed at 2.48:1 across roughly a third of the width, because the
+ink sat *between* the two ends in luminance rather than below both. That is the
+*opposite* of the convexity argument the four positional tones rely on, and **on a
+ramp like that, checking the stops is not enough — the spans between them have to
+be checked too.** The new ramp is still non-monotonic and its endpoints still do
+not bound it; what changed is that the extremum is now the **declared `via` stop**,
+so checking the three stops happens to bound the bar. Move `via` off the extremum
+and the spans need walking again.
+
+**The general rule this settles, and it now has two independent confirmations: a
+band that must be crossable by text is a WASH; a vivid one is a promise about
+layout.** Industry's stripe took the vivid option by direction and carries the
+promise; this bar took the wash and is free of it. Note what did NOT have to change
+to buy that — the ink, the ring, the dark ramp and every control treatment on the
+bar are untouched. **The saturated middle was the whole cost.** The bounded grounds
+`shell.css` gives the segmented control and the ghost buttons on this variant are
+consequently no longer load-bearing; they are kept as styling and as the shape a
+skin inherits, and both rules say so. If either is ever needed for legibility
+again, the ramp has regressed — fix the ramp, not the compensation.
 
 **THE LOOK IS A SOFT WEB UI ON AN APPLE COLOUR FOUNDATION** (since 2026-08-13).
 White cards on a `#fbfbfb` page, pill controls, tall chrome.
@@ -641,7 +651,76 @@ real width (1920x1080 is the target display); a downscaled capture makes correct
 positions rather than trusting a mid-scroll capture — headless compositing
 produces convincing artifacts.
 
-## Skins — a SECOND AXIS, and the only one in this library
+## The accent hue axis — `data-accent`, on the UNSKINNED library
+
+**Five hues plus the default, stamped `data-accent` and crossed with the theme,
+derived and gated the same way a skin's variants are** (2026-08-25). Source:
+`tokens/tokens.json` → `accentVariants`; emitted into `dist/jrk-tokens.css`;
+picker on `preview/components.html`, parity-gated by `npm run validate`. Blue is
+the **absence** of the attribute, so nothing that does not stamp it changes.
+
+**THE ANCHOR IS PINNED FROM BOTH SIDES AND THE WINDOW IS 0.7 OF A LIGHTNESS STEP.**
+`accent.solid` is ONE value for both themes, so it must be dark enough to be ink
+on the darkest light plane (`surface.subtle` `#f2f2f7`, 4.5:1) and light enough to
+bound its own fill on the dark card (`#232326`, 3:1) — **those pull in opposite
+directions.** The shipped `#0069d9` sits exactly on the lower edge at 3.00:1;
+its own `$note` reads that as comfort and it is **tangency**. This is why the
+"one anchor, four roles" arrangement is fragile in a way the accent's `$comment`
+does not say: re-stepping the blue by hand for the light half alone drops it out
+of the window and no light-mode check notices. Running the derivation against the
+blue hue reproduces `#0069d9` exactly, `#005ec4` to one unit and `#0057b8` to two.
+
+**THE VIABLE ARC IS 265°–330° AND CVD IS WHAT CLOSES IT, NOT CONTRAST** — the
+two-sided window has a solution on every hue of the circle. Against this library's
+own status marks: 0–150° (pink, red, orange, amber, olive, green) collides with
+`status.critical` or `status.warning` under protanopia/deuteranopia; **155–260°
+(teal, cyan) collides with `status.good` under TRITANOPIA**, which is the failure
+a blue-green accent invites and the one that gets forgotten; 335–355° collides
+with `status.warning` under tritanopia. Separation BETWEEN variants is deliberately
+not required (worst dE 4.2 against the default) — exactly one hue is stamped at a
+time, the same argument Industry's hazard hues make.
+
+**WHAT DOES NOT FOLLOW THE HUE, AND THIS IS THE PART TO CHECK BEFORE "FIXING" IT.**
+`color.gradient.*` keeps its four positional tones and its `--brand` topbar ramp,
+and `chart.*` keeps all eight slots. The tones are assigned by SLOT rather than by
+meaning; the masthead ramp is a brand surface with its own per-theme design and its
+own hand-measured ink, ring and control treatments, none of which is derived from
+the accent; and the chart order IS the colourblind-safety mechanism. So a stamped
+hue moves buttons, links, focus rings, selected controls and the sheet banner, and
+leaves the masthead and every chart mark where they were. `gradient.blue.from`
+equalling `#0069d9` is a coincidence of the positional palette, not accent-tracking
+— and it stopped even looking like tracking on 2026-08-25, when the masthead's own
+light ramp went pale and shares no stop with the accent at all.
+
+**THE ACCENT-vs-CHART-SLOT-1 COLLISION IS PER-HUE NOW, AND ONLY ONE HUE REPAIRS
+IT.** The default blue is dE 7.5 from slot 1 (accepted debt). `cerulean` is 10.1
+and clears the floor; `magenta` 7.9 is a wash; **`indigo` 6.0, `violet` 4.4 and
+`purple` 3.8 are WORSE than the default**, so the "never let a lone blue series
+sit beside a `--cta` without a label" rule gets stricter under those three, not
+looser. `validate` prints all five against the default every run.
+
+**`shadow.focus` IS RESTATED IN EVERY VARIANT and that is the whole reason it is
+in the role set.** It carries its colour inside an `rgba()` string, which no gate
+parses — this library already shipped a violet halo from a two-accents-ago indigo
+around a blue core for exactly that reason. A variant that re-points `focus.ring`
+and not `shadow.focus` rebuilds that bug once per hue, so `validate` now parses
+the string and checks the halo IS that hue's own ring.
+
+**SCOPED `:root:not([data-skin])`, DELIBERATELY.** A skin OWNS its accent — that
+is what `data-hazard` and `data-tint` are — so `data-accent` under a skin is a
+question with two answers. Unscoped it would also LEAK: a skin overrides only the
+accent tokens it happens to declare, so any role here that a skin does not restate
+would survive into it at equal specificity and paint one base hue into a skinned
+palette. The gallery picker disables itself under a skin for the same reason.
+
+**Adding a hue:** put it in `accentVariants.variants` with the full role set (all
+variants must declare the SAME roles — a hue that omits `text-link` leaves the
+default blue behind in that hue alone, and `validate` fails on it), add a button
+to `preview/components.html`, run `npm test`. The picker-parity gate fails in both
+directions: a hue with no button is invisible, a button with no hue silently shows
+the default.
+
+## Skins — a THIRD AXIS (see `data-accent` above for the second)
 
 **THREE SKINS SHIP — `industry`, `midgard` and `vitrine` — and the differences
 between them are the useful thing in this section.** Everything down to the end of `validate:skin`

@@ -288,7 +288,14 @@ console.log('\n== vivid gradient tiles ==');
     // Every other cell still fails hard, so re-picking `from` or `to`, or lightening
     // the ink, is caught. If the middle of the bar ever has to carry text, re-step
     // via toward #4d94ff (ink at 4.83:1) and delete this branch.
-    const INK_WAIVED = new Set(['via:light']);
+    /* EMPTY SINCE 2026-08-25, AND THAT IS THE POINT — leave it empty. The light via
+       stop used to sit here at 2.48:1, waived because .jrk-spacer held the middle of
+       the bar clear. The ramp is now #ffffff -> #cee0ff -> #ffffff and every stop
+       passes on its own, so the mechanism stays wired up and gates nothing: re-darken
+       a stop and it FAILS rather than being quietly excused by a waiver written for a
+       ramp that no longer exists. Adding a name back here asserts a layout guarantee,
+       so state which one, on gradient.topbar.$measured. */
+    const INK_WAIVED = new Set();
     for (const stop of ['from', 'via', 'to']) {
       for (const mode of ['light', 'dark']) {
         const c = contrast(TB.ink[mode], TB[stop][mode]);
@@ -310,12 +317,12 @@ console.log('\n== vivid gradient tiles ==');
       : fail('gradient.topbar.ink is the same in both themes — one of the two ramps is now carrying an ink nothing measured it for');
 
     // The focus ring on this variant is gradient.topbar.RING, not gradient.focus
-    // (white, and the light ramp reaches white) and no longer the ink either — the
-    // ink is 2.48:1 on the light via stop, under this very floor. Assert the ring
-    // clears 3:1 at every stop of both ramps. NO WAIVER HERE, deliberately: the
-    // ink's miss is survivable because the middle of the bar carries no text, and a
-    // ring's is not, because a ring is drawn around whichever control has focus and
-    // the trailing cluster slides into the band as the bar narrows.
+    // (white, and the light ramp is white at both ends) and not the ink either. It was
+    // split off the ink when the light via stop measured 2.48:1 — under this very
+    // floor — and it stays split now that the ramp is pale, because the two floors are
+    // still different problems: the ink's miss was survivable by layout and a ring's
+    // never was, a ring being drawn around whichever control has focus. Assert it
+    // clears 3:1 at every stop of both ramps. NO WAIVER HERE, deliberately.
     for (const stop of ['from', 'via', 'to']) {
       for (const mode of ['light', 'dark']) {
         const cf = contrast(TB.ring[mode], TB[stop][mode]);
@@ -324,11 +331,11 @@ console.log('\n== vivid gradient tiles ==');
           : fail(`topbar focus ring on ${stop} ${mode} ${cf.toFixed(2)}:1 — needs 3:1`);
       }
     }
-    // The ring is a SEPARATE value from the ink now, and that has to stay true. If
-    // someone folds it back onto the ink "because they are both near-black", the
-    // light via stop goes to 2.48:1 and the loop above catches it — but if they
-    // instead lightened the ink to match the ring, both would pass this file while
-    // the bar's own text got quietly darker for no stated reason.
+    // The ring is a SEPARATE value from the ink, and that has to stay true. Folding
+    // them together now LOOKS free — the pale ramp carries both comfortably — which is
+    // exactly why this matters more than it did, not less: the two would pass together
+    // today and diverge silently at the next re-step, which has now happened three
+    // times. Keep them distinct while it costs nothing.
     TB.ring.light !== TB.ink.light
       ? pass('gradient.topbar.ring is its own value, not gradient.topbar.ink — the ring floor and the ink floor are different problems on this ramp')
       : fail('gradient.topbar.ring has been aliased to gradient.topbar.ink — one of them is now carrying a floor it was not measured for');
@@ -556,6 +563,128 @@ console.log('\n== diverging cell ramp ==');
       w.deltaE >= CVD_FLOOR
         ? pass(`div polarity rank ${i + 1} ${mode} — dE ${w.deltaE.toFixed(1)} (${w.kind})`)
         : fail(`div polarity rank ${i + 1} ${mode} — dE ${w.deltaE.toFixed(1)} under ${CVD_FLOOR}; negative and positive collapse under ${w.kind}`);
+    }
+  }
+}
+
+// ---------- accent variants (data-accent) ----------
+/* THE HUE AXIS IS RE-MEASURED, NOT TRUSTED. Every variant restates the accent
+   namespace plus the four roles that take the anchor, so each one is a complete
+   second palette and gets the complete second run: the same floors the default
+   accent is held to above, plus a CVD check against this library's own status
+   marks, which is what closes the hue circle down to the 265-330deg arc.
+
+   THREE THINGS THIS CATCHES THAT NOTHING ELSE WOULD.
+
+   (1) accent.solid IS PINNED FROM BOTH SIDES and the window is about 0.7 of a
+   CIELAB lightness step. It is ONE value for both themes, so it has to be dark
+   enough to be ink on surface.subtle and light enough to bound its own fill on the
+   dark card, and those pull in opposite directions. The shipped blue sits exactly
+   on the lower edge at 3.00:1 — tangency, not headroom. A hue re-stepped by hand
+   for the light half alone falls out of the window with no light-mode check
+   noticing a thing.
+
+   (2) shadow.focus CARRIES ITS COLOUR INSIDE AN rgba() STRING, which every loop
+   above is blind to — this library shipped a violet halo around a blue core for
+   exactly that reason, across two accents. Each variant must restate it, and it
+   must agree with that variant's own focus.ring.
+
+   (3) A VARIANT MAY NOT SILENTLY DROP A ROLE. If a hue restates accent.text but
+   not text.link, links stay the default blue in that hue alone. Every variant is
+   required to carry the same role set as every other. */
+console.log('\n== accent variants (data-accent) ==');
+{
+  const AV = T.accentVariants;
+  if (!AV) {
+    warn('tokens.json declares no accentVariants — the data-accent axis is gone');
+  } else {
+    const names = Object.keys(AV.variants).filter((k) => !k.startsWith('$'));
+    const keysets = names.map((n) => Object.keys(AV.variants[n].vars).filter((k) => !k.startsWith('$')).sort().join(','));
+    new Set(keysets).size === 1
+      ? pass(`all ${names.length} variants declare the same ${keysets[0].split(',').length} roles`)
+      : fail('accent variants declare DIFFERENT role sets — a hue that omits a role leaves the default colour behind in it');
+
+    for (const name of names) {
+      const V = AV.variants[name].vars;
+      const g = (k, mode) => (typeof V[k] === 'string' ? V[k] : V[k][mode]);
+      for (const mode of ['light', 'dark']) {
+        const tag = `${name} ${mode}`;
+        let c = contrast(g('accent-on-solid', mode), g('accent-solid', mode));
+        c >= 4.5 ? pass(`${tag} — onSolid on solid ${c.toFixed(2)}:1`)
+                 : fail(`${tag} — onSolid on solid ${c.toFixed(2)}:1, needs 4.5:1`);
+        for (const k of ['accent-wash', 'accent-wash-hover', 'accent-wash-active']) {
+          c = contrast(g('accent-wash-text', mode), g(k, mode));
+          c >= 4.5 ? pass(`${tag} — washText on ${k.replace('accent-', '')} ${c.toFixed(2)}:1`)
+                   : fail(`${tag} — washText on ${k.replace('accent-', '')} ${c.toFixed(2)}:1, needs 4.5:1`);
+        }
+        for (const [n, bg] of [['surface', T.color.surface.default[mode]], ['canvas', T.color.surface.canvas[mode]],
+                               ['subtle', T.color.surface.subtle[mode]], ['raisedHover', T.color.surface.raisedHover[mode]]]) {
+          c = contrast(g('text-link', mode), bg);
+          c >= 4.5 ? pass(`${tag} — link on ${n} ${c.toFixed(2)}:1`)
+                   : fail(`${tag} — link on ${n} ${c.toFixed(2)}:1, needs 4.5:1`);
+          c = contrast(g('focus-ring', mode), bg);
+          c >= 3 ? pass(`${tag} — focus.ring on ${n} ${c.toFixed(2)}:1`)
+                 : fail(`${tag} — focus.ring on ${n} ${c.toFixed(2)}:1, needs 3:1`);
+        }
+        c = contrast(g('border-accent', mode), T.color.surface.default[mode]);
+        c >= 3 ? pass(`${tag} — border.accent on the card ${c.toFixed(2)}:1`)
+               : fail(`${tag} — border.accent on the card ${c.toFixed(2)}:1, needs 3:1 as a signifier`);
+        for (const ink of ['onBanner', 'onBannerMuted']) {
+          const inkHex = ink === 'onBanner' ? T.color.text.onBanner[mode] : g('text-on-banner-muted', mode);
+          c = contrast(inkHex, g('surface-banner', mode));
+          c >= 4.5 ? pass(`${tag} — text.${ink} on the banner ${c.toFixed(2)}:1`)
+                   : fail(`${tag} — text.${ink} on the banner ${c.toFixed(2)}:1, needs 4.5:1`);
+        }
+        const sh = g('shadow-focus', mode);
+        const m = /rgba\((\d+),\s*(\d+),\s*(\d+)/.exec(sh);
+        if (!m) {
+          fail(`${tag} — shadow.focus "${sh}" has no parseable rgba(); the halo colour is unreachable to every gate`);
+        } else {
+          const got = '#' + [m[1], m[2], m[3]].map((x) => Number(x).toString(16).padStart(2, '0')).join('');
+          got === g('focus-ring', mode)
+            ? pass(`${tag} — shadow.focus halo is this hue's own focus.ring (${got})`)
+            : fail(`${tag} — shadow.focus halo is ${got} but focus.ring is ${g('focus-ring', mode)} — a stale halo blooms a colour from another accent`);
+        }
+      }
+      const solid = g('accent-solid', 'light');
+      const cl = contrast(solid, T.color.surface.subtle.light);
+      const cd = contrast(solid, T.color.surface.default.dark);
+      cl >= 4.5 && cd >= 3
+        ? pass(`${name} — accent.solid holds the two-sided window: ${cl.toFixed(2)}:1 on subtle, ${cd.toFixed(2)}:1 on the dark card`)
+        : fail(`${name} — accent.solid is OUTSIDE the window: ${cl.toFixed(2)}:1 on subtle (needs 4.5) / ${cd.toFixed(2)}:1 on the dark card (needs 3). One value serves both themes, so it is pinned from both sides at once.`);
+      for (const st of ['critical', 'warning', 'serious', 'good', 'neutral']) {
+        for (const mode of ['light', 'dark']) {
+          const mark = T.color.status[st].mark[mode];
+          const ink = mode === 'light' ? g('accent-solid', 'light') : g('accent-text', 'dark');
+          const w = worstSeparation(ink, mark);
+          w.deltaE >= CVD_FLOOR
+            ? pass(`${name} ${mode} — vs status.${st} dE ${w.deltaE.toFixed(1)} (${w.kind})`)
+            : fail(`${name} ${mode} — vs status.${st} dE ${w.deltaE.toFixed(1)} under ${CVD_FLOOR}; the accent and the ${st} signal collapse under ${w.kind}`);
+        }
+      }
+      const s1 = worstSeparation(g('accent-solid', 'light'), T.chart.categorical.slots[0].light);
+      const s0 = worstSeparation(T.color.accent.solid.light, T.chart.categorical.slots[0].light);
+      console.log(`  ..    ${name} vs chart slot 1 — dE ${s1.deltaE.toFixed(1)} (${s1.kind}); the default blue is dE ${s0.deltaE.toFixed(1)}`);
+    }
+
+    /* ---- THE GALLERY PICKER MUST OFFER EXACTLY THE HUES THAT EXIST — the same gate
+       validate-skin runs on a skin's picker, for the same two silent failures: a hue
+       in the token file with no button is invisible, and a button with no variant
+       stamps an attribute nothing reads and quietly shows the default. */
+    const page = readFileSync(join(root, 'preview/components.html'), 'utf8');
+    const listed = [...page.matchAll(/data-accent-btn="([a-z0-9-]*)"/g)].map((mm) => mm[1]);
+    const declared = names.slice().sort();
+    const offered = listed.filter((x) => x).sort();
+    const missing = declared.filter((x) => !offered.includes(x));
+    const extra = offered.filter((x) => !declared.includes(x));
+    if (!listed.length) {
+      fail(`preview/components.html declares no data-accent-btn list, so ${declared.length} hues have no picker`);
+    } else if (missing.length || extra.length) {
+      fail(`preview/components.html picker is out of step — ${missing.length ? `missing ${missing.join(', ')}` : ''}${missing.length && extra.length ? '; ' : ''}${extra.length ? `offers ${extra.join(', ')} which no variant defines` : ''}`);
+    } else if (!listed.includes('')) {
+      fail(`preview/components.html picker offers no button for ${AV.variantAxis.default}, the default hue — it is the ABSENCE of the attribute, so its button carries an empty value`);
+    } else {
+      pass(`the gallery picker offers exactly the ${declared.length} declared hues, plus ${AV.variantAxis.default}`);
     }
   }
 }
