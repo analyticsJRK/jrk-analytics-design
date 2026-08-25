@@ -638,6 +638,64 @@
   background: var(--jrk-surface-track);
 }
 
+/* ── the glitch furniture: small dissonant marks, and no long one ─────────
+ *
+ * Short offset blocks, registration ticks and a few torn slices, repeating along
+ * the band. They are the reference's technical noise WITHOUT its full-width
+ * yellow strip, which was built, shipped for a day and removed by direction: one
+ * long bar stretching the masthead flattened everything else on it, and it was
+ * the only thing on the bar carrying a layout condition. These are what was
+ * actually wanted. Do not put the long one back — see CLAUDE.md for what it cost.
+ *
+ * TWO ALPHA BUDGETS, SPLIT BY WHERE A MARK SITS, and this is the whole rule for
+ * adding another one. The bar's ink occupies roughly y19..y37 (a 13px label's
+ * line box, centred in 56px):
+ *
+ *   crossing the ink band   capped at .35. At 35% yellow over the charcoal
+ *                           text-on-banner holds about 5.2:1, against the 41%
+ *                           where it crosses 4.5:1. The blocks and the three
+ *                           ticks are all here.
+ *   below the ink band      free to run harder — the slices and dashes at
+ *                           y44..y53 go to .42, because nothing is inked over
+ *                           them and the two controls tall enough to reach them
+ *                           are opaque.
+ *
+ * AND THE LOW MARKS ARE SCATTERED IN Y ON PURPOSE. The first version put the
+ * strongest slice at y39 — two pixels under a 37px text bottom, which is legal by
+ * the rule above and still wrong: at that distance a 30px bar under a word does
+ * not read as debris, it reads as an UNDERLINE, and on the brand row it appeared
+ * to underline the wordmark and the sign-out control. Legibility was never the
+ * problem; the mark was being parsed as typography. They now sit at y44, y48 and
+ * y50..53 with no two sharing a baseline.
+ *
+ * That split is why these can stay when the strip could not. A mark capped by the
+ * INK carries no promise about layout; a mark capped by its POSITION makes the
+ * bar's height and control ladder load-bearing. Everything here is in the first
+ * category except three short marks in the last 17px of the bar, and none of
+ * them spans the width, so none of them is a thing a reader can be reading over.
+ *
+ * Drawn on ::after so it can repeat across the width; the mask is alpha-only, the
+ * colour is the accent token, and z-index -1 puts it behind the bar's content
+ * inside the stacking context .jrk-topbar already opens with --jrk-z-sticky. */
+:root[data-skin='industry'] .jrk-topbar--vivid::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+
+  background-color: var(--jrk-accent-solid);
+
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='5' fill-opacity='.32'/%3E%3Crect x='52' y='33' width='8' height='4' fill-opacity='.28'/%3E%3Crect x='130' y='28' width='26' height='4' fill-opacity='.34'/%3E%3Crect x='200' y='34' width='12' height='5' fill-opacity='.30'/%3E%3Crect x='250' y='30' width='6' height='6' fill-opacity='.26'/%3E%3Crect x='96' y='20' width='1.5' height='14' fill-opacity='.28'/%3E%3Crect x='178' y='18' width='1.5' height='18' fill-opacity='.24'/%3E%3Crect x='268' y='22' width='1.5' height='12' fill-opacity='.28'/%3E%3Crect x='74' y='44' width='30' height='2' fill-opacity='.40'/%3E%3Crect x='214' y='48' width='26' height='2' fill-opacity='.42'/%3E%3Crect x='40' y='51' width='14' height='2' fill-opacity='.30'/%3E%3Crect x='160' y='50' width='22' height='2' fill-opacity='.28'/%3E%3Crect x='230' y='52' width='9' height='2' fill-opacity='.34'/%3E%3C/g%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 56'%3E%3Cg fill='black'%3E%3Crect x='20' y='30' width='18' height='5' fill-opacity='.32'/%3E%3Crect x='52' y='33' width='8' height='4' fill-opacity='.28'/%3E%3Crect x='130' y='28' width='26' height='4' fill-opacity='.34'/%3E%3Crect x='200' y='34' width='12' height='5' fill-opacity='.30'/%3E%3Crect x='250' y='30' width='6' height='6' fill-opacity='.26'/%3E%3Crect x='96' y='20' width='1.5' height='14' fill-opacity='.28'/%3E%3Crect x='178' y='18' width='1.5' height='18' fill-opacity='.24'/%3E%3Crect x='268' y='22' width='1.5' height='12' fill-opacity='.28'/%3E%3Crect x='74' y='44' width='30' height='2' fill-opacity='.40'/%3E%3Crect x='214' y='48' width='26' height='2' fill-opacity='.42'/%3E%3Crect x='40' y='51' width='14' height='2' fill-opacity='.30'/%3E%3Crect x='160' y='50' width='22' height='2' fill-opacity='.28'/%3E%3Crect x='230' y='52' width='9' height='2' fill-opacity='.34'/%3E%3C/g%3E%3C/svg%3E");
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+  -webkit-mask-size: auto 100%;
+  mask-size: auto 100%;
+  -webkit-mask-position: 0 50%;
+  mask-position: 0 50%;
+}
+
 /* ── type: uppercase labels, tracked wide; values never ───────────────────
    The signature is a small uppercase label at tracking-caps (0.14em under this
    skin). It is legible only BECAUSE it is uppercase and short. VALUES ARE
@@ -895,6 +953,12 @@
      goes, the facet goes with it, and the ink returns to text-primary — the same
      trade the stripe makes three rules up. 0-4-0 on the second selector to clear
      the masthead rule, which is 0-4-0 itself and earlier in this file. */
+  /* The glitch furniture goes with the band. It is measured against the charcoal;
+     print removes the charcoal, and the same alpha over white is a smear. */
+  :root[data-skin='industry'] .jrk-topbar--vivid::after {
+    display: none;
+  }
+
   :root[data-skin='industry'] .jrk-topbar--vivid,
   :root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand {
     background-color: transparent;

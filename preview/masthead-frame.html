@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Masthead frame</title>
+<!-- ONE BAR, STAMPED FROM THE QUERY STRING. This page exists only to be framed
+     by mastheads.html. It is not a gallery page and has no navigation of its own.
+
+     ?skin=<stamp|base>&theme=<light|dark>&variant=<plain|vivid|brand> -->
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="../dist/jrk-skin-industry.css">
+<link rel="stylesheet" href="../css/skins/industry.css">
+<link rel="stylesheet" href="../dist/jrk-skin-midgard.css">
+<link rel="stylesheet" href="../css/skins/midgard.css">
+<style>
+  /* The frame is exactly one bar tall, so the parent can size it from the token
+     rather than from a guess. No page padding: the bar runs edge to edge the way
+     it does in a real app. */
+  html, body { margin: 0; padding: 0; background: transparent; }
+  body { overflow: hidden; }
+</style>
+</head>
+<body>
+
+<header class="jrk-topbar" id="bar">
+  <span class="mh-brand">
+    <span class="mh-logo" aria-hidden="true"></span>
+    JRK Analytics
+  </span>
+  <span class="jrk-spacer"></span>
+  <div class="jrk-btn-group" role="group" aria-label="Theme">
+    <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" type="button" aria-pressed="true">Light</button>
+    <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" type="button" aria-pressed="false">Dark</button>
+  </div>
+  <span class="jrk-status">
+    <span class="jrk-dot jrk-dot--good" aria-hidden="true"></span>
+    <span class="jrk-caption">Synced 4m ago</span>
+  </span>
+  <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" type="button">Sign Out</button>
+</header>
+
+<style>
+  /* The wordmark is the CONSUMER's, not the library's — the portal owns this
+     markup — so it is styled here rather than in a component file. It inherits
+     `color`, which is the whole point of the masthead variants: one token
+     re-inks it along with everything else on the bar. */
+  .mh-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--jrk-space-2);
+    font-size: var(--jrk-text-md);
+    font-weight: var(--jrk-weight-semibold);
+    letter-spacing: var(--jrk-tracking-tight);
+  }
+  .mh-logo {
+    width: 24px;
+    height: 24px;
+    border-radius: var(--jrk-radius-md);
+    background: currentColor;
+    opacity: 0.85;
+  }
+</style>
+
+<script>
+  const q = new URLSearchParams(location.search);
+  const root = document.documentElement;
+
+  root.setAttribute('data-theme', q.get('theme') === 'dark' ? 'dark' : 'light');
+
+  const skin = q.get('skin') || 'base';
+  if (skin !== 'base') root.setAttribute('data-skin', skin);
+
+  // plain | vivid | brand. `brand` implies `vivid` — the two are composed in the
+  // base library, not alternatives.
+  const variant = q.get('variant') || 'brand';
+  const bar = document.getElementById('bar');
+  if (variant === 'vivid' || variant === 'brand') bar.classList.add('jrk-topbar--vivid');
+  if (variant === 'brand') bar.classList.add('jrk-topbar--brand');
+</script>
+
+</body>
+</html>

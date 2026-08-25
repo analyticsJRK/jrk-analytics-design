@@ -1,0 +1,153 @@
+<!-- @dsCard group="Components" name="Mastheads — every skin, both themes" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mastheads — JRK Analytics Design</title>
+<link rel="stylesheet" href="../css/index.css">
+<link rel="stylesheet" href="preview.css">
+<style>
+  .mh-grid {
+    display: grid;
+    gap: var(--jrk-space-5);
+  }
+
+  .mh-cell {
+    display: flex;
+    flex-direction: column;
+    gap: var(--jrk-space-2);
+  }
+
+  .mh-cell__label {
+    display: flex;
+    align-items: baseline;
+    gap: var(--jrk-space-2);
+    font-size: var(--jrk-text-xs);
+    font-weight: var(--jrk-weight-semibold);
+    color: var(--jrk-text-muted);
+  }
+
+  .mh-cell__label span {
+    font-weight: var(--jrk-weight-regular);
+  }
+
+  /* THE FRAME IS THE POINT OF THIS PAGE — see the note in the header. It carries
+     its own <html data-theme>, so it needs its own edge: on a light page a dark
+     bar bounds itself, but a LIGHT masthead on the light gallery page would
+     otherwise dissolve into it. */
+  .mh-frame {
+    display: block;
+    width: 100%;
+    height: var(--jrk-topbar-default);
+    border: 0;
+    outline: 1px solid var(--jrk-border-subtle);
+    outline-offset: 0;
+    background: var(--jrk-surface-canvas);
+  }
+</style>
+</head>
+<body>
+
+<div class="gal-page">
+  <header class="gal-page__head">
+    <h1>Mastheads</h1>
+    <p>
+      Every masthead this library ships, in <strong>both themes at once</strong>:
+      base, <code class="jrk-mono">industry</code> and
+      <code class="jrk-mono">midgard</code>, each as the plain bar and as the
+      <code class="jrk-mono">--vivid --brand</code> variant.
+    </p>
+    <p>
+      <strong>Each bar is an iframe, and it has to be.</strong> The token layer
+      scopes both themes to <code class="jrk-mono">:root</code> —
+      <code class="jrk-mono">:root[data-theme="dark"]</code> and a
+      <code class="jrk-mono">prefers-color-scheme</code> block against
+      <code class="jrk-mono">:root</code> — so a light and a dark palette cannot
+      coexist in one document. Every other gallery page toggles the whole page
+      for that reason. A frame gets its own <code class="jrk-mono">&lt;html&gt;</code>,
+      which is the only way to put the two side by side and the reason this page
+      exists rather than a section on
+      <a href="components.html">components.html</a>.
+    </p>
+  </header>
+
+  <section class="gal-sec">
+    <h2>The masthead variants</h2>
+    <p class="gal-sec__note">
+      The plain bar is inked with <code class="jrk-mono">text.primary</code> by the
+      consumer, so <strong>no skin repaints it</strong> — do not put a fill under
+      ink you do not own. The masthead variants own their ink through
+      <code class="jrk-mono">gradient.ink</code>, which is what makes them
+      skinnable: under either skin they collapse to that skin&rsquo;s flat banner,
+      because base&rsquo;s teal&ndash;blue&ndash;violet ribbon belongs to neither
+      palette.
+    </p>
+
+    <div class="mh-grid" id="grid"></div>
+
+    <div class="gal-rule">
+      <strong>Compare the two themes on the SKINNED rows before touching either
+      band.</strong> In dark each one is its own page colour &mdash;
+      Industry&rsquo;s <code class="jrk-mono">#0d0f10</code> is the last stop of
+      its page ramp and midgard&rsquo;s <code class="jrk-mono">#0b0f14</code> the
+      first stop of its own, 1.000:1 either way &mdash; so the accent hairline is
+      the entire boundary there, at 15.06:1 and 9.23:1. In light the fill step is
+      already 16.91:1 and 14.65:1 and that same 1px reads as decoration. It is not.
+    </div>
+
+    <div class="gal-rule">
+      <strong>A mark on a masthead is capped by the ink that crosses it.</strong>
+      Midgard&rsquo;s node network runs at 38% of the gold in dark and 20% in
+      light against a 53% ceiling; Industry&rsquo;s glitch marks are capped at 35%
+      where they cross the ink band (roughly
+      <code class="jrk-mono">y19&ndash;37</code>) and run to 55% below it, where
+      nothing is inked. Neither spans the width, so neither carries a promise
+      about layout &mdash; which a full-strength yellow strip did, and is why that
+      one was built, measured and removed.
+    </div>
+  </section>
+</div>
+
+<script>
+  /* Built from a list rather than written out, so a new skin is one entry and
+     cannot be added to one theme and forgotten in the other — which is exactly
+     the drift this page exists to make visible. */
+  const SKINS = [
+    ['base', 'Base'],
+    ['industry', 'Industry'],
+    ['midgard', 'Midgard'],
+  ];
+  const VARIANTS = [
+    ['plain', 'plain — never skinned'],
+    ['brand', '--vivid --brand'],
+  ];
+
+  const grid = document.getElementById('grid');
+  for (const [skin, skinLabel] of SKINS) {
+    for (const [variant, variantLabel] of VARIANTS) {
+      for (const theme of ['light', 'dark']) {
+        const cell = document.createElement('div');
+        cell.className = 'mh-cell';
+
+        const label = document.createElement('p');
+        label.className = 'mh-cell__label';
+        label.innerHTML =
+          skinLabel + ' · ' + theme + ' <span>' + variantLabel + '</span>';
+
+        const frame = document.createElement('iframe');
+        frame.className = 'mh-frame';
+        frame.loading = 'lazy';
+        frame.title = skinLabel + ' masthead, ' + theme + ' theme, ' + variantLabel;
+        frame.src =
+          'masthead-frame.html?skin=' + skin + '&theme=' + theme + '&variant=' + variant;
+
+        cell.append(label, frame);
+        grid.append(cell);
+      }
+    }
+  }
+</script>
+
+</body>
+</html>
