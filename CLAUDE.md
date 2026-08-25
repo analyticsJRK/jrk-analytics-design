@@ -967,39 +967,45 @@ in light the fill step is already 17:1 / 15:1. That 1px rule reads as pure
 decoration in every light-mode screenshot and is the whole masthead in the other
 theme. Do not drop it.
 
-**EACH MASTHEAD CARRIES A MARK, DRAWN AS AN ALPHA-ONLY MASK OVER A TOKEN FILL.**
-Industry spells JRK in hatched stencil letters with a vivid yellow strip and
-glitch furniture across the band; midgard runs a node network that is engraved in
-light and lit in dark. Both gates are blind to a `data:` URI — `check:css` skips
-them by name and `validate:skin`'s hex scan only catches an unencoded one — so
-**the SVGs state alpha and nothing else and every colour comes from a `var()`**.
-Two mechanics are worth carrying: an SVG gradient defaults to
-`objectBoundingBox`, which resolves **per element**, so a fade across a
-multi-path wordmark needs `gradientUnits="userSpaceOnUse"` or each letter fades
+**MIDGARD'S MASTHEAD CARRIES A MARK; INDUSTRY'S IS A BARE BAND, AND THAT WAS A
+DECISION RATHER THAN AN OMISSION.** Midgard runs a node network across its band,
+drawn as an alpha-only mask over a token fill — engraved in light, lit in dark.
+Industry was given a hatched JRK wordmark and a full-strength yellow strip on
+2026-08-24 and **both were removed the same day, by direction: the band reads
+better empty.** If a mark is ever wanted there again, the removed version is in
+the history and the two facts below are what it cost.
+
+**A `data:` URI IS INVISIBLE TO BOTH GATES**, so any mark drawn this way must
+state ALPHA and nothing else and take every colour from a `var()`. `check:css`
+skips data URIs by name and `validate:skin`'s hex scan only catches an unencoded
+one. Two mechanics from building these are worth keeping: an SVG gradient
+defaults to `objectBoundingBox`, which resolves **per element**, so a fade across
+a multi-path shape needs `gradientUnits="userSpaceOnUse"` or each path fades
 against its own box and the joins go visibly discontinuous; and **a glow cannot be
 a `filter`**, because CSS applies filter *before* mask, so a `drop-shadow` blooms
 the whole box and then has the bloom clipped away by the very strokes that cast
 it — the falloff has to live in the mask as a wide low-alpha stroke behind a
 narrow one.
 
-**MEASURE THE COMPOSITE, NOT THE LAYER.** The wordmark's 26% hatch over its 10%
-wash is `1 - (0.74 × 0.90)` = **33.4%** of yellow; either layer measured alone
-reports a margin the screen does not have. Both marks are capped by the ink that
-crosses them — 41% for Industry's yellow, 53% for midgard's gold — and ship below
-it, which is what lets them decorate the full width with nothing to promise.
+**MEASURE THE COMPOSITE, NOT THE LAYER.** Industry's removed wordmark layered a
+26% hatch over a 10% wash, which is `1 - (0.74 × 0.90)` = **33.4%** of yellow;
+either layer measured alone reports a margin the screen does not have. A mark on
+a masthead is capped by the ink that crosses it — **41% for Industry's yellow,
+53% for midgard's gold** — and midgard ships at 38% dark / 20% light, which is
+what lets it decorate the full width with nothing to promise about layout.
 
-**THE ONE EXCEPTION IS INDUSTRY'S YELLOW STRIP, AND IT IS A VERTICAL CONDITION.**
-`text.onBanner` on `#ffe500` is **1.06:1** — invisible, not merely poor — so the
-strip runs at FULL strength and is legal only because of where it sits, `y41..48`
-of the 56px bar. That is not the horizontal kind this file warns about: it does
-not depend on the bar's width or on what a consumer puts in the middle, only on
-values this library owns. Ink lives in roughly `y19..37` (a 13px label's line box,
-centred), the tallest control is 40px and reaches `y47.5`, and the two controls
-that cross the band are opaque so they occlude it. **Measured at 1600px with a
-`control-lg` in the bar: worst text bottom 37.0px, clearance 4.0px.** Move
-`topbar.default`, the control ladder, or the control type size and this must be
-re-measured. Everything else in that mark is capped at 35% because it sits in the
-text band and has no position argument to make.
+**AND A VIVID STRIP CANNOT CLEAR THAT BAR AT ALL**, which is the durable half of
+why Industry's is gone. `text.onBanner` on `#ffe500` is **1.06:1** — invisible,
+not merely poor — so a full-strength strip is only ever legal by POSITION. The
+removed one sat at `y41..48` of the 56px bar: below every glyph (ink lives in
+roughly `y19..37`) and behind the two controls tall enough to reach it, both
+opaque. Measured at 1600px with a `control-lg` present, the worst text bottom was
+37.0px, a 4.0px clearance. That is a vertical condition rather than the
+horizontal kind this file warns about — it depends only on values the library
+owns — but it still meant the bar's height, its control ladder and its control
+type size could not move without re-measuring the mark. **Removing it puts the
+masthead back to a pure colour fact.** Do not reintroduce a full-strength accent
+on that band without re-deriving the clearance.
 
 **Three faults were found by measuring rather than looking, and two were shipped.**
 Industry's wedge rule is `background-image` at 0-3-0 and base's `--vivid` is the
