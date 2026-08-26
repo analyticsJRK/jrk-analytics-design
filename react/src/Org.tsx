@@ -120,13 +120,51 @@ export interface OrgChartProps {
    *  reader has to tell six groups apart by colour, use the keyline — that is
    *  what it is the default for. */
   groupFill?: boolean;
+  /** Draw each rollup group as a card filled with the group's own MARK, at full
+   *  saturation.
+   *
+   *  The third rendering of the one rollup mechanism, and the one for PAPER.
+   *  `groupFill`'s tints are pastel by construction, so they carry no weight at
+   *  the 35-40% scale an 11x17 sheet needs and wash out under a laser printer's
+   *  lighter dot; the marks are the same colours every other chart in the library
+   *  uses at full strength. Measured against the tints: all-pairs safe cap 3
+   *  slots against 2, and at eight groups 0 unseparable pairs against 18.
+   *
+   *  TWO THINGS TO KNOW BEFORE USING IT ON SCREEN. The card's three levels of ink
+   *  collapse to one — black, which is the only ink that clears 4.5:1 on all eight
+   *  marks in both themes, where white clears it on NONE — so name, role and
+   *  figure separate by size and weight alone. And a vacant seat drops the fill
+   *  and keeps the colour on its dashed edge, because a dash cannot be read over a
+   *  saturated plane.
+   *
+   *  A caller may override `--jrk-org-group` and `--jrk-org-solid-ink` together on
+   *  a node to put a card outside the palette. Together: one alone gives
+   *  white-on-yellow or black-on-black.
+   *
+   *  Mutually exclusive with `groupFill` — they are two renderings of one thing,
+   *  and both classes on one list is a coin toss decided by source order. Warns in
+   *  development. */
+  groupSolid?: boolean;
   children: ReactNode;
   className?: string;
 }
 
-export function OrgChart({ label, nodeWidth, scroll = true, rollup, groupFill, children, className }: OrgChartProps) {
+export function OrgChart({
+  label, nodeWidth, scroll = true, rollup, groupFill, groupSolid, children, className,
+}: OrgChartProps) {
   if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
     if (rollup && groupFill) warnGroupFill(Children.toArray(children).length, '<OrgChart rollup>');
+    /* No count threshold for the solid variant, because it does not have one: the
+       marks hold adjacency at every count, which is the whole reason it exists.
+       What DOES need saying is picking both, which is not a degradation but an
+       undefined result. */
+    if (groupFill && groupSolid) {
+      console.warn(
+        '[jrk] <OrgChart> has both groupFill and groupSolid. They are two renderings of one ' +
+          'rollup and which wins is decided by source order in the stylesheet, not by this ' +
+          'prop. Pick one: groupFill for a screen, groupSolid for print.',
+      );
+    }
   }
 
   const tree = (
@@ -143,6 +181,9 @@ export function OrgChart({ label, nodeWidth, scroll = true, rollup, groupFill, c
            choice and the CSS reaches every card from here by descent. Putting it
            on a branch would leave a rollup hung on a node unstyled. */
         groupFill && 'jrk-org--group-fill',
+        /* Same reasoning as the fill above — root, not branch, so every card is
+           reachable by descent. */
+        groupSolid && 'jrk-org--group-solid',
         className,
       )}
       aria-label={label}

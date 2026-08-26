@@ -1044,3 +1044,160 @@
 
    The TOGGLE is untouched for a plainer reason: it sits between cards, on the
    page, and a pill wearing the group colour would read as a node. */
+
+/* ============================== solid nodes ============================== */
+
+/* THE CARD WEARS THE GROUP'S OWN MARK, at full saturation. Opt in with
+ * `.jrk-org--group-solid` on the root list — `<OrgChart groupSolid>` — and it is
+ * the third and last rendering of the one rollup mechanism above: same slots,
+ * same order, same subtree cascade, and nothing at all without a rollup, because
+ * every declaration falls back to the value the card already had.
+ *
+ * THE BLOCK ABOVE ARGUES AGAINST THIS, so this one has to answer it. Its case
+ * against the marks was two-part — that no ink but black clears 4.5:1 on them,
+ * flattening the card's three levels to one, and that `focus.ring` measures
+ * 1.26:1 on slot 5 against a mark, i.e. the library's one focus indicator
+ * disappears. The first is true and is priced below. The second was measured
+ * against the FILL, and the ring does not sit on the fill: `base.css` draws it at
+ * `outline-offset: 1px`, so its neighbour is the page. This variant widens that
+ * gap and lines it, and then the objection is spent.
+ *
+ * WHY THIS EXISTS WHEN group-fill DOES. A printed chart is the case the tints
+ * cannot serve. They are pastel by construction, so they carry no weight at
+ * 35-40% scale on 11x17 paper and they wash out under a laser printer's lighter
+ * dot; measured against scripts/cvd.mjs their all-pairs safe cap is 2 slots
+ * against the marks' 3, and at eight groups they leave 18 pairs unseparable where
+ * the keyline leaves none. The fill is the weaker channel by every number in that
+ * block. What it buys is a card that stays a document; what this buys is a card
+ * that survives being a poster. Pick by output, not by taste.
+ *
+ * INK IS BLACK IN BOTH THEMES, AND THAT IS MEASURED, NOT CHOSEN. On the eight
+ * marks, both themes:
+ *
+ *   black   5.08 .. 9.67 light    5.76 .. 7.08 dark    passes 4.5 on all 8
+ *   white   2.17 .. 4.13 light    2.97 .. 3.65 dark    passes on NONE
+ *
+ * White is the intuitive answer for a saturated card and it is unusable here —
+ * 2.17:1 on slot 4, which is not a near miss. So `--jrk-org-solid-ink` pins to
+ * neutral-975, one of the few primitives that does not move between themes, and
+ * it must not be re-pointed at `text.primary`: that is #ebebf0 in dark, i.e.
+ * white, i.e. 2.97:1 on the mint slot. The marks barely move between themes and
+ * neither does the ink that works on them.
+ *
+ * A CONSUMER MAY OVERRIDE THE PAIR PER NODE, and this is the one variant where it
+ * has to be able to. `--jrk-org-group` and `--jrk-org-solid-ink` are set
+ * together, so a chart that needs a card outside the palette — a root wearing
+ * surface.inverse, a rank wearing accent.solid — sets both and stays legible. Set
+ * one alone and you get white-on-yellow or black-on-black, so the rule for a
+ * caller is: the fill and its ink move together or neither moves.
+ *
+ * WHAT IS LOST, stated plainly because the group-fill block is right about it.
+ * The card's three levels of ink collapse to one, so name, role and figure no
+ * longer separate by lightness. They separate by SIZE and WEIGHT instead, which
+ * the base card already varies — md/semibold, sm/regular, xs/regular — and that
+ * is now the only channel carrying the hierarchy rather than a reinforcement of
+ * it. If a consumer flattens those sizes too, this variant has nothing left. */
+.jrk-org {
+  /* Declared here rather than in the token layer: it is a decision about THIS
+     component's fill, not a palette entry, and what keeps it honest is the
+     measurement in the block above. */
+  --jrk-org-solid-ink: var(--jrk-neutral-975);
+}
+
+.jrk-org--group-solid .jrk-org__card {
+  background: var(--jrk-org-group, var(--jrk-surface-default));
+  /* The edge goes to the ink rather than to a darker hue. On a saturated plane a
+     same-hue hairline is invisible (the tints' trick does not invert), and the
+     ink is the one colour already guaranteed against every slot. Kept at 1px so
+     a solid card beside an ungrouped one does not reflow. */
+  border-color: var(--jrk-org-solid-ink, var(--jrk-border-default));
+}
+
+/* The keyline is what this variant replaces, exactly as under group-fill: a 4px
+   capsule of the mark inside a plane of the same mark is not a signal. */
+.jrk-org--group-solid .jrk-org__card::before {
+  display: none;
+}
+
+/* All three lines take the one ink. Written as three rules at (0,3,0) rather than
+   as `color` on the card, because each line NAMES its own colour at (0,1,0) and
+   would win — the same reason the group-fill block restates every state instead
+   of relying on source order. */
+.jrk-org--group-solid .jrk-org__name,
+.jrk-org--group-solid .jrk-org__role,
+.jrk-org--group-solid .jrk-org__meta {
+  color: var(--jrk-org-solid-ink, var(--jrk-text-primary));
+}
+
+/* FOCUS IS THE ONE PLACE THIS VARIANT ADDS RATHER THAN REPLACES, and it is what
+   answers the group-fill block's second objection. `base.css` rings at
+   `outline-offset: 1px`, so a 1px sliver of page separates ring from fill — thin
+   enough that a 1.26:1 pair is still touching. Two changes and it is not: the
+   offset widens to 3px, and `focus.offset` draws a 1px collar tight to the card
+   so the ring's neighbour is that collar and never the mark. Measured
+   ring-against-collar: 5.22:1 light, 7.16:1 dark, each theme's worst case, both
+   clear of the 3:1 floor a non-text indicator holds. The bloom is kept and stays
+   decorative. */
+.jrk-org--group-solid .jrk-org__card--link:focus-visible {
+  outline: 1.5px solid var(--jrk-focus-ring);
+  outline-offset: 3px;
+  box-shadow: 0 0 0 1px var(--jrk-focus-offset), var(--jrk-shadow-focus);
+}
+
+/* Hover is a VEIL, for the reason group-fill gives: a mark has no next plane, and
+   stepping to surface.hover would replace the group colour with grey. The veil is
+   directional and darkens, which on a saturated fill reads as pressed rather than
+   as lit — correct for a card already at full chroma. */
+.jrk-org--group-solid .jrk-org__card--link:hover {
+  background-color: var(--jrk-org-group, var(--jrk-surface-hover));
+  background-image: linear-gradient(var(--jrk-overlay-hover-veil) 0 100%);
+}
+
+/* The CURRENT node keeps its group rather than taking accent.wash, which would
+   erase the colour on the one card a reader came to find. It says "this one" with
+   the edge instead: the ink hairline goes to 2px, which is the only non-colour
+   channel a filled card has left. */
+.jrk-org--group-solid .jrk-org__card[aria-current] {
+  background: var(--jrk-org-group, var(--jrk-accent-wash));
+  border-width: 2px;
+  border-color: var(--jrk-org-solid-ink, var(--jrk-border-accent));
+  /* The border grew by 1px, so the padding gives 1px back and the card does not
+     resize on becoming current. */
+  padding: calc(var(--jrk-space-2) - 1px) calc(var(--jrk-space-3) - 1px);
+}
+
+.jrk-org--group-solid .jrk-org__card[aria-current] .jrk-org__name,
+.jrk-org--group-solid .jrk-org__card[aria-current] .jrk-org__role {
+  color: var(--jrk-org-solid-ink, var(--jrk-text-primary));
+}
+
+.jrk-org--group-solid .jrk-org__card--link[aria-current]:hover {
+  background-color: var(--jrk-org-group, var(--jrk-accent-wash-hover));
+}
+
+/* A VACANT CARD DOES NOT TAKE THE FILL, and this is the one state where this
+   variant and group-fill part company. A tint is quiet enough that a dashed edge
+   still reads over it; a mark is not — dash, muted name and fill all compete at
+   full chroma and the card stops looking unfilled at all, which is the single
+   fact `--vacant` exists to carry. So the seat reverts to the page and the BRANCH
+   keeps its colour on the dashed edge, which is the same two-channel split the
+   base rule makes: the edge says the post is open, the colour says which rollup
+   it heads. Stated at (0,3,0) to beat `--vacant`'s own (0,1,0). */
+.jrk-org--group-solid .jrk-org__card--vacant {
+  background: transparent;
+  border-color: var(--jrk-org-group, var(--jrk-border-strong));
+}
+
+.jrk-org--group-solid .jrk-org__card--vacant .jrk-org__name {
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-org--group-solid .jrk-org__card--vacant .jrk-org__role,
+.jrk-org--group-solid .jrk-org__card--vacant .jrk-org__meta {
+  color: var(--jrk-text-muted);
+}
+
+/* CONNECTORS AND TOGGLES ARE UNTOUCHED, for the reasons the group-fill block ends
+   on: a group-coloured connector puts four of the eight marks under the 3:1 floor
+   a line has to clear against the page, and a toggle wearing a fill reads as a
+   node. */
