@@ -289,12 +289,31 @@
    keeps it off a stacked branch, whose children are also all leaves and whose
    own `align-items: flex-start` this rule would otherwise out-specify (0-2-0
    against 0-1-0) and silently blow every card out to full width. Where :has()
-   is unsupported the row is merely ragged, which is what it was before. */
-.jrk-org__branch:not(.jrk-org__branch--stacked):not(:has(.jrk-org__branch)) {
+   is unsupported the row is merely ragged, which is what it was before.
+
+   AND A CHILD CARRYING ANYTHING AFTER ITS CARD IS NOT A LEAF, which the branch
+   test alone cannot see. `.jrk-org__branch` is the only thing this component
+   puts after a card, so "no branch inside" WAS the whole of it — until a
+   consumer hung its own block there instead. The portal's org chart renders the
+   state level as a column of labelled boxes rather than as nodes, so a row of
+   managers each carrying a `<div>` matched "no branch inside", the row equalised
+   to the tallest column beside it, and every manager card grew a hand of empty
+   colour under its text. Reported as cards stretching; measured at 272px against
+   a sibling's 73px.
+
+   `:not(:has(> .jrk-org__node > :nth-child(2)))` states the real condition — a
+   leaf is a node whose card is its only child — and it does so without naming
+   anything the consumer invented, which is the test for whether a rule like this
+   belongs here at all. */
+.jrk-org__branch:not(.jrk-org__branch--stacked):not(:has(.jrk-org__branch)):not(
+    :has(> .jrk-org__node > :nth-child(2))
+  ) {
   align-items: stretch;
 }
 
-.jrk-org__branch:not(.jrk-org__branch--stacked):not(:has(.jrk-org__branch))
+.jrk-org__branch:not(.jrk-org__branch--stacked):not(:has(.jrk-org__branch)):not(
+    :has(> .jrk-org__node > :nth-child(2))
+  )
   > .jrk-org__node
   > .jrk-org__card {
   /* Grow, never shrink. `flex: 1` would let a long role line compress a card
