@@ -223,3 +223,271 @@
     --jrk-masthead-ink: var(--jrk-text-on-banner);
     --jrk-masthead-mark: var(--jrk-accent-solid);
 }
+
+/* ACCENT HUES, stamped with data-inlay. A third attribute, crossed with the theme:
+     <html data-skin="midgard" data-inlay="moss">
+   Available: moss, verdigris, frost, sapphire, amethyst. Omit the attribute for
+   gold — the default hue is the ABSENCE of a variant, not one of them, so
+   nothing that does not stamp it can change. Only the accent namespace varies. */
+
+/* ── inlay: moss ─────────────────────────────────────────────── */
+:root[data-skin="midgard"][data-inlay="moss"] {
+  --jrk-accent-solid: #689d4d;
+  --jrk-accent-solid-hover: #5e8d45;
+  --jrk-accent-solid-active: #55813f;
+  --jrk-accent-on-solid: #1c1a15;
+  --jrk-accent-text: #426331;
+  --jrk-accent-wash: #b8cfa6;
+  --jrk-accent-wash-hover: #adc799;
+  --jrk-accent-wash-active: #a1c08c;
+  --jrk-accent-wash-border: #95b97f;
+  --jrk-accent-wash-text: #1c1a15;
+  --jrk-border-accent: #689d4d;
+  --jrk-text-link: #426331;
+  --jrk-focus-ring: #689d4d;
+  --jrk-shadow-focus: 0 0 0 2px #1b1811, 0 0 0 4px #689d4d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="midgard"][data-inlay="moss"]:not([data-theme="light"]) {
+    --jrk-accent-solid: #7acd51;
+    --jrk-accent-solid-hover: #87d262;
+    --jrk-accent-solid-active: #92d670;
+    --jrk-accent-text: #7acd51;
+    --jrk-accent-wash: #47713b;
+    --jrk-accent-wash-hover: #4f7f3f;
+    --jrk-accent-wash-active: #568d42;
+    --jrk-accent-wash-border: #5e9b45;
+    --jrk-accent-wash-text: #e8e6df;
+    --jrk-border-accent: #7acd51;
+    --jrk-text-link: #7acd51;
+    --jrk-focus-ring: #7acd51;
+    --jrk-shadow-focus: 0 0 0 2px #7acd51, 0 0 0 4px #0f151b;
+  }
+}
+
+:root[data-skin="midgard"][data-inlay="moss"][data-theme="dark"] {
+    --jrk-accent-solid: #7acd51;
+    --jrk-accent-solid-hover: #87d262;
+    --jrk-accent-solid-active: #92d670;
+    --jrk-accent-text: #7acd51;
+    --jrk-accent-wash: #47713b;
+    --jrk-accent-wash-hover: #4f7f3f;
+    --jrk-accent-wash-active: #568d42;
+    --jrk-accent-wash-border: #5e9b45;
+    --jrk-accent-wash-text: #e8e6df;
+    --jrk-border-accent: #7acd51;
+    --jrk-text-link: #7acd51;
+    --jrk-focus-ring: #7acd51;
+    --jrk-shadow-focus: 0 0 0 2px #7acd51, 0 0 0 4px #0f151b;
+}
+
+/* ── inlay: verdigris ────────────────────────────────────────── */
+:root[data-skin="midgard"][data-inlay="verdigris"] {
+  --jrk-accent-solid: #4b9f83;
+  --jrk-accent-solid-hover: #448f76;
+  --jrk-accent-solid-active: #3e826b;
+  --jrk-accent-on-solid: #1c1a15;
+  --jrk-accent-text: #2f6553;
+  --jrk-accent-wash: #abcfbe;
+  --jrk-accent-wash-hover: #9dc8b6;
+  --jrk-accent-wash-active: #8fc1ad;
+  --jrk-accent-wash-border: #81baa4;
+  --jrk-accent-wash-text: #1c1a15;
+  --jrk-border-accent: #499c81;
+  --jrk-text-link: #2f6553;
+  --jrk-focus-ring: #499c81;
+  --jrk-shadow-focus: 0 0 0 2px #1b1811, 0 0 0 4px #499c81;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="midgard"][data-inlay="verdigris"]:not([data-theme="light"]) {
+    --jrk-accent-solid: #4ed0a4;
+    --jrk-accent-solid-hover: #60d5ad;
+    --jrk-accent-solid-active: #6ed8b4;
+    --jrk-accent-text: #4ed0a4;
+    --jrk-accent-wash: #327161;
+    --jrk-accent-wash-hover: #367f6b;
+    --jrk-accent-wash-active: #3a8d75;
+    --jrk-accent-wash-border: #3e9b7f;
+    --jrk-accent-wash-text: #e8e6df;
+    --jrk-border-accent: #4ed0a4;
+    --jrk-text-link: #4ed0a4;
+    --jrk-focus-ring: #4ed0a4;
+    --jrk-shadow-focus: 0 0 0 2px #4ed0a4, 0 0 0 4px #0f151b;
+  }
+}
+
+:root[data-skin="midgard"][data-inlay="verdigris"][data-theme="dark"] {
+    --jrk-accent-solid: #4ed0a4;
+    --jrk-accent-solid-hover: #60d5ad;
+    --jrk-accent-solid-active: #6ed8b4;
+    --jrk-accent-text: #4ed0a4;
+    --jrk-accent-wash: #327161;
+    --jrk-accent-wash-hover: #367f6b;
+    --jrk-accent-wash-active: #3a8d75;
+    --jrk-accent-wash-border: #3e9b7f;
+    --jrk-accent-wash-text: #e8e6df;
+    --jrk-border-accent: #4ed0a4;
+    --jrk-text-link: #4ed0a4;
+    --jrk-focus-ring: #4ed0a4;
+    --jrk-shadow-focus: 0 0 0 2px #4ed0a4, 0 0 0 4px #0f151b;
+}
+
+/* ── inlay: frost ────────────────────────────────────────────── */
+:root[data-skin="midgard"][data-inlay="frost"] {
+  --jrk-accent-solid: #4d939d;
+  --jrk-accent-solid-hover: #45848d;
+  --jrk-accent-solid-active: #3f7981;
+  --jrk-accent-on-solid: #1c1a15;
+  --jrk-accent-text: #34636a;
+  --jrk-accent-wash: #b1cdcd;
+  --jrk-accent-wash-hover: #a4c5c6;
+  --jrk-accent-wash-active: #96bdbf;
+  --jrk-accent-wash-border: #88b5b9;
+  --jrk-accent-wash-text: #1c1a15;
+  --jrk-border-accent: #4d939d;
+  --jrk-text-link: #34636a;
+  --jrk-focus-ring: #4d939d;
+  --jrk-shadow-focus: 0 0 0 2px #1b1811, 0 0 0 4px #4d939d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="midgard"][data-inlay="frost"]:not([data-theme="light"]) {
+    --jrk-accent-solid: #51bccd;
+    --jrk-accent-solid-hover: #62c3d2;
+    --jrk-accent-solid-active: #70c8d6;
+    --jrk-accent-text: #51bccd;
+    --jrk-accent-wash: #366e7b;
+    --jrk-accent-wash-hover: #3a7a88;
+    --jrk-accent-wash-active: #3e8795;
+    --jrk-accent-wash-border: #4393a2;
+    --jrk-accent-wash-text: #e8e6df;
+    --jrk-border-accent: #51bccd;
+    --jrk-text-link: #51bccd;
+    --jrk-focus-ring: #51bccd;
+    --jrk-shadow-focus: 0 0 0 2px #51bccd, 0 0 0 4px #0f151b;
+  }
+}
+
+:root[data-skin="midgard"][data-inlay="frost"][data-theme="dark"] {
+    --jrk-accent-solid: #51bccd;
+    --jrk-accent-solid-hover: #62c3d2;
+    --jrk-accent-solid-active: #70c8d6;
+    --jrk-accent-text: #51bccd;
+    --jrk-accent-wash: #366e7b;
+    --jrk-accent-wash-hover: #3a7a88;
+    --jrk-accent-wash-active: #3e8795;
+    --jrk-accent-wash-border: #4393a2;
+    --jrk-accent-wash-text: #e8e6df;
+    --jrk-border-accent: #51bccd;
+    --jrk-text-link: #51bccd;
+    --jrk-focus-ring: #51bccd;
+    --jrk-shadow-focus: 0 0 0 2px #51bccd, 0 0 0 4px #0f151b;
+}
+
+/* ── inlay: sapphire ─────────────────────────────────────────── */
+:root[data-skin="midgard"][data-inlay="sapphire"] {
+  --jrk-accent-solid: #4d559d;
+  --jrk-accent-solid-hover: #454d8d;
+  --jrk-accent-solid-active: #3f4681;
+  --jrk-accent-on-solid: #f2ece0;
+  --jrk-accent-text: #4d559d;
+  --jrk-accent-wash: #c6c6d6;
+  --jrk-accent-wash-hover: #b8b9d0;
+  --jrk-accent-wash-active: #aaacc9;
+  --jrk-accent-wash-border: #9da0c3;
+  --jrk-accent-wash-text: #1c1a15;
+  --jrk-border-accent: #4d559d;
+  --jrk-text-link: #4d559d;
+  --jrk-focus-ring: #4d559d;
+  --jrk-shadow-focus: 0 0 0 2px #1b1811, 0 0 0 4px #4d559d;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="midgard"][data-inlay="sapphire"]:not([data-theme="light"]) {
+    --jrk-accent-solid: #515dcd;
+    --jrk-accent-solid-hover: #626dd2;
+    --jrk-accent-solid-active: #707ad6;
+    --jrk-accent-text: #7982d8;
+    --jrk-accent-wash: #363f7b;
+    --jrk-accent-wash-hover: #3a4388;
+    --jrk-accent-wash-active: #3e4895;
+    --jrk-accent-wash-border: #434da2;
+    --jrk-accent-wash-text: #e8e6df;
+    --jrk-border-accent: #5561ce;
+    --jrk-text-link: #7982d8;
+    --jrk-focus-ring: #5561ce;
+    --jrk-shadow-focus: 0 0 0 2px #5561ce, 0 0 0 4px #0f151b;
+  }
+}
+
+:root[data-skin="midgard"][data-inlay="sapphire"][data-theme="dark"] {
+    --jrk-accent-solid: #515dcd;
+    --jrk-accent-solid-hover: #626dd2;
+    --jrk-accent-solid-active: #707ad6;
+    --jrk-accent-text: #7982d8;
+    --jrk-accent-wash: #363f7b;
+    --jrk-accent-wash-hover: #3a4388;
+    --jrk-accent-wash-active: #3e4895;
+    --jrk-accent-wash-border: #434da2;
+    --jrk-accent-wash-text: #e8e6df;
+    --jrk-border-accent: #5561ce;
+    --jrk-text-link: #7982d8;
+    --jrk-focus-ring: #5561ce;
+    --jrk-shadow-focus: 0 0 0 2px #5561ce, 0 0 0 4px #0f151b;
+}
+
+/* ── inlay: amethyst ─────────────────────────────────────────── */
+:root[data-skin="midgard"][data-inlay="amethyst"] {
+  --jrk-accent-solid: #844f9b;
+  --jrk-accent-solid-hover: #77478c;
+  --jrk-accent-solid-active: #6c417f;
+  --jrk-accent-on-solid: #f2ece0;
+  --jrk-accent-text: #79498e;
+  --jrk-accent-wash: #d5c3d5;
+  --jrk-accent-wash-hover: #ccb5ce;
+  --jrk-accent-wash-active: #c3a8c8;
+  --jrk-accent-wash-border: #b99bc1;
+  --jrk-accent-wash-text: #1c1a15;
+  --jrk-border-accent: #844f9b;
+  --jrk-text-link: #79498e;
+  --jrk-focus-ring: #844f9b;
+  --jrk-shadow-focus: 0 0 0 2px #1b1811, 0 0 0 4px #844f9b;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin="midgard"][data-inlay="amethyst"]:not([data-theme="light"]) {
+    --jrk-accent-solid: #ae64ce;
+    --jrk-accent-solid-hover: #b674d3;
+    --jrk-accent-solid-active: #bd80d7;
+    --jrk-accent-on-solid: #1c1a15;
+    --jrk-accent-text: #b26cd0;
+    --jrk-accent-wash: #64427b;
+    --jrk-accent-wash-hover: #704788;
+    --jrk-accent-wash-active: #7c4d96;
+    --jrk-accent-wash-border: #8852a3;
+    --jrk-accent-wash-text: #e8e6df;
+    --jrk-border-accent: #ae64ce;
+    --jrk-text-link: #b26cd0;
+    --jrk-focus-ring: #ae64ce;
+    --jrk-shadow-focus: 0 0 0 2px #ae64ce, 0 0 0 4px #0f151b;
+  }
+}
+
+:root[data-skin="midgard"][data-inlay="amethyst"][data-theme="dark"] {
+    --jrk-accent-solid: #ae64ce;
+    --jrk-accent-solid-hover: #b674d3;
+    --jrk-accent-solid-active: #bd80d7;
+    --jrk-accent-on-solid: #1c1a15;
+    --jrk-accent-text: #b26cd0;
+    --jrk-accent-wash: #64427b;
+    --jrk-accent-wash-hover: #704788;
+    --jrk-accent-wash-active: #7c4d96;
+    --jrk-accent-wash-border: #8852a3;
+    --jrk-accent-wash-text: #e8e6df;
+    --jrk-border-accent: #ae64ce;
+    --jrk-text-link: #b26cd0;
+    --jrk-focus-ring: #ae64ce;
+    --jrk-shadow-focus: 0 0 0 2px #ae64ce, 0 0 0 4px #0f151b;
+}

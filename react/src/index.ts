@@ -51,8 +51,8 @@ export {
 } from './Chart';
 export type { ChartCardProps, LegendProps, BarListProps, BarListItem, LineChartProps, Series } from './Chart';
 
-export { OrgChart, OrgNode } from './Org';
-export type { OrgChartProps, OrgNodeProps } from './Org';
+export { OrgChart, OrgNode, OrgGroup } from './Org';
+export type { OrgChartProps, OrgNodeProps, OrgGroupProps } from './Org';
 
 export { AuthLayout, SsoButton } from './Auth';
 export type { AuthLayoutProps, SsoButtonProps } from './Auth';

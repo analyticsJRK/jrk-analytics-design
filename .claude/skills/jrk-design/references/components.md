@@ -502,10 +502,14 @@ every connector is derived from the layout, so there is nothing to measure.
 </div>
 ```
 
-Card modifiers: `--link` (renders as `<a>`/`<button>`), `--vacant` (open post).
-State is `aria-current` on the card, not a modifier. Branch modifiers:
-`--stacked`, `--rollup`. Root modifier: `.jrk-org--group-fill` (see the filled
-variant below). Sizing knob: `--jrk-org-node` on `.jrk-org` (default 176px).
+Card modifiers: `--link` (renders as `<a>`/`<button>`), `--vacant` (open post),
+`--compact` (the dense terminal tile). State is `aria-current` on the card, not a
+modifier. Branch modifiers: `--stacked`, `--column`, `--rollup`. Root modifiers:
+`.jrk-org--group-fill` and `.jrk-org--group-solid` (see both variants below).
+Elements: `__name`, `__role`, `__code`, `__meta`, `__aside`, plus `__group` /
+`__group-label` / `__group-items` inside a `--column`. Sizing knob:
+`--jrk-org-node` on `.jrk-org` (default 176px); everything else derives from it.
+**Card text is CENTRED** — `__group-label` is the one exception.
 
 - **It is a nested `<ul>`, not `role="tree"`.** A tree role promises roving
   tabindex and arrow-key movement between siblings, which nothing here
@@ -642,6 +646,163 @@ that never groups anything it changes nothing.
   `--vacant` at (0,1,0)/(0,2,0), and a partial override leaves a hovered or
   current filled card wearing a grey plane where its group should be. Same reason
   the stacked branch restates its connectors.
+
+
+### `.jrk-org--group-solid` — the node carries the colour at full strength
+
+`<OrgChart groupSolid>`. The THIRD rendering of the one `--rollup` mechanism, on
+the ROOT list, and the one the dense portfolio layout uses.
+
+- **The fill is `chart.deep`, and the important thing about it is that it is not a
+  new palette.** Same eight hues, same searched order as `chart.categorical`, each
+  stepped down in lightness until **white** clears 4.5:1 — worst 4.54:1 light
+  (teal), 4.58:1 dark (purple). It exists because of the fact the `group-fill`
+  section states: on the marks no ink but black clears 4.5:1 and white clears it on
+  none. Rather than change the ink, the fill moved.
+- **Being a volume rather than a second palette is what carries the doctrine
+  over**, and `validate` asserts each piece:
+
+  | | keyline (marks) | solid (deep) |
+  |---|---|---|
+  | worst adjacent pair | 22.3 / 16.5 | **15.9 / 18.4** |
+  | all pairs guaranteed to | 3 | **3** |
+  | collapsing pairs in 8 | 9, all same-parity | **9, all same-parity** |
+  | separated by texture | all 9 | **all 9** |
+
+  So the `(1,2)(3,4)(5,6)(7,8)` texture bucketing still puts every collapsing pair
+  an odd distance apart, and "the first eight groups are fully distinguishable"
+  holds unchanged. **The parity assertion is the load-bearing one** — adjacency can
+  survive a hand-edit that moves a pair onto an ODD distance, where no texture is
+  waiting for it. `validate` also checks `chart.deep` still IS the categorical hue
+  order; if that fails, nothing above transfers.
+- **Three roles, three inks, and the call site must not be able to confuse them.**
+  A **mark** (`--jrk-chart-N`) takes black, a **tint** (`--jrk-chart-tint-N`) takes
+  the theme, a **deep fill** (`--jrk-chart-deep-N`) takes white. `chart.deep.ink`
+  is white in *both* halves and is **not** `text.inverse`, which is `#000000` in
+  dark and 4.0:1 at best here.
+- **It is still not a series palette.** Tuned against its own ink rather than
+  against the card, so every slot is ~4.5:1 on the plane — a shape, not a mark. A
+  line or a bar takes `chart.categorical`.
+- **A deep fill bounds itself** — 4.54:1 light, 3.29:1 dark against the card — so
+  the tile is a shape without an edge, and the dark half's derivation carries an
+  extra 3:1 floor against the dark card for exactly that. Hand-recorded on
+  `chart.deep.boundsSelf`, because nothing gates a fill against the fill beneath
+  it. **The 1px white hairline stays anyway**, and not as decoration: two tiles of
+  the SAME hue stacked flush in a `--column` have a **1.00:1** step between them
+  and the hairline is the only thing there.
+- **Three ink levels collapse to one**, so name, code and figure separate by size
+  and weight alone. Flatten those and the variant has nothing left.
+- **Focus is the one place it ADDS rather than replaces.** The ring is 1.10:1
+  light / 2.09:1 dark directly on a deep fill, so the widened offset plus the 1px
+  `focus.offset` collar is the entire reason a focused node has a visible ring.
+  Ring-against-collar is 5.22:1 / 7.16:1 (theme constants, unchanged by the fill);
+  collar-against-fill is 4.54:1 / 3.29:1.
+- **A vacant card drops the fill** and keeps the colour on its dashed edge — a
+  dash cannot be read over a saturated plane. This is where the variant and
+  `group-fill` part company.
+- **A node may sit outside the palette**: set `--jrk-org-group-solid` and
+  `--jrk-org-solid-ink` **together** (`<OrgNode style>`), for a president's card or
+  a holding company. One alone gives white-on-white and nothing checks it. Prefer
+  `surface.inverse`/`text.inverse` — and it is right **because** it flips, not in
+  spite of it. The card has to separate from `surface.default` in both halves and
+  under every skin, and an inverse plane is *defined* as the maximum step off the
+  plane. Worst case across all four palettes x both themes: ink **13.96:1**,
+  step off the panel **12.91:1**. `surface.bannerDeep` looks better and is
+  measurably wrong — stable dark navy in the BASE layer, but a skin owns its
+  planes and vitrine sets it to `#e9eceb` in light, **1.025:1** off that skin's
+  panel, so the card vanishes. It is a *banner* plane; nothing about it promises a
+  step against a *card*. The rule is not "prefer a themed pair" (bannerDeep is
+  one, with measured ink, and it fails) — it is that this card needs a plane whose
+  step against `surface.default` is **guaranteed**. `--jrk-org-group` still works in that slot and
+  still gets the bright mark, which is the pre-existing bargain, not the good one.
+- Mutually exclusive with `groupFill`; both classes on one list is decided by
+  source order in the stylesheet. Warns in development.
+
+### `--column` and `.jrk-org__group` — the terminal level
+
+`<OrgNode column>` holding `<OrgGroup label>`. The **third** layout for a level,
+after the horizontal default and `--stacked`.
+
+```html
+<li class="jrk-org__node jrk-org__node--group-1">
+  <div class="jrk-org__card">…manager…</div>
+  <ul class="jrk-org__branch jrk-org__branch--column">
+    <li class="jrk-org__group">
+      <span class="jrk-org__group-label">WA</span>
+      <ul class="jrk-org__group-items" aria-label="WA">
+        <li class="jrk-org__node">
+          <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+            <span class="jrk-org__name">Boulders at Puget Sound</span>
+            <span class="jrk-org__code">WST</span>
+            <span class="jrk-org__meta">714 units</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</li>
+```
+
+- **It draws NO connectors, on purpose, and that is defensible only because of
+  the width.** A column sits directly under its parent card at exactly
+  `--jrk-org-node`, so containment states the relationship — a stronger claim than
+  a line, because a line can be traced to the wrong card in a thirty-card row and a
+  box under a card cannot. `--stacked` needs its spine because it indents children
+  AWAY from the parent; this never separates them. **The two widths agreeing IS the
+  mechanism.**
+- **For a TERMINAL level whose members are not compared with each other.** Twelve
+  properties under a manager get looked up one at a time or counted, so fanning
+  them out costs 2,300px and buys nothing. Five direct reports ARE compared and
+  take the default. A `--column` node with a subtree of its own has no drawn
+  hierarchy at all — `<OrgNode>` warns, **exempting `<OrgGroup>`**, because a group
+  HAS children and the naive check fires on every correct column.
+- **Only worth its keep with `--compact` tiles.** `column` sets that for its
+  children via context and it inherits through the group, because the size is a
+  property of the LEVEL — one full-size card among eleven tiles is a third taller
+  than its neighbours. `compact` on a node overrides in both directions.
+- **`.jrk-org__group` is the one channel left when colour is spent.** Every tile in
+  a column is one hue and that hue names the ROLLUP, so a subdivision gets a
+  bracket and a label. Whitespace cannot carry it either — the gap between groups
+  and the gap between tiles would be the only difference, both a few pixels.
+- **The label is neutral ink, NOT the group hue, and it is measured.** A deep fill
+  can be the box's edge (3:1, graphical) and cannot be its text (4.5:1) in dark, in
+  all eight slots — the same split the skinned accents record, same resolution.
+  Nothing is lost: the hue is stated on every tile inside, the label carries the
+  one fact nothing else does. It is also the only start-aligned string in the
+  component, because it heads a list rather than belonging to a row.
+- **`__code` is the identifier line, not a second `__role`** — a property code, a
+  fund code. Same middle slot; a card takes one or the other. Uppercased and
+  tracked in CSS so the value stays copyable, and deliberately NOT monospace: at
+  `text.2xs` a mono face inside 176px starts wrapping a five-character code.
+- **The compact tile restates the `aria-current` padding compensation at 0-4-0.**
+  The full card's rule ties at 0-3-0 and would grow a current tile ~8px taller and
+  12px wider than every peer, inside a layout whose whole mechanism is that the
+  stack is one width. Same 1px-in-1px-out arithmetic, compact values.
+- **The name is clamped to two lines**, which is the other half of the centring
+  decision: one long property name allowed a third sets the height for the eleven
+  tiles beside it. The tail is recovered by the code line, which is the value a
+  reader cites.
+
+**Cards are centre-aligned (2026-08-26), reversing the documented start-aligned
+rule.** That rule's observations still hold — centring is the diagram-tool look and
+costs scanning on a wrapped name — but at this density a level is thirty cards wide
+and the comparison runs ACROSS a row, so a shared optical centre is the axis it
+runs along. The scanning cost is paid on the name and is what the two-line clamp
+answers.
+
+**Under a skin only the tile and the typeface change, and most of it is free.**
+`.jrk-org__card` takes `radius-lg` and `.jrk-org__group` takes `radius-md` — through
+TOKENS, unlike the base library's tiles — so industry and midgard square both and
+vitrine rounds both with no rule written. Then: midgard adds its engraved bevel and
+the display face on the full-size name (mixed case; a tracked-caps name does not
+fit 176px, and the compact tile is out because the display face is titles only),
+vitrine adds the glass catch and no blur, and **industry adds nothing but the
+squaring** — it takes no notch, because an org card is frequently a `--link` and
+`clip-path` clips the focus ring along with the shadow, the filled variant owns
+`background` so the notch edge would vanish, and the chart is always nested where
+that skin already forbids a notch. **The eight fills, the ink and the connectors
+are inherited whole and do not re-hue for an accent, a hazard hue or a tint** — the
+slot order IS the colourblind mechanism.
 
 ## Hover card
 

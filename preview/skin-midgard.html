@@ -11,6 +11,23 @@
 <link rel="stylesheet" href="../dist/jrk-skin-midgard.css">
 <link rel="stylesheet" href="../css/skins/midgard.css">
 <link rel="stylesheet" href="preview.css">
+<style>
+  /* The inlay strip. SAMPLED off the cascade, not stamped — see the picker
+     script at the foot of this file for why six hard-coded hexes would be a
+     second copy of the palette. */
+  .inlay { display: flex; gap: 6px; }
+  .inlay button {
+    width: 30px; height: 30px; padding: 0; cursor: pointer;
+    border: 1px solid var(--jrk-border-default);
+    border-radius: var(--jrk-radius-md);
+    background: var(--jrk-accent-solid);
+  }
+  .inlay button[aria-checked='true'] {
+    outline: 2px solid var(--jrk-text-primary);
+    outline-offset: 2px;
+  }
+  .inlay button:focus-visible { box-shadow: var(--jrk-shadow-focus); }
+</style>
 </head>
 <body>
 
@@ -33,11 +50,17 @@
       light is a design decision</strong>: warm vellum under the same gold, with
       every gold role re-stepped for a pale ground. Check both.
     </p>
-    <div style="margin-top:16px">
-      <div class="gal-note" style="margin-bottom:6px"><strong>Skin</strong></div>
-      <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Skin">
-        <button class="jrk-tab" data-skin-btn="" type="button">Base</button>
-        <button class="jrk-tab" data-skin-btn="midgard" type="button">Midgard</button>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;align-items:flex-end;margin-top:16px">
+      <div>
+        <div class="gal-note" style="margin-bottom:6px"><strong>Skin</strong></div>
+        <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Skin">
+          <button class="jrk-tab" data-skin-btn="" type="button">Base</button>
+          <button class="jrk-tab" data-skin-btn="midgard" type="button">Midgard</button>
+        </div>
+      </div>
+      <div>
+        <div class="gal-note" style="margin-bottom:6px"><strong>Inlay</strong></div>
+        <div class="inlay" role="radiogroup" aria-label="Inlay" id="inlay"></div>
       </div>
     </div>
   </header>
@@ -348,6 +371,73 @@ document.querySelectorAll('[data-skin-btn]').forEach((b) => {
    reload. */
 const param = new URL(location.href).searchParams.get('skin');
 applySkin(param === null || param === SKIN ? SKIN : '');
+
+/* The inlay picker. The default is the ABSENCE of data-inlay, not a value of it,
+   so "gold" REMOVES the attribute rather than setting it — the same reason an app
+   that never stamps it cannot change. */
+const INLAYS = ['gold', 'moss', 'verdigris', 'frost', 'sapphire', 'amethyst'];
+const inlay = document.getElementById('inlay');
+inlay.innerHTML = INLAYS.map((x) =>
+  '<button type="button" role="radio" aria-checked="false" aria-label="' + x +
+  '" title="' + x + '" data-inlay-btn="' + x + '"></button>').join('');
+
+/* SAMPLED, NOT STAMPED, for the reason vitrine's picker records: every generated
+   inlay block is anchored at `:root[data-skin="midgard"][data-inlay="X"]`, and
+   :root matches <html> and nothing else — so a button carrying its own data-inlay
+   matches none of them and just inherits the root's --jrk-accent-solid. Six
+   hard-coded hexes here would be a second copy of the palette, free to drift.
+   Stamp the ROOT once per inlay, read the resolved value off the cascade, put the
+   root back. Synchronous, so nothing paints between the reads. */
+function sampleInlays() {
+  const root = document.documentElement;
+  const held = root.dataset.inlay;
+  const out = {};
+  for (const x of INLAYS) {
+    if (x === 'gold') delete root.dataset.inlay;
+    else root.dataset.inlay = x;
+    out[x] = getComputedStyle(root).getPropertyValue('--jrk-accent-solid').trim();
+  }
+  if (held === undefined) delete root.dataset.inlay;
+  else root.dataset.inlay = held;
+  for (const b of inlay.querySelectorAll('[data-inlay-btn]')) b.style.background = out[b.dataset.inlayBtn];
+}
+
+/* Each inlay has its own light and dark value, so the strip is re-sampled when
+   the theme changes. data-inlay is filtered out or applyInlay would re-enter this
+   through its own root write. */
+new MutationObserver((recs) => {
+  if (recs.some((r) => r.attributeName !== 'data-inlay')) sampleInlays();
+}).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme', 'data-skin'] });
+
+function applyInlay(x) {
+  const root = document.documentElement;
+  if (x && x !== 'gold') root.dataset.inlay = x;
+  else delete root.dataset.inlay;
+  const u = new URL(location.href);
+  if (x && x !== 'gold') u.searchParams.set('inlay', x);
+  else u.searchParams.delete('inlay');
+  history.replaceState(null, '', u);
+  for (const b of inlay.querySelectorAll('[data-inlay-btn]')) {
+    b.setAttribute('aria-checked', String(b.dataset.inlayBtn === (x || 'gold')));
+  }
+  sampleInlays();
+}
+
+inlay.addEventListener('click', (e) => {
+  const b = e.target.closest('[data-inlay-btn]');
+  if (b) applyInlay(b.dataset.inlayBtn);
+});
+/* Arrow keys, because a radiogroup that answers only the pointer is not one. */
+inlay.addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+  e.preventDefault();
+  const cur = INLAYS.indexOf(document.documentElement.dataset.inlay || 'gold');
+  const next = (cur + (e.key === 'ArrowRight' ? 1 : -1) + INLAYS.length) % INLAYS.length;
+  applyInlay(INLAYS[next]);
+  inlay.querySelectorAll('[data-inlay-btn]')[next].focus();
+});
+
+applyInlay(new URL(location.href).searchParams.get('inlay') || 'gold');
 </script>
 </body>
 </html>

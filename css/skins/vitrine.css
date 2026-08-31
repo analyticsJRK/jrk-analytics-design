@@ -118,27 +118,61 @@
   background: var(--jrk-vitrine-scrim);
 }
 
-/* ── the glass ─────────────────────────────────────────────────────────────
-   A pane is three things and none of them can be dropped without the tile
-   ceasing to read as glass:
+/* ── CHROME IS GLASS, CONTENT IS SOLID ─────────────────────────────────────
+   Directed 2026-08-26, and it is the line this skin was missing rather than a
+   retreat from the look. Frosting is a property of CHROME — the masthead, the
+   submodule nav, menus, modals, toasts — all of which sit ABOVE the page and
+   whose job is to say "I am in front of what you were reading". Content is what
+   you were reading. It needs a ground that does not move.
 
-     1. THE TRANSLUCENT FILL, surface-glass. Never surface-default — that token
-        is the COMPOSITE this fill produces over the scrim, and pointing a tile
-        at it would give an opaque panel that measures correctly and looks
-        nothing like the reference.
-     2. THE BLUR. backdrop-filter is what separates frosted glass from a tinted
-        rectangle. It is also the expensive part: a blurred backdrop is a
-        full-viewport composite per element, so this is applied to TOP-LEVEL
-        tiles only and explicitly removed from nested ones below.
-     3. THE TOP-EDGE CATCH, carried inside shadow-card as an inset highlight.
-        On the dark page a drop shadow renders nothing — a black shadow over a
-        near-black ground, the finding this library has now reached four
-        independent ways — so in dark the highlight IS the elevation.
+   WHAT WENT WRONG WITHOUT THAT LINE, on a real screen rather than in the
+   gallery. A translucent card takes its colour from whatever is behind it, so a
+   tall card over a photograph reads as a vertical gradient: pale at the top
+   where the sky is, flushed at the bottom where the ground is. Every ratio still
+   passed, because the ratios are measured against the composite's extremes and
+   the extremes were honoured — and the card still looked wrong, because a pane
+   whose tint changes down its own height reads as a rendering artefact rather
+   than as a material. Small tiles inside it then sit on three different grounds.
 
-   @supports IS NOT OPTIONAL HERE. Where backdrop-filter is unavailable the fill
-   alone is far too transparent to carry ink, so the fallback is the opaque
-   composite. That is the one place surface-default is used as a fill, and it is
-   used precisely because it is what the glass would have resolved to. */
+   TWO FAILURES AT OPPOSITE ENDS, AND THE SKIN HAD BOTH:
+
+     - Scene routed through --jrk-vitrine-backdrop, so vitrine-clamp applied:
+       contrast(0.18) brightness(1.85) lands every channel in [193, 255]. That
+       is a 62-level window at the top of the range. A token-built pastel
+       gradient survives it; a PHOTOGRAPH is flattened to nothing, and the glass
+       reads as white cardboard because there is no longer anything behind it
+       worth blurring.
+     - Scene NOT routed through the token — set on a wrapper, which is what a
+       consumer reaches for first — so the clamp never applies and the panes take
+       the image at full strength. Every contrast guarantee in this file is void
+       in that state and nothing detects it.
+
+   Making content opaque answers both at once, which is why it is the fix rather
+   than a retune of the clamp. An opaque content plane is `surface-default`
+   whatever is behind it: the recorded value stops being a RECORDING for these
+   tiles and becomes the literal fill, so their measurements are exactly true
+   instead of true-within-a-band, and an unclamped backdrop can no longer reach
+   them. The scene shows AROUND the content, which is where it was always doing
+   its work.
+
+   surface-default is still a composite recording for the surfaces that are
+   still glass — the masthead, the overlays, the selected tab below — so the
+   "measure against both extremes, never the recorded middle" rule in the scrim
+   note above is unchanged FOR THOSE. It simply no longer reaches content.
+
+   WHAT CONTENT KEEPS is everything that is not translucency: the generous
+   radius, the inset top-edge catch inside shadow-card, and the rounded contract
+   further down. In light the catch on a near-white plane is invisible and the
+   radius carries the look; in dark the catch is the elevation, the same as it
+   was. A reader loses the tint on the card and keeps the material.
+
+   AND IT IS THE CHEAP DIRECTION. backdrop-filter is a full-viewport composite
+   per element, so a dashboard of twenty tiles was paying twenty of them for a
+   effect that was actively hurting it. Chrome is a handful of elements.
+
+   The @supports block that used to swap these to surface-glass is GONE rather
+   than guarded. The base rule below already paints the opaque fill, which used
+   to be the no-backdrop-filter fallback and is now simply the value. */
 /* ── WHAT IS NOT GLASS ────────────────────────────────────────────────────
    A SURFACE THAT BRINGS ITS OWN MEANINGFUL FILL IS NOT A PANE, and the eight
    selectors below are guarded so it stays that way. This was a real fault, not a
@@ -182,25 +216,25 @@
   border-radius: var(--jrk-radius-lg);
 }
 
-@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
-  :root[data-skin='vitrine'] .jrk-card:not(.jrk-card--tinted),
-  :root[data-skin='vitrine'] .jrk-chart-card,
-  :root[data-skin='vitrine'] .jrk-stat:not(.jrk-stat--vivid):not(.jrk-stat--tinted),
-  :root[data-skin='vitrine'] .jrk-stat-row:not(.jrk-stat-row--tinted),
-  :root[data-skin='vitrine'] .jrk-table-wrap,
-  :root[data-skin='vitrine'] .jrk-sheet,
-  :root[data-skin='vitrine'] .jrk-alert:not(.jrk-alert--warning):not(.jrk-alert--serious):not(.jrk-alert--critical):not(.jrk-alert--good):not(.jrk-alert--accent),
-  :root[data-skin='vitrine'] .jrk-auth__panel {
-    background: var(--jrk-surface-glass);
-    -webkit-backdrop-filter: blur(var(--jrk-glass-blur)) saturate(1.4);
-    backdrop-filter: blur(var(--jrk-glass-blur)) saturate(1.4);
-  }
-}
 
-/* A NESTED pane takes no blur and no glass. Two frosted layers over each other
-   read as fog rather than as depth, the inner one has nothing behind it worth
-   blurring, and the cost is paid twice for it. It takes the opaque composite
-   and the neutral hairline nesting.css already gives it. */
+/* THIS RULE IS NOW A NO-OP AND IS KEPT ON PURPOSE — read before deleting it.
+   It used to do real work: content was glass, so a nested tile had to be handed
+   back the opaque composite and have the blur turned off, because two frosted
+   layers over each other read as fog rather than as depth and the inner one has
+   nothing behind it worth blurring. With content opaque above, a nested tile
+   already inherits both of those, so every declaration here now restates what it
+   would get anyway.
+
+   It stays because it is the SEAM. If content ever goes back to glass — a
+   consumer overriding the block above, or a later pass reversing the
+   chrome/content split — the nested case is the thing that quietly breaks, and
+   it broke this way once already at 0-4-0 against a 0-3-0 stat rule. A rule that
+   is currently redundant and correct is cheaper than rediscovering why it was
+   needed. The `backdrop-filter: none` pair is the half that matters; the fill is
+   here so the two cannot drift apart.
+
+   A nested tile is separated by nesting.css's neutral hairline, not by a fill
+   step: surface-default on surface-default is 1.00:1 and always was. */
 :root[data-skin='vitrine'] .jrk-card .jrk-card:not(.jrk-card--tinted),
 :root[data-skin='vitrine'] .jrk-card .jrk-stat:not(.jrk-stat--vivid):not(.jrk-stat--tinted),
 :root[data-skin='vitrine'] .jrk-card .jrk-table-wrap,
@@ -357,4 +391,134 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+}
+
+/* ── the org chart's tiles: ROUNDED PANES WITH THE CATCH ───────────────────
+   The rounding is free HERE and nowhere else in this skin, and the difference is
+   worth knowing. The note on `radius-lg` in tokens/skins/vitrine.json says the
+   base library reaches for `radius.none` DIRECTLY on tiles, so overriding the
+   token rounds nothing and the tiles have to be named in this file. The org
+   chart is the exception: `.jrk-org__card` takes `radius-lg` and
+   `.jrk-org__group` takes `radius-md` through the tokens, because a node is a
+   mark in a diagram rather than a tile on a page and org.css keeps its radius
+   deliberately. So those two round themselves — 16px and 12px — and the list
+   above needs no entry for them.
+
+   What has to be stated is the CATCH: the base library gives an org card no
+   shadow, and this skin's elevation tokens carry the inset top-edge highlight
+   that makes a pane read as glass. Without it a node is a flat rounded
+   rectangle, which is the one thing that looks like a different material from
+   everything around it.
+
+   NO BLUR, and that is this skin's own rule rather than a saving. A node sits
+   inside a `.jrk-card` that is already frosted: two frosted layers read as fog
+   rather than as depth, the inner one has nothing worth blurring behind it, and
+   the composite cost is paid twice for it. `shadow-card` is the whole treatment
+   — the highlight, and in dark the highlight IS the elevation, because a black
+   shadow over this page renders nothing.
+
+   The hover and current states are left exactly as the base library draws them.
+   The catch is the material and is constant across every state, which is what
+   keeps it from being read as one. */
+:root[data-skin='vitrine'] .jrk-org__card,
+:root[data-skin='vitrine'] .jrk-org__group {
+  box-shadow: var(--jrk-shadow-card);
+}
+
+/* ── the submodule nav: a raised pane, not a rule ─────────────────────────
+   `.jrk-tabs` is the row that swaps between views of one subject — Overview,
+   Weekly route, Reviews, Calendar. Base draws it as PAPER: a 1px hairline across
+   the whole row and a 3px rule under the selected label. That is the right idiom
+   on a page made of sheets and the wrong one here, where nothing else in the
+   skin states anything with a rule. On glass the row read as un-skinned — a
+   borrowed underline sitting on a frosted band with no relationship to it.
+
+   THIS IS THE ONE PIECE OF CONTENT-ADJACENT CHROME THAT STAYS GLASS, and it is
+   why `surface-glass` still has a consumer at all after the block above turned
+   content opaque. A submodule nav is chrome by function: it sits above the
+   content it switches, and it is exactly the kind of surface frosting was for.
+
+   surface-glass rather than surface-glass-raised, deliberately. The RAISED pane
+   is denser and belongs to things that float over the page — menus, modals, the
+   masthead — so that a menu opened over a card still reads as in front of it. A
+   tab is ON the page. Using the raised value here would put the nav in the same
+   plane as an overlay and flatten a distinction the skin spends real alpha on.
+
+   THE STATE HAS THREE CHANNELS AND ONLY ONE OF THEM IS COLOUR, which is what
+   makes it safe to drop the underline the base library relies on:
+
+     1. THE RIM, an inset 1px of border-accent. This is the 3:1 graphical
+        signifier WCAG 1.4.11 wants and it is the one the underline used to be —
+        border-accent measures 3.28:1 on this skin's panel. It is drawn as an
+        INSET BOX-SHADOW rather than a border because base reserves 3px of
+        transparent bottom border to stop the row shifting on selection; adding a
+        real 1px border would re-do that reservation and move every label by 2px.
+        A shadow costs no layout at all.
+     2. THE PANE, fill plus the top-edge catch from shadow-card. Small — glass on
+        glass — and it is an accelerator, not the signal.
+     3. SEMIBOLD. The channel that survives greyscale, both dichromacies and both
+        themes, exactly as it does on the segmented thumb. Do not let a tidy-up
+        drop it.
+
+   Plus accent-text ink, which is 4.66:1 here and is text contrast rather than a
+   non-text indicator — it reinforces, it does not substitute for the rim.
+
+   `:not(.jrk-tabs--pills)` IS LOAD-BEARING. The pills variant is a different
+   widget — an inset well with a raised thumb — and it is the same widget as
+   `.jrk-btn-group` in a second markup contract, which the base library requires
+   to stay in step. Without the guard this rule would repaint the thumb and the
+   two would silently disagree. It also keeps the two forms distinguishable under
+   this skin: pills are a well, tabs are a flat row with one pane lifted out of
+   it. */
+:root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) {
+  /* COLOUR ONLY, never `border-bottom: 0` — that would set border-style to none
+     and a later border-color would paint nothing, which is how this breaks
+     quietly. The 1px stays reserved so the row's height is identical to base's
+     and switching skins reflows nothing. */
+  border-bottom-color: transparent;
+}
+
+:root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab {
+  /* All four corners. Base zeroes the bottom pair so its underline keeps square
+     ends; a pane wants the radius all the way round, and the shorthand at 0-3-0
+     beats base's longhands at 0-1-0. */
+  border-radius: var(--jrk-radius-md);
+}
+
+:root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab:hover:not(:disabled) {
+  /* A whisper of the pane the selected tab wears, so hover previews the state
+     rather than announcing a different one. No rim and no catch — those are what
+     say "selected". */
+  background: var(--jrk-surface-hover);
+}
+
+:root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab[aria-selected='true'],
+:root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab[aria-current='page'] {
+  background: var(--jrk-surface-glass);
+  /* The underline goes, colour only. The rim below replaces it as the 3:1
+     channel; leaving both would put two accent marks on one small object. */
+  border-bottom-color: transparent;
+  /* Rim first, then the catch. A box-shadow list containing `none` is INVALID
+     CSS and drops the whole declaration — rim and catch together — so this is
+     only safe because shadow-card is never `none` under this skin. That is
+     stated on the token; midgard records the same trap. */
+  box-shadow: inset 0 0 0 1px var(--jrk-border-accent), var(--jrk-shadow-card);
+  font-weight: var(--jrk-weight-semibold);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  :root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab[aria-selected='true'],
+  :root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab[aria-current='page'] {
+    -webkit-backdrop-filter: blur(var(--jrk-glass-blur)) saturate(1.4);
+    backdrop-filter: blur(var(--jrk-glass-blur)) saturate(1.4);
+  }
+}
+
+/* The count chip sits inside a pane now rather than on the bare row, so it takes
+   the recess that reads against one — surface-track is this skin's inset value
+   and surface-active is a hover step that all but disappears on the pane. The
+   NUMBER is the information either way and inherits the tab's ink. */
+:root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab[aria-selected='true'] .jrk-tab__count,
+:root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab[aria-current='page'] .jrk-tab__count {
+  background: var(--jrk-surface-track);
 }

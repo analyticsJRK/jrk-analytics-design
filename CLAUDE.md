@@ -380,6 +380,125 @@ light, 5.26:1 dark), `text.primary` and `text.secondary` clear, and `text.muted`
 FAILS on all eight (3.70–4.10 light) — so anything muted must step up when it
 lands on a tint.
 
+
+**THERE IS A THIRD CHART NAMESPACE NOW — `--jrk-chart-deep-*`, added 2026-08-26 —
+AND IT IS A VOLUME OF THE CATEGORICAL PALETTE, NOT A SECOND PALETTE.** Same eight
+hues, same searched order, each stepped down in lightness until **white** clears
+4.5:1 (worst 4.54:1 light, 4.58:1 dark). That distinction is the whole reason the
+colourblind doctrine above did not have to be re-argued for it, and `validate`
+asserts each half of it: worst adjacent **dE 15.9 light / 18.4 dark** against the
+marks' 22.3 / 16.5, all-pairs safe cap **3 in both halves — identical to
+`seriesCapAllPairs`** — and all **nine** collapsing pairs still SAME-PARITY, so
+the org chart's `(1,2)(3,4)(5,6)(7,8)` texture buckets separate every one of them
+and "the first eight groups are fully distinguishable" carries over word for word.
+**The parity check is the load-bearing gate**, because adjacency can survive a
+hand-edit that quietly moves a pair onto an ODD distance, where no texture is
+waiting for it. It also gates that `chart.deep` still IS the categorical hue
+order; if that ever fails, nothing else transfers and the set needs re-deriving
+from scratch.
+
+**Read it as the general rule: when an ink cannot survive a fill, move the FILL.**
+The paragraph above is right that no ink but black works on the marks — so
+`.jrk-org--group-solid` was not given a different ink, it was given a different
+volume of the same hues. Three roles, three inks, and the call site must never be
+able to confuse them: a **mark** takes black, a **tint** takes the theme, a **deep
+fill** takes white. A deep fill also **bounds itself** (4.54:1 light, 3.29:1 dark
+against the card), so it is a shape without an edge — which is why the dark half's
+derivation carries an extra 3:1 floor against the dark card and why that figure is
+hand-recorded on `chart.deep.boundsSelf`: **nothing gates a fill against the fill
+beneath it.** `chart.deep.ink` is white in BOTH halves and is **not**
+`text.inverse`, which is `#000000` in dark and 4.0:1 at best here.
+
+**A DEEP FILL IS STILL NOT A SERIES PALETTE.** It is tuned against its own ink
+rather than against the card, so every slot is ~4.5:1 on the plane — which is a
+shape, not a mark. A line or a bar takes `chart.categorical`. The focus story is
+unchanged and is worth knowing before restyling it: the ring is **1.10:1 light /
+2.09:1 dark** directly on a deep fill, so the `focus.offset` collar the solid
+variant draws is not belt-and-braces, it is the entire reason a focused node has a
+visible ring. Ring-against-collar (5.22:1 / 7.16:1) is a pair of theme constants
+and did not move when the fill went deep; what improved is the collar against the
+fill, now 4.54:1 / 3.29:1.
+
+**PUTTING A NODE OUTSIDE THE ROLLUP PALETTE TAKES `surface.inverse`, AND IT TAKES
+IT *BECAUSE* THAT PLANE FLIPS.** `.jrk-org--group-solid` lets a consumer set
+`--jrk-org-group-solid` + `--jrk-org-solid-ink` on a node (an apex card, a holding
+company). What that card has to do is separate from `surface.default` — the plane
+every other card in the chart sits on — in both halves AND under every skin, and an
+**inverse plane is defined as the maximum step off the plane**, so whichever way
+the theme goes it goes the other. Worst case across base / industry / midgard /
+vitrine × light / dark: ink **13.96:1** on the fill, **12.91:1** of step against
+the panel.
+
+**`surface.bannerDeep` looks like the better answer and is measurably the wrong
+one — this is the instructive half.** It reads as a stable dark navy `#14375e` in
+the BASE layer, which is where a check naturally starts, so "themed pair, dark in
+both halves, recorded white ink" all come back green. **A skin owns its own
+planes:** `vitrine` sets it to `#e9eceb` in light, which is **1.025:1** against
+that skin's panel — the apex card disappears into the chart, and only a render
+under that skin shows it. It is a **banner** plane, built to sit under the
+topbar's own ink; nothing about it promises a step against a **card**. So the rule
+is NOT "prefer a themed pair" — bannerDeep is a themed pair with measured ink and
+it still fails. **A token's guarantee is about the plane it was designed against,
+and borrowing it for a different plane borrows nothing.** Check a candidate under
+all four palettes, not just the base one.
+
+**THE ORG CHART HAS A THIRD LEVEL LAYOUT AND IT DRAWS NO CONNECTORS ON PURPOSE.**
+`--stacked` indents children away from the parent and then spends a spine
+reconnecting them; `--column` never separates them — it sits directly under the
+parent card at **exactly `--jrk-org-node`**, so containment states the
+relationship, and that is a stronger claim than a line because a line can be
+traced to the wrong card in a thirty-card row and a box under a card cannot. **The
+two widths agreeing IS the mechanism**; break that and the level loses its only
+statement of hierarchy. It is for a TERMINAL level whose members are not compared
+with each other (twelve properties get looked up one at a time, so fanning them out
+costs 2,300px and buys nothing), it is only worth its keep with `--compact` tiles,
+and a `--column` node with a subtree of its own has no drawn hierarchy at all — the
+React layer warns, exempting `<OrgGroup>`, because a group HAS children and the
+naive check fires on every correct column.
+
+**`.jrk-org__group` is the one channel left when colour is already spent.** Every
+tile in a column is one hue and that hue names the ROLLUP, so a subdivision inside
+it gets a bracket and a label. **The label is neutral ink, NOT the group hue, and
+that is measured:** a deep fill can be the box's edge (3:1, graphical) and cannot
+be its text (4.5:1) in dark, in all eight slots. Same split the skinned accents
+record, same resolution — the edge takes the hue, the ink takes the ink. Two things
+about the solid tile that look removable and are not: the **1px white hairline**
+stays even though a deep fill bounds itself, because two tiles of the SAME hue
+stacked flush in a column have a **1.00:1** step between them and the hairline is
+the only thing there; and the compact tile **restates** the `aria-current` padding
+compensation at 0-4-0, because the full card's rule ties at 0-3-0 and would grow a
+current tile ~8px taller than every peer inside a layout whose whole mechanism is
+that the stack is one width.
+
+**ORG CARDS ARE CENTRE-ALIGNED NOW (2026-08-26), REVERSING A DOCUMENTED
+DECISION.** The old rule was start-aligned, on the grounds that centring is the
+diagram-tool look and costs scanning on a wrapped name. **Both observations still
+hold; what expired is the premise, not the measurement** — at this density a level
+is thirty cards wide and the comparison runs ACROSS a row, so centred text gives
+every card in it the same optical centre. The scanning cost is real and is paid on
+the name, which is why `--compact` clamps its name to **two lines**: one long
+property name allowed a third sets the height for the eleven tiles beside it.
+`.jrk-org__group-label` is the one string that stays start-aligned — it heads a
+list rather than belonging to a row.
+
+**UNDER A SKIN ONLY THE TILE AND THE TYPEFACE CHANGE, and most of that is free
+because the org chart takes its radius from TOKENS.** `.jrk-org__card` reaches for
+`radius-lg` and `.jrk-org__group` for `radius-md`, unlike the base library's tiles
+which reach for `radius.none` directly — so industry and midgard square both with
+no rule written and vitrine rounds both, which is the one place vitrine's radius
+override works without naming the element. On top of that: **midgard** adds its
+engraved bevel and sets the full-size name in `font.display` **mixed case** (a
+tracked-caps name does not fit 176px, and the compact tile is excluded because the
+display face is titles only); **vitrine** adds the glass catch and no blur (two
+frosted layers read as fog); **industry adds nothing but the squaring**, and its
+`no notch` decision is recorded in the skin file rather than left implicit — an org
+card is frequently a `--link`, and `clip-path` clips the **focus ring** along with
+the shadow, the filled variant owns `background` so the notch EDGE would vanish,
+and the chart is always nested where that skin already forbids a notch. **The eight
+fills, the ink and the connectors are inherited whole by all three skins and do not
+re-hue for an accent or a hazard hue** — the slot order IS the colourblind
+mechanism, exactly as `chart.*` does not follow `data-accent`.
+
 **THE VIVID TILE TONES ARE TWO DIFFERENT KINDS OF THING, and the rules are nearly
 opposite.** `gradient.{rose,violet,blue,teal}` are POSITIONAL — assign by slot,
 never by meaning, because half the positional pairs collapse under CVD and colour
@@ -651,6 +770,32 @@ real width (1920x1080 is the target display); a downscaled capture makes correct
 positions rather than trusting a mid-scroll capture — headless compositing
 produces convincing artifacts.
 
+**THERE IS A HEADLESS BROWSER ON THIS MACHINE AND THERE IS NO EXCUSE FOR SHIPPING
+A LAYOUT UNSEEN.** `/c/Program Files/Google/Chrome/Application/chrome.exe`
+(Edge is at `/c/Program Files (x86)/Microsoft/Edge/Application/msedge.exe`):
+
+```bash
+node scripts/serve-preview.mjs &                       # 4321
+"/c/Program Files/Google/Chrome/Application/chrome.exe" --headless --disable-gpu   --no-sandbox --hide-scrollbars --window-size=1800,1050 --virtual-time-budget=5000   --screenshot=out.png "http://localhost:4321/preview/components.html"
+```
+
+`components.html` is 2,500 lines, so a screenshot of it is the top of the page and
+not the thing you changed. **Write a throwaway probe page** — one component, the
+stamps in the `<html>` tag, `<link>`s to `dist/jrk-tokens.css`, `css/index.css`
+and (for a skin) `dist/jrk-skin-<s>.css` + `css/skins/<s>.css` — emit one per
+theme x skin, capture them, and delete them. Four palettes is four captures, and
+that is the point: **a skin overrides tokens the base layer's own values told you
+were safe.** `surface.bannerDeep` is dark navy in the base layer and `#e9eceb`
+under `vitrine`; a card built on it looked right in three palettes and vanished in
+the fourth.
+
+**Two defects in one change here were invisible to every gate and obvious in the
+first render** — white ink inherited onto unfilled cards (an entire level of the
+org chart present, spaced, connected and completely invisible) and `width: auto`
+under `align-items: center`, which shrink-wraps instead of filling. Neither is
+something reading the CSS reliably catches. `npm test` gates colour and structure;
+**it has never gated layout, and passing it is not evidence the page is right.**
+
 ## The accent hue axis — `data-accent`, on the UNSKINNED library
 
 **Five hues plus the default, stamped `data-accent` and crossed with the theme,
@@ -837,12 +982,26 @@ bevel arriving at one conclusion by three routes — **on a dark ground, elevati
 is a fill.** The light half fails for a *different* reason worth carrying
 separately: a shadow there is legal in isolation (alpha 0.10 leaves `text-muted`
 at 4.64:1) but not on these pixels, because `surface-canvas-grid` already spends
-**0.10 of a 0.115 ceiling** on them and **the alphas add**. That is the same trap
-the complementary masks on the wave and the dot ground exist to avoid, hit from a
-new direction: **a new translucent layer has to be budgeted against every other
-translucent layer that shares its pixels, not against the page.** Three opaque
-steps spend none of that budget, and the step-to-step separation (1.32:1–1.61:1
-light, 1.13:1–1.51:1 dark) is what makes the extrusion read.
+**0.10 of a 0.115 ceiling** on them and **the alphas add**: **a new translucent
+layer has to be budgeted against every other translucent layer that shares its
+pixels, not against the page.** Three opaque steps spend none of that budget, and
+the step-to-step separation (1.32:1–1.61:1 light, 1.13:1–1.51:1 dark) is what
+makes the extrusion read.
+
+**That rule used to have a second illustration and it no longer does — read the
+rule, not the example.** The page carried a WAVE as well as the dot ground: two
+fixed layers masked COMPLEMENTARILY, arcs above the horizon and dots below, so
+neither ever composited onto the other and each got the full ceiling instead of
+splitting one. **The wave was removed on 2026-08-25 by direction** — near the top
+of the port its arcs are wide and nearly flat, so they read as horizontal dashes
+rather than as a bloom, and the page going white at the top five days earlier is
+what made that plain. `surface-canvas-wave` and `wave-gap` went with it, and
+`validate:skin`'s dead-`skinOnly` check is what forces that tidying rather than
+leaving two colours nothing draws. What the removal retires is a CONSTRAINT, not
+a mechanism: with one layer left the dot ground has the whole 0.115 to itself, so
+there is headroom above the 0.10 it ships at — but the adding rule was never about
+the wave, and the next translucent layer put on those pixels brings it straight
+back.
 
 **IT TOOK FOUR SHAPES TO GET ONE MARK, AND EACH FAILURE IS A DIFFERENT LESSON.**
 Two corner-anchored wedges first: each took its edge angle from its own box
@@ -901,18 +1060,22 @@ values and nothing that does not stamp the attribute can change. **Only the
 accent namespace varies**; the steel neutrals, the status set, the geometry and
 the type belong to the skin. That is what makes a hue a one-attribute swap.
 
-**THE ATTRIBUTE IS NOW THE SKIN'S TO NAME, and that is infrastructure two skins
-share rather than a detail of this one.** `data-hazard` was hardcoded in
+**THE ATTRIBUTE IS THE SKIN'S TO NAME, and that is infrastructure ALL THREE skins
+now share rather than a detail of this one.** `data-hazard` was hardcoded in
 `build-tokens.mjs` until 2026-08-25, when `vitrine` gained a colour choice whose
 hue is a **material** rather than a signal — so the axis is declared per skin in
-`variantAxis: { attr, default }` and the two stamp `data-hazard` and `data-tint`
-respectively. Three things the generalisation is worth carrying: the build
-**refuses** variants that do not declare an axis (rather than defaulting to
-industry's word, which is how a name that lies gets shipped); it refuses a
-`default` that is also a declared variant (that would put a button in the gallery
-that changes nothing); and `validate:skin` looks for the gallery picker's list
-under the axis's own name — `HAZARDS` here, `TINTS` there. Industry's emitted
-selectors did not move by a byte.
+`variantAxis: { attr, default }`, and the three stamp `data-hazard`, `data-tint`
+and `data-inlay` respectively (a hazard SIGNAL, the light the glass is lit BY, and
+the material set INTO the console). Three things the generalisation is worth
+carrying: the build **refuses** variants that do not declare an axis (rather than
+defaulting to industry's word, which is how a name that lies gets shipped); it
+refuses a `default` that is also a declared variant (that would put a button in
+the gallery that changes nothing); and `validate:skin` looks for the gallery
+picker's list under the axis's own name — `HAZARDS` here, `TINTS` and `INLAYS`
+there. **That last one constrains the name**: the gate derives the list by
+appending a bare `S`, so an axis called `finish` would want a list called
+`FINISHS`. Pick a word whose naive plural is the real one. Industry's emitted
+selectors did not move by a byte through any of this.
 
 **Derived by search, not picked: every role is the NEAREST LEGAL STEP to its
 hue's vivid centre** — light roles darken, dark roles lighten, each stopping the
@@ -979,10 +1142,18 @@ inscriptional caps, an engraved bevel where the base library puts a shadow, and
 aged gold `#d9ae43` used as the SELECTION signal rather than as decoration.**
 Opt-in the same way (`Cinzel` is requested from `css/skins/midgard.css`, so a
 consumer that never stamps `data-skin="midgard"` never fetches it). Gallery:
-`preview/skin-midgard.html`. **No hazard variants, on purpose:** Industry's accent
-is a hazard *signal* and can be re-hued without touching what the design means;
-this one is a *material*, and every light gold role is stepped away from the fill
-rather than equal to it, so a hue swap would mean re-deriving all of them.
+`preview/skin-midgard.html`.
+
+**IT HAS A VARIANT AXIS NOW — `data-inlay`, five hues, added 2026-08-26 — and the
+note it replaces argued against exactly that.** That note said industry's accent
+is a hazard *signal* and can be re-hued freely, where this one is a *material*
+whose light roles are each stepped away from the fill, so a hue swap would mean
+re-deriving all of them. **The premise was right and the conclusion was wrong:**
+re-deriving all of them is precisely what industry's method does — nearest legal
+step to the hue's vivid centre, per role, per half — so being a material made the
+work no larger, only differently shaped. The axis is `inlay` rather than `hazard`
+or `tint` because this hue is the material set INTO the console: gold, patina,
+stone.
 
 **THE DARK HALF IS THE FAITHFUL ONE AND THE LIGHT HALF IS A DESIGN DECISION —
 that asymmetry is how you skin a dark-native look.** The reference is a dark
@@ -1028,11 +1199,64 @@ It is not a bad pick: every gold from `#b8891f` to `#e6c15c` stays under 10
 against every amber a warning could plausibly be, because an amber accent and an
 amber warning separate only by lightness. Light is clear (22.7 / 33.5 / 22.3),
 because the light status marks are deep browns and reds. **`validate:skin` runs
-its CVD check on hazard VARIANTS only, and this skin declares none, so nothing
-fails** — which is exactly why it is written here: with `data-skin="midgard"` in
-dark, a status badge carries its icon AND its label, a delta states direction in
-text, and a gold `--cta` does not share a tile with a warning chip whose only mark
-is its colour.
+its CVD check on declared VARIANTS, and the gold is not one — it is the ABSENCE of
+`data-inlay` — so this collision is still ungated and the advisory still stands:**
+with `data-skin="midgard"` in dark and no inlay stamped, a status badge carries
+its icon AND its label, a delta states direction in text, and a gold `--cta` does
+not share a tile with a warning chip whose only mark is its colour. **Stamping any
+of the five inlays retires the advisory**, because all five clear dE 10 against
+every status colour and the gate proves it on each build.
+
+**THE FIVE INLAYS ARE ALL COOL, AND THAT IS FORCED BY MEASUREMENT RATHER THAN
+CHOSEN — it is the most useful thing this axis turned up.** Sweeping the wheel
+against this skin's own status set — at every anchor saturation the set uses AND at
+both chroma levels — leaves two clean arcs, **45–192°** and **225–306°**, and the
+entire warm half is unavailable: 0–42° collides with critical, warning and serious
+*because those roles ARE deep reds and burnt oranges here*, 309–357° collides with
+warning and then the reds again, and 195–222° collides with `good` under
+tritanopia. Every warm metal a Norse console might plausibly wear lands in the
+first of those — bronze at hue 27 measured dE 9.7 against critical and 9.3 against
+warning; a garnet at 353 collided four ways. **And the default already occupies the
+only clean warm hue**, the gold sitting at roughly 45° on the edge of the first
+arc, so a second warm inlay would either collide with a status colour or look like
+the gold. That is why the five read as STONES against a metal default rather than
+as a set of metals: **the palette is the shape the status set left behind.** It
+also means this skin is the first to ship a variant axis with **no restricted hue
+at all** — industry's `red` and vitrine's `amber` each carry a documented one.
+
+**THE LIGHT HALF IS SOFTENED BY CHROMA, NOT BY LIGHTNESS (2026-08-27), and the
+ORDER of the two operations is what makes it safe.** `LIGHT_CHROMA` is 0.62: the
+anchor saturation is scaled for the light walk only, and every role then
+**re-walks its own lightness ramp at the new chroma** — so `accent-on-solid` still
+clears 4.5:1, `border-accent` still clears 3:1 and the wash still carries muted
+*by construction*. Desaturating the finished hexes instead would have moved every
+one of them off its floor with nothing to catch it, because **a lower-chroma colour
+at the same HSL lightness has a different relative luminance.**
+
+**Why chroma is the right lever at all:** a saturated fill on a warm vellum plate
+is the loudest thing on screen even when its luminance is modest, because what it
+does against a pale ground is a CHROMA jump and no contrast ratio sees one. That is
+industry's masthead-mark finding restated — on a pale plate, softening spends the
+channel the gates do not measure.
+
+**AND HERE IS THE PART THAT DOES NOT TRANSFER FROM INDUSTRY, which is the
+generalisable half.** Its note says going DOWN needs no re-derivation because every
+figure is an upper bound. **That is true of ALPHA and false of CHROMA:** dropping
+chroma pulls a hue toward the neutral axis, which pulls it toward every OTHER hue,
+so a hue that is clean at full chroma can collide once softened. `frost` proved it
+— clean at 198° and saturation 0.55, and **dE 5.2 against `status.good.mark` under
+tritanopia** once softened to 0.34. The clean arcs narrowed from 36–198 / 216–306
+to the figures above, frost moved to 188° and verdigris from 168° to 160° to keep
+the two apart. **Re-run the CVD sweep at the SOFTENED chroma, not only at the
+anchor.**
+
+**Dark is untouched, and so is the shipped gold.** A light accent on slate glows
+rather than presses, so softening only light makes the two halves converge. The
+gold is the default rather than a variant, its light roles are hand-derived with
+figures recorded throughout this file, and it consequently **now reads brighter in
+light than the five stones do** — defensible as metal-against-stone, and if it
+should follow it needs `accent-solid` split into per-theme values and every stepped
+role re-measured.
 
 **The chart palette is inherited whole and the collision moves somewhere better.**
 No slot is overridden and none crosses the 3:1 mark floor on either plate. But the
@@ -1197,6 +1421,87 @@ radii — and one architectural problem the other two skins do not have.** Opt-i
 the same way (`Outfit` is requested from `css/skins/vitrine.css`). Gallery:
 `preview/skin-vitrine.html`.
 
+**CHROME IS GLASS, CONTENT IS SOLID — directed 2026-08-26, and it is the line
+this skin shipped without.** Frosting is a property of CHROME: the masthead, the
+submodule nav, menus, modals, toasts — things that sit ABOVE what you were
+reading and whose job is to say so. Content is what you were reading, and it
+needs a ground that does not move. `.jrk-card`, `.jrk-chart-card`, `.jrk-stat`,
+`.jrk-stat-row`, `.jrk-table-wrap`, `.jrk-sheet`, `.jrk-alert` and
+`.jrk-auth__panel` now take opaque `surface-default` — the `@supports` block that
+swapped them to `surface-glass` is **gone**, not guarded, because the base rule
+under it already painted the opaque fill as the no-`backdrop-filter` fallback.
+
+**WHAT A TRANSLUCENT CARD DOES ON A REAL SCREEN, which the gallery could not
+show.** A pane takes its colour from what is behind it, so a tall card over a
+photograph reads as a vertical gradient — pale where the sky is, flushed where
+the ground is — and the small tiles inside it then sit on three different
+grounds. **Every ratio still passed**, because they are measured against the
+composite's extremes and the extremes were honoured. The card still looked wrong.
+A pane whose tint changes down its own height reads as a rendering artefact
+rather than as a material, and no contrast figure sees that.
+
+**THE CLAMP FAILS AT BOTH ENDS, AND BOTH ARE MEASURED.** With the scene routed
+through `--jrk-vitrine-backdrop`, `contrast(0.18) brightness(1.85)` lands every
+channel in **[193, 255]** — a 62-level window at the top of the range. A
+token-built pastel gradient survives that; a PHOTOGRAPH is flattened until there
+is nothing left to blur, and the glass renders as white cardboard. In dark
+(`brightness(0.28)`) the scene disappears altogether. With the scene NOT routed
+through the token — set on a wrapper, which is what a consumer reaches for first
+— the clamp never runs and the panes take the image at full strength. **Making
+content opaque answers both at once**, which is why it was the fix rather than a
+retune: an opaque plane is `surface-default` whatever is behind it, so those
+tiles' measurements become exactly true instead of true-within-a-band, and an
+unclamped backdrop can no longer reach them.
+
+**THE CLAMP IS NOW DOING FAR LESS WORK AND IS A CANDIDATE FOR RELAXING.** It
+existed to bound what reached the glass; the only glass left is chrome, which is
+a handful of elements. Left alone on purpose — retuning it means re-deriving the
+five coupled values — but the current setting erases the scene the skin exists to
+show, and that is now a look decision rather than a legibility one.
+
+**WHAT IT DOES NOT FIX, AND THIS IS THE ONE TO TELL A CONSUMER: INK THAT SITS ON
+THE PAGE.** A page title, a description, an unselected nav label — none of those
+are on a card. On the CLAMPED page `text-muted` measures 4.82–5.70:1, which is
+what `validate:skin` gates. On an **unclamped** sunset it measures **3.85:1 on
+the yellow, 2.10:1 on the orange, 1.37:1 on the pink and 1.12:1 on the violet**,
+and `text-primary` drops to 2.93:1. That is unreadable, not merely poor. **The
+backdrop MUST go through `--jrk-vitrine-backdrop`; a scene painted on a wrapper
+voids every page-level guarantee in the skin and nothing detects it.** Content
+going opaque protects the cards and cannot protect the page.
+
+**AND IT IS THE CHEAP DIRECTION.** `backdrop-filter` is a full-viewport composite
+per element, so a dashboard of twenty tiles was paying twenty of them for an
+effect that was actively hurting it.
+
+**THE SUBMODULE NAV IS A RAISED PANE, NOT A RULE.** Base draws `.jrk-tabs` as
+PAPER — a hairline across the row, a 3px rule under the selected label — which is
+right on a page made of sheets and wrong here, where nothing else in the skin
+states anything with a rule. The selected tab now takes `surface-glass` + the
+blur + `shadow-card`'s catch, and the row's hairline and the tab's underline both
+go to `transparent` (**colour only, never `border: 0`** — that kills
+`border-style` and a later `border-color` paints nothing). **This is why
+`surface-glass` still has a consumer at all** now that content is opaque, and it
+takes the plain value rather than `surface-glass-raised` deliberately: raised
+belongs to things that float over the page, and a tab is ON it.
+
+**The state keeps a 3:1 channel, which is what makes dropping the underline
+safe.** An inset 1px `border-accent` rim replaces it (3.28:1 on this skin's
+panel), drawn as an **inset box-shadow rather than a border** because base
+reserves 3px of transparent bottom border to stop the row shifting on selection —
+a real border would redo that reservation and move every label. Then the pane,
+then **semibold**, which is again the only channel surviving greyscale and both
+dichromacies. `accent-text` ink at 4.66:1 reinforces and does not substitute.
+`:not(.jrk-tabs--pills)` is load-bearing: pills are the same widget as
+`.jrk-btn-group` in a second markup contract and must not be repainted here, and
+the guard is also what keeps the two forms distinguishable under this skin —
+pills are a well, tabs are a flat row with one pane lifted out of it.
+
+**`.jrk-section-nav` was checked and deliberately left alone.** Its current-state
+mark looks like the same paper idiom and is not: the `::after` is a scaled
+`accent-solid` DOT, not a rule, and it already carries the state with ink and
+semibold beside it. Killing it would have removed a working signal to fix a
+problem it did not have.
+
 **A TRANSLUCENT TILE HAS NO FIXED INK GROUND, WHICH WOULD VOID EVERY CONTRAST
 GUARANTEE IN THE LIBRARY — and `validate:skin` refuses it outright** rather than
 measuring something meaningless: *"surface-default is not a flat colour in
@@ -1207,16 +1512,27 @@ the design, and the design is worth copying for any future translucent surface:
 `surface-glass` and is used only for rendering, inside an `@supports` guard whose
 fallback is that same composite.
 
-**THE SCRIM IS WHAT MAKES THE RECORDING TRUE, AND IT IS NOT DECORATION.** A
-consumer points `--jrk-vitrine-backdrop` at their own image; the scrim is the veil
-between it and the glass, and it **bounds** what the glass can ever sit on. At
-alpha **0.94** the dark composite spans `#151c1b`–`#19201f` whatever is behind it,
-black through white. **Every ink was solved against the PALE EXTREME rather than
-against the recorded hex**, and that is not pedantry: at 0.90 the span widened
-enough to put `text-muted` at **4.46:1** — under by 0.04, and *invisible to the
-gate*, which only ever sees the flat value. **Backdrop, scrim, glass alpha and
-`surface-default` are one decision in four places**; move any one and re-derive
-the other three in the same commit.
+**WHAT BOUNDS THE COMPOSITE IS `vitrine-clamp`, NOT THE SCRIM — that moved, and
+this paragraph used to say otherwise.** The scrim was once a 0.94-alpha veil that
+bounded by COVERAGE: every ratio came out true and the skin was not frosted,
+because six percent of an image is nothing to blur. The bound moved to
+`vitrine-clamp`, which bounds by LUMINANCE instead, so the image keeps its
+structure; **the scrim is a tint at 0.30** now and carries only the palette's
+cast. Do not reason from the 0.94 figure — it is retired, and the 4.46:1
+near-miss it used to justify was measured on a mechanism that no longer exists.
+
+**What survives that change is the RULE, and it is the durable half: every ink on
+a glass surface was solved against the composite's PALE EXTREME rather than
+against the recorded hex** — dark `#141918`–`#222726`, light `#e8e9e9`–`#fdfefe` —
+because that hex is only ever the middle of a range that moves with the consumer's
+image, and the gate only ever sees the middle. **Backdrop, clamp, scrim, glass
+alpha and `surface-default` are one decision in FIVE places**; move any one and
+re-derive the rest in the same commit.
+
+**Since 2026-08-26 that rule reaches CHROME ONLY** — the masthead, the overlays,
+the selected tab — because content is opaque and measures against a literal fill.
+That shrinks the blast radius of the whole arrangement considerably, and it is
+also what makes relaxing the clamp a look decision rather than a legibility one.
 
 **THE SKIN SHIPS NO IMAGE, and that is a distribution decision rather than an
 aesthetic one.** This library has never shipped a binary, and the portal's
@@ -1308,14 +1624,27 @@ the same shape as industry's `red`, arrived at from the opposite end of the whee
    reaches the Design System pane.
 5. `npm test`, then look at the gallery.
 
-**And check it under BOTH skins** — `preview/skin-industry.html` and
-`preview/skin-midgard.html`, which stamp `data-skin` and nothing else. A new
+**And check it under ALL THREE skins** — `preview/skin-industry.html`,
+`preview/skin-midgard.html` and `preview/skin-vitrine.html`, which stamp
+`data-skin` and nothing else. A new
 component picks a skin's colours up for free (they are the same variables) but its
 GEOMETRY does not, and each skin has its own list to be added to: if it takes
-`radius.full` it stays a pill under either skin until it is named in that skin's
+`radius.full` it stays a pill under any skin until it is named in that skin's
 squared-control list; under `industry` a top-level tile takes no notch until it is
 in the clip-path list; under `midgard` a tile with a `__header` gets no band and a
-`__footer` no lozenge until it is named. See the skins section above.
+`__footer` no lozenge until it is named; under `vitrine` a tile stays SQUARE until
+it is named, because that skin's list runs the other way. See the skins section
+above.
+
+**REACHING FOR A RADIUS TOKEN INSTEAD OF `radius.none` IS WHAT MAKES A COMPONENT
+SKIN ITSELF, and the org chart is the worked example.** `.jrk-org__card` takes
+`radius-lg` and `.jrk-org__group` takes `radius-md`, so all three skins get the
+right corner with **no rule in any of the three files** — squared under industry
+and midgard, rounded under vitrine. That is available to anything which is a mark
+in a diagram rather than a tile on a page; a tile still takes `radius.none`
+directly and still has to be named in vitrine's list. Ask which of the two a new
+thing is before picking, because the answer decides whether three skin files need
+editing or none do.
 `preview/components.html` carries a three-way skin picker of its own, which is
 the faster check: it is the FULL component set, so a base-shaped component under
 a skin shows up there rather than only on the page that skin happens to demo.

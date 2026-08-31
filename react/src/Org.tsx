@@ -1,4 +1,4 @@
-import { Children, createContext, isValidElement, useContext, useId, useState, type ReactNode } from 'react';
+import { Children, createContext, isValidElement, useContext, useId, useState, type CSSProperties, type ReactNode } from 'react';
 import { Icon } from './Icon';
 import { cx } from './utils';
 
@@ -29,6 +29,20 @@ const InRollup = createContext<Grouping>('none');
  * but the safe group count differs between the two variants, so the warning
  * cannot be written without knowing which one is on. */
 const GroupFill = createContext(false);
+
+/* Whether the cards at this depth are the COMPACT tile rather than the full card.
+ *
+ * Set by `<OrgNode column>` for its own children and inherited from there, so a
+ * caller writes `compact` nowhere and a two-hundred-property terminal level
+ * cannot end up half one size and half the other. That is the whole reason it is
+ * context and not a prop each tile repeats: the size is a property of the LEVEL,
+ * and a level with one full-size card in it has a tile a third taller than its
+ * eleven neighbours, which is exactly the raggedness the column layout exists to
+ * remove.
+ *
+ * `compact` on a node still wins in both directions — pass it to opt a stray card
+ * in, or `compact={false}` to opt one out. */
+const CompactCards = createContext(false);
 
 /* Adjacent tints stop being distinguishable at the 4|5 pair: dE 7.0 light / 8.6
  * dark against validate's floor of 10, where the first four are 14.5 / 17.1. The
@@ -120,26 +134,47 @@ export interface OrgChartProps {
    *  reader has to tell six groups apart by colour, use the keyline — that is
    *  what it is the default for. */
   groupFill?: boolean;
-  /** Draw each rollup group as a card filled with the group's own MARK, at full
-   *  saturation.
+  /** Draw each rollup group as a SOLID CARD in the group's own colour, under
+   *  white ink.
    *
-   *  The third rendering of the one rollup mechanism, and the one for PAPER.
+   *  The third rendering of the one rollup mechanism. It was built for PAPER —
    *  `groupFill`'s tints are pastel by construction, so they carry no weight at
    *  the 35-40% scale an 11x17 sheet needs and wash out under a laser printer's
-   *  lighter dot; the marks are the same colours every other chart in the library
-   *  uses at full strength. Measured against the tints: all-pairs safe cap 3
-   *  slots against 2, and at eight groups 0 unseparable pairs against 18.
+   *  lighter dot — and it is now also what the dense terminal-level layout uses
+   *  on screen, because a filled card at the head of a column of tiles has to be
+   *  its own kind of object rather than a card wearing a background.
    *
-   *  TWO THINGS TO KNOW BEFORE USING IT ON SCREEN. The card's three levels of ink
-   *  collapse to one — black, which is the only ink that clears 4.5:1 on all eight
-   *  marks in both themes, where white clears it on NONE — so name, role and
-   *  figure separate by size and weight alone. And a vacant seat drops the fill
-   *  and keeps the colour on its dashed edge, because a dash cannot be read over a
+   *  THE FILL IS `chart.deep`, NOT `chart.categorical`, and that distinction is
+   *  the one thing to carry away. It is the SAME eight hues in the SAME searched
+   *  order, stepped down in lightness until white clears 4.5:1 on every slot in
+   *  both halves — so it is a VOLUME of the series palette rather than a second
+   *  palette, and every colourblind property transfers: worst adjacent dE 15.9
+   *  light / 18.4 dark, all-pairs safe cap 3 (identical to the marks), and all
+   *  nine collapsing pairs still same-parity, so the texture bucketing separates
+   *  every one and the first eight groups stay fully distinguishable. `npm run
+   *  validate` gates all of it.
+   *
+   *  It reads better than the tints and it is not free: measured against
+   *  `groupFill`, the all-pairs safe cap is 3 slots against 2 and at eight groups
+   *  0 unseparable pairs against 18. What it spends is the card's three levels of
+   *  ink, which collapse to ONE — white, which is the only ink that clears 4.5:1
+   *  on all eight deep fills in both themes — so name, role and figure separate
+   *  by size and weight alone. If a consumer flattens those, this variant has
+   *  nothing left.
+   *
+   *  A DEEP FILL BOUNDS ITSELF, 4.54:1 on the light card and 3.29:1 on the dark
+   *  one, so a filled card is a shape without an edge. It keeps a 1px white
+   *  hairline anyway, and that is not decoration: two tiles of the same hue
+   *  stacked flush in a `column` have a 1.00:1 fill step between them and the
+   *  hairline is the only thing there. And a vacant seat drops the fill and keeps
+   *  the colour on its dashed edge, because a dash cannot be read over a
    *  saturated plane.
    *
-   *  A caller may override `--jrk-org-group` and `--jrk-org-solid-ink` together on
-   *  a node to put a card outside the palette. Together: one alone gives
-   *  white-on-yellow or black-on-black.
+   *  A caller may override `--jrk-org-group-solid` and `--jrk-org-solid-ink`
+   *  together on a node to put a card outside the palette — a navy president, a
+   *  charcoal holding company. Together: one alone gives white-on-yellow or
+   *  white-on-white. `--jrk-org-group` still works in that slot and still gets
+   *  the bright mark, which is the pre-existing bargain rather than the good one.
    *
    *  Mutually exclusive with `groupFill` — they are two renderings of one thing,
    *  and both classes on one list is a coin toss decided by source order. Warns in
@@ -211,6 +246,14 @@ export interface OrgNodeProps {
    *  leaf cards equalises to the tallest, so a two-line role sets the height for
    *  every peer beside it. */
   role?: ReactNode;
+  /** The IDENTIFIER — a property code, a fund code, a cost centre. Occupies the
+   *  same middle line as `role`, and a card takes one or the other: a manager
+   *  card says what the person does, a property tile says what the asset is
+   *  called in the system of record.
+   *
+   *  Uppercased and tracked by CSS, not by the data, so the value stays copyable
+   *  as whatever it actually is. Pass it as it is stored. */
+  code?: ReactNode;
   /** The figure the node carries: "37 properties · 8,412 units". An org chart in
    *  this library is a chart; a node with no figure is a diagram. */
   meta?: ReactNode;
@@ -229,6 +272,36 @@ export interface OrgNodeProps {
    *  out. The escape valve for a wide fan — twelve peers side by side is 2,300px
    *  no screen holds. LEAF CHILDREN ONLY; warns in development otherwise. */
   stacked?: boolean;
+  /** Stack this node's children INSIDE this node's own footprint, with no
+   *  connectors drawn at all, and render them as compact tiles.
+   *
+   *  The third layout for a level, and the one for a TERMINAL one. `stacked`
+   *  indents children away from the parent and then spends a spine reconnecting
+   *  them; this never separates them, so there is nothing to reconnect — the
+   *  column sits directly under the card at exactly the card's width, and
+   *  containment states the relationship. That is a stronger statement than a
+   *  line, because a line can be traced to the wrong card in a thirty-card row
+   *  and a box under a card cannot.
+   *
+   *  Use it when a level's members are NOT compared with each other: twelve
+   *  properties under a regional manager get looked up one at a time or counted,
+   *  so fanning them out buys nothing and costs 2,300px. Five direct reports are
+   *  compared, and they take the default.
+   *
+   *  It implies `compact` on its children (see `compact`), which is the half of
+   *  it that makes the density pay. LEAF CHILDREN ONLY — apart from `<OrgGroup>`,
+   *  which is what a column is normally filled with; anything else with children
+   *  of its own is a subtree with no drawn hierarchy, and this warns in
+   *  development. */
+  column?: boolean;
+  /** Render this node's card as the COMPACT tile — one rung down in type and
+   *  padding on every axis, with the name clamped to two lines.
+   *
+   *  Rarely passed by hand: `column` sets it for its children and it inherits
+   *  from there, because the size is a property of the LEVEL and one full-size
+   *  card among eleven tiles is a third taller than its neighbours. Pass it
+   *  explicitly to opt a stray card in, or `compact={false}` to opt one out. */
+  compact?: boolean;
   /** Colour this node's children as rollup groups: each child takes the next
    *  palette slot and its whole subtree inherits it, so a reader can see what
    *  rolls up into what.
@@ -289,11 +362,45 @@ export interface OrgNodeProps {
   toggleLabel?: ReactNode;
   children?: ReactNode;
   className?: string;
+  /** Inline style on the CARD, the same element `className` lands on.
+   *
+   *  It exists for one job the component cannot do from a prop: putting a node
+   *  OUTSIDE the rollup palette under `groupSolid`, by setting
+   *  `--jrk-org-group-solid` and `--jrk-org-solid-ink` together. A president's
+   *  card, a holding company, the two levels above the rollup — those are not
+   *  palette slots and numbering them as slots would steal a colour from a group
+   *  that needs it.
+   *
+   *  SET BOTH OR NEITHER. One alone gives white-on-white or white-on-yellow, and
+   *  nothing checks it.
+   *
+   *  `surface.inverse` / `text.inverse` is the pair to reach for, and it is right
+   *  BECAUSE it flips rather than in spite of flipping. What this card has to do
+   *  is separate from `surface.default` — the plane every other card in the chart
+   *  sits on — in both halves and under every skin. An inverse plane is *defined*
+   *  as the maximum step off the plane, so whichever way the theme goes it goes
+   *  the other. Worst case across base/industry/midgard/vitrine x light/dark:
+   *  ink 13.96:1 on the fill, 12.91:1 of step against the panel.
+   *
+   *  `surface.bannerDeep` looks like the better answer and is measurably the
+   *  wrong one — recorded here because it passes a careless check. It reads as a
+   *  stable dark navy in the BASE layer, which is where it gets checked first,
+   *  but a skin owns its own planes: vitrine sets it to #e9eceb in light, which
+   *  is 1.025:1 against that skin's panel, and the card vanishes. It is a BANNER
+   *  plane, built to sit under the topbar's own ink; nothing about it promises a
+   *  step against a CARD.
+   *
+   *  So the rule is not "prefer a themed pair" — bannerDeep is a themed pair with
+   *  measured ink and it still fails. It is: this card needs a plane whose step
+   *  against `surface.default` is guaranteed, and inverse is the only namespace
+   *  that makes that promise. A fixed hex makes no promise at all. */
+  style?: CSSProperties;
 }
 
 export function OrgNode({
   name,
   role,
+  code,
   meta,
   aside,
   current,
@@ -301,6 +408,8 @@ export function OrgNode({
   href,
   onClick,
   stacked,
+  column,
+  compact,
   rollup,
   group,
   collapsible,
@@ -310,12 +419,19 @@ export function OrgNode({
   toggleLabel,
   children,
   className,
+  style,
 }: OrgNodeProps) {
   const branchId = useId();
   const kids = Children.toArray(children);
   const hasKids = kids.length > 0;
   const alreadyGrouped = useContext(InRollup);
   const filledGroups = useContext(GroupFill);
+  /* The prop wins in BOTH directions, which is why this is `??` on a possibly-false
+     prop rather than `compact || inherited` — the latter would make `compact={false}`
+     inside a column silently do nothing, and opting one card out is the whole
+     reason the escape hatch is documented. */
+  const inheritedCompact = useContext(CompactCards);
+  const isCompact = compact ?? inheritedCompact;
 
   const [uncontrolled, setUncontrolled] = useState(Boolean(defaultCollapsed));
   const isControlled = collapsed !== undefined;
@@ -332,6 +448,29 @@ export function OrgNode({
       console.warn(
         '[jrk] <OrgNode stacked> is for leaf children. A stacked child with children of its own centres over its subtree and pulls off the spine.',
       );
+    }
+    /* THE `<OrgGroup>` EXEMPTION IS THE POINT OF WRITING THIS SEPARATELY FROM THE
+       `stacked` CHECK ABOVE, rather than widening that one. A group HAS children —
+       that is what it is — so the plain "any child with children" test fires on
+       every correctly-built column, and a warning that fires on the normal case is
+       a warning nobody reads. What is actually illegal is a child NODE with a
+       subtree: with no connectors drawn, its children hang under it with nothing
+       stating the relationship at all, which is a silent loss of the hierarchy
+       rather than a cosmetic one. */
+    if (column) {
+      const offenders = kids.filter(
+        (k) => isValidElement<OrgNodeProps>(k) && k.type !== OrgGroup && Children.count(k.props.children) > 0,
+      );
+      if (offenders.length) {
+        console.warn(
+          `[jrk] <OrgNode column> has ${offenders.length} child(ren) with children of their own. A column draws NO connectors — containment is what states the relationship — so a subtree inside one has nothing drawing its hierarchy at all. Use column for a terminal level: leaf nodes, or <OrgGroup> holding leaf nodes.`,
+        );
+      }
+      if (stacked) {
+        console.warn(
+          '[jrk] <OrgNode> has both stacked and column. They are two different answers to a wide fan and both classes land on one branch, so the result is decided by source order in the stylesheet. Pick one: stacked keeps a spine and indents, column keeps the parent footprint and drops the connectors.',
+        );
+      }
     }
     if (rollup && filledGroups) warnGroupFill(kids.length, '<OrgNode rollup>');
     /* MIXING THE TWO KINDS IS THE FAULT; nesting one kind is not. Either direction of the
@@ -354,6 +493,7 @@ export function OrgNode({
 
   const cardClass = cx(
     'jrk-org__card',
+    isCompact && 'jrk-org__card--compact',
     vacant && 'jrk-org__card--vacant',
     (href || onClick) && 'jrk-org__card--link',
     className,
@@ -363,6 +503,12 @@ export function OrgNode({
     <>
       <span className="jrk-org__name">{name}</span>
       {role && <span className="jrk-org__role">{role}</span>}
+      {/* After `role` rather than instead of it, because the DOM order has to be
+          stable: a card is free to carry both (a manager whose cost centre is on
+          the chart), and the middle line then reads role-then-code, which is the
+          order a reader expects — what the person does, then the key it is filed
+          under. Neither is required. */}
+      {code && <span className="jrk-org__code">{code}</span>}
       {meta && <span className="jrk-org__meta">{meta}</span>}
       {aside && <span className="jrk-org__aside">{aside}</span>}
     </>
@@ -370,15 +516,19 @@ export function OrgNode({
 
   let card: ReactNode;
   if (href) {
-    card = <a className={cardClass} href={href} aria-current={current || undefined}>{cardInner}</a>;
+    card = (
+      <a className={cardClass} style={style} href={href} aria-current={current || undefined}>
+        {cardInner}
+      </a>
+    );
   } else if (onClick) {
     card = (
-      <button type="button" className={cardClass} onClick={onClick} aria-current={current || undefined}>
+      <button type="button" className={cardClass} style={style} onClick={onClick} aria-current={current || undefined}>
         {cardInner}
       </button>
     );
   } else {
-    card = <div className={cardClass} aria-current={current || undefined}>{cardInner}</div>;
+    card = <div className={cardClass} style={style} aria-current={current || undefined}>{cardInner}</div>;
   }
 
   const setCollapsed = (next: boolean) => {
@@ -420,6 +570,7 @@ export function OrgNode({
           className={cx(
             'jrk-org__branch',
             stacked && 'jrk-org__branch--stacked',
+            column && 'jrk-org__branch--column',
             rollup && 'jrk-org__branch--rollup',
           )}
           hidden={isCollapsed}
@@ -438,10 +589,87 @@ export function OrgNode({
                   : 'none'
             }
           >
-            {children}
+            {/* `column` sets the size for the level BELOW it, never for its own card —
+                a manager heading a column of properties is a full-size card and the
+                properties are tiles. It then INHERITS on down, which is what carries
+                it through an `<OrgGroup>` to the tiles inside without the group
+                having to know about it. Nothing turns it back off, and it does not
+                need to: the only legal descendants of a column are leaves and
+                groups, which the warning above enforces. */}
+            <CompactCards.Provider value={column ? true : inheritedCompact}>
+              {children}
+            </CompactCards.Provider>
           </InRollup.Provider>
         </ul>
       )}
+    </li>
+  );
+}
+
+export interface OrgGroupProps {
+  /** The group's name — a state code, a market, a fund, a vintage. Uppercased
+   *  and tracked by CSS, so pass it as it is stored.
+   *
+   *  Not optional, and it is the whole component: an unlabelled box around some
+   *  tiles states that they belong together and refuses to say what they have in
+   *  common, which is the one fact the box exists to carry. If there is nothing
+   *  to name, the tiles belong directly in the column. */
+  label: string;
+  /** Leaf `<OrgNode>`s. They pick up the compact tile size from the column
+   *  above without this component doing anything — see `CompactCards`. */
+  children: ReactNode;
+  className?: string;
+}
+
+/* A NAMED SUBDIVISION INSIDE A `<OrgNode column>` — the states under a regional
+ * manager, the vintages under a fund.
+ *
+ * It renders an `<li>` holding a `<ul>`, so the accessibility tree says exactly
+ * what the picture says: the branch is a list of groups and a group is a list of
+ * properties. That matters more here than it usually does, because visually the
+ * only thing separating two groups is a thin box and a three-letter label, and a
+ * screen-reader user gets the nesting and the label in place of both. Flattening
+ * it — headings interleaved into one list — hands them two hundred properties in
+ * a run with the state codes buried in it.
+ *
+ *   <OrgNode name="Ed Sarti" role="Associate" meta="7 properties · 2,182 units" column>
+ *     <OrgGroup label="WA">
+ *       <OrgNode name="Boulders at Puget Sound" code="WST" meta="714 units" />
+ *       <OrgNode name="Carrolls Creek Landing" code="CCL" meta="288 units" />
+ *     </OrgGroup>
+ *     <OrgGroup label="CA">
+ *       <OrgNode name="Parkside Glen" code="PAG" meta="180 units" />
+ *     </OrgGroup>
+ *   </OrgNode>
+ *
+ * IT TAKES THE ROLLUP COLOUR AND CANNOT DISAGREE WITH IT. The box's edge reads
+ * `--jrk-org-group-solid`, which is a custom property set on the node above and
+ * inherited, so a group inside a rollup is edged in that rollup's hue with
+ * nothing to pass in and no way to give it a colour its parent does not have.
+ *
+ * THE LABEL IS NOT THE HUE, and that is measured: a deep fill is 4.54:1 on the
+ * light card and 3.29:1 on the dark one, so it can be the box's edge (3:1,
+ * graphical) and cannot be its text (4.5:1) in dark, in all eight slots. The
+ * edge takes the hue and the ink takes the ink. Nothing is lost — the hue names
+ * the rollup and is stated on every tile inside; the label names the group,
+ * which is the fact nothing else on screen carries.
+ *
+ * ONLY MEANINGFUL INSIDE A COLUMN. It is a plain list item, so it renders
+ * anywhere without breaking, but in a fanned-out branch it sits where a node
+ * would and the bus draws a stem to a box rather than to a card. It is not
+ * gated, because the CSS cannot see its parent and a runtime check would need a
+ * context set by every branch in the component for one authoring mistake that is
+ * obvious the moment it is looked at. */
+export function OrgGroup({ label, children, className }: OrgGroupProps) {
+  return (
+    <li className={cx('jrk-org__group', className)}>
+      <span className="jrk-org__group-label">{label}</span>
+      {/* `aria-label` on the inner list, so the group is announced by its own
+          name rather than as "list, 5 items" nested inside another list. Same
+          reason OrgChart's `label` is required. */}
+      <ul className="jrk-org__group-items" aria-label={label}>
+        {children}
+      </ul>
     </li>
   );
 }

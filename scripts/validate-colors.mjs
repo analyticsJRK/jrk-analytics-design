@@ -460,6 +460,103 @@ console.log('\n== CVD separation (Machado 2009 + CIEDE2000) ==');
   }
 }
 
+// ---------- chart.deep — the org chart's solid fill ----------
+// A THIRD namespace over the same eight hues, and the reason it needs its own
+// section is that it is measured against the OPPOSITE thing. A categorical mark
+// is measured against the card it is drawn on; a deep fill is measured against
+// the ink drawn on IT. Nothing above sees that, and this palette exists solely
+// so a filled org node can carry white — which on chart.categorical is
+// impossible for all eight slots at once.
+//
+// Four properties are asserted, and the last two are what let this file stop
+// re-arguing the colourblind doctrine for a new palette: the deep set is the
+// SAME hues in the SAME searched order, so if adjacency, the all-pairs cap and
+// the same-parity structure of the collapsing pairs all carry over, then the
+// categorical palette's texture bucketing separates this one too and the
+// "first 8 groups fully distinguishable" claim holds unchanged. If a slot is
+// ever hand-edited, the parity check is the one that catches the damage —
+// adjacency can survive a bad edit that quietly moves a pair onto an odd
+// distance, where no texture is waiting for it.
+console.log('\n== chart.deep (org filled node) ==');
+{
+  const deep = T.chart.deep.slots;
+  const cat = T.chart.categorical.slots;
+  const ink = T.chart.deep.ink;
+
+  // 0. It must BE the categorical palette's hue order, or nothing below transfers.
+  const sameOrder = deep.length === cat.length && deep.every((s, i) => s.hue === cat[i].hue && s.slot === cat[i].slot);
+  sameOrder
+    ? pass('same eight hues in the same slot order as chart.categorical')
+    : fail('chart.deep diverges from chart.categorical hue order — the CVD doctrine no longer transfers, re-derive from scratch');
+
+  for (const mode of ['light', 'dark']) {
+    const hexes = deep.map((s) => s[mode]);
+
+    // 1. THE WHOLE POINT: white ink on every slot. Worst case is what ships.
+    let worstInk = { r: Infinity, hue: null };
+    for (const s of deep) {
+      const r = contrast(s[mode], ink[mode]);
+      if (r < worstInk.r) worstInk = { r, hue: s.hue };
+    }
+    const inkMsg = `${mode} worst ink ${ink[mode]} on a deep fill: ${worstInk.r.toFixed(2)}:1 (${worstInk.hue})`;
+    worstInk.r >= 4.5 ? pass(inkMsg) : fail(`${inkMsg} — needs 4.5:1, this palette exists only to carry it`);
+
+    // 2. The fill bounds itself, so a filled node needs no hairline to be a
+    //    shape. Hand-recorded on the token because nothing else gates a fill
+    //    against the fill beneath it — see the note in tokens.json.
+    const declared = T.chart.deep.boundsSelf[mode];
+    let worstPlane = Infinity;
+    for (const s of deep) worstPlane = Math.min(worstPlane, contrast(s[mode], SURFACE[mode]));
+    const planeMsg = `${mode} worst fill-vs-plane ${worstPlane.toFixed(2)}:1 on ${SURFACE[mode]} (declared ${declared})`;
+    Math.abs(worstPlane - declared) <= 0.05
+      ? pass(planeMsg)
+      : fail(`${planeMsg} — update chart.deep.boundsSelf.${mode}`);
+    if (worstPlane < 3) fail(`${mode} a deep fill is ${worstPlane.toFixed(2)}:1 on its own plane — the filled node stops being a shape`);
+
+    // 3. Adjacency, the contract for consecutive rollup slots.
+    const adj = worstAdjacent(hexes);
+    const adjMsg = `${mode} worst adjacent dE ${adj.deltaE.toFixed(1)} (${deep[adj.i].hue}|${deep[adj.j].hue}, ${adj.kind})`;
+    adj.deltaE >= CVD_FLOOR ? pass(adjMsg) : fail(`${adjMsg} — needs ${CVD_FLOOR}`);
+
+    // 4. The declared scatter cap is shared with the categorical palette rather
+    //    than restated, because a divergence there means the two are no longer
+    //    the same palette at two volumes.
+    const cap = T.chart.categorical.seriesCapAllPairs;
+    const measured = allPairsSafeCap(hexes);
+    const capMsg = `${mode} all-pairs safe cap = ${measured} (categorical declares ${cap})`;
+    measured === cap ? pass(capMsg) : fail(`${capMsg} — chart.deep no longer matches the palette it is derived from`);
+  }
+
+  // 5. EVERY COLLAPSING PAIR IS SAME-PARITY. This is the load-bearing one. The
+  //    org chart's texture buckets are (1,2)(3,4)(5,6)(7,8), which puts the two
+  //    members of each bucket an ODD distance apart — so as long as every
+  //    collapse lands on an even offset, all of them are separated by texture
+  //    and none of them shares a bucket. An odd-distance collapse has no
+  //    texture waiting for it and is invisible to the author.
+  const odd = [];
+  const collapsing = [];
+  for (let i = 0; i < deep.length; i++) {
+    for (let j = i + 1; j < deep.length; j++) {
+      const worst = Math.min(
+        worstSeparation(deep[i][ 'light' ], deep[j].light).deltaE,
+        worstSeparation(deep[i].dark, deep[j].dark).deltaE,
+      );
+      if (worst >= CVD_FLOOR) continue;
+      collapsing.push(`${deep[i].slot}|${deep[j].slot} ${worst.toFixed(1)}`);
+      if ((j - i) % 2 === 1) odd.push(`${deep[i].hue}|${deep[j].hue} (dE ${worst.toFixed(1)}, distance ${j - i})`);
+    }
+  }
+  odd.length === 0
+    ? pass(`all ${collapsing.length} collapsing pairs are same-parity — texture separates every one: ${collapsing.join('  ')}`)
+    : fail(`ODD-DISTANCE collapse, no texture separates it: ${odd.join('; ')}`);
+
+  // 6. The ink is not text.inverse. They agree in light and must not be
+  //    collapsed, because text.inverse is #000000 in dark and 4.0:1 at best here.
+  ink.dark === T.color.text.inverse.dark
+    ? fail('chart.deep.ink.dark equals text.inverse.dark — one of them is wrong, they are different roles')
+    : pass('chart.deep.ink stays distinct from text.inverse');
+}
+
 // ---------- dataviz six-checks ----------
 // Band, chroma and the normal-vision floor still come from the skill. CVD is
 // covered above regardless, so a missing skill is a gap, not a hole.

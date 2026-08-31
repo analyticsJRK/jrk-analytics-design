@@ -195,28 +195,57 @@
   <section class="gal-sec">
     <h2>The glass, and why it can be measured at all</h2>
     <p class="gal-note">
-      <strong>A translucent tile has no fixed ink ground</strong>, which would
-      void every contrast guarantee in the library.
-      <code>validate-skin.mjs</code> refuses it outright &mdash;
-      <em>&ldquo;surface-default is not a flat colour; every other check measures
-      against it&rdquo;</em>. So <code>surface-default</code> records what the
-      glass <em>composites to</em>, as a flat hex, and the gate goes on measuring
-      all 532 checks against it exactly as it would for an opaque skin. The
-      translucency lives in <code>surface-glass</code> and is used only for
-      rendering.
+      <strong>Chrome is glass; content is solid.</strong> Frosting is a property
+      of things that sit <em>above</em> what you are reading &mdash; the masthead,
+      the submodule nav, menus, modals. Content is what you are reading, and it
+      needs a ground that does not move. The tiles below take opaque
+      <code>surface-default</code>; the scene shows <em>around</em> them, which is
+      where it was always doing its work.
     </p>
     <p class="gal-note">
-      <strong>That recording is only honest because the scrim bounds it.</strong>
-      A consumer points <code>--jrk-vitrine-backdrop</code> at their own image;
-      the scrim is the veil between it and the glass. At alpha
-      <strong>0.94</strong> the composite spans <code>#151c1b</code> to
-      <code>#19201f</code> in dark <em>whatever</em> sits behind it &mdash; black
-      through white &mdash; and every ink was solved against the <em>pale
-      extreme</em> rather than against the recorded hex. At 0.90 the span widened
-      enough to put <code>text-muted</code> at <strong>4.46:1</strong>, under by
-      0.04 and invisible to the gate, which only ever sees the flat value.
-      Backdrop, scrim, glass alpha and <code>surface-default</code> are one
-      decision in four places.
+      <strong>A translucent card takes its colour from whatever is behind it</strong>,
+      so a tall card over a photograph read as a vertical gradient &mdash; pale
+      where the sky was, flushed where the ground was &mdash; and the small tiles
+      inside it then sat on three different grounds. <em>Every ratio still
+      passed</em>, because they are measured against the composite&rsquo;s
+      extremes and the extremes were honoured. It still looked wrong: a pane whose
+      tint changes down its own height reads as a rendering artefact rather than
+      as a material, and no contrast figure sees that.
+    </p>
+    <p class="gal-note">
+      <strong>The clamp failed at both ends, which is why opacity was the fix
+      rather than a retune.</strong> Routed through
+      <code>--jrk-vitrine-backdrop</code>,
+      <code>contrast(0.18) brightness(1.85)</code> lands every channel in
+      <strong>[193,&nbsp;255]</strong> &mdash; a 62-level window at the top of the
+      range. A token-built pastel gradient survives it; a photograph is flattened
+      until there is nothing left to blur, and the glass renders as white
+      cardboard. Painted on a wrapper instead, the clamp never runs at all and the
+      panes take the image at full strength. An opaque plane is
+      <code>surface-default</code> <em>whatever</em> is behind it, so these
+      tiles&rsquo; measurements are exactly true rather than true-within-a-band.
+    </p>
+    <p class="gal-note">
+      <strong>What that does not fix is ink that sits on the page.</strong> A
+      title, a description, an unselected nav label &mdash; none of those are on a
+      card. On the clamped page <code>text-muted</code> measures
+      <strong>4.82&ndash;5.70:1</strong>, which is what
+      <code>validate:skin</code> gates. On an <em>unclamped</em> sunset it is
+      <strong>3.85:1</strong> on the yellow, <strong>2.10:1</strong> on the
+      orange, <strong>1.37:1</strong> on the pink and <strong>1.12:1</strong> on
+      the violet, and <code>text-primary</code> drops to 2.93:1. Unreadable, not
+      merely poor. <strong>The backdrop must go through the token</strong> &mdash;
+      a scene painted on a wrapper voids every page-level guarantee here and
+      nothing detects it.
+    </p>
+    <p class="gal-note">
+      <code>surface-default</code> is still a <em>recording</em> for what remains
+      glass &mdash; the masthead, the overlays, the selected tab below &mdash; so
+      &ldquo;measure against both extremes, never the recorded middle&rdquo; is
+      unchanged for those. It simply no longer reaches content. And this is the
+      cheap direction: <code>backdrop-filter</code> is a full-viewport composite
+      per element, so a dashboard of twenty tiles was paying twenty of them for an
+      effect that was hurting it.
     </p>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px">
       <div class="jrk-stat">
@@ -235,6 +264,66 @@
         <span class="jrk-delta jrk-delta--critical">&#9660; 2.8%</span>
       </div>
     </div>
+  </section>
+
+  <section class="gal-sec">
+    <h2>The submodule nav is a raised pane, not a rule</h2>
+    <p class="gal-note">
+      Base draws <code>.jrk-tabs</code> as <strong>paper</strong> &mdash; a
+      hairline across the row and a 3px rule under the selected label. That is
+      right on a page made of sheets and wrong here, where nothing else in the
+      skin states anything with a rule; on glass the row read as un-skinned. The
+      selected tab now takes <code>surface-glass</code>, the blur and
+      <code>shadow-card</code>&rsquo;s top-edge catch, and both the row&rsquo;s
+      hairline and the tab&rsquo;s underline go to <code>transparent</code> &mdash;
+      <strong>colour only, never <code>border: 0</code></strong>, which kills
+      <code>border-style</code> so a later <code>border-color</code> paints
+      nothing.
+    </p>
+    <p class="gal-note">
+      <strong>This is why <code>surface-glass</code> still has a consumer</strong>
+      now that content is opaque &mdash; and it takes the plain value rather than
+      <code>surface-glass-raised</code> deliberately: raised belongs to things that
+      float <em>over</em> the page, and a tab is on it.
+    </p>
+    <p class="gal-note">
+      <strong>The state keeps a 3:1 channel, which is what makes dropping the
+      underline safe.</strong> An inset 1px <code>border-accent</code> rim
+      replaces it &mdash; 3.28:1 on this skin&rsquo;s panel &mdash; drawn as an
+      <em>inset box-shadow rather than a border</em>, because base reserves 3px of
+      transparent bottom border to stop the row shifting on selection and a real
+      border would redo that reservation and move every label. Then the pane, then
+      <strong>semibold</strong>, again the only channel that survives greyscale and
+      both dichromacies. <code>accent-text</code> at 4.66:1 reinforces; it does not
+      substitute.
+    </p>
+    <nav class="jrk-tabs" aria-label="Treatment coverage views">
+      <a class="jrk-tab" href="#">Overview</a>
+      <a class="jrk-tab" href="#" aria-current="page">Weekly route</a>
+      <a class="jrk-tab" href="#">Reviews<span class="jrk-tab__count">12</span></a>
+      <a class="jrk-tab" href="#">Live status</a>
+      <a class="jrk-tab" href="#">Calendar</a>
+      <a class="jrk-tab" href="#">Directory &amp; contacts</a>
+    </nav>
+    <p class="gal-note" style="margin-top:16px">
+      <code>:not(.jrk-tabs--pills)</code> is load-bearing. Pills are the same
+      widget as <code>.jrk-btn-group</code> in a second markup contract and must
+      not be repainted here &mdash; and the guard is also what keeps the two forms
+      distinguishable under this skin: <strong>pills are a well, tabs are a flat
+      row with one pane lifted out of it.</strong> Both are below.
+    </p>
+    <div class="jrk-tabs jrk-tabs--pills" role="group" aria-label="Range">
+      <button class="jrk-tab" type="button" aria-selected="true">Week</button>
+      <button class="jrk-tab" type="button" aria-selected="false">Month</button>
+      <button class="jrk-tab" type="button" aria-selected="false">Quarter</button>
+    </div>
+    <p class="gal-note" style="margin-top:16px">
+      <code>.jrk-section-nav</code> was checked and <strong>deliberately left
+      alone</strong>. Its current-state mark looks like the same paper idiom and is
+      not &mdash; the <code>::after</code> is a scaled <code>accent-solid</code>
+      <em>dot</em>, not a rule, and ink and semibold already sit beside it. Killing
+      it would have removed a working signal to fix a problem it did not have.
+    </p>
   </section>
 
   <section class="gal-sec">

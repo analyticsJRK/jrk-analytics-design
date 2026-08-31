@@ -31,6 +31,25 @@ export const SERIES_CAP_ALL_PAIRS = 3;
  *  labels or a table view. Not dismissable. */
 export const reliefRequiredLight: readonly string[] = ['#fa9418', '#15a7a2', '#d5ab19', '#30b0c7'];
 
+/** Deep fills that carry WHITE ink — the org chart's filled node.
+ *  The SAME eight hues in the SAME searched order as chartSeries, stepped down
+ *  until white clears 4.5:1, so it is a volume of that palette rather than a
+ *  second one: adjacency, the all-pairs cap of 3 and the same-parity structure of
+ *  the collapsing pairs all carry over (worst adjacent dE 15.9 light / 18.4 dark).
+ *
+ *  NOT a series palette. A line or a bar takes chartSeries, which is tuned
+ *  against the card plane; these are tuned against their own ink and are ~4.5:1
+ *  on the card, which is a shape rather than a mark. Cycle at 8 the same way. */
+export const chartDeep = {
+  light: ['#0070eb', '#ad6104', '#10837f', '#8c7010', '#a945dc', '#ea002d', '#238192', '#9b6d2d'],
+  dark: ['#0072e5', '#a76700', '#10837f', '#887100', '#b034ef', '#e9002f', '#088193', '#986b2c'],
+} as const;
+
+/** The one ink that survives on every chartDeep slot, both halves. White in
+ *  both — it is NOT text.inverse, which is #000000 in dark and 4.0:1 at best on
+ *  these fills. */
+export const chartDeepInk = { light: '#ffffff', dark: '#ffffff' } as const;
+
 export const chartSequential = ['#eeeefc', '#e2e2fa', '#dcdcfa', '#c3c2f5', '#b4b3f2', '#a5a4ef', '#9190ec', '#7d7be8', '#6e6ce4', '#5e5ce6', '#5856d6', '#4a49b3', '#3f3e96'] as const;
 
 export const chartDiverging = {

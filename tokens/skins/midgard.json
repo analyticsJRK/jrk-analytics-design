@@ -379,5 +379,398 @@
       "dark": "var(--jrk-accent-solid)",
       "$note": "The node network's colour. The gold is 1.94:1 on this skin's light plate and no better on its pale wash, so light takes the stepped border-accent (#9a7b14, 3.12:1 on the band). The ink holds 4.5:1 up to a 96% mark there against a shipped 38%."
     }
+  },
+  "variantAxis": {
+    "attr": "inlay",
+    "default": "gold",
+    "$note": "THE AXIS IS NAMED FOR WHAT A VALUE MEANS, which is why this is neither data-hazard nor data-tint. Industry’s hue is a hazard SIGNAL; vitrine’s is the light its glass is lit BY; this skin’s is the material set INTO the console — gold, patina, stone. `inlay` is the honest word for that, and the plural the picker gate derives from it (INLAYS) is the one the gallery reads.\n\n`default` is gold, and gold is NOT a variant: it is the ABSENCE of data-inlay, so the shipped skin is untouched by this whole section and nothing that does not stamp the attribute can change. Declaring it in `variants` as well would put a button in the gallery that changes nothing, which the build refuses."
+  },
+  "variants": {
+    "$comment": "THE FIVE INLAYS ARE ALL COOL, AND THAT IS FORCED BY MEASUREMENT RATHER THAN CHOSEN. Sweeping the wheel against this skin’s own status set — at every anchor saturation the set uses AND at both chroma levels (see $softenNote) — leaves two clean arcs, 45–192° and 225–306°. The whole warm half is unavailable: 0–42° collides with critical, warning and serious BECAUSE those roles ARE deep reds and burnt oranges here, 309–357° collides with warning and then the reds again, and 195–222° collides with good under tritanopia. Every warm metal a Norse console might plausibly wear lands in the first of those: bronze at hue 27 measured dE 9.7 against critical and 9.3 against warning, and a garnet at 353 collided four ways.\n\nSO THE DEFAULT ALREADY OCCUPIES THE ONLY CLEAN WARM HUE. The shipped gold sits at roughly 45°, on the edge of the first arc, so a second warm inlay would either collide with a status colour or look like the gold. That is why the five read as STONES against a metal default rather than as a set of metals — the palette is the shape the status set left behind.\n\nNONE OF THE FIVE NEEDS AN ACKNOWLEDGEMENT. All clear dE 10 against every status colour at both chroma levels, which is a stronger result than either other skin manages: industry’s red and vitrine’s amber each ship a documented restriction. This skin has none.",
+    "$axisNote": "Stamped data-inlay, CROSSED with data-theme — four blocks per inlay, not one. A skin is orthogonal to the theme and always was.",
+    "$methodNote": "DERIVED BY SEARCH, NOT PICKED, by the method industry established and vitrine confirmed: an HSL anchor per hue, a 1% lightness ramp, and for every role the NEAREST LEGAL STEP to that hue’s vivid centre — light roles darken, dark roles lighten, each stopping the moment it clears its floor. Washes are MIXES TOWARD THE PLATE from a floor of 0.5, because what separates a wash from a fill on a pale hue is chroma and no contrast ratio sees chroma; a lightness walk returns the vivid stop and calls it a wash.\n\nTWO THINGS HERE ARE THIS SKIN’S AND NOT INDUSTRY’S. The light page is a warm vellum RAMP, so the binding stop for a dark ink is its darkest stop #ded6c4 rather than the plate. And the dark page ramp is NOT MONOTONIC — #0b0f14 / #0f151b / #070a0d, lit across the middle — so the binding stop for a light ink is the MIDDLE one, #0f151b. Walking the ends reports a role as passing when it fails across the middle third of the screen; that is this skin’s own recorded finding and the derivation honours it.",
+    "$inkNote": "accent-wash-text IS text-primary ON EVERY INLAY, which is the base skin’s own choice carried forward rather than an omission. A gold ink on a gold wash is the same colour — the shipped accent is 1.94:1 on its own plate — and the same holds for any high-chroma inlay against its own mix. The plain ink is the honest value, and the gate’s accent-wash-text check is then the same check as its text-primary-on-wash check, which is fine: both must hold.\n\nAND EVERY DARK WASH FAILS text-muted, on all five, at 2.0–2.9:1. That is not a defect introduced here — it is the finding the base skin already records for the gold (4.12:1 on slate against 5.90:1 on vellum), arriving once per inlay because the mechanism is the same: deepening the wash enough to carry muted costs the fill its step off the plate. MUTED STEPS UP TO SECONDARY ON A DARK WASH. Nothing gates it; the light half is gated and passes by construction, because the mix stops at the first step where muted clears.",
+    "$ringNote": "THE TWO-TONE FOCUS RING IS RESTATED PER INLAY, and it has to be. It carries its colour inside an rgba/hex string that no gate parses, so a variant that re-points focus-ring and not shadow-focus ships a halo in the previous hue around a core in the new one — the base library did exactly that with a two-accents-ago indigo. validate:skin counts the bands and holds the best one to 3:1 against the plate. Light keeps the dark band inside and the hue outside; dark keeps the hue inside and the page outside, the same arrangement the shipped gold uses, because a single-tone ring is invisible on a high-chroma accent against a pale plate.",
+    "moss": {
+      "$note": "deep forest green — the earthiest of the five",
+      "$measured": {
+        "solid vs the light plate": "3.01:1 on #faf7ef",
+        "ink on solid (light)": "#1c1a15 at 5.40:1",
+        "accent-text (light)": "#426331 — 6.41:1 on the plate, 4.74:1 on the page's binding stop #ded6c4",
+        "border-accent (light)": "#689d4d — 3.01:1 on the plate. THE FILL BOUNDS ITSELF on this finish: border-accent IS accent-solid.",
+        "wash (light)": "#b8cfa6 (mix 55% toward the plate) — text-primary 10.36:1, text-muted 4.54:1",
+        "wash edge under border-accent (light)": "2.06:1 vs 3.01:1",
+        "solid vs the dark plate": "8.34:1 on #1a2028",
+        "ink on solid (dark)": "#1c1a15 at 8.84:1",
+        "accent-text (dark)": "#7acd51 — 8.34:1 on the plate, 9.34:1 on the page's binding stop #0f151b",
+        "border-accent (dark)": "#7acd51 — 8.34:1 on the plate. THE FILL BOUNDS ITSELF on this finish: border-accent IS accent-solid.",
+        "wash (dark)": "#47713b (mix 53% toward the plate) — text-primary 4.55:1, text-muted 2.02:1 (FAILS — muted steps up to secondary on this wash, the finding the base skin already records)",
+        "wash edge under border-accent (dark)": "4.88:1 vs 8.34:1",
+        "CVD vs this skin's status set": "clear of every status colour at dE 10."
+      },
+      "vars": {
+        "accent-solid": {
+          "light": "#689d4d",
+          "dark": "#7acd51"
+        },
+        "accent-solid-hover": {
+          "light": "#5e8d45",
+          "dark": "#87d262"
+        },
+        "accent-solid-active": {
+          "light": "#55813f",
+          "dark": "#92d670"
+        },
+        "accent-on-solid": {
+          "light": "#1c1a15",
+          "dark": "#1c1a15"
+        },
+        "accent-text": {
+          "light": "#426331",
+          "dark": "#7acd51"
+        },
+        "accent-wash": {
+          "light": "#b8cfa6",
+          "dark": "#47713b"
+        },
+        "accent-wash-hover": {
+          "light": "#adc799",
+          "dark": "#4f7f3f"
+        },
+        "accent-wash-active": {
+          "light": "#a1c08c",
+          "dark": "#568d42"
+        },
+        "accent-wash-border": {
+          "light": "#95b97f",
+          "dark": "#5e9b45"
+        },
+        "accent-wash-text": {
+          "light": "#1c1a15",
+          "dark": "#e8e6df"
+        },
+        "border-accent": {
+          "light": "#689d4d",
+          "dark": "#7acd51"
+        },
+        "text-link": {
+          "light": "#426331",
+          "dark": "#7acd51"
+        },
+        "focus-ring": {
+          "light": "#689d4d",
+          "dark": "#7acd51"
+        },
+        "shadow-focus": {
+          "light": "0 0 0 2px #1b1811, 0 0 0 4px #689d4d",
+          "dark": "0 0 0 2px #7acd51, 0 0 0 4px #0f151b"
+        }
+      }
+    },
+    "verdigris": {
+      "$note": "aged copper patina, the finish a Norse console would actually wear",
+      "$measured": {
+        "solid vs the light plate": "2.98:1 on #faf7ef",
+        "ink on solid (light)": "#1c1a15 at 5.45:1",
+        "accent-text (light)": "#2f6553 — 6.31:1 on the plate, 4.67:1 on the page's binding stop #ded6c4",
+        "border-accent (light)": "#499c81 — 3.09:1 on the plate",
+        "wash (light)": "#abcfbe (mix 55% toward the plate) — text-primary 10.27:1, text-muted 4.50:1",
+        "wash edge under border-accent (light)": "2.07:1 vs 3.09:1",
+        "solid vs the dark plate": "8.49:1 on #1a2028",
+        "ink on solid (dark)": "#1c1a15 at 9.01:1",
+        "accent-text (dark)": "#4ed0a4 — 8.49:1 on the plate, 9.52:1 on the page's binding stop #0f151b",
+        "border-accent (dark)": "#4ed0a4 — 8.49:1 on the plate. THE FILL BOUNDS ITSELF on this finish: border-accent IS accent-solid.",
+        "wash (dark)": "#327161 (mix 54% toward the plate) — text-primary 4.58:1, text-muted 2.04:1 (FAILS — muted steps up to secondary on this wash, the finding the base skin already records)",
+        "wash edge under border-accent (dark)": "4.84:1 vs 8.49:1",
+        "CVD vs this skin's status set": "clear of every status colour at dE 10."
+      },
+      "vars": {
+        "accent-solid": {
+          "light": "#4b9f83",
+          "dark": "#4ed0a4"
+        },
+        "accent-solid-hover": {
+          "light": "#448f76",
+          "dark": "#60d5ad"
+        },
+        "accent-solid-active": {
+          "light": "#3e826b",
+          "dark": "#6ed8b4"
+        },
+        "accent-on-solid": {
+          "light": "#1c1a15",
+          "dark": "#1c1a15"
+        },
+        "accent-text": {
+          "light": "#2f6553",
+          "dark": "#4ed0a4"
+        },
+        "accent-wash": {
+          "light": "#abcfbe",
+          "dark": "#327161"
+        },
+        "accent-wash-hover": {
+          "light": "#9dc8b6",
+          "dark": "#367f6b"
+        },
+        "accent-wash-active": {
+          "light": "#8fc1ad",
+          "dark": "#3a8d75"
+        },
+        "accent-wash-border": {
+          "light": "#81baa4",
+          "dark": "#3e9b7f"
+        },
+        "accent-wash-text": {
+          "light": "#1c1a15",
+          "dark": "#e8e6df"
+        },
+        "border-accent": {
+          "light": "#499c81",
+          "dark": "#4ed0a4"
+        },
+        "text-link": {
+          "light": "#2f6553",
+          "dark": "#4ed0a4"
+        },
+        "focus-ring": {
+          "light": "#499c81",
+          "dark": "#4ed0a4"
+        },
+        "shadow-focus": {
+          "light": "0 0 0 2px #1b1811, 0 0 0 4px #499c81",
+          "dark": "0 0 0 2px #4ed0a4, 0 0 0 4px #0f151b"
+        }
+      }
+    },
+    "frost": {
+      "$note": "cold cyan. It sat at 198deg until the light half was softened: dropping chroma pulled it into status.good under tritanopia (dE 5.2), and the arc that is clean at BOTH chroma levels ends at 192deg. Verdigris moved down to 160 to keep the two apart.",
+      "$measured": {
+        "solid vs the light plate": "3.28:1 on #faf7ef",
+        "ink on solid (light)": "#1c1a15 at 4.95:1",
+        "accent-text (light)": "#34636a — 6.25:1 on the plate, 4.63:1 on the page's binding stop #ded6c4",
+        "border-accent (light)": "#4d939d — 3.28:1 on the plate. THE FILL BOUNDS ITSELF on this finish: border-accent IS accent-solid.",
+        "wash (light)": "#b1cdcd (mix 58% toward the plate) — text-primary 10.33:1, text-muted 4.53:1",
+        "wash edge under border-accent (light)": "2.10:1 vs 3.28:1",
+        "solid vs the dark plate": "7.36:1 on #1a2028",
+        "ink on solid (dark)": "#1c1a15 at 7.80:1",
+        "accent-text (dark)": "#51bccd — 7.36:1 on the plate, 8.24:1 on the page's binding stop #0f151b",
+        "border-accent (dark)": "#51bccd — 7.36:1 on the plate. THE FILL BOUNDS ITSELF on this finish: border-accent IS accent-solid.",
+        "wash (dark)": "#366e7b (mix 50% toward the plate) — text-primary 4.58:1, text-muted 2.04:1 (FAILS — muted steps up to secondary on this wash, the finding the base skin already records)",
+        "wash edge under border-accent (dark)": "4.63:1 vs 7.36:1",
+        "CVD vs this skin's status set": "clear of every status colour at dE 10."
+      },
+      "vars": {
+        "accent-solid": {
+          "light": "#4d939d",
+          "dark": "#51bccd"
+        },
+        "accent-solid-hover": {
+          "light": "#45848d",
+          "dark": "#62c3d2"
+        },
+        "accent-solid-active": {
+          "light": "#3f7981",
+          "dark": "#70c8d6"
+        },
+        "accent-on-solid": {
+          "light": "#1c1a15",
+          "dark": "#1c1a15"
+        },
+        "accent-text": {
+          "light": "#34636a",
+          "dark": "#51bccd"
+        },
+        "accent-wash": {
+          "light": "#b1cdcd",
+          "dark": "#366e7b"
+        },
+        "accent-wash-hover": {
+          "light": "#a4c5c6",
+          "dark": "#3a7a88"
+        },
+        "accent-wash-active": {
+          "light": "#96bdbf",
+          "dark": "#3e8795"
+        },
+        "accent-wash-border": {
+          "light": "#88b5b9",
+          "dark": "#4393a2"
+        },
+        "accent-wash-text": {
+          "light": "#1c1a15",
+          "dark": "#e8e6df"
+        },
+        "border-accent": {
+          "light": "#4d939d",
+          "dark": "#51bccd"
+        },
+        "text-link": {
+          "light": "#34636a",
+          "dark": "#51bccd"
+        },
+        "focus-ring": {
+          "light": "#4d939d",
+          "dark": "#51bccd"
+        },
+        "shadow-focus": {
+          "light": "0 0 0 2px #1b1811, 0 0 0 4px #4d939d",
+          "dark": "0 0 0 2px #51bccd, 0 0 0 4px #0f151b"
+        }
+      }
+    },
+    "sapphire": {
+      "$note": "deep stone blue",
+      "$measured": {
+        "solid vs the light plate": "6.32:1 on #faf7ef",
+        "ink on solid (light)": "#f2ece0 at 5.75:1",
+        "accent-text (light)": "#4d559d — 6.32:1 on the plate, 4.68:1 on the page's binding stop #ded6c4",
+        "border-accent (light)": "#4d559d — 6.32:1 on the plate. THE FILL BOUNDS ITSELF on this finish: border-accent IS accent-solid.",
+        "wash (light)": "#c6c6d6 (mix 70% toward the plate) — text-primary 10.31:1, text-muted 4.52:1",
+        "wash edge under border-accent (light)": "2.38:1 vs 6.32:1",
+        "solid vs the dark plate": "2.96:1 on #1a2028",
+        "ink on solid (dark)": "#f2ece0 at 4.70:1",
+        "accent-text (dark)": "#7982d8 — 4.68:1 on the plate, 5.25:1 on the page's binding stop #0f151b",
+        "border-accent (dark)": "#5561ce — 3.11:1 on the plate",
+        "wash (dark)": "#363f7b (mix 50% toward the plate) — text-primary 7.81:1, text-muted 3.47:1 (FAILS — muted steps up to secondary on this wash, the finding the base skin already records)",
+        "wash edge under border-accent (dark)": "2.20:1 vs 3.11:1",
+        "CVD vs this skin's status set": "clear of every status colour at dE 10."
+      },
+      "vars": {
+        "accent-solid": {
+          "light": "#4d559d",
+          "dark": "#515dcd"
+        },
+        "accent-solid-hover": {
+          "light": "#454d8d",
+          "dark": "#626dd2"
+        },
+        "accent-solid-active": {
+          "light": "#3f4681",
+          "dark": "#707ad6"
+        },
+        "accent-on-solid": {
+          "light": "#f2ece0",
+          "dark": "#f2ece0"
+        },
+        "accent-text": {
+          "light": "#4d559d",
+          "dark": "#7982d8"
+        },
+        "accent-wash": {
+          "light": "#c6c6d6",
+          "dark": "#363f7b"
+        },
+        "accent-wash-hover": {
+          "light": "#b8b9d0",
+          "dark": "#3a4388"
+        },
+        "accent-wash-active": {
+          "light": "#aaacc9",
+          "dark": "#3e4895"
+        },
+        "accent-wash-border": {
+          "light": "#9da0c3",
+          "dark": "#434da2"
+        },
+        "accent-wash-text": {
+          "light": "#1c1a15",
+          "dark": "#e8e6df"
+        },
+        "border-accent": {
+          "light": "#4d559d",
+          "dark": "#5561ce"
+        },
+        "text-link": {
+          "light": "#4d559d",
+          "dark": "#7982d8"
+        },
+        "focus-ring": {
+          "light": "#4d559d",
+          "dark": "#5561ce"
+        },
+        "shadow-focus": {
+          "light": "0 0 0 2px #1b1811, 0 0 0 4px #4d559d",
+          "dark": "0 0 0 2px #5561ce, 0 0 0 4px #0f151b"
+        }
+      }
+    },
+    "amethyst": {
+      "$note": "the violet stone; furthest from the shipped gold",
+      "$measured": {
+        "solid vs the light plate": "5.49:1 on #faf7ef",
+        "ink on solid (light)": "#f2ece0 at 5.00:1",
+        "accent-text (light)": "#79498e — 6.21:1 on the plate, 4.60:1 on the page's binding stop #ded6c4",
+        "border-accent (light)": "#844f9b — 5.49:1 on the plate. THE FILL BOUNDS ITSELF on this finish: border-accent IS accent-solid.",
+        "wash (light)": "#d5c3d5 (mix 69% toward the plate) — text-primary 10.43:1, text-muted 4.57:1",
+        "wash edge under border-accent (light)": "2.30:1 vs 5.49:1",
+        "solid vs the dark plate": "4.30:1 on #1a2028",
+        "ink on solid (dark)": "#1c1a15 at 4.56:1",
+        "accent-text (dark)": "#b26cd0 — 4.64:1 on the plate, 5.20:1 on the page's binding stop #0f151b",
+        "border-accent (dark)": "#ae64ce — 4.30:1 on the plate. THE FILL BOUNDS ITSELF on this finish: border-accent IS accent-solid.",
+        "wash (dark)": "#64427b (mix 50% toward the plate) — text-primary 6.45:1, text-muted 2.87:1 (FAILS — muted steps up to secondary on this wash, the finding the base skin already records)",
+        "wash edge under border-accent (dark)": "2.95:1 vs 4.30:1",
+        "CVD vs this skin's status set": "clear of every status colour at dE 10."
+      },
+      "vars": {
+        "accent-solid": {
+          "light": "#844f9b",
+          "dark": "#ae64ce"
+        },
+        "accent-solid-hover": {
+          "light": "#77478c",
+          "dark": "#b674d3"
+        },
+        "accent-solid-active": {
+          "light": "#6c417f",
+          "dark": "#bd80d7"
+        },
+        "accent-on-solid": {
+          "light": "#f2ece0",
+          "dark": "#1c1a15"
+        },
+        "accent-text": {
+          "light": "#79498e",
+          "dark": "#b26cd0"
+        },
+        "accent-wash": {
+          "light": "#d5c3d5",
+          "dark": "#64427b"
+        },
+        "accent-wash-hover": {
+          "light": "#ccb5ce",
+          "dark": "#704788"
+        },
+        "accent-wash-active": {
+          "light": "#c3a8c8",
+          "dark": "#7c4d96"
+        },
+        "accent-wash-border": {
+          "light": "#b99bc1",
+          "dark": "#8852a3"
+        },
+        "accent-wash-text": {
+          "light": "#1c1a15",
+          "dark": "#e8e6df"
+        },
+        "border-accent": {
+          "light": "#844f9b",
+          "dark": "#ae64ce"
+        },
+        "text-link": {
+          "light": "#79498e",
+          "dark": "#b26cd0"
+        },
+        "focus-ring": {
+          "light": "#844f9b",
+          "dark": "#ae64ce"
+        },
+        "shadow-focus": {
+          "light": "0 0 0 2px #1b1811, 0 0 0 4px #844f9b",
+          "dark": "0 0 0 2px #ae64ce, 0 0 0 4px #0f151b"
+        }
+      }
+    },
+    "$softenNote": "THE LIGHT HALF IS SOFTENED BY CHROMA, NOT BY LIGHTNESS — directed 2026-08-27. LIGHT_CHROMA is 0.62: the anchor saturation is scaled for the light walk only, and every role then RE-WALKS its own lightness ramp at the new chroma. That ordering is the whole reason it is safe. A walk re-finds each floor, so accent-on-solid still clears 4.5:1, border-accent still clears 3:1 and the wash still carries muted BY CONSTRUCTION. Desaturating the finished hexes instead would have moved every one of them off its floor with nothing to catch it, because a lower-chroma colour at the same HSL lightness has a different relative luminance.\n\nWHY CHROMA IS THE RIGHT LEVER: a saturated fill on a warm vellum plate is the loudest thing on screen even when its luminance is modest, because what it does against a pale ground is a CHROMA jump and no contrast ratio sees one. That is industry’s masthead-mark finding restated — on a pale plate, softening spends the channel the gates do not measure.\n\nAND HERE IS THE PART THAT DOES NOT TRANSFER FROM INDUSTRY. Its note says going DOWN needs no re-derivation because every figure is an upper bound. That is true of ALPHA and false of CHROMA: dropping chroma pulls a hue toward the neutral axis, which pulls it toward every OTHER hue, so a hue clean at full chroma can collide once softened. Frost proved it — clean at 198° and 0.55, dE 5.2 against status.good.mark under tritanopia once softened to 0.34. The clean arcs narrowed from 36–198 / 216–306 to 45–192 / 225–306, frost moved to 188°, and verdigris moved from 168 to 160 to keep the two apart. RE-RUN THE CVD SWEEP AT THE SOFTENED CHROMA, NOT ONLY AT THE ANCHOR.\n\nDARK IS UNTOUCHED, deliberately: a light accent on slate glows rather than presses, so the two halves converge rather than diverge. The SHIPPED GOLD is also untouched — it is the default rather than a variant, its light roles are hand-derived with figures recorded across CLAUDE.md, and it consequently now reads brighter in light than the five stones do. Defensible as metal-against-stone; if it should follow, it needs accent-solid split into per-theme values and its stepped roles re-measured."
   }
 }

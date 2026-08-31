@@ -34,30 +34,38 @@
  * a system serif. Must stay at the top: @import after a rule is dropped. */
 @import url('https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap');
 
-/* ── the page: a receding dot ground under a wave ─────────────────────────
-   THE GROUND BELONGS TO THE DOCUMENT, so the textures go on `body` and the app
-   shell is made transparent to let them through. .jrk-app would otherwise paint
-   an opaque canvas straight over them, and putting a copy on every shell class
+/* ── the page: a receding dot ground ──────────────────────────────────────
+   THE GROUND BELONGS TO THE DOCUMENT, so the texture goes on `body` and the app
+   shell is made transparent to let it through. .jrk-app would otherwise paint
+   an opaque canvas straight over it, and putting a copy on every shell class
    means every one of them paints its own — a page that never builds a .jrk-app
    (a gallery page, a print view, a bare auth route) still stands on the ground
    this way.
 
-   TWO FIXED PSEUDO-ELEMENTS, MASKED COMPLEMENTARILY. That is the whole design
-   and each half of it is load-bearing:
+   THE WAVE WAS REMOVED ON 2026-08-25, BY DIRECTION. It was a second fixed
+   pseudo-element carrying concentric arcs from a centre below the fold, masked to
+   the UPPER band. Near the top of the port those arcs are wide and nearly flat, so
+   they read as horizontal dashes rather than as a bloom — and the page having gone
+   white at the top five days earlier is what made them obvious. Gone with it:
+   surface-canvas-wave, wave-gap, and the ::before that carried them.
 
-     FIXED, because the horizon is a property of the viewport. A ground that
-     scrolls has no horizon — the fade line would travel with the content and
-     read as a band moving up the screen. Fixed also sizes the wave to the
-     viewport rather than to the document, which on a long page is the
-     difference between an arc and one enormous stretched ellipse.
+   FIXED, still, because the horizon is a property of the viewport. A ground that
+   scrolls has no horizon — the fade line would travel with the content and read as
+   a band moving up the screen.
 
-     COMPLEMENTARY, because it is what pays for the contrast. Masked so the dots
-     fade IN toward the bottom and the arcs fade OUT, the two never occupy the
-     same pixel, so each gets the full texture budget instead of splitting one.
-     Overlap them and the alphas ADD, which on the light half puts text.muted
-     under 4.5:1. The figures are on the two tokens; the short version is that
-     the composite in the crossfade is bounded by the LARGER alpha rather than
-     the sum, and only while these two masks stay opposites.
+   WHAT THE REMOVAL RETIRES IS A CONSTRAINT, NOT A FEATURE, and it is worth knowing
+   which. The two layers were masked COMPLEMENTARILY — dots fading in toward the
+   bottom, arcs fading out — so they never occupied the same pixel and each got the
+   full texture budget instead of splitting one. Overlap them and the alphas ADD,
+   which on the light half put text.muted under 4.5:1. With one layer left there is
+   nothing to overlap: the dot ground now has the whole budget to itself.
+
+   SO surface-canvas-grid's ALPHA CEILING IS NO LONGER SHARED, and if the dots ever
+   need to read harder there is now room to raise it — up to the 0.115 the light
+   page's dark end allows, from the 0.10 it ships at. Reach for the RADIUS first
+   anyway; radius is free against a per-pixel contrast floor and alpha is not.
+   ANY NEW TRANSLUCENT LAYER ON THESE PIXELS SPENDS THAT BUDGET AGAIN — the adding
+   rule was never about the wave specifically, and a second layer brings it back.
 
    `black` and `transparent` in the masks are ALPHA, not colour — a mask reads
    nothing else — which is also why they are keywords and not hexes that
@@ -108,11 +116,15 @@
    halves, worst 5.46:1. stripe-from and stripe-to still move the band; there is
    now nothing they have to be moved away from.
 
-   IT IS A BACKGROUND LAYER ON `body`, NOT A THIRD PSEUDO-ELEMENT, because there
-   is no third one to have: ::before is the wave and ::after is the dot ground,
-   and each carries a mask that is load-bearing for contrast. The visible
-   consequence is that the stripe sits BENEATH both textures — z-index -1 is
-   above body's background — so the dot field continues across it.
+   IT IS A BACKGROUND LAYER ON `body`, NOT A PSEUDO-ELEMENT, and since 2026-08-25
+   that is a CHOICE rather than a shortage. It used to be neither available nor
+   arguable — ::before was the wave and ::after the dot ground, each carrying a
+   mask that was load-bearing for contrast. The wave is gone and ::before is free
+   now. Leave the stripe where it is: as a background layer it sits BENEATH the
+   dot ground (z-index -1 is above body's background), so the dot field continues
+   across it, and moving it to ::before would put it level with the dots and make
+   their stacking order arbitrary. If a future layer needs a pseudo-element, that
+   is what ::before is for.
 
    FIXED, like the textures. Percentages on a fixed layer resolve against the
    VIEWPORT, so the band lands where it is written with no dependence on how
@@ -169,32 +181,21 @@
   background: transparent;
 }
 
-:root[data-skin='industry'] body::before,
+/* the ground — the lower band, fading in toward the bottom of the port.
+   The dot RADIUS is the visibility lever here, not the alpha: alpha is capped by
+   the muted-text floor and radius is not, so a dot that needs to read harder
+   gets bigger rather than darker.
+
+   ONE RULE SINCE 2026-08-25. It used to be two — a shared block setting the fixed
+   positioning for ::before and ::after, then one each for the wave and the dots.
+   The wave is gone and a shared block with a single member is just indirection. */
 :root[data-skin='industry'] body::after {
   content: '';
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-}
 
-/* the wave — the upper band, fading out where the ground begins */
-:root[data-skin='industry'] body::before {
-  background-image:
-    repeating-radial-gradient(
-      ellipse 130% 78% at 50% 104%,
-      transparent 0 calc(var(--jrk-wave-gap) - 2px),
-      var(--jrk-surface-canvas-wave) calc(var(--jrk-wave-gap) - 2px) var(--jrk-wave-gap)
-    );
-  -webkit-mask-image: linear-gradient(to bottom, black 6%, transparent 58%);
-  mask-image: linear-gradient(to bottom, black 6%, transparent 58%);
-}
-
-/* the ground — the lower band, fading in toward the bottom of the port.
-   The dot RADIUS is the visibility lever here, not the alpha: alpha is capped by
-   the muted-text floor and radius is not, so a dot that needs to read harder
-   gets bigger rather than darker. */
-:root[data-skin='industry'] body::after {
   background-image:
     radial-gradient(circle at center, var(--jrk-surface-canvas-grid) 1.75px, transparent 2.25px);
   background-size: var(--jrk-grid-cell) var(--jrk-grid-cell);
@@ -881,8 +882,8 @@
    edge ADVANCES in columns instead of gliding, and a four-step alpha stair on
    the mask edge so each column arrives through a short dither rather than
    snapping. The rgba() values in the mask are ALPHA, not colour — a mask reads
-   nothing else — which is the same reason the wave and dot-ground masks above are
-   written with `black` and `transparent` keywords rather than hexes.
+   nothing else — which is the same reason the dot-ground mask above is written
+   with `black` and `transparent` keywords rather than hexes.
 
    WHAT THIS IS NOT. It is a WIPE: the panel is revealed by a travelling edge.
    Two attempts at a shard-scatter reveal were built over it and both were
@@ -1072,3 +1073,40 @@
     border-bottom-color: var(--jrk-border-strong);
   }
 }
+
+/* ── the org chart's tiles: SQUARED, AND DELIBERATELY NOT NOTCHED ──────────
+   The squaring is free and is not stated here. `.jrk-org__card` reaches for
+   `radius-lg` and `.jrk-org__group` for `radius-md` — through the TOKENS, unlike
+   the base library's tiles, which reach for `radius.none` directly — and this
+   skin points every radius at 0. So an org node under this skin is a hard
+   rectangle with no rule needed, and that squaring plus `Inter Tight` is the
+   whole of this skin's tile design here. Squared and flat is not an omission:
+   nothing in this skin carries an ambient shadow, because the notch below
+   removes it from everything that does.
+
+   WHAT IS WRITTEN HERE IS THE ABSENCE OF THE NOTCH, because a chart of two
+   hundred hard rectangles is exactly what invites a later pass to add
+   `.jrk-org__card` to the clip-path list above, and there are three separate
+   reasons not to:
+
+     - AN ORG CARD IS FREQUENTLY A CONTROL. `--link` renders as an <a> or a
+       <button>, and clip-path clips the box-shadow AND the outline — both are
+       drawn outside the border box. That is the same fact the notch block opens
+       with, arriving somewhere much worse than a missing ambient shadow: it
+       takes the FOCUS RING with it. This skin already squares its controls
+       rather than notching them for the milder version of this (since
+       2026-08-20 a white button's only boundary in light IS shadow.md), and a
+       focusable card is where that rule stops being about looks.
+     - THE FILLED VARIANT OWNS `background`. Under `.jrk-org--group-solid` the
+       card sets the background SHORTHAND, and its hover sets `background-image`
+       for the veil — so the notch EDGE, which is a background layer, would
+       vanish on every filled card and fight the veil on a hovered one. That is
+       the documented reason `.jrk-stat--vivid` is excluded from the edge rule;
+       here it would hit the common case rather than one variant.
+     - THE CHART IS ALWAYS NESTED. An org chart lives inside a `.jrk-card`, and
+       the rule below already says a nested tile takes no notch, because two
+       chamfers inside each other read as a printing misregistration. Two
+       hundred of them inside one would be that finding at scale.
+
+   If a chamfer is ever wanted on a node, the only safe target is a non-link
+   full-size card in an ungrouped chart — which is not a case worth a rule. */

@@ -508,3 +508,57 @@
     border-bottom-color: var(--jrk-border-strong);
   }
 }
+
+/* ── the org chart's tiles: SQUARE SLATE PLATES, ENGRAVED ──────────────────
+   The squaring is free: `.jrk-org__card` reaches for `radius-lg` and
+   `.jrk-org__group` for `radius-md` through the TOKENS, and this skin points
+   every radius at 0. What has to be stated is the BEVEL, because the base
+   library gives an org card no shadow at all — deliberately, and its reason
+   does not reach this skin.
+
+   THAT REASON WAS ABOUT LIFT, AND THIS IS NOT A LIFT. org.css declines a
+   shadow on the interactive card because "one card lifting under the pointer in
+   a field of flat peers is noise rather than a signifier", which is a statement
+   about HOVER. `shadow-card` here is not an ambient drop shadow: every
+   elevation token in this skin carries a 1px inset top highlight, and in dark
+   that highlight IS the elevation — a black shadow on `#0b0f14` renders
+   nothing. So this buys the engraved top edge that makes a plate read as
+   machined slate at rest, and nothing moves when the pointer arrives.
+
+   It stays out of the hover and current rules on purpose. A node's states are
+   carried by fill and edge exactly as they are in the base library, and the
+   bevel is constant across all of them — which is what makes it read as the
+   material rather than as a state.
+
+   ON A FILLED CARD THE HIGHLIGHT AND THE HAIRLINE MERGE, and that is fine
+   rather than redundant. `.jrk-org--group-solid` draws a white 1px border, so on
+   a saturated card the inset white line lands on top of a white edge and simply
+   thickens the top of it — which is what a bevel on a painted plate looks like.
+   On an unfilled card the border is `border-default` and the highlight is a
+   separate, brighter line, which is where the engraving actually reads. */
+:root[data-skin='midgard'] .jrk-org__card,
+:root[data-skin='midgard'] .jrk-org__group {
+  box-shadow: var(--jrk-shadow-card);
+}
+
+/* THE NAME TAKES THE DISPLAY FACE — WITHOUT THE CAPS, and the exception is
+   measured against the box rather than chosen. Every other member of this
+   skin's display list pairs `font-display` with `text-transform: uppercase` and
+   `tracking-wide`, because those strings are short enough that caps at that
+   tracking still read as a word. A person's name is not: "LAWRENCE BAECK" in
+   tracked Cinzel does not fit 176px minus the card's own padding, and a
+   two-line name sets the height for every peer in its row — which is the cost
+   the centring note in org.css is about.
+
+   So the face carries the character and the case carries the legibility. Cinzel
+   is caps-forward but has real lowercase, so mixed case is not a compromise
+   here, it is the correct setting for a proper noun.
+
+   COMPACT TILES ARE OUT, and that is this skin's own rule rather than a caution:
+   the display face is TITLES ONLY, never body copy and never a small label, and
+   a property name at `text-xs` inside a 24px tile is a small label. A serif at
+   12px in a column of two hundred is also slower to scan than the sans it
+   replaces, which is the opposite of what the compact tile is for. */
+:root[data-skin='midgard'] .jrk-org__card:not(.jrk-org__card--compact) .jrk-org__name {
+  font-family: var(--jrk-font-display);
+}

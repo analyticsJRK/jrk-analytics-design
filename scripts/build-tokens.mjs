@@ -93,6 +93,14 @@ T.chart.categorical.slots.forEach((s) => add(`chart-dash-${s.slot}`, s.dash));
 // categorical slots so the two can never be confused at the call site.
 T.chart.tint.slots.forEach((s) => add(`chart-tint-${s.slot}`, s.light, s.dark));
 add('chart-tint-ink', T.chart.tint.ink.light, T.chart.tint.ink.dark);
+// Deep fills that carry WHITE ink — the org chart's filled node. Same eight hues
+// in the same searched order as the categorical slots, stepped down until white
+// clears 4.5:1, so this is a VOLUME of that palette rather than a second one and
+// the CVD doctrine carries over intact. Third namespace on purpose: the call site
+// must never be able to confuse a mark, a tint and a deep fill, because the ink
+// that survives on each is a different colour (black / theme / white).
+T.chart.deep.slots.forEach((s) => add(`chart-deep-${s.slot}`, s.light, s.dark));
+add('chart-deep-ink', T.chart.deep.ink.light, T.chart.deep.ink.dark);
 T.chart.sequential.steps.forEach((hex, i) => add(`chart-seq-${i + 1}`, hex));
 add('chart-div-negative', T.chart.diverging.negative);
 add('chart-div-positive', T.chart.diverging.positive);
@@ -509,6 +517,25 @@ export const SERIES_CAP_ALL_PAIRS = ${T.chart.categorical.seriesCapAllPairs};
 /** Sub-3:1 on the light surface — using these as fills obligates visible direct
  *  labels or a table view. Not dismissable. */
 export const reliefRequiredLight: readonly string[] = [${T.chart.categorical.reliefRequired.light.map((h) => `'${h}'`).join(', ')}];
+
+/** Deep fills that carry WHITE ink — the org chart's filled node.
+ *  The SAME eight hues in the SAME searched order as chartSeries, stepped down
+ *  until white clears 4.5:1, so it is a volume of that palette rather than a
+ *  second one: adjacency, the all-pairs cap of 3 and the same-parity structure of
+ *  the collapsing pairs all carry over (worst adjacent dE 15.9 light / 18.4 dark).
+ *
+ *  NOT a series palette. A line or a bar takes chartSeries, which is tuned
+ *  against the card plane; these are tuned against their own ink and are ~4.5:1
+ *  on the card, which is a shape rather than a mark. Cycle at 8 the same way. */
+export const chartDeep = {
+  light: [${T.chart.deep.slots.map((s) => `'${s.light}'`).join(', ')}],
+  dark: [${T.chart.deep.slots.map((s) => `'${s.dark}'`).join(', ')}],
+} as const;
+
+/** The one ink that survives on every chartDeep slot, both halves. White in
+ *  both — it is NOT text.inverse, which is #000000 in dark and 4.0:1 at best on
+ *  these fills. */
+export const chartDeepInk = { light: '${T.chart.deep.ink.light}', dark: '${T.chart.deep.ink.dark}' } as const;
 
 export const chartSequential = [${T.chart.sequential.steps.map((h) => `'${h}'`).join(', ')}] as const;
 

@@ -1363,6 +1363,625 @@
       Hover Southeast: the tint takes <code class="jrk-mono">overlay.hoverVeil</code>, the same
       directional veil the pastel expander uses, because a tint has no next plane to step to.
     </div>
+
+    <!-- the portfolio layout: solid nodes over state-grouped columns -->
+    <p class="gal-label">
+      The portfolio layout — solid nodes, and a terminal level that is a column rather than a fan
+    </p>
+    <div class="gal-demo gal-demo--plain">
+      <div class="jrk-card" style="width:100%">
+        <div class="jrk-card__header">
+          <div>
+            <div class="jrk-card__title">JRK portfolio</div>
+            <div class="jrk-card__subtitle">
+              <code class="jrk-mono">.jrk-org--group-solid</code> ·
+              <code class="jrk-mono">--column</code> ·
+              <code class="jrk-mono">.jrk-org__group</code>
+            </div>
+          </div>
+        </div>
+        <div class="jrk-card__body">
+          <div class="jrk-org-scroll">
+            <ul class="jrk-org jrk-org--group-solid" aria-label="JRK portfolio reporting structure">
+              <li class="jrk-org__node">
+                <div class="jrk-org__card" style="--jrk-org-group-solid: var(--jrk-surface-inverse); --jrk-org-solid-ink: var(--jrk-text-inverse)">
+                  <span class="jrk-org__name">Tom Manzo</span>
+                  <span class="jrk-org__role">President</span>
+                  <span class="jrk-org__meta">89 props · 28,460 un</span>
+                </div>
+                <ul class="jrk-org__branch">
+                  <li class="jrk-org__node">
+                    <div class="jrk-org__card">
+                      <span class="jrk-org__name">Matt Sussman</span>
+                      <span class="jrk-org__role">EVP</span>
+                      <span class="jrk-org__meta">89 props · 28,460 un</span>
+                    </div>
+                    <ul class="jrk-org__branch">
+                      <li class="jrk-org__node">
+                        <div class="jrk-org__card">
+                          <span class="jrk-org__name">Lawrence Baeck</span>
+                          <span class="jrk-org__role">SVP</span>
+                          <span class="jrk-org__meta">23 props · 7,183 un</span>
+                        </div>
+                        <ul class="jrk-org__branch">
+                          <li class="jrk-org__node">
+                            <div class="jrk-org__card" aria-current="true">
+                              <span class="jrk-org__name">Ed Sarti</span>
+                              <span class="jrk-org__role">Associate</span>
+                              <span class="jrk-org__meta">7 props · 2,182 un</span>
+                            </div>
+                            <ul class="jrk-org__branch">
+                              <li class="jrk-org__node jrk-org__node--group-1">
+                                <div class="jrk-org__card">
+                                  <span class="jrk-org__name">Ed Sarti</span>
+                                  <span class="jrk-org__role">Associate</span>
+                                  <span class="jrk-org__meta">7 props · 2,182 un</span>
+                                </div>
+                                <ul class="jrk-org__branch jrk-org__branch--column">
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">WA</span>
+                                    <ul class="jrk-org__group-items" aria-label="WA">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Boulders at Puget Sound</span>
+                                          <span class="jrk-org__code">WST</span>
+                                          <span class="jrk-org__meta">714 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Carrolls Creek Landing</span>
+                                          <span class="jrk-org__code">CCL</span>
+                                          <span class="jrk-org__meta">288 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Centennial</span>
+                                          <span class="jrk-org__code">CNT</span>
+                                          <span class="jrk-org__meta">417 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Santa Fe Ridge</span>
+                                          <span class="jrk-org__code">SFR</span>
+                                          <span class="jrk-org__meta">240 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Silverdale Ridge</span>
+                                          <span class="jrk-org__code">SVR</span>
+                                          <span class="jrk-org__meta">118 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Trillium Heights</span>
+                                          <span class="jrk-org__code">TRL</span>
+                                          <span class="jrk-org__meta">225 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">CA</span>
+                                    <ul class="jrk-org__group-items" aria-label="CA">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Parkside Glen</span>
+                                          <span class="jrk-org__code">PAG</span>
+                                          <span class="jrk-org__meta">180 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                              <li class="jrk-org__node jrk-org__node--group-2">
+                                <div class="jrk-org__card">
+                                  <span class="jrk-org__name">Geneva Lacroix</span>
+                                  <span class="jrk-org__role">Regional Manager</span>
+                                  <span class="jrk-org__meta">5 props · 1,570 un</span>
+                                </div>
+                                <ul class="jrk-org__branch jrk-org__branch--column">
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">LA</span>
+                                    <ul class="jrk-org__group-items" aria-label="LA">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Delaneaux</span>
+                                          <span class="jrk-org__code">DLX</span>
+                                          <span class="jrk-org__meta">210 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Heights at Hammond</span>
+                                          <span class="jrk-org__code">HAM</span>
+                                          <span class="jrk-org__meta">336 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Indigo Park</span>
+                                          <span class="jrk-org__code">IND</span>
+                                          <span class="jrk-org__meta">330 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Lumina</span>
+                                          <span class="jrk-org__code">LUM</span>
+                                          <span class="jrk-org__meta">384 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">FL</span>
+                                    <ul class="jrk-org__group-items" aria-label="FL">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Terra Mar</span>
+                                          <span class="jrk-org__code">TEM</span>
+                                          <span class="jrk-org__meta">310 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                              <li class="jrk-org__node jrk-org__node--group-3">
+                                <div class="jrk-org__card">
+                                  <span class="jrk-org__name">Jen Carothers</span>
+                                  <span class="jrk-org__role">Regional Manager</span>
+                                  <span class="jrk-org__meta">8 props · 2,257 un</span>
+                                </div>
+                                <ul class="jrk-org__branch jrk-org__branch--column">
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">TX</span>
+                                    <ul class="jrk-org__group-items" aria-label="TX">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Carrington Park</span>
+                                          <span class="jrk-org__code">CPK</span>
+                                          <span class="jrk-org__meta">258 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Halstead</span>
+                                          <span class="jrk-org__code">HAL</span>
+                                          <span class="jrk-org__meta">301 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Summerbrooke</span>
+                                          <span class="jrk-org__code">SMB</span>
+                                          <span class="jrk-org__meta">376 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">West 18th Street Apartments</span>
+                                          <span class="jrk-org__code">W18</span>
+                                          <span class="jrk-org__meta">304 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">AZ</span>
+                                    <ul class="jrk-org__group-items" aria-label="AZ">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">909 West</span>
+                                          <span class="jrk-org__code">9WT</span>
+                                          <span class="jrk-org__meta">408 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Terraces at Glassford Hill</span>
+                                          <span class="jrk-org__code">TGH</span>
+                                          <span class="jrk-org__meta">226 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">OK</span>
+                                    <ul class="jrk-org__group-items" aria-label="OK">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Retreat at River Bend</span>
+                                          <span class="jrk-org__code">NOR</span>
+                                          <span class="jrk-org__meta">216 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">The Parc at East Fifty First</span>
+                                          <span class="jrk-org__code">EST</span>
+                                          <span class="jrk-org__meta">168 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                              <li class="jrk-org__node jrk-org__node--group-4">
+                                <div class="jrk-org__card">
+                                  <span class="jrk-org__name">Lawrence Baeck</span>
+                                  <span class="jrk-org__role">SVP</span>
+                                  <span class="jrk-org__meta">3 props · 1,174 un</span>
+                                </div>
+                                <ul class="jrk-org__branch jrk-org__branch--column">
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">FL</span>
+                                    <ul class="jrk-org__group-items" aria-label="FL">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Edgewater Crossings</span>
+                                          <span class="jrk-org__code">EWC</span>
+                                          <span class="jrk-org__meta">266 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">White Sands</span>
+                                          <span class="jrk-org__code">CCW</span>
+                                          <span class="jrk-org__meta">268 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">AL</span>
+                                    <ul class="jrk-org__group-items" aria-label="AL">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">150 Summit</span>
+                                          <span class="jrk-org__code">SMT</span>
+                                          <span class="jrk-org__meta">640 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                            </ul>
+                          </li>
+                        </ul>
+                      </li>
+                      <li class="jrk-org__node">
+                        <div class="jrk-org__card">
+                          <span class="jrk-org__name">Matt Sussman</span>
+                          <span class="jrk-org__role">EVP</span>
+                          <span class="jrk-org__meta">46 props · 14,425 un</span>
+                        </div>
+                        <ul class="jrk-org__branch">
+                          <li class="jrk-org__node">
+                            <div class="jrk-org__card">
+                              <span class="jrk-org__name">Brian DePaul</span>
+                              <span class="jrk-org__role">Associate</span>
+                              <span class="jrk-org__meta">10 props · 3,250 un</span>
+                            </div>
+                            <ul class="jrk-org__branch">
+                              <li class="jrk-org__node jrk-org__node--group-5">
+                                <div class="jrk-org__card">
+                                  <span class="jrk-org__name">Brian DePaul</span>
+                                  <span class="jrk-org__role">Associate</span>
+                                  <span class="jrk-org__meta">2 props · 568 un</span>
+                                </div>
+                                <ul class="jrk-org__branch jrk-org__branch--column">
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">CA</span>
+                                    <ul class="jrk-org__group-items" aria-label="CA">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Rancho Solana</span>
+                                          <span class="jrk-org__code">RAN</span>
+                                          <span class="jrk-org__meta">168 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Serenade at RiverPark</span>
+                                          <span class="jrk-org__code">SRP</span>
+                                          <span class="jrk-org__meta">400 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                              <li class="jrk-org__node jrk-org__node--group-6">
+                                <div class="jrk-org__card">
+                                  <span class="jrk-org__name">Missi Burt</span>
+                                  <span class="jrk-org__role">Regional Manager</span>
+                                  <span class="jrk-org__meta">8 props · 2,682 un</span>
+                                </div>
+                                <ul class="jrk-org__branch jrk-org__branch--column">
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">CA</span>
+                                    <ul class="jrk-org__group-items" aria-label="CA">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">333 Fremont</span>
+                                          <span class="jrk-org__code">FRE</span>
+                                          <span class="jrk-org__meta">83 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Cascades + Crown Point</span>
+                                          <span class="jrk-org__code">CPC</span>
+                                          <span class="jrk-org__meta">418 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Diamond Hillside</span>
+                                          <span class="jrk-org__code">DIA</span>
+                                          <span class="jrk-org__meta">242 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Dominion Heights</span>
+                                          <span class="jrk-org__code">DOH</span>
+                                          <span class="jrk-org__meta">196 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Duo Apartments</span>
+                                          <span class="jrk-org__code">DUO</span>
+                                          <span class="jrk-org__meta">301 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Montage Apartments</span>
+                                          <span class="jrk-org__code">MON</span>
+                                          <span class="jrk-org__meta">636 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">The Grove Lux Apts</span>
+                                          <span class="jrk-org__code">ENC</span>
+                                          <span class="jrk-org__meta">492 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">OR</span>
+                                    <ul class="jrk-org__group-items" aria-label="OR">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">The Vue</span>
+                                          <span class="jrk-org__code">VUE</span>
+                                          <span class="jrk-org__meta">314 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                            </ul>
+                          </li>
+                          <li class="jrk-org__node">
+                            <div class="jrk-org__card">
+                              <span class="jrk-org__name">Evaldas Gadzi</span>
+                              <span class="jrk-org__role">Associate</span>
+                              <span class="jrk-org__meta">4 props · 1,120 un</span>
+                            </div>
+                            <ul class="jrk-org__branch">
+                              <li class="jrk-org__node jrk-org__node--group-7">
+                                <div class="jrk-org__card">
+                                  <span class="jrk-org__name">Evaldas Gadzi</span>
+                                  <span class="jrk-org__role">Associate</span>
+                                  <span class="jrk-org__meta">4 props · 1,120 un</span>
+                                </div>
+                                <ul class="jrk-org__branch jrk-org__branch--column">
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">CA</span>
+                                    <ul class="jrk-org__group-items" aria-label="CA">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Arbors at California Oaks</span>
+                                          <span class="jrk-org__code">ACO</span>
+                                          <span class="jrk-org__meta">460 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">C on Pico</span>
+                                          <span class="jrk-org__code">COP</span>
+                                          <span class="jrk-org__meta">94 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Chase Knolls I</span>
+                                          <span class="jrk-org__code">CKN</span>
+                                          <span class="jrk-org__meta">401 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">The Harrison</span>
+                                          <span class="jrk-org__code">HAR</span>
+                                          <span class="jrk-org__meta">165 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                              <li class="jrk-org__node jrk-org__node--group-8">
+                                <div class="jrk-org__card">
+                                  <span class="jrk-org__name">Inez Rueda</span>
+                                  <span class="jrk-org__role">Regional Manager</span>
+                                  <span class="jrk-org__meta">2 props · 526 un</span>
+                                </div>
+                                <ul class="jrk-org__branch jrk-org__branch--column">
+                                  <li class="jrk-org__group">
+                                    <span class="jrk-org__group-label">FL</span>
+                                    <ul class="jrk-org__group-items" aria-label="FL">
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Addison Place</span>
+                                          <span class="jrk-org__code">ADP</span>
+                                          <span class="jrk-org__meta">166 units</span>
+                                        </a>
+                                      </li>
+                                      <li class="jrk-org__node">
+                                        <a class="jrk-org__card jrk-org__card--compact jrk-org__card--link" href="#">
+                                          <span class="jrk-org__name">Arbor Oaks Apartments</span>
+                                          <span class="jrk-org__code">ARO</span>
+                                          <span class="jrk-org__meta">360 units</span>
+                                        </a>
+                                      </li>
+                                    </ul>
+                                  </li>
+                                </ul>
+                              </li>
+                            </ul>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>Three layouts for a level, and this chart uses all three of them.</strong> The top of
+      the tree fans out, because four SVPs are compared with each other. The bottom is
+      <code class="jrk-mono">--column</code>: the properties under one manager are looked up one at
+      a time or counted, never compared, so fanning them out buys nothing and costs 2,300px. A
+      column <em>draws no connectors at all</em> — it sits directly under its parent at exactly the
+      parent's width, and containment states the relationship. That is a stronger claim than a line,
+      because a line can be traced to the wrong card in a thirty-card row and a box under a card
+      cannot. <code class="jrk-mono">--stacked</code> is the middle case: it indents children away
+      from the parent and then spends a spine reconnecting them.
+    </div>
+
+    <div class="gal-rule">
+      <strong>The solid fill is <code class="jrk-mono">chart.deep</code>, not
+      <code class="jrk-mono">chart.categorical</code></strong>, and that is the only new palette
+      here. On the series marks <em>no ink but black clears 4.5:1 and white clears it on none</em> —
+      so rather than change the ink, the fill moved: the same eight hues in the same searched order,
+      stepped down in lightness until white reaches 4.5:1 on every slot in both halves (worst
+      4.54:1 light, 4.58:1 dark). It is a <em>volume</em> of the series palette, not a second
+      palette, which is why none of the colourblind doctrine had to be re-argued: worst adjacent
+      dE 15.9 light / 18.4 dark, all-pairs safe cap 3 exactly as the marks declare, and all nine
+      collapsing pairs still same-parity — so the same
+      <code class="jrk-mono">(1,2)(3,4)(5,6)(7,8)</code> texture buckets separate every one and the
+      first eight groups stay fully distinguishable. <code class="jrk-mono">npm run validate</code>
+      gates all of it.
+    </div>
+
+    <div class="gal-rule">
+      A deep fill also <strong>bounds itself</strong> — 4.54:1 on the light card, 3.29:1 on the dark
+      one — so a filled node is a shape without an edge. It keeps a 1px white hairline anyway, and
+      that is not decoration: two tiles of the <em>same</em> hue stacked flush in a column have a
+      1.00:1 fill step between them, and the hairline is the only thing there. What the fill
+      <em>spends</em> is the card's three levels of ink, which collapse to one — so name, code and
+      figure separate by <strong>size and weight alone</strong>. Flatten those and this variant has
+      nothing left.
+    </div>
+
+    <div class="gal-rule">
+      <strong>The slots are assigned by name, not by position</strong>, and this chart is the case
+      that requires it. <code class="jrk-mono">--rollup</code> derives a slot from
+      <code class="jrk-mono">nth-child</code>, so it can only ever colour the children of
+      <em>one</em> node; here the eight managers are spread across three different associates' child
+      lists with no ordinal in common. <code class="jrk-mono">.jrk-org__node--group-N</code> lets
+      the caller assign from the group's identity instead, so one manager keeps one colour wherever
+      they appear. What the caller takes on is the numbering: adjacency is guaranteed between
+      <em>consecutive</em> slots, so groups must be numbered in the order they are
+      <strong>read</strong> — left to right across the level, by first appearance — never by a hash
+      or an alphabetical key.
+    </div>
+
+    <div class="gal-rule">
+      <strong>The apex card is the one node outside the palette</strong>, set per node with
+      <code class="jrk-mono">--jrk-org-group-solid</code> and
+      <code class="jrk-mono">--jrk-org-solid-ink</code> together — one alone gives white-on-white.
+      It takes <code class="jrk-mono">surface.inverse</code>, and it takes it <em>because</em> that
+      plane flips rather than in spite of it. What this card has to do is separate from
+      <code class="jrk-mono">surface.default</code>, the plane every other card sits on, in both
+      halves and under all four palettes — and an inverse plane is <em>defined</em> as the maximum
+      step off the plane, so whichever way the theme goes it goes the other. Worst case across
+      base / industry / midgard / vitrine × light / dark: ink <strong>13.96:1</strong> on the fill,
+      <strong>12.91:1</strong> of step against the panel.
+    </div>
+
+    <div class="gal-rule">
+      <strong><code class="jrk-mono">surface.bannerDeep</code> looks like the better answer and is
+      measurably the wrong one</strong> — worth recording, because it fails the test a careless
+      check would pass it on. It reads as a stable dark navy in the <em>base</em> layer, which is
+      where it gets checked first; but a skin owns its own planes, and
+      <code class="jrk-mono">vitrine</code> sets it to <code class="jrk-mono">#e9eceb</code> in
+      light, which is <strong>1.025:1</strong> against that skin's panel. The apex card vanishes
+      into the chart. It is a <em>banner</em> plane, built to sit under the topbar's own ink, and
+      nothing about it promises a step against a <em>card</em>. So the rule is not "prefer a themed
+      pair" — bannerDeep is a themed pair with measured ink and it still fails. It is: this card
+      needs a plane whose step against <code class="jrk-mono">surface.default</code> is guaranteed,
+      and inverse is the only namespace that makes that promise.
+    </div>
+
+    <div class="gal-rule">
+      <strong>The state boxes are the one thing colour could not carry.</strong> Every tile in a
+      column is the same hue — that hue names the <em>rollup</em> and is already spent — so the
+      subdivision inside it gets a bracket and a label instead. The label is <em>neutral ink, not
+      the group hue</em>, and that is measured: a deep fill is 4.54:1 on the light card and 3.29:1
+      on the dark one, so it can be the box's edge (3:1, graphical) and cannot be its text (4.5:1)
+      in dark — in all eight slots. The edge takes the hue, the ink takes the ink. In markup it is
+      an <code class="jrk-mono">&lt;li&gt;</code> holding a <code class="jrk-mono">&lt;ul&gt;</code>,
+      so a screen-reader user gets the nesting and the state name in place of the box.
+    </div>
+
+    <div class="gal-rule">
+      <strong>Cards are centre-aligned here, reversing an earlier decision, and the reason is worth
+      stating.</strong> The old rule was start-aligned, on the grounds that centring is the
+      diagram-tool look and costs scanning on a wrapped name. Both observations still hold. What
+      changed is what a reader does at this density: a level is thirty cards wide and a card is
+      three short lines, so the comparison runs <em>across</em> a row and centred text gives every
+      card in it the same optical centre. The scanning cost is real and is paid on the name, which
+      is why the compact tile clamps its name to <strong>two lines</strong> — one long property name
+      allowed a third would set the height for the eleven tiles beside it. The group label is the
+      one string that stays start-aligned: it heads the list rather than belonging to the row.
+    </div>
+
+    <div class="gal-rule">
+      <strong>Under a skin only the tile and the typeface change.</strong> Both radii come from
+      tokens — <code class="jrk-mono">radius.lg</code> on the card,
+      <code class="jrk-mono">radius.md</code> on the group — so
+      <code class="jrk-mono">industry</code> and <code class="jrk-mono">midgard</code> square them
+      and <code class="jrk-mono">vitrine</code> rounds them with no rule written. On top of that:
+      midgard adds its engraved bevel and sets the full-size name in
+      <code class="jrk-mono">font.display</code> (mixed case, because a tracked-caps name does not
+      fit 176px), vitrine adds the glass catch and no blur, and industry adds
+      <em>nothing but the squaring</em> — it deliberately takes <strong>no notch</strong>, because
+      an org card is frequently a link and <code class="jrk-mono">clip-path</code> clips the focus
+      ring along with the shadow. The eight fills, the ink and the connectors are inherited whole by
+      all three: the slot order <em>is</em> the colourblind mechanism, so it does not re-hue for a
+      skin, an accent or a hazard hue.
+    </div>
   </section>
 
   <!-- ============================ feedback ============================ -->

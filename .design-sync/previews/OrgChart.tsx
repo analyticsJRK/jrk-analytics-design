@@ -1,4 +1,4 @@
-import { OrgChart, OrgNode, Badge } from '@jrk/design';
+import { OrgChart, OrgNode, OrgGroup, Badge } from '@jrk/design';
 
 /* Hierarchy runs DOWN, peers fan OUT. Nesting in the JSX is nesting in the
    chart — every connector is derived from the layout, so there are no
@@ -113,6 +113,95 @@ export const FilledGroups = () => (
         vacant
       />
       <OrgNode name="Northeast" role="2 markets" meta="$204M · 4 assets" href="#" />
+    </OrgNode>
+  </OrgChart>
+);
+
+/* THE PORTFOLIO LAYOUT: solid nodes over a terminal level that is a COLUMN
+   rather than a fan. This is the shape a real property chart wants, and it uses
+   two mechanisms the other examples do not.
+
+   `groupSolid` fills the card with `chart.deep` — the SAME eight hues in the
+   SAME searched order as the series palette, stepped down in lightness until
+   WHITE clears 4.5:1 on every slot in both halves (worst 4.54:1 light, 4.58:1
+   dark). That is why it exists: on `chart.categorical` no ink but black clears
+   4.5:1 and white clears it on none, so rather than change the ink, the fill
+   moved. Being a volume of the series palette rather than a second one is what
+   let all the colourblind doctrine transfer — worst adjacent dE 15.9 / 18.4, the
+   same all-pairs safe cap of 3, and all nine collapsing pairs still same-parity,
+   so the same texture buckets separate every one. `npm run validate` gates it.
+
+   `column` stacks a node's children in the node's own footprint with NO
+   CONNECTORS. That is not a shortcut: a column sits directly under its parent at
+   exactly the parent's width, so containment states the relationship, and that is
+   a stronger claim than a line — a line can be traced to the wrong card in a
+   thirty-card row and a box under a card cannot. Use it when a level's members
+   are not compared with each other; the properties under one manager get looked
+   up one at a time or counted, so fanning twelve of them out costs 2,300px and
+   buys nothing.
+
+   SLOTS ARE ASSIGNED BY NAME, NOT POSITION, and this chart is the case that
+   requires it. `rollup` derives a slot from nth-child, so it can only colour the
+   children of ONE node; here the managers hang off two different associates with
+   no ordinal in common. `group={n}` lets the caller assign from identity instead
+   — and what the caller takes on is the numbering: adjacency is guaranteed
+   between CONSECUTIVE slots, so number groups in the order they will be READ
+   across the level, by first appearance, never by a hash or an alphabetical key.
+
+   TWO GROUPS AND A SHORT COLUMN, DELIBERATELY, and it is the same crop the
+   FilledGroups note above records: the harness cannot scroll, so a wide chart
+   loses its right-hand nodes silently. The real thing is thirty managers wide
+   inside `.jrk-org-scroll`. */
+export const PortfolioColumns = () => (
+  <OrgChart label="JRK portfolio reporting structure" groupSolid>
+    {/* The root sits ABOVE the rollup, so it has no group and would fall back to
+        the plain card plane. It is put outside the palette on purpose —
+        `--jrk-org-group-solid` and `--jrk-org-solid-ink` TOGETHER, because one
+        alone gives white-on-white.
+
+        `surface.inverse` is the pair to reach for, and it is right BECAUSE it
+        flips rather than in spite of it. This card has to separate from
+        `surface.default` — the plane every other card sits on — in both halves
+        and under every skin, and an inverse plane is *defined* as the maximum
+        step off the plane. Worst case across all four palettes x both themes:
+        ink 13.96:1 on the fill, 12.91:1 of step against the panel.
+
+        `surface.bannerDeep` looks like the better answer and is measurably the
+        wrong one: stable dark navy in the BASE layer, but a skin owns its planes
+        and vitrine sets it to #e9eceb in light — 1.025:1 off that skin's panel,
+        so the card vanishes. It is a banner plane, and nothing about it promises
+        a step against a card. */}
+    <OrgNode
+      name="Tom Manzo"
+      role="President"
+      meta="89 props · 28,460 un"
+      style={{
+        ['--jrk-org-group-solid' as string]: 'var(--jrk-surface-inverse)',
+        ['--jrk-org-solid-ink' as string]: 'var(--jrk-text-inverse)',
+      }}
+    >
+      <OrgNode name="Lawrence Baeck" role="SVP" meta="23 props · 7,183 un">
+        <OrgNode name="Ed Sarti" role="Associate" meta="7 props · 2,182 un" group={1} column>
+          <OrgGroup label="WA">
+            <OrgNode name="Boulders at Puget Sound" code="WST" meta="714 units" href="#" />
+            <OrgNode name="Carrolls Creek Landing" code="CCL" meta="288 units" href="#" />
+            <OrgNode name="Silverdale Ridge" code="SVR" meta="118 units" href="#" />
+          </OrgGroup>
+          <OrgGroup label="CA">
+            <OrgNode name="Parkside Glen" code="PAG" meta="180 units" href="#" />
+          </OrgGroup>
+        </OrgNode>
+        <OrgNode name="Geneva Lacroix" role="Regional Manager" meta="5 props · 1,570 un" group={2} column>
+          <OrgGroup label="LA">
+            <OrgNode name="Delaneaux" code="DLX" meta="210 units" href="#" />
+            <OrgNode name="Heights at Hammond" code="HAM" meta="336 units" href="#" />
+            <OrgNode name="Indigo Park" code="IND" meta="330 units" href="#" />
+          </OrgGroup>
+          <OrgGroup label="FL">
+            <OrgNode name="Terra Mar" code="TEM" meta="310 units" href="#" />
+          </OrgGroup>
+        </OrgNode>
+      </OrgNode>
     </OrgNode>
   </OrgChart>
 );

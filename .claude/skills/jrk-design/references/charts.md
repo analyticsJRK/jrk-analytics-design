@@ -36,18 +36,42 @@ ramp. If not (property names, regions, teams) it is nominal — and nominal bars
 all take **slot 1**. Coloring nominal bars by their value spends the identity
 channel re-encoding what bar length already shows.
 
-## 2. Two color sets, two jobs
+## 2. Three color sets, three jobs — and three different inks
 
-| Set | Tokens / classes | For |
-|---|---|---|
-| **Categorical** | `--jrk-chart-1..8`, `.jrk-s1..8` | series identity; CVD-validated |
-| **Tint** | `--jrk-chart-tint-1..8`, `.jrk-t1..8` | pastel fills for already-labelled marks |
+| Set | Tokens / classes | For | Ink that survives on it |
+|---|---|---|---|
+| **Categorical** | `--jrk-chart-1..8`, `.jrk-s1..8` | series identity; CVD-validated | black only |
+| **Tint** | `--jrk-chart-tint-1..8`, `.jrk-t1..8` | pastel fills for already-labelled marks | the theme's own |
+| **Deep** | `--jrk-chart-deep-1..8` | solid fills that carry white ink | white only |
+
+**The ink column is the whole reason there are three.** They are not three levels
+of the same thing that you pick by taste — each is measured against a different
+neighbour, and the call site must never be able to confuse them.
 
 A tint is legal **only** when identity is carried by something else: a category
 label on the axis, a direct value label, or a number in the legend. Tints sit
 above the lightness band and below the chroma floor, so the validator
 deliberately skips them — reaching for one where color *is* the identity channel
 is a bug no gate will catch.
+
+**Deep is not a fourth palette, it is a VOLUME of the categorical one** — same
+eight hues, same searched order, each stepped down in lightness until white clears
+4.5:1 (worst 4.54:1 light, 4.58:1 dark). That is what let the whole CVD argument
+below transfer to it unchanged rather than being re-derived: worst adjacent dE
+**15.9 light / 18.4 dark**, the same all-pairs safe cap of 3, and all nine
+collapsing pairs still same-parity so the same texture buckets separate them.
+`validate` gates every one of those, including that it still IS the categorical
+hue order.
+
+It exists because on the categorical marks **no ink but black clears 4.5:1 and
+white clears it on none** — so where a design needs a saturated fill under white
+ink, the fill moves rather than the ink. **Read that as the general rule.** Its
+one consumer today is the org chart's filled node (`.jrk-org--group-solid`).
+
+**Deep is still NOT a series palette.** It is tuned against its own ink instead of
+against the card, so every slot sits at ~4.5:1 on the plane — which reads as a
+shape, not a mark. A line, a bar or a dot takes **categorical**; `seriesColor()`
+does not know these values and should not.
 
 Set a series color via `--series` on the mark's container, or the helper classes.
 
