@@ -190,6 +190,141 @@
     </div>
   </section>
 
+  <!-- ======================= funnel ======================= -->
+  <section class="gal-sec">
+    <h2>Funnel</h2>
+    <p class="gal-sec__note">
+      Stages of one process, so this is <strong>ordinal</strong>, not categorical: swapping two
+      stages changes what the chart says. It takes the sequential ramp by position — one hue,
+      monotone steps — and never the eight-slot series palette.
+    </p>
+
+    <div class="jrk-chart-card" style="max-width:620px">
+      <div class="jrk-chart-card__header">
+        <div>
+          <h3 class="jrk-chart-card__title">Leasing funnel</h3>
+          <p class="jrk-chart-card__subtitle">Inquiry to signed lease · Q2 2026 · 8 assets</p>
+        </div>
+      </div>
+      <div class="jrk-chart-card__body">
+        <ol class="jrk-funnel" role="list">
+          <li class="jrk-funnel__stage">
+            <span class="jrk-funnel__head">
+              <span class="jrk-funnel__label">Inquiries</span>
+              <span class="jrk-funnel__value">12,940</span>
+              <span class="jrk-funnel__share">100%</span>
+            </span>
+            <span class="jrk-funnel__track">
+              <span class="jrk-funnel__fill" style="--jrk-funnel-width:100%"></span>
+            </span>
+          </li>
+
+          <li class="jrk-funnel__stage">
+            <p class="jrk-funnel__step">
+              <span class="jrk-funnel__step-rate">40% continue</span>
+              <span class="jrk-funnel__step-loss">7,760 dropped</span>
+            </p>
+            <span class="jrk-funnel__head">
+              <span class="jrk-funnel__label">Tours scheduled</span>
+              <span class="jrk-funnel__value">5,180</span>
+              <span class="jrk-funnel__share">40%</span>
+            </span>
+            <span class="jrk-funnel__track">
+              <span class="jrk-funnel__fill" style="--jrk-funnel-width:40%"></span>
+            </span>
+          </li>
+
+          <li class="jrk-funnel__stage">
+            <p class="jrk-funnel__step">
+              <span class="jrk-funnel__step-rate">70% continue</span>
+              <span class="jrk-funnel__step-loss">1,570 no-showed</span>
+            </p>
+            <span class="jrk-funnel__head">
+              <span class="jrk-funnel__label">Tours completed</span>
+              <span class="jrk-funnel__value">3,610</span>
+              <span class="jrk-funnel__share">28%</span>
+            </span>
+            <span class="jrk-funnel__track">
+              <span class="jrk-funnel__fill" style="--jrk-funnel-width:27.9%"></span>
+            </span>
+          </li>
+
+          <li class="jrk-funnel__stage">
+            <p class="jrk-funnel__step jrk-funnel__step--alert">
+              <span class="jrk-funnel__step-rate">34% continue</span>
+              <span class="jrk-funnel__step-loss">2,370 dropped</span>
+            </p>
+            <span class="jrk-funnel__head">
+              <span class="jrk-funnel__label">Applications</span>
+              <span class="jrk-funnel__value">1,240</span>
+              <span class="jrk-funnel__share">9.6%</span>
+            </span>
+            <span class="jrk-funnel__track">
+              <span class="jrk-funnel__fill" style="--jrk-funnel-width:9.6%"></span>
+            </span>
+          </li>
+
+          <li class="jrk-funnel__stage">
+            <p class="jrk-funnel__step">
+              <span class="jrk-funnel__step-rate">81% continue</span>
+              <span class="jrk-funnel__step-loss">230 declined</span>
+            </p>
+            <span class="jrk-funnel__head">
+              <span class="jrk-funnel__label">Approved</span>
+              <span class="jrk-funnel__value">1,010</span>
+              <span class="jrk-funnel__share">7.8%</span>
+            </span>
+            <span class="jrk-funnel__track">
+              <span class="jrk-funnel__fill" style="--jrk-funnel-width:7.8%"></span>
+            </span>
+          </li>
+
+          <li class="jrk-funnel__stage">
+            <p class="jrk-funnel__step">
+              <span class="jrk-funnel__step-rate">88% continue</span>
+              <span class="jrk-funnel__step-loss">118 lapsed</span>
+            </p>
+            <span class="jrk-funnel__head">
+              <span class="jrk-funnel__label">Leases signed</span>
+              <span class="jrk-funnel__value">892</span>
+              <span class="jrk-funnel__share">6.9%</span>
+            </span>
+            <span class="jrk-funnel__track">
+              <span class="jrk-funnel__fill" style="--jrk-funnel-width:6.9%"></span>
+            </span>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>No trapezoid.</strong> The bands are centred, so the taper is read off their ends —
+      but value stays on <em>length</em>. A drawn diagonal encodes nothing: its area is the mean
+      of two numbers already on screen and its slope is an artefact of the row height, so a
+      reader who decodes the wedge comes away with the wrong ratio.
+    </div>
+    <div class="gal-rule">
+      <strong>Six stages, and the count is measured.</strong> An ordinal ramp has to clear 2:1
+      against the surface, which pins the window from both ends — a lighter step fails on the
+      white card, a darker one on the <code class="jrk-mono">#232326</code> card. Steps 7–12 are
+      what clear it under all four palettes: worst 2.44:1 in light (on vitrine's panel) and
+      2.16:1 in dark. <code class="jrk-mono">&lt;Funnel&gt;</code> throws on a seventh stage
+      rather than reusing a step.
+    </div>
+    <div class="gal-rule">
+      <strong>Both readouts are printed.</strong> The share beside each count is cumulative; the
+      rate between two bands is marginal. State only one and the reader is left multiplying
+      percentages. The alert tone on the applications step is redundant — the number and the
+      word are there either way.
+    </div>
+    <div class="gal-rule">
+      <strong>This is the one chart palette that survives greyscale intact</strong>, because its
+      identity channel already <em>is</em> lightness. So the funnel takes no hatch in print,
+      where <code class="jrk-mono">.jrk-bars__fill</code> does — alternating 45°/135° here would
+      state a category boundary the data does not have.
+    </div>
+  </section>
+
   <!-- ======================= tints ======================= -->
   <section class="gal-sec">
     <h2>Pastel tints</h2>

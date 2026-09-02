@@ -51,6 +51,9 @@ export {
 } from './Chart';
 export type { ChartCardProps, LegendProps, BarListProps, BarListItem, LineChartProps, Series } from './Chart';
 
+export { Funnel, MAX_FUNNEL_STAGES } from './Funnel';
+export type { FunnelProps, FunnelStage } from './Funnel';
+
 export { OrgChart, OrgNode, OrgGroup } from './Org';
 export type { OrgChartProps, OrgNodeProps, OrgGroupProps } from './Org';
 

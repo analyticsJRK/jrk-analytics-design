@@ -10,7 +10,7 @@ Color comes **last**. Most bad charts pick colors first.
 | magnitude across nominal categories | ranked horizontal bars, all one hue |
 | change over time | line (2px) or area (single series, ~10% wash) |
 | part-to-whole, few parts | stacked bar with a 2px surface gap |
-| position in a sequence (funnel, tier) | **ordinal** — one hue, monotone steps |
+| position in a sequence (funnel, tier) | **ordinal** — one hue, monotone steps; `.jrk-funnel` |
 | polarity around a baseline | diverging — two hues, neutral grey middle |
 | signed values in ONE table column | `.jrk-cell-bar--signed` — length from a centre axis |
 | signed values across a table GRID | `.jrk-cell-heat` — diverging tint + `.jrk-heat-legend` |
@@ -210,6 +210,58 @@ A fixed viewBox stretched by `width: 100%` scales the **text and strokes** too �
 hairlines. `<LineChart>` measures with a `ResizeObserver` so user units stay 1:1
 with CSS pixels. Hand-written chart SVGs must do the same.
 
+## 8. The funnel — the ordinal form, and what it refuses to draw
+
+`.jrk-funnel` / `<Funnel>`. Stages of one process, so it is **ordinal**: swapping
+two stages changes what the chart says, which is the test in §1. It takes
+`chart.sequential` **by position** — there is no way to hand a stage a colour,
+and the accent-vs-slot-1 debt cannot reach it because it never touches the
+categorical set.
+
+**No trapezoid, and the omission is the design.** A drawn diagonal encodes
+nothing: its area is the mean of two numbers already on screen, its slope is an
+artefact of the row height, and a reader who decodes the wedge comes away with
+the wrong ratio. The silhouette comes from the bands' own widths, **centred** —
+value stays on length, which is the precise channel.
+
+**Centring is the one thing this form pays for**, and it is affordable here and
+nowhere else. Two centred bars share no datum, which is exactly why `.jrk-bars`
+is start-aligned and must stay so. A funnel is monotone by construction, so the
+comparison is "how much narrower is the next one" rather than "which is
+biggest" — and every band prints its count and its share of entry anyway.
+`<Funnel>` warns in dev if a stage exceeds the one before it: a set of counts
+that climbs is a grouped comparison, not a funnel.
+
+**Six stages, and the count is measured.** An ordinal ramp must clear 2:1
+against the surface (`chart.sequential.ordinalFloor`), which pins the window from
+both ends at once — lighter than `seq-6` fails on a light card, darker than
+`seq-12` fails on a dark one. `seq-6` then measures **1.98:1** on vitrine's
+`#eeeeee` panel, 0.02 under, so the window starts one step in at **7..12**:
+worst 2.44:1 light, 2.16:1 dark, across all four palettes. Nothing gates this —
+`validate` does not walk a skin's panel with the ordinal floor — so the figures
+are hand-recorded in `funnel.css` and must be re-measured if a card or a panel
+moves. A seventh stage **throws**, the way `seriesColor(8)` does.
+
+**Both readouts are printed.** The share beside each count is cumulative; the
+rate between two bands is marginal. State one and the reader is left multiplying
+percentages. The loss lives *between* the stages, so `.jrk-funnel__step` sits in
+the gap the taper already draws attention to.
+
+**No ink on the fill.** The ramp crosses from a step that carries black to one
+that carries white, so a label inside the band would change ink direction partway
+down — the confusion `chart.deep` exists to prevent. Label, value and share are
+text tokens beside the band.
+
+**It is the one chart palette that survives greyscale intact**, because its
+identity channel already *is* lightness. So it takes no print hatch, where
+`.jrk-bars__fill` does: alternating 45°/135° here would state a category boundary
+the data does not have. Forced-colors gets a 1px outline instead, to keep the
+shape when backgrounds are flattened.
+
+**It skins itself.** The band reaches for `radius.data-end`, so vitrine's 999px
+override turns it into a pill for free and the two squared skins leave it at 4px
+— no rule in any skin file.
+
 ## Components
 
 - `.jrk-chart` (root, holds `--series`), `__plot`, `__value`, `__tick`, `__axis-title`
@@ -222,6 +274,9 @@ with CSS pixels. Hand-written chart SVGs must do the same.
 - `.jrk-stack-bar` + `__seg` (`--tinted`) — segments auto-assign slots 1..8
 - `.jrk-meter` + `__fill` (`--warning` `--critical`) — the unfilled track is a
   lighter step of the same ramp, so severity reads across the whole bar
+- `.jrk-funnel` + `__stage` `__step` (`--alert`) `__step-rate` `__step-loss`
+  `__head` `__label` `__value` `__share` `__track` `__fill` — the ordinal form.
+  See §8
 - `.jrk-legend` + `__item` `__swatch` (`--line` `--dot`)
 - `.jrk-grid`, `.jrk-axis` (chart chrome, inside SVG)
 

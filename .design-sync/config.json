@@ -25,6 +25,9 @@
     "BarList": {
       "cardMode": "column"
     },
+    "Funnel": {
+      "cardMode": "column"
+    },
     "Tag": {
       "cardMode": "column"
     },

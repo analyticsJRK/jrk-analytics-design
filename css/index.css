@@ -60,6 +60,12 @@
 @import './components/explain.css';
 @import './components/feedback.css';
 @import './components/chart.css';
+/* After chart.css — the funnel is a chart form and reads alongside the rest of
+   the data-viz layer. Nothing in it overrides a chart rule; it shares no
+   selectors with one and takes its own ramp (chart.sequential, not the
+   categorical slots), so the position is for a reader of this list rather than
+   for the cascade. */
+@import './components/funnel.css';
 @import './components/org.css';
 @import './components/auth.css';
 @import './components/spotlight.css';

@@ -14,11 +14,11 @@ import { Button, Stat, DataTable } from '@jrk/design';
 ```
 
 React exports: `Alert AppShell Badge BarList Button ButtonGroup Card CellBar
-ChartCard Checkbox Content DataTable Delta Empty Input Legend LineChart Main
+ChartCard Checkbox Content DataTable Delta Empty Funnel Input Legend LineChart Main
 NavGroup NavItem NavMenu NavMenuItem NavMenuSeparator OrgChart OrgNode
 PageHeader SectionNav Select Sidebar SidebarAction Sparkline Spinner Stat StatRow Status
 Switch TabPanel Tabs Tag Textarea Topbar` plus `cx`, `setTheme`,
-`variantClass`, `MAX_SERIES`, `MAX_SERIES_ALL_PAIRS`.
+`variantClass`, `MAX_SERIES`, `MAX_SERIES_ALL_PAIRS`, `MAX_FUNNEL_STAGES`.
 
 ## Button
 

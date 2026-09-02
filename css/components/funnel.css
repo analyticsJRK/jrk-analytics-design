@@ -1,0 +1,233 @@
+/* Funnel — ordered stages, one hue, monotone steps.
+
+   THIS IS AN ORDINAL FORM, NOT A CATEGORICAL ONE. charts.md's form table sends
+   "position in a sequence (funnel, tier)" to a one-hue ramp, and the test it
+   states is the right one: swapping two stages of a funnel changes the meaning,
+   so the stages are not categories and must not wear chart.categorical. They
+   wear chart.sequential, assigned by POSITION — which is also why the palette
+   never has to be re-derived for this component and why the accent-vs-slot-1
+   debt recorded in tokens.json cannot reach it.
+
+   WHAT IT DOES NOT DRAW, AND THE OMISSION IS THE DESIGN. There are no diagonal
+   trapezoid sides. A drawn taper encodes nothing — its area is the mean of two
+   values the reader can already see, its slope is an artefact of the row height,
+   and a reader who decodes the wedge rather than the band comes away with the
+   wrong ratio. What produces the funnel silhouette here is the bands' own
+   widths, CENTRED: value stays on length, which is the precise channel, and the
+   taper is read off the sequence of ends rather than off ink drawn between them.
+
+   CENTRING IS THE ONE THING THIS FORM PAYS FOR. Two centred bars are harder to
+   compare than two left-aligned ones, because neither end is on a shared datum —
+   .jrk-bars is start-aligned for exactly that reason and should stay so. It is
+   affordable here and nowhere else: a funnel is monotone by construction, so the
+   comparison is "how much narrower is the next one", not "which of these is
+   biggest", and every band prints its own value and its share of entry.
+
+   BOTH ENDS OF A BAND ARE DATA ENDS. chart.css rounds a bar at the data end and
+   leaves the baseline end square, because the baseline is not a value. A centred
+   band has no baseline end — it is symmetric about the axis and both ends move
+   with the number — so it takes radius.data-end on all four corners.
+
+   NO INK SITS ON THE FILL. The ramp crosses from a step that carries black to
+   one that carries white, so a label inside the band would have to change ink
+   direction partway down the funnel: exactly the confusion chart.deep exists to
+   prevent ("a mark takes black, a tint takes the theme, a deep fill takes
+   white"). Label, value and share are text tokens beside the band. */
+
+.jrk-funnel {
+  display: flex;
+  flex-direction: column;
+  /* Never wrap. A COLUMN flex container that wraps goes multi-line, and
+     align-content: stretch then inflates each line — the failure that once
+     tripled a grid's height.
+
+     space-1 rather than a larger figure because the step annotation carries most
+     of the air itself, and the two have to ADD to something symmetric: 4px here
+     plus the step's 8px is 12px above it, and its 8px plus the head row's 4px is
+     12px below. Grow this alone and the annotation drifts up toward the band it
+     is measuring FROM rather than sitting in the transition. */
+  gap: var(--jrk-space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* THE LABELS SIT ABOVE THE BAND, NOT IN A COLUMN BESIDE IT, and that is the one
+   place this component departs from .jrk-bars on purpose. A label column and a
+   value column together take well over half a card's width, which leaves the
+   marks a third of it to taper across — and a taper measured over 200px stops
+   being legible about three stages in, which is exactly where a funnel's
+   interesting stages are. Stacking the head row gives the bands the full width,
+   so the last stage is still a shape rather than a stub.
+   .jrk-bars keeps its columns because ranked bars are compared to each OTHER
+   across a shared left datum; a funnel is compared down its own sequence. */
+.jrk-funnel__stage {
+  display: flex;
+  flex-direction: column;
+}
+
+.jrk-funnel__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--jrk-space-2);
+  padding-block-end: var(--jrk-space-1);
+}
+
+/* ---------- the band ---------- */
+
+.jrk-funnel__track {
+  display: flex;
+  justify-content: center;
+  min-height: var(--jrk-funnel-band, 24px);
+}
+
+/* display: block is load-bearing — the fill is a <span>, and an inline box
+   ignores width AND height, so the band renders as nothing at all.
+
+   The width fallback is not defensive either, it is the default. An undefined
+   custom property invalidates the whole declaration, so a stage that forgets to
+   set --jrk-funnel-width would otherwise draw an empty row between its label and
+   its value — which is precisely how .jrk-bars__fill shipped blank. */
+.jrk-funnel__fill {
+  display: block;
+  width: var(--jrk-funnel-width, 100%);
+  height: var(--jrk-funnel-band, 24px);
+  /* A stage that rounds to nothing still has to be visible as a stage. */
+  min-width: 2px;
+  border-radius: var(--jrk-radius-data-end);
+  background: var(--jrk-funnel-fill, var(--jrk-chart-seq-7));
+}
+
+/* ---------- the ordinal ramp ---------- */
+
+/* SIX STAGES, chart.sequential steps 7..12, and the count is a MEASUREMENT
+   rather than a taste. An ordinal ramp has to clear 2:1 against the surface
+   (chart.sequential.ordinalFloor), and that pins the usable window from both
+   ends at once: a step lighter than seq-6 fails on a light card, a step darker
+   than seq-12 fails on a dark one. Steps 6..12 is the widest window that clears
+   both in the base library — but seq-6 measures 1.98:1 on vitrine's #eeeeee
+   panel, 0.02 under the floor, so the window starts one step in.
+
+   Measured over all four palettes, both halves, against each skin's own chart
+   surface: worst light 2.44:1 (seq-7 on vitrine), worst dark 2.16:1 (seq-12 on
+   the base #232326 card, which is the tightest figure in the whole token file).
+   Nothing gates this — validate measures chart.categorical against $meta.surfaces
+   and does not walk a skin's panel with the ordinal floor — so the numbers are
+   hand-recorded here and have to be re-measured if a card or a panel moves.
+
+   Deepening down the funnel, not up: the band that survives to the end is the
+   one the reader is looking for, and it is also the smallest mark on screen. A
+   seventh stage folds into the tail or the funnel is split — <Funnel> throws,
+   the same way seriesColor(8) does, rather than reusing a step and stating a
+   sequence that is not one. */
+.jrk-funnel__stage:nth-child(1) { --jrk-funnel-fill: var(--jrk-chart-seq-7); }
+.jrk-funnel__stage:nth-child(2) { --jrk-funnel-fill: var(--jrk-chart-seq-8); }
+.jrk-funnel__stage:nth-child(3) { --jrk-funnel-fill: var(--jrk-chart-seq-9); }
+.jrk-funnel__stage:nth-child(4) { --jrk-funnel-fill: var(--jrk-chart-seq-10); }
+.jrk-funnel__stage:nth-child(5) { --jrk-funnel-fill: var(--jrk-chart-seq-11); }
+.jrk-funnel__stage:nth-child(6) { --jrk-funnel-fill: var(--jrk-chart-seq-12); }
+
+/* ---------- labels ---------- */
+
+/* min-width: 0 is what lets the ellipsis happen at all — a flex item's default
+   min-width is auto, so a long stage name would push the value off the end
+   instead of truncating. A label that will not fit is still not CLIPPED: the
+   full string stays in the title attribute and in the table view. */
+.jrk-funnel__label {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The count is the precise readout the centred band gives up, so it is never
+   optional. Pushed to the end rather than given a column, so the head row costs
+   the band no width. */
+.jrk-funnel__value {
+  margin-inline-start: auto;
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-primary);
+}
+
+/* Share of the ENTRY stage — the cumulative read. The step rate below is the
+   marginal one, and a funnel that states only one of the two leaves the reader
+   multiplying percentages in their head. */
+.jrk-funnel__share {
+  /* Holds the right edge steady as the shares lose a digit down the funnel —
+     without it "100%" and "6.9%" end at different places and the column reads
+     as ragged rather than as a column. */
+  min-width: 4ch;
+  text-align: right;
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-regular);
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-muted);
+}
+
+/* ---------- the step between two stages ---------- */
+
+/* This is the analytic payload. A funnel is read for where the loss is, and the
+   loss lives between the bands rather than in them — so it is set in the gap the
+   taper already draws attention to, centred on the same axis the bands are.
+
+   Both figures are stated in TEXT. The taper is the redundant encoding here, not
+   the other way round: a 4px difference in band width at the bottom of a funnel
+   is not a number anyone can read off. */
+.jrk-funnel__step {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: var(--jrk-space-1) var(--jrk-space-3);
+  margin: 0;
+  padding-block: var(--jrk-space-2);
+  font-size: var(--jrk-text-xs);
+}
+
+.jrk-funnel__step-rate {
+  font-weight: var(--jrk-weight-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-funnel__step-loss {
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-muted);
+}
+
+/* A step worth acting on. The tone is redundant — .jrk-funnel__step-rate still
+   carries the number and the word — and it is deliberately the status WASH ink
+   rather than a re-hued band: repainting the band would break the ramp, which is
+   the one thing in this component that has to stay monotone. */
+.jrk-funnel__step--alert .jrk-funnel__step-rate {
+  color: var(--jrk-status-critical-text);
+}
+
+/* ---------- print & forced colors ---------- */
+
+/* AN ORDINAL RAMP IS THE ONE CHART PALETTE THAT SURVIVES GREYSCALE INTACT,
+   because its identity channel already IS lightness — six monotone steps stay
+   six monotone steps. So this component needs no hatching: chart.css textures
+   .jrk-bars__fill and .jrk-stack-bar__seg in print precisely because those carry
+   hue, and alternating 45/135 here would state a category boundary that the data
+   does not have. All print has to do is keep the fills from being dropped. */
+@media print {
+  .jrk-funnel__fill {
+    print-color-adjust: exact;
+  }
+}
+
+/* Forced-colors flattens every background to Canvas, which would erase the band
+   and with it the taper. The outline restores the SHAPE — width is the channel
+   that matters, and the ramp is redundant with the printed share anyway. */
+@media (forced-colors: active) {
+  .jrk-funnel__fill {
+    outline: 1px solid;
+    outline-offset: -1px;
+  }
+}
