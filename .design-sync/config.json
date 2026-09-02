@@ -50,6 +50,9 @@
     "OrgNode": {
       "cardMode": "column"
     },
+    "OrgGroup": {
+      "cardMode": "column"
+    },
     "Menu": {
       "cardMode": "single",
       "primaryStory": "Open",
