@@ -573,6 +573,27 @@
     transform: rotate(180deg);
   }
 
+  /* THE LIST SCROLLS, AND `overflow: hidden` HERE MEANT IT DID NOT.
+   *
+   * The UA gives ::picker(select) `max-height: stretch` — the popup fills the space
+   * available to it and its content scrolls. Overriding `overflow` to `hidden` kept the
+   * first half of that bargain and cancelled the second: the box still stopped at the
+   * viewport, but everything past it was clipped with no way to reach it. On a picker with
+   * 240 options that is 7,700px of list behind a 760px window, and the reported symptom is
+   * exactly what it sounds like — the list will not scroll, and zooming the page out is the
+   * only way to see more of it, because a smaller CSS pixel makes `stretch` resolve taller.
+   *
+   * `hidden` was not arbitrary: SOMETHING has to clip, or the first and last option paint
+   * square corners over `--jrk-radius-lg`. `auto` clips exactly the same way — any value
+   * other than `visible` establishes the rounding — so the corners are still honoured and
+   * the overflow becomes reachable instead of lost.
+   *
+   * Split by axis rather than `overflow: auto`, because a horizontal scrollbar is never the
+   * right answer for this control: an option too wide for the picker should ellipsis, and
+   * the shorthand would offer to scroll sideways to it instead.
+   *
+   * `overscroll-behavior: contain` so reaching the end of a long reviewer list does not
+   * hand the wheel to the page and scroll the screen out from under an open dropdown. */
   .jrk-select::picker(select) {
     padding: 0;
     margin-block-start: var(--jrk-space-1);
@@ -580,7 +601,9 @@
     border: 1px solid var(--jrk-border-default);
     border-radius: var(--jrk-radius-lg);
     box-shadow: var(--jrk-shadow-lg);
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior: contain;
   }
 
   /* Steps with the closed control above — text.sm, not text.md. A dropdown whose
