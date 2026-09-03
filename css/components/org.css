@@ -376,6 +376,31 @@
   color: var(--jrk-text-secondary);
 }
 
+/* The identifier — a property code, a fund code, a cost centre. It takes __role's
+   size and colour EXACTLY, because it occupies __role's slot when a card carries
+   no role, and a card that carries both reads as one two-line block rather than
+   as a heading and a subheading.
+
+   THIS RULE'S ABSENCE WAS A BUG, AND THE INTERESTING PART IS WHERE IT SURFACED.
+   The class was emitted by <OrgNode code> and used ten times in the gallery while
+   nothing in css/ styled it, so it INHERITED — and on a `--link` card what it
+   inherits is the anchor's own `text.link`. On a white card that merely reads as
+   a link nested inside a link. On a `--group-solid` card it is text.link `#0069d9`
+   over the slot-1 mark `#007aff`: **1.3:1**, i.e. gone. Nothing gated it, because
+   an unstyled class is not a wrong colour — `check:css` verifies the tokens a rule
+   names and has no opinion about a rule that was never written.
+
+   text.secondary rather than text.muted is load-bearing and not a preference:
+   muted fails on all eight chart tints (3.70-4.10:1), which is why the group-fill
+   block below has to restate __meta and does not have to restate this. */
+.jrk-org__code {
+  font-size: var(--jrk-text-sm);
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-secondary);
+  /* A code is a key and keys carry digits — "T2-114", "CC 4180". */
+  font-variant-numeric: tabular-nums;
+}
+
 /* Where the analytics goes: "37 properties · 8,412 units", "Southeast · 4 sites".
    An org chart in this library is a chart, so a node carrying no figure is a
    diagram — but the figure is free text here rather than a rendered metric,
@@ -1119,12 +1144,20 @@
   display: none;
 }
 
-/* All three lines take the one ink. Written as three rules at (0,3,0) rather than
-   as `color` on the card, because each line NAMES its own colour at (0,1,0) and
-   would win — the same reason the group-fill block restates every state instead
-   of relying on source order. */
+/* All FOUR lines take the one ink. Written at (0,3,0) rather than as `color` on
+   the card, because each line NAMES its own colour at (0,1,0) and would win — the
+   same reason the group-fill block restates every state instead of relying on
+   source order.
+
+   __code was missing from this list for as long as the list existed, and NEITHER
+   half of the repair is sufficient alone. The base rule alone stops the anchor's
+   blue being inherited but leaves the line at text.secondary on a saturated mark:
+   2.65:1 worst (slot 5), 2.72:1 on slot 1, against a 4.5:1 floor. This rule alone
+   fixes the solid card and leaves every OTHER `--link` card reading its code in
+   link blue. Both, or the bug moves rather than closes. */
 .jrk-org--group-solid .jrk-org__name,
 .jrk-org--group-solid .jrk-org__role,
+.jrk-org--group-solid .jrk-org__code,
 .jrk-org--group-solid .jrk-org__meta {
   color: var(--jrk-org-solid-ink, var(--jrk-text-primary));
 }
