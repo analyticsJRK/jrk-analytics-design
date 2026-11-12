@@ -34,8 +34,9 @@
       "dark": "#232c2a"
     },
     "surface-track": {
-      "light": "#eceeee",
-      "dark": "#101413"
+      "light": "#d7dcdb",
+      "dark": "#101413",
+      "$note": "THE WELL OF EVERY SEGMENTED CONTROL, and the light half was invisible: #eceeee against the #eeeeee composite is 1.00:1, so a toggle in a card read as loose labels with nothing holding them (reported 2026-11-04). Dark was always recessed at 1.13:1. Light is now 1.19:1 off the composite and 1.14:1 off the glass's binding extreme #e8e9e9 — the dark half's step, near base's 1.22:1. The ink on it holds: text-secondary 6.38:1, text-primary 10.95:1."
     },
     "surface-inverse": {
       "light": "#1a2120",

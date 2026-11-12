@@ -756,6 +756,17 @@
   cursor: not-allowed;
 }
 
+/* A DISABLED BOX THAT IS TICKED STAYS TICKED. The rule above repaints every disabled box
+   with the disabled surface, which put the white tick on a near-white fill — so a locked,
+   granted permission read as an empty box. The fill steps to the disabled ink instead:
+   still grey, so it does not claim the accent, and dark enough to carry the tick. */
+.jrk-check input[type='checkbox']:disabled:checked,
+.jrk-check input[type='checkbox']:disabled:indeterminate,
+.jrk-check input[type='radio']:disabled:checked {
+  background-color: var(--jrk-text-disabled);
+  border-color: var(--jrk-text-disabled);
+}
+
 .jrk-check input:disabled + .jrk-check__label {
   color: var(--jrk-text-disabled);
 }

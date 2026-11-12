@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useId, useRef, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { Button } from './Button';
 import type { ButtonProps } from './Button';
@@ -35,7 +35,93 @@ const MenuClose = createContext<() => void>(() => {});
  * The panel is free-form. <MenuItem> is for an actionable row, but a filter menu
  * of checkboxes or a block of prose is equally valid inside it — the contract is
  * the surface and the dismissal, not the contents.
+ *
+ * THE PANEL FLOATS IN THE TOP LAYER (2026-11-11), because `.jrk-card` clips.
+ * The card took `overflow: clip` with its rounded corners, so an absolutely-
+ * positioned panel inside one was cut off at the card's bottom edge. A roster
+ * filtered to four rows opened a filter list with its lower half missing. The
+ * panel is `popover="manual"` and shown with `showPopover()`, so it paints
+ * above every ancestor's clip, and `place()` writes its viewport coordinates.
+ *
+ * Why not plain `position: fixed`: a fixed element is still clipped when an
+ * ancestor has `transform`, `filter` or `backdrop-filter`, and the frosted card
+ * has the last. Why not a portal: it would move the panel to the end of
+ * <body>, so Tab from the trigger would skip it, and the outside-press check
+ * would need a second ref. A popover keeps its place in the DOM, so Tab order,
+ * `contains()` and inherited styles behave as before.
+ *
+ * `manual`, not `auto`: an `auto` popover closes itself on Escape and on an
+ * outside press, without React knowing. `open` would stay true with nothing on
+ * screen. The dismissal stays here, where it always was.
  */
+
+/* Viewport geometry for the floating panel. GAP is --jrk-space-1, the distance
+   the anchored rule hangs the panel from its trigger. EDGE keeps the panel off
+   the viewport's own edge, where its shadow would be cut. */
+const GAP = 4;
+const EDGE = 8;
+
+/* Places `panel` against `trigger` in viewport coordinates, through the custom
+   properties `.jrk-menu--floating` reads. Below the trigger unless the panel
+   does not fit there and there is more room above, and never taller than the
+   room on the side it opens to: a fixed panel has no page scroll to reveal its
+   bottom.
+
+   Returns false when the trigger has scrolled out of view, so the caller can
+   close the panel. A panel left behind by its trigger looks like it belongs to
+   whatever is under it now. */
+function place(trigger: HTMLElement, panel: HTMLElement, align: 'start' | 'end'): boolean {
+  const r = trigger.getBoundingClientRect();
+  const vw = document.documentElement.clientWidth;
+  const vh = document.documentElement.clientHeight;
+  if (!shown(trigger, r, vw, vh)) return false;
+
+  const below = vh - r.bottom - GAP - EDGE;
+  const above = r.top - GAP - EDGE;
+  // scrollHeight is the content's full height even while max-height caps the
+  // box; the difference of the other two adds the borders back.
+  const natural = panel.scrollHeight + panel.offsetHeight - panel.clientHeight;
+  const up = natural > below && above > below;
+  panel.dataset.side = up ? 'top' : 'bottom';
+  panel.style.setProperty('--jrk-menu-y', `${up ? vh - r.top + GAP : r.bottom + GAP}px`);
+  panel.style.setProperty('--jrk-menu-room', `${Math.max(0, up ? above : below)}px`);
+
+  // Measure the width at x = 0. A shrink-to-fit panel measured where it last
+  // sat near the right edge comes back narrower than it is.
+  panel.style.setProperty('--jrk-menu-x', '0px');
+  const w = panel.offsetWidth;
+  // `start` is the left edge in LTR and the right edge in RTL.
+  const leftEdge = (align === 'start') !== (getComputedStyle(trigger).direction === 'rtl');
+  const x = leftEdge ? r.left : r.right - w;
+  panel.style.setProperty('--jrk-menu-x', `${Math.max(EDGE, Math.min(x, vw - w - EDGE))}px`);
+  return true;
+}
+
+/* Whether any of the trigger is still visible: inside the viewport AND inside
+   every ancestor that clips or scrolls. The viewport alone is not enough. A
+   menu in a table cell scrolls out of `.jrk-table-wrap` long before it leaves
+   the screen, and the panel would then float over the sticky header. The
+   absolute panel never had this problem, because the wrap clipped it too. */
+function shown(trigger: HTMLElement, r: DOMRect, vw: number, vh: number): boolean {
+  let top = 0;
+  let left = 0;
+  let bottom = vh;
+  let right = vw;
+  for (let a = trigger.parentElement; a && a !== document.body; a = a.parentElement) {
+    const s = getComputedStyle(a);
+    if (s.overflowX === 'visible' && s.overflowY === 'visible') continue;
+    const b = a.getBoundingClientRect();
+    top = Math.max(top, b.top);
+    left = Math.max(left, b.left);
+    bottom = Math.min(bottom, b.bottom);
+    right = Math.min(right, b.right);
+  }
+  return r.bottom > top && r.top < bottom && r.right > left && r.left < right;
+}
+
+/* The same SSR swap Shell.tsx and Chart.tsx use: a client component is still
+   server-rendered for the first HTML, and useLayoutEffect warns there. */
+const useIsoLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 export interface MenuProps {
   /** The trigger's label. Also names the panel, so the two cannot drift. */
@@ -88,6 +174,51 @@ export function Menu({
   const [open, setOpen] = useState(defaultOpen);
   const box = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+
+  /* Into the top layer, then placed, before the first paint, so the panel never
+     shows a frame at the CSS fallback position. Without the Popover API the
+     panel is an ordinary fixed element and the same placement still applies. */
+  useIsoLayoutEffect(() => {
+    if (!open) return;
+    const t = trigger.current;
+    const p = panel.current;
+    if (!t || !p) return;
+    if (typeof p.showPopover === 'function' && !p.matches(':popover-open')) p.showPopover();
+    if (!place(t, p, align)) {
+      setOpen(false);
+      return;
+    }
+
+    let frame = 0;
+    const update = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        if (!place(t, p, align)) setOpen(false);
+      });
+    };
+    // Capture, because a scroll inside the table wrap or the rail does not
+    // bubble to window, and those are the scrolls that move the trigger. The
+    // panel's own list scrolling moves nothing, so it is skipped.
+    const onScroll = (e: Event) => {
+      if (e.target instanceof Node && p.contains(e.target)) return;
+      update();
+    };
+    window.addEventListener('scroll', onScroll, true);
+    window.addEventListener('resize', update);
+    // The trigger can move without a scroll (a toolbar re-wrapping), and the
+    // panel changes height as a filter box narrows its list, which can change
+    // the side it fits on.
+    const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(update) : undefined;
+    observer?.observe(t);
+    observer?.observe(p);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll, true);
+      window.removeEventListener('resize', update);
+      observer?.disconnect();
+    };
+  }, [open, align]);
 
   const dismiss = useCallback(() => {
     setOpen(false);
@@ -131,12 +262,15 @@ export function Menu({
 
       {open && (
         <div
+          ref={panel}
           id={panelId}
           role="group"
+          popover="manual"
           aria-label={typeof label === 'string' ? label : undefined}
           className={cx(
             'jrk-menu',
             'jrk-menu--anchored',
+            'jrk-menu--floating',
             align === 'start' && 'jrk-menu--start',
             menuClassName,
           )}
