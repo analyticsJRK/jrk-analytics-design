@@ -57,7 +57,17 @@ What ships instead: `aria-haspopup` + `aria-expanded` on the trigger, a labelled
   surface and the dismissal, not the contents.
 - `trailingIcon` is part of the trigger, so "what is this set to" does not
   require opening the thing that answers it.
-- A long panel scrolls at `min(70vh, 560px)` rather than running off the page.
-  The trigger cannot move, so the panel is what gives.
+- **The panel floats above the page, so a card cannot clip it.** `.jrk-card` is
+  `overflow: clip`, and the old absolutely-positioned panel was cut off at the
+  bottom of any short card. The panel is now a `popover="manual"` element in
+  the browser's top layer, placed from the trigger's position on screen. It
+  keeps its place in the DOM, so Tab order, the outside-press check and
+  inherited text colour are unchanged.
+- **It opens below the trigger, or above when there is more room there**, and
+  stays 8px inside the viewport. It follows the trigger on scroll and closes
+  when the trigger scrolls out of view, including out of a table's own scroll
+  area.
+- A long panel scrolls at `min(70vh, 560px)`, or at the room left on its side
+  of the trigger if that is less, rather than running off the page.
 - The trigger defaults to `secondary` / `sm`. It is not a `cta` — a menu opens
   something, it does not commit anything, and there is at most one `cta` per view.

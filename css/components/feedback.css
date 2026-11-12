@@ -377,6 +377,41 @@
   inset-inline-start: 0;
 }
 
+/* THE FLOATING PANEL — what <Menu> renders since 2026-11-11. The absolute rules
+   above are clipped by any ancestor with `overflow: clip`, and `.jrk-card` has
+   that, so a menu in a short card opened with its lower half cut off. <Menu>
+   now shows the panel as a popover in the top layer and writes viewport
+   coordinates into the three properties below (see `place()` in Menu.tsx).
+   The rules above stay as the no-JS form for hand-written markup.
+
+   Three resets against the UA popover sheet, which centres a popover (`inset:
+   0; margin: auto`) and paints it in system colours (`color: CanvasText`). A
+   popover keeps its place in the DOM, so `inherit` gets the app's text colour
+   back exactly as an in-flow panel had it.
+
+   `left`, not `inset-inline-start`: the x is a viewport coordinate measured
+   from the left edge in both directions, and `place()` handles RTL. */
+.jrk-menu--anchored.jrk-menu--floating {
+  --jrk-menu-x: 0px;
+  --jrk-menu-y: 0px;
+  --jrk-menu-room: 100vh;
+  position: fixed;
+  inset: auto;
+  left: var(--jrk-menu-x);
+  top: var(--jrk-menu-y);
+  margin: 0;
+  color: inherit;
+  max-height: min(70vh, 560px, var(--jrk-menu-room));
+}
+
+/* Opened above its trigger: pinned by the bottom edge, so a panel that shrinks
+   while it is open (a filter box narrowing its list) stays against the trigger
+   instead of floating up away from it. */
+.jrk-menu--floating[data-side='top'] {
+  top: auto;
+  bottom: var(--jrk-menu-y);
+}
+
 .jrk-menu__item {
   display: flex;
   align-items: center;
