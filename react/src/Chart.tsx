@@ -1,6 +1,15 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { useId, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { cx } from './utils';
+import {
+  axisTicks,
+  compactNumber,
+  linearFit,
+  runsOf,
+  spreadLabels,
+  thinLabels,
+  useContainerWidth,
+} from './chartUtils';
 
 /* Chart primitives.
 
@@ -20,10 +29,20 @@ export const MAX_SERIES_ALL_PAIRS = 3;
 export interface Series {
   /** Names the series in the legend, the tooltip, and the table view. */
   name: string;
-  values: number[];
+  /** `null` is a GAP, never a zero — the line breaks and resumes. A month that
+   *  has not happened drawn at the axis reads as a collapse. */
+  values: (number | null)[];
+  /** Pin the series to a palette slot (1-8) so colour follows the ENTITY, not
+   *  its rank: a filter that drops series two must not repaint series three.
+   *  Defaults to position. Slots must be unique within one chart. */
+  slot?: number;
+  /** Draw the stroke dashed — prior years beside a solid current one. Setting
+   *  a style on ANY series switches the per-slot redundant dash off for the
+   *  chart: two dash vocabularies on one plot is one too many. */
+  style?: 'solid' | 'dashed';
 }
 
-function assertSeriesCount(n: number, cap = MAX_SERIES) {
+export function assertSeriesCount(n: number, cap = MAX_SERIES) {
   if (n > cap) {
     throw new RangeError(
       `${n} series exceeds the ${cap}-slot palette. The palette is never cycled — ` +
@@ -31,6 +50,16 @@ function assertSeriesCount(n: number, cap = MAX_SERIES) {
     );
   }
 }
+
+function slotOf(explicit: number | undefined, index: number): number {
+  const slot = explicit ?? index + 1;
+  if (!Number.isInteger(slot) || slot < 1 || slot > MAX_SERIES) {
+    throw new RangeError(`Series slot ${slot} is outside 1-${MAX_SERIES}. The palette is never cycled.`);
+  }
+  return slot;
+}
+
+const plainFormat = (n: number) => n.toLocaleString();
 
 /* ================================ ChartCard ================================ */
 
@@ -92,12 +121,16 @@ export interface LegendProps {
   /** Makes entries toggle buttons that filter the chart. */
   hidden?: ReadonlySet<string>;
   onToggle?: (name: string) => void;
+  /** Explicit slot per entry, matching `Series.slot`. Defaults to position. */
+  slots?: number[];
+  /** Entries whose line key is drawn dashed, matching `Series.style`. */
+  dashed?: ReadonlySet<string>;
   className?: string;
 }
 
 /** Renders nothing for a single series — the title already names what is
  *  plotted, and a one-swatch box just restates it. */
-export function Legend({ series, shape = 'block', hidden, onToggle, className }: LegendProps) {
+export function Legend({ series, shape = 'block', hidden, onToggle, slots, dashed, className }: LegendProps) {
   if (series.length < 2) return null;
   assertSeriesCount(series.length);
 
@@ -107,11 +140,15 @@ export function Legend({ series, shape = 'block', hidden, onToggle, className }:
         const off = hidden?.has(name) ?? false;
         const swatch = (
           <span
-            className={cx('jrk-legend__swatch', shape !== 'block' && `jrk-legend__swatch--${shape}`)}
+            className={cx(
+              'jrk-legend__swatch',
+              shape !== 'block' && `jrk-legend__swatch--${shape}`,
+              dashed?.has(name) && 'jrk-legend__swatch--dashed',
+            )}
             aria-hidden="true"
           />
         );
-        const cls = cx('jrk-legend__item', `jrk-s${i + 1}`);
+        const cls = cx('jrk-legend__item', `jrk-s${slotOf(slots?.[i], i)}`);
 
         return onToggle ? (
           <button key={name} type="button" className={cls} aria-pressed={!off} onClick={() => onToggle(name)}>
@@ -134,58 +171,228 @@ export function Legend({ series, shape = 'block', hidden, onToggle, className }:
 export interface BarListItem {
   label: string;
   value: number;
+  /** A second figure printed beside the value — units beside a property
+   *  count. Bar plus number, never two bars: a second axis in a list this small
+   *  reads as noise. */
+  secondary?: number | string;
 }
 
 export interface BarListProps {
   items: BarListItem[];
   format?: (n: number) => string;
+  /** Formats a numeric `secondary`. */
+  secondaryFormat?: (n: number) => string;
   /** Baseline for the bar widths. Defaults to the largest value. Pass an
    *  explicit max when several BarLists must be comparable. */
   max?: number;
   /** Column width for labels. */
   labelWidth?: string;
+  /** Show the first N rows and a "+N more" line. The bar scale is still the
+   *  largest of ALL items, so truncating never re-scales what is shown. */
+  limit?: number;
+  /** Words for the overflow line. Default "+ N more". */
+  moreLabel?: (hidden: number) => ReactNode;
+  /** The label that means "no value" — `(blank)`, `Unassigned`. That row is
+   *  styled as a gap rather than as a category, so it does not read as a name. */
+  blankLabel?: string;
   className?: string;
 }
 
 /** Ranked horizontal bars — the right form for "which categories are biggest".
  *  Nominal categories all take slot 1: bar length already encodes the value,
  *  so spending the identity channel on it would be re-encoding. */
-export function BarList({ items, format, max, labelWidth = '140px', className }: BarListProps) {
+export function BarList({
+  items, format, secondaryFormat, max, labelWidth = '140px', limit, moreLabel, blankLabel, className,
+}: BarListProps) {
   const peak = max ?? Math.max(...items.map((i) => i.value), 0);
-  const fmt = format ?? ((n: number) => n.toLocaleString());
+  const fmt = format ?? plainFormat;
+  const fmt2 = secondaryFormat ?? plainFormat;
+  const shown = limit !== undefined && limit >= 0 ? items.slice(0, limit) : items;
+  const rest = items.length - shown.length;
+  const hasSecondary = items.some((i) => i.secondary !== undefined);
 
   return (
     <div
-      className={cx('jrk-bars', className)}
+      className={cx('jrk-bars', hasSecondary && 'jrk-bars--secondary', className)}
       style={{ ['--jrk-bars-label' as string]: labelWidth }}
     >
-      {items.map((item) => (
-        <div className="jrk-bars__row" key={item.label}>
-          <span className="jrk-bars__label" title={item.label}>
+      {shown.map((item, i) => (
+        <div className="jrk-bars__row" key={`${item.label}-${i}`}>
+          <span
+            className={cx('jrk-bars__label', blankLabel !== undefined && item.label === blankLabel && 'jrk-bars__label--blank')}
+            title={item.label}
+          >
             {item.label}
           </span>
           <span className="jrk-bars__track">
             <span
               className="jrk-bars__fill"
-              style={{ width: peak > 0 ? `${(item.value / peak) * 100}%` : 0 }}
+              style={{ width: peak > 0 ? `${(Math.max(0, item.value) / peak) * 100}%` : 0 }}
             />
           </span>
           {/* The value is always visible — this is the relief channel that
               makes the sub-3:1 light-mode hues legal. */}
           <span className="jrk-bars__value">{fmt(item.value)}</span>
+          {hasSecondary && (
+            <span className="jrk-bars__secondary">
+              {item.secondary === undefined ? '' : typeof item.secondary === 'number' ? fmt2(item.secondary) : item.secondary}
+            </span>
+          )}
         </div>
       ))}
+      {rest > 0 && <p className="jrk-bars__more">{moreLabel ? moreLabel(rest) : `+ ${rest} more`}</p>}
+    </div>
+  );
+}
+
+/* ================================ StackBar ================================= */
+
+export interface StackBarSegment {
+  label: string;
+  value: number;
+}
+
+export interface StackBarProps {
+  /** Part-to-whole, in a FIXED order — the order is what assigns the slot, so
+   *  two stack bars that must agree take the same order (sort by a shared
+   *  ranking, never by each bar's own measure). Eight at most; fold the tail
+   *  into "Other". */
+  segments: StackBarSegment[];
+  /** Names the whole for assistive tech: "Units by asset manager". */
+  label: string;
+  format?: (n: number) => string;
+  /** The keyed legend with each segment's value and share. On by default —
+   *  colour is never the only channel, and this is the stack's table. */
+  legend?: boolean;
+  /** Pastel fills. Legal only because the legend labels every segment. */
+  tinted?: boolean;
+  className?: string;
+}
+
+/** The React wrapper over `.jrk-stack-bar`: part-to-whole, few parts.
+ *
+ *  This is where a donut would go, and the library deliberately has none —
+ *  charts.md sends part-to-whole to a stacked bar, because length along one
+ *  axis is read more accurately than angle. Zero-valued segments stay in the
+ *  DOM (hidden) so `:nth-child` keeps every later segment on its own slot. */
+export function StackBar({ segments, label, format, legend = true, tinted, className }: StackBarProps) {
+  assertSeriesCount(segments.length);
+  const fmt = format ?? plainFormat;
+  const total = segments.reduce((s, x) => s + Math.max(0, x.value), 0);
+  const share = (v: number) => (total > 0 ? `${((Math.max(0, v) / total) * 100).toFixed(1)}%` : '—');
+  const summary = `${label}. ${segments.map((s) => `${s.label} ${fmt(s.value)} (${share(s.value)})`).join(', ')}.`;
+
+  return (
+    <div className={cx('jrk-chart', 'jrk-stack-chart', className)}>
+      <div className={cx('jrk-stack-bar', tinted && 'jrk-stack-bar--tinted')} role="img" aria-label={summary}>
+        {segments.map((s) => (
+          <span
+            key={s.label}
+            className="jrk-stack-bar__seg"
+            hidden={!(s.value > 0)}
+            style={{ flexGrow: Math.max(0, s.value), flexBasis: 0 }}
+            title={`${s.label}: ${fmt(s.value)} (${share(s.value)})`}
+          />
+        ))}
+      </div>
+      {legend && (
+        <ul className="jrk-legend jrk-legend--values">
+          {segments.map((s, i) => (
+            <li key={s.label} className={cx('jrk-legend__item', tinted ? `jrk-t${i + 1}` : `jrk-s${i + 1}`)}>
+              <span className="jrk-legend__swatch" aria-hidden="true" />
+              <span className="jrk-legend__label">{s.label}</span>
+              <span className="jrk-legend__value">{fmt(s.value)}</span>
+              <span className="jrk-legend__share">{share(s.value)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
+/* =============================== SeriesTable =============================== */
+
+export interface SeriesTableProps {
+  labels: string[];
+  series: Pick<Series, 'name' | 'values'>[];
+  format?: (n: number) => string;
+  /** Heading for the label column. */
+  labelHeader?: string;
+  /** Visually hidden caption — what the table is OF. */
+  caption?: string;
+  /** Add a row total column. Only for series that add up. */
+  total?: boolean;
+  className?: string;
+}
+
+/** The table view a ChartCard puts behind its toggle, for any labelled series
+ *  chart — LineChart, ColumnChart. A missing value prints a dash, never 0. */
+export function SeriesTable({ labels, series, format, labelHeader = 'Period', caption, total, className }: SeriesTableProps) {
+  const fmt = format ?? plainFormat;
+  return (
+    <div className={cx('jrk-table-wrap', className)}>
+      <table className="jrk-table jrk-table--compact">
+        {caption && <caption className="jrk-sr-only">{caption}</caption>}
+        <thead>
+          <tr>
+            <th scope="col">{labelHeader}</th>
+            {series.map((s) => (
+              <th key={s.name} scope="col" className="jrk-num">
+                {s.name}
+              </th>
+            ))}
+            {total && (
+              <th scope="col" className="jrk-num">
+                Total
+              </th>
+            )}
+          </tr>
+        </thead>
+        <tbody>
+          {labels.map((l, i) => (
+            <tr key={`${l}-${i}`}>
+              <th scope="row">{l}</th>
+              {series.map((s) => {
+                const v = s.values[i];
+                return (
+                  <td key={s.name} className="jrk-num">
+                    {v == null ? '—' : fmt(v)}
+                  </td>
+                );
+              })}
+              {total && (
+                <td className="jrk-num">{fmt(series.reduce((a, s) => a + (s.values[i] ?? 0), 0))}</td>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
 
 /* =============================== LineChart ================================= */
 
+export interface LineChartBand {
+  /** Lower edge per label. A null on either edge breaks the band. */
+  lo: (number | null)[];
+  hi: (number | null)[];
+  /** Names the range in the legend and tooltip: "Middle 50% of properties". */
+  label: string;
+}
+
 export interface LineChartProps {
   series: Series[];
   /** One label per index — dates, buckets. Length must match values. */
   labels: string[];
   format?: (n: number) => string;
+  /** How a value reads on the axis. Defaults to thousands-compact; the tooltip
+   *  always uses `format`, because it exists to give the exact figure. */
+  tickFormat?: (n: number) => string;
+  /** The tooltip's heading per index, where it can be longer than a tick —
+   *  "12 March 2026" over a "12 Mar" axis. */
+  tips?: string[];
   height?: number;
   /** Fill under the line at ~10% opacity. Single series only — stacked washes
    *  become unreadable past one. */
@@ -195,83 +402,183 @@ export interface LineChartProps {
    *
    *  Why the default is conditional rather than always-on: the slot order was
    *  searched to maximise the worst ADJACENT pair, so hue alone is strong
-   *  between neighbours but every collapsing pair lands at (n, n+4) —
+   *  between neighbours but every collapsing pair is same-parity —
    *  orange|yellow measures dE 0.8 under deuteranopia. A line chart compares
    *  non-adjacent series freely, so from two series up the second channel is
    *  load-bearing. At one series there is nothing to confuse it with, and
    *  charts.md reserves the dashed stroke for .jrk-threshold — a lone dashed
-   *  line would read as a reference value. */
+   *  line would read as a reference value. Ignored once any series sets
+   *  `style`. */
   encoding?: 'hue' | 'redundant';
+  /** Start the axis at zero (default). Off for a rating, where 4.06 drawn from
+   *  zero is a flat line four fifths of the way up an empty box. A signed
+   *  series always keeps zero in the domain and draws a zero line. */
+  fromZero?: boolean;
+  /** Name each line at its last point. Identity then rides in a label as well
+   *  as in the hue; labels are spread so two close finishes never overprint. */
+  endLabels?: boolean;
+  /** A dashed least-squares trend, drawn as a reference (threshold ink, not the
+   *  series hue). SINGLE SERIES ONLY — a grey dashed line per series cannot say
+   *  whose trend it is. */
+  trend?: boolean;
+  /** A shaded range under the lines — a peer interquartile range, a forecast
+   *  interval. Neutral ink: a range is a reference, not a series. */
+  band?: LineChartBand;
+  /** Overrides the generated `aria-label`. */
+  label?: string;
   className?: string;
 }
 
 /** Line chart with the crosshair + tooltip hover layer, which ships by
  *  default: an SVG chart IS interactive, and values the eye cannot read off
  *  the axis have to be reachable somehow. */
-export function LineChart({ series, labels, format, height = 220, area, encoding, className }: LineChartProps) {
+export function LineChart({
+  series, labels, format, tickFormat, tips, height = 220, area, encoding, fromZero = true,
+  endLabels, trend, band, label, className,
+}: LineChartProps) {
   assertSeriesCount(series.length);
+  const slots = series.map((s, i) => slotOf(s.slot, i));
+  if (new Set(slots).size !== slots.length) {
+    throw new RangeError('Two series share a palette slot. Each slot names one entity.');
+  }
 
-  const redundant = (encoding ?? (series.length > 1 ? 'redundant' : 'hue')) === 'redundant';
+  const styled = series.some((s) => s.style !== undefined);
+  const redundant = !styled && (encoding ?? (series.length > 1 ? 'redundant' : 'hue')) === 'redundant';
+  const showTrend = Boolean(trend) && series.length === 1;
+  if (trend && series.length !== 1 && typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
+    console.warn('[jrk] <LineChart trend> draws one grey dashed fit and cannot say whose it is on a multi-series chart. Ignored.');
+  }
 
   const [active, setActive] = useState<number | null>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
-  const fmt = format ?? ((n: number) => n.toLocaleString());
+  const fmt = format ?? plainFormat;
+  const tfmt = tickFormat ?? compactNumber;
 
-  // The viewBox must match the rendered width in CSS pixels. A fixed viewBox
-  // scaled up by `width: 100%` scales the TEXT too — axis labels set at 12px
-  // land at 17-18px on a wide card, which quietly breaks the type scale and
-  // the hairline weights. Measuring keeps user units == CSS pixels.
+  // The viewBox must match the rendered width in CSS pixels (charts.md §7).
   const W = useContainerWidth(wrapRef, 600);
   const H = height;
-  const padL = 44;
-  const padR = 16;
-  const padT = 12;
-  const padB = 26;
-
-  const all = series.flatMap((s) => s.values);
-  const rawMax = Math.max(...all, 0);
-  const max = niceCeil(rawMax);
   const n = labels.length;
 
-  const x = (i: number) => padL + (n <= 1 ? 0 : (i * (W - padL - padR)) / (n - 1));
-  const y = (v: number) => H - padB - (max > 0 ? (v / max) * (H - padT - padB) : 0);
+  const { min, max, ticks } = useMemo(() => {
+    const present = [
+      ...series.flatMap((s) => s.values),
+      ...(band ? [...band.lo, ...band.hi] : []),
+    ].filter((v): v is number => v != null && Number.isFinite(v));
+    if (!present.length) return { min: 0, max: 1, ticks: [0, 1] };
+    return axisTicks(Math.min(...present), Math.max(...present), { fromZero });
+  }, [series, band, fromZero]);
 
-  const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => f * max);
+  // The gutter fits the widest tick label rather than a fixed 44px, so a
+  // "$1.2M" axis does not print into the plot.
+  const padL = Math.max(36, Math.max(...ticks.map((t) => tfmt(t).length)) * 6.5 + 14);
+  const padR = endLabels ? Math.min(160, Math.max(...series.map((s) => s.name.length)) * 6.6 + 20) : 16;
+  const padT = 12;
+  const padB = 26;
+  const plotW = Math.max(1, W - padL - padR);
 
-  function onMove(e: React.MouseEvent<HTMLDivElement>) {
+  const x = (i: number) => padL + (n <= 1 ? plotW / 2 : (i * plotW) / (n - 1));
+  const y = (v: number) => H - padB - ((v - min) / (max - min || 1)) * (H - padT - padB);
+
+  const keepX = thinLabels(n, plotW, Math.max(36, Math.max(0, ...labels.map((l) => l.length)) * 6.6 + 12));
+
+  const fit = showTrend ? linearFit(series[0].values) : null;
+
+  const lastIndex = (vals: (number | null)[]) =>
+    vals.reduce<number | null>((found, v, i) => (v == null ? found : i), null);
+
+  const tags = endLabels
+    ? spreadLabels(
+        series
+          .map((s, si) => {
+            const last = lastIndex(s.values);
+            return last == null ? null : { key: s.name, slot: slots[si], x: x(last), y: y(s.values[last] as number) };
+          })
+          .filter((t): t is NonNullable<typeof t> => t != null),
+        13,
+        padT,
+        H - padB,
+      )
+    : [];
+
+  function onMove(e: React.PointerEvent<HTMLDivElement>) {
     const box = wrapRef.current?.getBoundingClientRect();
     if (!box || n === 0) return;
     // Map pointer position back through the same viewBox transform the marks use.
     const svgX = ((e.clientX - box.left) / box.width) * W;
-    const i = Math.round(((svgX - padL) / (W - padL - padR)) * (n - 1));
-    setActive(Math.max(0, Math.min(n - 1, i)));
+    const i = Math.round(((svgX - padL) / plotW) * (n - 1));
+    setActive(n <= 1 ? 0 : Math.max(0, Math.min(n - 1, i)));
+  }
+
+  const bandRuns = band
+    ? runsOf(band.lo.map((lo, i) => (lo == null || band.hi[i] == null ? null : lo)))
+    : [];
+
+  const legendItems: ReactNode[] = [];
+  if (series.length > 1) {
+    series.forEach((s, si) =>
+      legendItems.push(
+        <span key={s.name} className={cx('jrk-legend__item', `jrk-s${slots[si]}`)}>
+          <span
+            className={cx('jrk-legend__swatch', 'jrk-legend__swatch--line', s.style === 'dashed' && 'jrk-legend__swatch--dashed')}
+            aria-hidden="true"
+          />
+          {s.name}
+        </span>,
+      ),
+    );
+  }
+  if (band) {
+    legendItems.push(
+      <span key="__band" className="jrk-legend__item jrk-legend__item--band">
+        <span className="jrk-legend__swatch" aria-hidden="true" />
+        {band.label}
+      </span>,
+    );
+  }
+  if (showTrend && fit) {
+    legendItems.push(
+      <span key="__trend" className="jrk-legend__item jrk-legend__item--reference">
+        <span className="jrk-legend__swatch jrk-legend__swatch--line jrk-legend__swatch--dashed" aria-hidden="true" />
+        Linear trend
+      </span>,
+    );
   }
 
   return (
     <div className={cx('jrk-chart', className)} data-encoding={redundant ? 'redundant' : undefined}>
-      <div
-        className="jrk-chart__plot"
-        ref={wrapRef}
-        onMouseMove={onMove}
-        onMouseLeave={() => setActive(null)}
-      >
-        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={chartSummary(series, labels)}>
+      <div className="jrk-chart__plot" ref={wrapRef} onPointerMove={onMove} onPointerLeave={() => setActive(null)}>
+        <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={label ?? chartSummary(series, labels)}>
           <g className="jrk-grid">
             {ticks.map((t) => (
               <line key={t} x1={padL} x2={W - padR} y1={y(t)} y2={y(t)} />
             ))}
           </g>
 
+          {band && (
+            <g className="jrk-chart__band">
+              {bandRuns.map((run, ri) => (
+                <polygon
+                  key={ri}
+                  points={[
+                    ...run.map(([i]) => `${x(i).toFixed(1)},${y(band.hi[i] as number).toFixed(1)}`),
+                    ...[...run].reverse().map(([i]) => `${x(i).toFixed(1)},${y(band.lo[i] as number).toFixed(1)}`),
+                  ].join(' ')}
+                />
+              ))}
+            </g>
+          )}
+
           <g className="jrk-axis">
-            <line x1={padL} x2={W - padR} y1={y(0)} y2={y(0)} />
+            {/* The baseline is the bottom tick, or zero when the series is
+                signed — then it is drawn as its own stronger line below. */}
+            {!(min < 0 && max > 0) && <line x1={padL} x2={W - padR} y1={y(min)} y2={y(min)} />}
             {ticks.map((t) => (
               <text key={t} x={padL - 8} y={y(t) + 4} textAnchor="end">
-                {compact(t)}
+                {tfmt(t)}
               </text>
             ))}
             {labels.map((l, i) =>
-              // Thin the x labels so they never collide at narrow widths.
-              i % Math.ceil(n / 7) === 0 ? (
+              keepX.has(i) ? (
                 <text key={l + i} x={x(i)} y={H - 8} textAnchor="middle">
                   {l}
                 </text>
@@ -279,24 +586,66 @@ export function LineChart({ series, labels, format, height = 220, area, encoding
             )}
           </g>
 
+          {min < 0 && max > 0 && <line className="jrk-chart__zero" x1={padL} x2={W - padR} y1={y(0)} y2={y(0)} />}
+
           {active !== null && (
-            <line className="jrk-chart__crosshair" x1={x(active)} x2={x(active)} y1={padT} y2={y(0)} />
+            <line className="jrk-chart__crosshair" x1={x(active)} x2={x(active)} y1={padT} y2={H - padB} />
           )}
 
-          {series.map((s, si) => (
-            <g key={s.name} className={`jrk-s${si + 1}`}>
-              {area && series.length === 1 && (
-                <path
-                  className="jrk-area"
-                  d={`${path(s.values, x, y)} L${x(n - 1)},${y(0)} L${x(0)},${y(0)} Z`}
-                />
-              )}
-              <path className="jrk-line" d={path(s.values, x, y)} />
-              {active !== null && s.values[active] !== undefined && (
-                <circle className="jrk-dot" cx={x(active)} cy={y(s.values[active])} r={4} />
-              )}
-            </g>
-          ))}
+          {fit && (
+            <path
+              className="jrk-threshold jrk-chart__trend"
+              d={`M${x(fit.from).toFixed(1)},${y(fit.at(fit.from)).toFixed(1)} L${x(fit.to).toFixed(1)},${y(fit.at(fit.to)).toFixed(1)}`}
+            />
+          )}
+
+          {series.map((s, si) => {
+            const runs = runsOf(s.values);
+            return (
+              <g key={s.name} className={`jrk-s${slots[si]}`}>
+                {area &&
+                  series.length === 1 &&
+                  runs
+                    .filter((r) => r.length > 1)
+                    .map((r, ri) => (
+                      <path
+                        key={`a${ri}`}
+                        className="jrk-area"
+                        d={`${linePath(r, x, y)} L${x(r[r.length - 1][0])},${y(Math.max(min, Math.min(0, max)))} L${x(r[0][0])},${y(Math.max(min, Math.min(0, max)))} Z`}
+                      />
+                    ))}
+                {runs.map((r, ri) =>
+                  r.length > 1 ? (
+                    <path
+                      key={ri}
+                      className={cx('jrk-line', s.style === 'dashed' && 'jrk-line--dashed', styled && s.style !== 'dashed' && 'jrk-line--solid')}
+                      d={linePath(r, x, y)}
+                    />
+                  ) : (
+                    // An isolated reading between two gaps is a real value, and
+                    // a path through one point draws nothing.
+                    <circle key={ri} className="jrk-dot jrk-dot--lone" cx={x(r[0][0])} cy={y(r[0][1])} r={3} />
+                  ),
+                )}
+                {active !== null && s.values[active] != null && (
+                  <circle className="jrk-dot" cx={x(active)} cy={y(s.values[active] as number)} r={4} />
+                )}
+              </g>
+            );
+          })}
+
+          {tags.map((t) => {
+            const s = series.find((ss) => ss.name === t.key)!;
+            const last = lastIndex(s.values) as number;
+            return (
+              <g key={`${t.key}-tag`} className={`jrk-s${t.slot}`}>
+                <circle className="jrk-dot" cx={t.x} cy={y(s.values[last] as number)} r={4} />
+                <text className="jrk-chart__end-label" x={t.x + 8} y={t.y} dominantBaseline="middle">
+                  {t.key}
+                </text>
+              </g>
+            );
+          })}
         </svg>
 
         {active !== null && (
@@ -305,70 +654,43 @@ export function LineChart({ series, labels, format, height = 220, area, encoding
             style={{
               left: `${(x(active) / W) * 100}%`,
               top: 0,
-              // Flip the tooltip to the other side near the right edge so it
-              // never runs outside the plot.
-              transform: active > n / 2 ? 'translateX(calc(-100% - 12px))' : 'translateX(12px)',
+              // Flip to the other side past the middle so it never runs outside the plot.
+              transform: active > (n - 1) / 2 ? 'translateX(calc(-100% - 12px))' : 'translateX(12px)',
             }}
           >
-            <div className="jrk-chart-tooltip__header">{labels[active]}</div>
-            {series.map((s, si) => (
-              <div className={cx('jrk-chart-tooltip__row', `jrk-s${si + 1}`)} key={s.name}>
+            <div className="jrk-chart-tooltip__header">{tips?.[active] ?? labels[active]}</div>
+            {series.map((s, si) => {
+              const v = s.values[active];
+              return (
+                <div className={cx('jrk-chart-tooltip__row', `jrk-s${slots[si]}`)} key={s.name}>
+                  <span className="jrk-chart-tooltip__swatch" />
+                  <span className="jrk-chart-tooltip__label">{s.name}</span>
+                  <span className="jrk-chart-tooltip__value">{v == null ? '—' : fmt(v)}</span>
+                </div>
+              );
+            })}
+            {band && band.lo[active] != null && band.hi[active] != null && (
+              <div className="jrk-chart-tooltip__row jrk-chart-tooltip__row--band">
                 <span className="jrk-chart-tooltip__swatch" />
-                <span className="jrk-chart-tooltip__label">{s.name}</span>
-                <span className="jrk-chart-tooltip__value">{fmt(s.values[active])}</span>
+                <span className="jrk-chart-tooltip__label">{band.label}</span>
+                <span className="jrk-chart-tooltip__value">
+                  {fmt(band.lo[active] as number)}–{fmt(band.hi[active] as number)}
+                </span>
               </div>
-            ))}
+            )}
           </div>
         )}
       </div>
 
-      <Legend series={series.map((s) => s.name)} shape="line" />
+      {legendItems.length > 0 && <div className="jrk-legend">{legendItems}</div>}
     </div>
   );
 }
 
 /* ================================= helpers ================================= */
 
-/** Tracks an element's content width so an SVG viewBox can be kept 1:1 with
- *  CSS pixels. Falls back to `initial` before measurement and on SSR. */
-function useContainerWidth(ref: React.RefObject<HTMLElement | null>, initial: number) {
-  const [w, setW] = useState(initial);
-
-  // Layout effect so the first paint already has the measured width and the
-  // chart does not visibly resize.
-  const useIso = typeof window === 'undefined' ? useEffect : useLayoutEffect;
-  useIso(() => {
-    const el = ref.current;
-    if (!el || typeof ResizeObserver === 'undefined') return;
-    const ro = new ResizeObserver(([entry]) => {
-      // The SVG is width:100% of this element, so changing the viewBox cannot
-      // change the measured width — no feedback loop.
-      const next = Math.max(240, Math.round(entry.contentRect.width));
-      setW((prev) => (prev === next ? prev : next));
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, [ref]);
-
-  return w;
-}
-
-function path(values: number[], x: (i: number) => number, y: (v: number) => number) {
-  return values.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-}
-
-/** Rounds the axis top to a clean number so ticks read 0 / 1,000 / 2,000
- *  rather than 0 / 1,073 / 2,146. */
-function niceCeil(v: number) {
-  if (v <= 0) return 1;
-  const mag = 10 ** Math.floor(Math.log10(v));
-  return Math.ceil(v / mag) * mag;
-}
-
-function compact(n: number) {
-  if (Math.abs(n) >= 1e6) return `${(n / 1e6).toFixed(1).replace(/\.0$/, '')}M`;
-  if (Math.abs(n) >= 1e3) return `${(n / 1e3).toFixed(1).replace(/\.0$/, '')}K`;
-  return String(Math.round(n));
+function linePath(run: [number, number][], x: (i: number) => number, y: (v: number) => number) {
+  return run.map(([i, v], k) => `${k === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
 }
 
 /** The SVG needs a text alternative — the table view carries the values, this

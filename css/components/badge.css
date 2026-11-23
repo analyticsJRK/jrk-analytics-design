@@ -31,9 +31,13 @@
   font-size: var(--jrk-text-2xs);
 }
 
-/* Square-ish variant for counts and IDs. */
+/* Square-ish variant for counts and IDs. MONO, because a square badge is
+   nearly always a code — a property code, a repair id — and an identifier wants
+   its characters to line up between rows the way a figure does. */
 .jrk-badge--square {
   border-radius: var(--jrk-radius-sm);
+  font-family: var(--jrk-font-mono);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ---------- status variants ---------- */
@@ -145,4 +149,147 @@
   width: 10px;
   height: 10px;
   stroke-width: 2.5;
+}
+
+/* ---------- pressed-toggle badge ----------
+ *
+ * A badge that is also the button that sets it — the HOT flag on a work-order row:
+ * flagged, it is the solid tone pill and pressing it takes the flag off; unflagged,
+ * it is the same word in a dashed grey outline and pressing it puts the flag on.
+ *
+ *   <button type="button" class="jrk-badge jrk-badge--critical jrk-badge--toggle"
+ *           aria-pressed="true">HOT</button>
+ *
+ * `aria-pressed` IS THE STATE and drives the styling, so what is announced and
+ * what is drawn are one value. On and off are told apart by SHAPE as well as
+ * colour — a solid edge against a dashed one — so the state survives greyscale
+ * and every CVD type. The tone class names the colour the flag has when ON. */
+.jrk-badge--toggle {
+  font: inherit;
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: 1.4;
+  border-color: currentColor;
+  cursor: pointer;
+}
+
+/* Off: a dashed outline in secondary ink. Hovering it previews the ON state —
+   the tone's own wash and ink come back because this rule stops matching. */
+.jrk-badge--toggle[aria-pressed='false']:not(:hover),
+.jrk-badge--toggle[aria-pressed='false']:disabled {
+  color: var(--jrk-text-secondary);
+  background: transparent;
+  border-color: var(--jrk-border-strong);
+  border-style: dashed;
+}
+
+/* On: hover lays the shared hover veil over the tone's wash rather than
+   darkening it with a filter, so every tone and both themes step by one measured
+   amount. */
+.jrk-badge--toggle[aria-pressed='true']:hover:not(:disabled) {
+  background-image: linear-gradient(var(--jrk-overlay-hover-veil), var(--jrk-overlay-hover-veil));
+}
+
+.jrk-badge--toggle.jrk-badge--sm {
+  font-size: var(--jrk-text-2xs);
+}
+
+.jrk-badge--toggle:disabled {
+  cursor: progress;
+  opacity: 0.7;
+}
+
+/* ---------- avatar ----------
+ *
+ * A person's initials in a circle — the account chip, an assignee in a row. A
+ * MARK, not a control, so it stays round under every skin. inline-grid with
+ * `flex: none` so it never pushes the name beside it onto a second line. */
+.jrk-avatar {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--jrk-control-sm);
+  height: var(--jrk-control-sm);
+  font-size: var(--jrk-text-2xs);
+  font-weight: var(--jrk-weight-semibold);
+  line-height: 1;
+  letter-spacing: 0;
+  color: var(--jrk-accent-wash-text);
+  background: var(--jrk-accent-wash);
+  border-radius: var(--jrk-radius-full);
+  user-select: none;
+}
+
+.jrk-avatar--sm {
+  width: var(--jrk-icon-lg);
+  height: var(--jrk-icon-lg);
+  font-size: 9px;
+}
+
+.jrk-avatar--lg {
+  width: var(--jrk-control-md);
+  height: var(--jrk-control-md);
+  font-size: var(--jrk-text-xs);
+}
+
+/* On a vivid bar the wash draws no circle at all and the initials read as stray
+   text; the solid accent shows in both themes. */
+.jrk-avatar--solid {
+  color: var(--jrk-accent-on-solid);
+  background: var(--jrk-accent-solid);
+}
+
+/* ---------- count badge ----------
+ *
+ * The unread count on a bell, the open count on a Tasks button. A solid pill
+ * holding a number, inline by default. `--overlay` hangs it off the top-right
+ * corner of the control it counts; that control has to be positioned, which a
+ * `.jrk-btn` holding one is made below, and anything else is through
+ * `.jrk-count-anchor`. `pointer-events: none` so the corner of the button stays
+ * the button. */
+.jrk-count {
+  display: inline-block;
+  min-width: 18px;
+  padding: 0 5px;
+  font-size: var(--jrk-text-2xs);
+  font-weight: var(--jrk-weight-bold);
+  font-variant-numeric: tabular-nums;
+  line-height: 18px;
+  text-align: center;
+  color: var(--jrk-status-critical-on-solid);
+  background: var(--jrk-status-critical-solid);
+  border-radius: var(--jrk-radius-full);
+}
+
+.jrk-count--accent {
+  color: var(--jrk-accent-on-solid);
+  background: var(--jrk-accent-solid);
+}
+
+/* The quiet form, for a count inside a solid accent button: the button's own
+   ink as the fill and its fill as the ink, so the number is the one bright mark. */
+.jrk-count--inverse {
+  color: var(--jrk-accent-solid);
+  background: var(--jrk-accent-on-solid);
+}
+
+.jrk-count--overlay {
+  position: absolute;
+  top: 0;
+  inset-inline-end: 0;
+  transform: translate(30%, -20%);
+  pointer-events: none;
+}
+
+.jrk-count--overlay:dir(rtl) {
+  transform: translate(-30%, -20%);
+}
+
+.jrk-count-anchor,
+.jrk-btn:has(.jrk-count--overlay) {
+  position: relative;
+}
+
+.jrk-count-anchor {
+  display: inline-flex;
 }

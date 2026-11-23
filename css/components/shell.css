@@ -4,9 +4,15 @@
      .jrk-app > .jrk-sidebar + .jrk-main
      .jrk-main > .jrk-topbar + .jrk-content
 
+   Or with a full-width masthead above the rail (see "masthead" below):
+     .jrk-topbar.jrk-topbar--masthead + .jrk-app > .jrk-sidebar + .jrk-main
+
    The rail carries two optional rows above the nav and a second nav level below
    it. Full order, all four parts optional except __nav:
-     .jrk-sidebar > __brand + __actions + __nav + __footer */
+     .jrk-sidebar > __brand + __actions + __nav + __footer
+   and a row with trailing controls, or an inline second level:
+     .jrk-nav-row > .jrk-nav-item + .jrk-nav-row__actions > .jrk-nav-row__control
+     .jrk-nav-row + .jrk-nav-disclosure__sections > .jrk-nav-item */
 
 .jrk-app {
   display: grid;
@@ -18,12 +24,30 @@
 /* ============================== sidebar ============================== */
 
 .jrk-sidebar {
+  /* ONE LAYOUT, TWO WIDTHS. An icon sits on the same pixel whether the rail is open or
+     not, and opening it only lets the text in. So the collapsed rail is not a second
+     layout: the rows are always laid out at the expanded width and this element's
+     `overflow: hidden` clips them. The inset is what puts a 32px row's centre on the
+     collapsed rail's centre line (less its 1px edge); the open rail grows by the same
+     amount, so no label loses width to it. The nav's scrollbar sits at the expanded
+     edge, outside the clip, and needs no rule. */
+  --jrk-rail-inset: calc((var(--jrk-sidebar-collapsed) - 1px) / 2 - var(--jrk-control-md) / 2);
+  --jrk-rail-width: calc(var(--jrk-sidebar-expanded) + var(--jrk-rail-inset) - var(--jrk-space-2));
+
   display: flex;
   flex-direction: column;
-  width: var(--jrk-sidebar-expanded);
+  width: var(--jrk-rail-width);
   height: 100vh;
   position: sticky;
   top: 0;
+  /* A sticky element is a stacking context at `auto`, so anything the rail pops — a
+     flyout, a tooltip, a peek — is ordered against the PAGE by the rail's own level, and
+     every `position: relative` card later in the document paints over it. The symptom
+     reads as impossible: the panel is in the DOM, the right size, and drawn under the
+     cards. Overlay, not sticky: the topbar is sticky and later in the DOM, so at equal
+     level it would clip a panel placed beside it. Below modal, so a dialog still covers
+     the rail. */
+  z-index: var(--jrk-z-overlay);
   /* The rail READS AS CHROME now: it takes the card fill and the content plane
      keeps the tinted page, so the shell is a white frame around a tinted work
      area, matching the topbar it meets at the corner. Those two must agree —
@@ -42,12 +66,26 @@
      more. */
   background: var(--jrk-surface-default);
   border-inline-end: 1px solid var(--jrk-border-subtle);
-  transition: width var(--jrk-duration-base) var(--jrk-ease-standard);
+  /* Width and the peek's negative margin share one transition, so their sum — the grid
+     track — holds still for the whole animation. */
+  transition:
+    width var(--jrk-duration-base) var(--jrk-ease-standard),
+    margin-inline-end var(--jrk-duration-base) var(--jrk-ease-standard),
+    box-shadow var(--jrk-duration-base) var(--jrk-ease-standard);
   overflow: hidden;
 }
 
 .jrk-sidebar[data-collapsed='true'] {
   width: var(--jrk-sidebar-collapsed);
+}
+
+/* PEEK — a collapsed rail opened by hover or keyboard focus (<Sidebar peek>). The rail is
+   full width while the negative end margin keeps its grid track at the collapsed width, so
+   the panel lays over the page instead of reflowing it on every pass of the mouse. The
+   shadow is what says it is floating. */
+.jrk-sidebar[data-peek='true'] {
+  margin-inline-end: calc(var(--jrk-sidebar-collapsed) - var(--jrk-rail-width));
+  box-shadow: var(--jrk-shadow-lg);
 }
 
 .jrk-sidebar__brand {
@@ -79,7 +117,8 @@
   border-bottom: 1px solid var(--jrk-border-subtle);
 }
 
-/* Three 28px squares do not fit in a 52px rail, so they stack. This is a COLUMN
+/* Three control-md squares do not fit in the collapsed rail (52px until 2026-11-23,
+   72px since — still far short of three squares and their gaps), so they stack. This is a COLUMN
    flex container and it must never gain flex-wrap — a wrapping column goes
    multi-line and align-content:stretch then inflates every line. That bug
    tripled a grid's height once already. */
@@ -139,13 +178,43 @@
 .jrk-sidebar__nav {
   flex: 1;
   overflow-y: auto;
+  /* Laid out at the open width in both states and clipped by the rail — see "ONE LAYOUT,
+     TWO WIDTHS" on .jrk-sidebar. The leading inset is the icon column. */
+  width: calc(var(--jrk-rail-width) - 1px);
   padding: var(--jrk-space-2);
+  padding-inline-start: var(--jrk-rail-inset);
   display: flex;
   flex-direction: column;
   /* Was a hardcoded 2px, which check:css does not catch — it gates hex, not
      px. 4px is the tokenised step up, and it is what makes the rail read as a
      list of destinations rather than a stack of adjacent bars. */
   gap: var(--jrk-space-1);
+}
+
+/* The rail's search box sits on the icon column: its glyph lands where the rows' icons
+   land, in both states. In the collapsed rail it shrinks to one icon-wide pill and keeps
+   its height — nothing that takes height is removed when the rail closes, or every row
+   below it jumps when the rail opens. */
+.jrk-sidebar__search {
+  padding-block-end: var(--jrk-space-2);
+}
+
+.jrk-sidebar__search .jrk-input-group {
+  --field-px: var(--jrk-space-2);
+}
+
+.jrk-sidebar__search :is(.jrk-input, .jrk-input-group) {
+  width: 100%;
+  min-width: 0;
+  transition: width var(--jrk-transition);
+}
+
+.jrk-sidebar[data-collapsed='true'] .jrk-sidebar__search :is(.jrk-input, .jrk-input-group) {
+  width: var(--jrk-control-md);
+}
+
+.jrk-sidebar[data-collapsed='true'] .jrk-sidebar__search .jrk-input::placeholder {
+  color: transparent;
 }
 
 /* A SCROLLING LIST MUST NOT COMPRESS ITS ROWS, and this is the rule that makes
@@ -180,8 +249,10 @@
   padding: var(--jrk-space-4) var(--jrk-space-3) var(--jrk-space-1);
   font-size: var(--jrk-text-xs);
   font-weight: var(--jrk-weight-semibold);
-  /* Sentence case — Apple sidebars label their sections plainly. */
-  letter-spacing: var(--jrk-tracking-normal);
+  /* Sentence case — Apple sidebars label their sections plainly. Tight tracking, with
+     the rows it captions: a caption tracked wider than its rows reads as a different
+     typeface. */
+  letter-spacing: var(--jrk-tracking-tight);
   color: var(--jrk-text-muted);
   white-space: nowrap;
 }
@@ -213,10 +284,14 @@
   height: var(--jrk-control-md);
   padding-inline: var(--jrk-space-2);
   font-family: inherit;
-  /* Lighter and one step larger together. Either alone reads as a mistake —
-     15px at medium looks heavy-set, 14px at regular looks washed out. The pair
-     is what gives the airier, more vertical rail. */
-  font-size: var(--jrk-text-lg);
+  /* NARROW, by the consumer's direction: a 216px rail ellipsized long module names at
+     15px. Inter has no width axis (the library loads `ital,opsz,wght` only), so
+     `font-stretch` is a no-op and narrower can only mean a size step down plus tight
+     tracking — `sm` with `tracking-tight`, the control size every other control already
+     resolves to. Regular weight stays: it was chosen with the size as a pair, and the
+     current row's semibold below is what keeps where-am-I readable in greyscale. */
+  font-size: var(--jrk-text-sm);
+  letter-spacing: var(--jrk-tracking-tight);
   font-weight: var(--jrk-weight-regular);
   color: var(--jrk-text-secondary);
   text-align: start;
@@ -298,6 +373,229 @@
   margin-inline-start: auto;
 }
 
+/* A long label ellipsizes instead of pushing the row's badge or controls out past the
+   rail. A flex item's default min-width is its content, so without `min-width: 0` the
+   label never shrinks at all. The hover text (`title`) is where the whole name lives. */
+.jrk-nav-item__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* A quiet trailing number. `__badge` is for a count with a tone; this is the figure on
+   its own. On the current row muted ink falls under 4.5:1 against the wash, so it takes
+   the row's own ink there. */
+.jrk-nav-item__count {
+  margin-inline-start: auto;
+  color: var(--jrk-text-muted);
+  font-size: var(--jrk-text-2xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.jrk-nav-item[aria-current='page'] .jrk-nav-item__count {
+  color: inherit;
+}
+
+.jrk-nav-item__count ~ .jrk-nav-item__badge {
+  margin-inline-start: 0;
+}
+
+/* AN EMOJI IN THE ICON SLOT, and the three declarations that make it sit there:
+ * 1. An explicit emoji stack. Inter carries no emoji, so the browser otherwise falls back
+ *    on whatever it has — and a Linux host may have a monochrome face or the tofu box.
+ * 2. `line-height: 1`. Inheriting the row's drops the glyph a pixel or two below centre.
+ * 3. The icon's own box. A glyph sized to its natural width indents its label further than
+ *    an SVG row's, and the rail reads as two kinds of row.
+ * One step under the label because an emoji is a picture: at the same size it carries more
+ * ink than a one-stroke outline beside it. */
+.jrk-nav-item__glyph {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: var(--jrk-icon-md);
+  height: var(--jrk-icon-md);
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji',
+    'Twemoji Mozilla', sans-serif;
+  font-size: var(--jrk-text-md);
+  line-height: 1;
+}
+
+/* IN FLIGHT. The clicked row's icon slot becomes a ring and the row takes the hover wash,
+   so "which one did I click" is legible from across the rail and not only from a 13px ring.
+   Both arrive after a delay: a prefetched route commits in about a frame, and a wash that
+   flashes for one frame reads as a rendering fault rather than as progress. The ring keeps
+   the icon's box, so nothing reflows when it mounts. */
+.jrk-nav-item__pending {
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: var(--jrk-icon-md);
+  height: var(--jrk-icon-md);
+}
+
+.jrk-nav-item__pending::before {
+  content: '';
+  width: 0.85em;
+  height: 0.85em;
+  border: 2px solid var(--jrk-border-strong);
+  border-top-color: var(--jrk-accent-solid);
+  border-radius: var(--jrk-radius-full);
+  opacity: 0;
+  animation:
+    jrk-spin 0.7s linear infinite,
+    jrk-nav-pending-in var(--jrk-duration-fast) linear var(--jrk-duration-fast) forwards;
+}
+
+.jrk-nav-item[aria-busy='true']:not([aria-current='page']) {
+  animation: jrk-nav-pending-wash var(--jrk-duration-fast) linear var(--jrk-duration-fast) both;
+}
+
+@keyframes jrk-nav-pending-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes jrk-nav-pending-wash {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: var(--jrk-surface-hover);
+    color: var(--jrk-text-primary);
+  }
+}
+
+/* Drawn and not a link: a destination that exists and cannot be opened yet. Dimmed in the
+   label AND the mark — colour cannot dim an emoji, so the glyph takes opacity. No hover:
+   a wash on a row that cannot be pressed is a promise it then breaks. */
+.jrk-nav-item[aria-disabled='true'] {
+  cursor: not-allowed;
+}
+
+.jrk-nav-item[aria-disabled='true']:hover {
+  background: none;
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-nav-item[aria-disabled='true'] .jrk-nav-item__label,
+.jrk-nav-item[aria-disabled='true'] svg {
+  color: var(--jrk-text-disabled);
+}
+
+.jrk-nav-item[aria-disabled='true'] .jrk-nav-item__glyph {
+  opacity: 0.5;
+}
+
+/* A second-level row: indented under the row that owns it and one step quieter, because a
+   module and its section at equal weight read as two unrelated destinations. Its icon is
+   usually a chevron, dimmed so the indent rather than the mark carries the hierarchy.
+   Inside a <NavDisclosure> list the rows take this without the modifier. */
+.jrk-nav-item--sub,
+.jrk-nav-disclosure__sections > .jrk-nav-item {
+  padding-inline-start: var(--jrk-space-5);
+  color: var(--jrk-text-secondary);
+}
+
+:is(.jrk-nav-item--sub, .jrk-nav-disclosure__sections > .jrk-nav-item):not([aria-current='page']) .jrk-icon {
+  opacity: 0.55;
+}
+
+.jrk-nav-disclosure__sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-1);
+}
+
+.jrk-sidebar__nav .jrk-nav-disclosure__sections > * {
+  flex-shrink: 0;
+}
+
+/* ------------------------------------------------------------------ row actions */
+
+/* A row with trailing controls (pin, caret) is a flex line, and the controls are real
+   SIBLINGS of the link. One absolutely-positioned button over the row's end cannot hold
+   two, and overlapped the label the moment one was long. */
+.jrk-nav-row {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-1);
+}
+
+.jrk-nav-row > .jrk-nav-item {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.jrk-nav-row__actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.jrk-nav-row__control {
+  display: grid;
+  place-items: center;
+  width: var(--jrk-control-sm);
+  height: var(--jrk-control-sm);
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--jrk-radius-sm);
+  background: none;
+  color: var(--jrk-text-muted);
+  cursor: pointer;
+  transition:
+    width var(--jrk-transition),
+    opacity var(--jrk-transition),
+    transform var(--jrk-transition),
+    color var(--jrk-transition),
+    background-color var(--jrk-transition);
+}
+
+.jrk-nav-row__control:hover {
+  background: var(--jrk-surface-hover);
+  color: var(--jrk-text-primary);
+}
+
+/* THE PIN IS HIDDEN BY OPACITY AND WIDTH, NOT display:none — and that is the fix, not the
+   shortcut. A display:none control cannot take focus, so an action a mouse gets on hover
+   would be unreachable by keyboard entirely; :focus-visible paints this the moment it is
+   reached. The width goes too because a permanently reserved 24px slot is taken out of the
+   label, and truncated "Required Repairs" to "Required Re…". A pinned row keeps it lit. */
+.jrk-nav-pin {
+  width: 0;
+  opacity: 0;
+}
+
+.jrk-nav-row:hover .jrk-nav-pin,
+.jrk-nav-pin:focus-visible,
+.jrk-nav-pin[aria-pressed='true'] {
+  width: var(--jrk-control-sm);
+  opacity: 1;
+}
+
+.jrk-nav-pin[aria-pressed='true'] {
+  color: var(--jrk-accent-text);
+}
+
+.jrk-nav-pin--remove:hover {
+  color: var(--jrk-status-critical-text);
+}
+
+/* THE CARET IS ALWAYS THERE, unlike the pin. The pin is an action taken once; the caret is
+   a STATE — this row has sections, and they are or are not showing — and a state you can
+   only see by hovering is one the reader has to go looking for. It is also the only thing
+   telling a row with a second level from one without. */
+.jrk-nav-disclosure__caret[aria-expanded='true'] {
+  transform: rotate(90deg);
+  color: var(--jrk-text-secondary);
+}
+
+:dir(rtl) .jrk-nav-disclosure__caret:not([aria-expanded='true']) {
+  transform: scaleX(-1);
+}
+
 /* ========================= second nav level (flyout) ========================= */
 
 /* Disclosure caret. Snowsight ships NO caret on these rows — you find the second
@@ -356,7 +654,7 @@
  * That is the mobile drawer, well outside this library's 1920x1080 target. */
 .jrk-nav-flyout {
   position: fixed;
-  inset-inline-start: var(--jrk-nav-flyout-inset, var(--jrk-sidebar-expanded));
+  inset-inline-start: var(--jrk-nav-flyout-inset, var(--jrk-rail-width, var(--jrk-sidebar-expanded)));
   top: var(--jrk-nav-flyout-top, 0px);
   width: 232px;
   max-height: calc(100vh - var(--jrk-space-4));
@@ -382,18 +680,37 @@
   padding: var(--jrk-space-1_5) var(--jrk-space-2_5) var(--jrk-space-1);
   font-size: var(--jrk-text-sm);
   font-weight: var(--jrk-weight-semibold);
+  letter-spacing: var(--jrk-tracking-tight);
   color: var(--jrk-text-primary);
 }
 
-/* Collapsed rail: the icon centers and the label is hidden but stays in the
-   accessibility tree, so the nav still reads correctly to a screen reader. */
+/* Collapsed rail: the label is hidden but stays in the accessibility tree, so the nav
+   still reads correctly to a screen reader.
+
+   NOTHING THAT TAKES HEIGHT IS REMOVED. Captions keep their line (opacity, above), an open
+   disclosure's sections stay as their chevrons, and row controls — which take only width —
+   go. Hiding anything taller moves every row beneath it, and the icons jump when the rail
+   opens.
+
+   THE ROW IS A CIRCLE ON THE ICON COLUMN, not a centred icon: `justify-content: center` put
+   the icon half a pixel off its open position. A section row keeps its indent, so its pill
+   is the indent plus the icon. */
 .jrk-sidebar[data-collapsed='true'] .jrk-nav-item {
-  justify-content: center;
-  padding-inline: 0;
+  flex: none;
+  width: var(--jrk-control-md);
+  justify-content: flex-start;
+  padding-inline: var(--jrk-space-2) 0;
+}
+
+.jrk-sidebar[data-collapsed='true'] :is(.jrk-nav-item--sub, .jrk-nav-disclosure__sections > .jrk-nav-item) {
+  width: calc(var(--jrk-space-5) + var(--jrk-icon-md) + var(--jrk-space-2));
+  padding-inline: var(--jrk-space-5) 0;
 }
 
 .jrk-sidebar[data-collapsed='true'] .jrk-nav-item__label,
 .jrk-sidebar[data-collapsed='true'] .jrk-nav-item__badge,
+.jrk-sidebar[data-collapsed='true'] .jrk-nav-item__count,
+.jrk-sidebar[data-collapsed='true'] .jrk-sidebar__toggle-label,
 .jrk-sidebar[data-collapsed='true'] .jrk-sidebar__brand span {
   position: absolute;
   width: 1px;
@@ -405,14 +722,33 @@
 /* The caret is aria-hidden decoration, so unlike the label and badge it is
    removed outright rather than kept in the accessibility tree — the button's
    aria-expanded is what announces the disclosure, and it survives the collapse. */
-.jrk-sidebar[data-collapsed='true'] .jrk-nav-item__caret {
+.jrk-sidebar[data-collapsed='true'] .jrk-nav-item__caret,
+.jrk-sidebar[data-collapsed='true'] .jrk-nav-row__actions {
   display: none;
 }
 
 .jrk-sidebar__footer {
   padding: var(--jrk-space-2);
+  padding-inline-start: var(--jrk-rail-inset);
   border-top: 1px solid var(--jrk-border-subtle);
   flex-shrink: 0;
+}
+
+/* The footer's collapse control. Its chevron sits where the rows' icons sit, in both
+   states — start-aligned, not centred, or it slides as the rail opens. It points the way
+   the rail will move. */
+.jrk-sidebar__toggle {
+  justify-content: flex-start;
+  padding-inline-start: var(--jrk-space-2);
+}
+
+.jrk-sidebar__toggle:not(.jrk-sidebar__toggle--collapsed) > .jrk-icon {
+  transform: rotate(180deg);
+}
+
+.jrk-sidebar[data-collapsed='true'] .jrk-sidebar__toggle {
+  width: var(--jrk-control-md);
+  padding-inline: var(--jrk-space-2) 0;
 }
 
 /* ============================== topbar ============================== */
@@ -854,6 +1190,119 @@
   color: var(--jrk-accent-wash-text);
 }
 
+/* ---------- masthead: a full-width bar above the rail ---------- */
+
+/* `.jrk-topbar--masthead + .jrk-app` — the bar is a SIBLING above the shell rather than the
+   first child of `.jrk-main`, so one bar runs the full window and the rail hangs beneath
+   it. Three measurements follow and none is optional; they are one change, and if the bar
+   moves back inside the column all three come out together.
+
+   1. The bar outranks the rail. The rail is at overlay (see .jrk-sidebar), so a sticky bar
+      at 100 would sit UNDER it at the corner where they meet. Equal level, earlier in the
+      DOM: the two do not overlap once the rail is offset below, and a panel the rail pops
+      still clears the page. Below modal, so a dialog covers both. */
+.jrk-topbar--masthead {
+  z-index: var(--jrk-z-overlay);
+}
+
+/* 2. `.jrk-app` is `min-height: 100vh`. Under a 56px bar that is 100vh + 56px, and every
+      page gains a scrollbar it has no content for. */
+.jrk-topbar--masthead + .jrk-app {
+  min-height: calc(100vh - var(--jrk-topbar-default));
+}
+
+/* 3. The rail is `height: 100vh; top: 0`, both measured for a bar beside it. Left alone it
+      sticks a bar's height too low and its footer falls off the bottom of the window. */
+.jrk-topbar--masthead + .jrk-app > .jrk-sidebar {
+  height: calc(100vh - var(--jrk-topbar-default));
+  top: var(--jrk-topbar-default);
+}
+
+/* ---------- brand mark ---------- */
+
+/* `flex: 0 0 auto`: the bar is a flex line and the wordmark must not be what gives up width
+   to the account block. */
+.jrk-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2_5);
+  flex: 0 0 auto;
+  color: inherit;
+  font-weight: var(--jrk-weight-semibold);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* THE MARK IS THE BAR'S INK INVERTED — the ink as its fill, the bar's leading colour as
+   its glyph — so it measures whatever the wordmark beside it measures, on any bar. A
+   brand-blue square would be a second brand colour competing with the ramp it sits on,
+   and on the dark ramp's black leading edge it is 1.9:1 and nearly vanishes.
+
+   A CHAIN, because a skin can make the bar flat. Every skin fills the masthead with a flat
+   `masthead-*` colour, so `gradient.topbar.*` still resolves but stops describing the
+   surface the mark sits on. Most specific first:
+     masthead-brand-fill  a skin whose `--brand` bar differs from its `--vivid` one
+     masthead-fill        a skin whose two masthead variants are one colour
+     gradient.topbar.*    no skin stamped — the base ramp
+   An undeclared custom property is the only thing that answers "does this skin declare
+   one" without this file enumerating the skins, which is why it is fallbacks and not
+   selectors. */
+.jrk-brand__mark {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  /* The smallest control's square, so the mark lines up with the bar's icon buttons. */
+  width: var(--jrk-control-sm);
+  height: var(--jrk-control-sm);
+  border-radius: var(--jrk-radius-md);
+  background: var(--jrk-masthead-ink, var(--jrk-gradient-topbar-ink));
+  color: var(--jrk-masthead-brand-fill, var(--jrk-masthead-fill, var(--jrk-gradient-topbar-from)));
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-bold);
+}
+
+.jrk-brand__text {
+  letter-spacing: var(--jrk-tracking-tight);
+}
+
+/* ---------- account chip ---------- */
+
+/* An avatar and a name. A row of two things, NOT a nav row: `.jrk-nav-item` is
+   `width: 100%`, and in the bar's flex line that asks for the whole bar and takes the
+   shrink out of a sibling. Anything reusing a rail class outside the rail is suspect, and
+   the damage shows on the neighbour rather than on the element that took the class. */
+.jrk-topbar__user {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  height: var(--jrk-control-md);
+  padding-inline: var(--jrk-space-2);
+  /* The control size: the chip shares a line with buttons and segments. */
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-medium);
+  color: var(--jrk-text-secondary);
+  white-space: nowrap;
+}
+
+/* On a vivid bar both were selected against white chrome. The name takes the bar's ink;
+   the avatar's wash (mark-soft, white at 28%) drew no circle at all on the pale brand ramp
+   and the initials read as stray text, so it takes the solid accent, which reads on both
+   themes' ramps. */
+.jrk-topbar--vivid .jrk-topbar__user {
+  color: var(--jrk-gradient-ink);
+}
+
+.jrk-topbar--vivid .jrk-avatar {
+  background: var(--jrk-accent-solid);
+  color: var(--jrk-accent-on-solid);
+}
+
+/* The drawer toggle exists only where the drawer does — see the 720px block. */
+.jrk-topbar__drawer {
+  display: none;
+}
+
 .jrk-content {
   flex: 1;
   padding: var(--jrk-space-6) var(--jrk-space-5);
@@ -920,10 +1369,16 @@
   max-width: 68ch;
 }
 
+/* The header wraps, so its ACTIONS must too. Without it the title/actions pair wraps while
+   the actions stay one unbreakable row, and a ~490px row of search, count and export cannot
+   shrink below its content — a narrow viewport then pushes the page wider than itself. */
 .jrk-page-header__actions {
   display: flex;
   align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: var(--jrk-space-2);
+  min-width: 0;
 }
 
 /* ============================== breadcrumbs ============================== */
@@ -1179,7 +1634,7 @@
     inset-inline-start: 0;
     top: 0;
     z-index: var(--jrk-z-overlay);
-    width: var(--jrk-sidebar-expanded);
+    width: var(--jrk-rail-width);
     transform: translateX(-100%);
     box-shadow: var(--jrk-shadow-xl);
   }
@@ -1190,5 +1645,38 @@
 
   .jrk-content {
     padding: var(--jrk-space-4) var(--jrk-space-3);
+  }
+
+  /* The drawer exists, so its toggle does. The wordmark goes before the account block does:
+     a reader inside the app knows which app it is, and the MARK stays, so the corner never
+     reads as empty chrome. Clipped rather than removed — it is the home link's name. The
+     account chip keeps its avatar for the same reason. */
+  .jrk-topbar__drawer {
+    display: inline-grid;
+  }
+
+  .jrk-brand__text,
+  .jrk-topbar__user-name {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* A page header's actions take their own full-width row and start where the title starts.
+     Wrapping alone is not enough: the slot's base size is its own max-content, so a second
+     line narrower than that changes nothing — the row has to give way before its children
+     can wrap inside it. A full row rather than `flex-shrink`, so it breaks predictably
+     instead of sitting beside a short title on one page and under a long one on the next.
+     `min-width: 0` on the leading block is what lets a long title break at all. */
+  .jrk-page-header > :first-child {
+    min-width: 0;
+  }
+
+  .jrk-page-header__actions {
+    flex: 1 1 100%;
+    justify-content: flex-start;
   }
 }

@@ -110,3 +110,27 @@ export const ComparableMax = () => (
     </ChartCard>
   </div>
 );
+
+/* An UNFED stage has no source in this window — not zero, absent. It keeps its
+   slot as a dashed outline, prints "—", and no rate is stated across it. A
+   stage under `minWidth` is drawn AT it and tagged "not to scale". `compact`
+   is for two funnels side by side. */
+export const UnfedAndCompact = () => (
+  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--jrk-space-4)', maxWidth: 720 }}>
+    <ChartCard title="This property" subtitle="Tours not fed">
+      <Funnel
+        compact
+        minWidth={0.04}
+        stages={[
+          { label: 'Leads', value: 12940 },
+          { label: 'Tours', value: 0, unfed: true },
+          { label: 'Applications', value: 1240 },
+          { label: 'Leases', value: 31 },
+        ]}
+      />
+    </ChartCard>
+    <ChartCard title="Portfolio" subtitle="Same window">
+      <Funnel compact stages={[{ label: 'Leads', value: 9800 }, { label: 'Tours', value: 4100 }, { label: 'Applications', value: 1102 }, { label: 'Leases', value: 640 }]} />
+    </ChartCard>
+  </div>
+);

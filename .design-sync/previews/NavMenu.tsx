@@ -48,7 +48,7 @@ const frameCss = `
 }
 .pv-frame .jrk-app { min-height: 0; height: 100%; }
 .pv-frame .jrk-sidebar { height: 100%; position: static; }
-.pv-frame .jrk-sidebar:not([data-collapsed='true']) { width: var(--jrk-sidebar-expanded); }
+.pv-frame .jrk-sidebar:not([data-collapsed='true']) { width: var(--jrk-rail-width, var(--jrk-sidebar-expanded)); }
 .pv-frame .jrk-topbar { position: static; }
 .pv-frame .jrk-content { overflow: hidden; }
 `;

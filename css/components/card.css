@@ -264,10 +264,109 @@
    The hairline is the card header's, not the table's: `.jrk-table thead th` already
    draws a `border-bottom`, and putting a second one on top of the header would be
    two lines a row apart. This one closes the header off. */
-.jrk-card__header:has(+ .jrk-card__body--flush) {
+.jrk-card__header:has(+ .jrk-card__body--flush:not([hidden])) {
   padding-bottom: var(--jrk-space-3);
   border-bottom: 1px solid var(--jrk-border-default);
 }
+
+/* `min-width: 0` on the title block is what lets a header give way at all: a flex
+   item's default `min-width: auto` is its content, so one long title held the row
+   open past the card and `overflow: clip` ate the actions. */
+.jrk-card__header > :first-child {
+  min-width: 0;
+}
+
+/* AN ANCHORED CARD clears the sticky topbar when a `#link` scrolls to it. Without
+   the offset the card's own heading lands under the bar, which reads as the link
+   having gone to the wrong place. Only on cards that carry an id, so nothing else
+   gains a scroll margin it did not ask for. */
+.jrk-card[id] {
+  scroll-margin-top: calc(var(--jrk-topbar-default) + var(--jrk-space-4));
+}
+
+/* A short status beside the actions — "649 combos · 80 properties". The auto
+   margin is what pins it to the trailing edge: under `space-between` a third item
+   would otherwise float in the middle of the header. */
+.jrk-card__meta {
+  margin-inline-start: auto;
+  align-self: center;
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+  white-space: nowrap;
+}
+
+/* THE TAKEAWAY, ABOVE THE DETAIL. It sits between the header and the body and
+   stays visible when a collapsible card is folded: folding hides the detail and
+   never the conclusion. The body under it takes a divider, so the reader can tell
+   the sentence that summarises the table from the first line of it. */
+.jrk-card__summary {
+  padding: 0 var(--jrk-space-5) var(--jrk-space-4);
+}
+
+.jrk-card__summary + .jrk-card__body {
+  padding-top: var(--jrk-space-4);
+  border-top: 1px solid var(--jrk-border-subtle);
+}
+
+/* ---------- collapsible (opt-in) ----------
+ *
+ * OPT-IN, and that is the whole design. Folding everywhere was tried and removed:
+ * eight chevrons in a column, each with a hit target and a seam, turned one report
+ * into a stack of drawers. A fold is for the long tail somebody opens when they
+ * want it, on a page whose other sections read as a report.
+ *
+ * The toggle is a button INSIDE the heading, the disclosure pattern's own shape —
+ * not a button wrapping the header, which would swallow the actions slot's own
+ * links and put interactive content inside a button. It strips the button's
+ * ground rather than being restyled into one, so the title reads as a title. No
+ * focus rule here: base.css rings every button. */
+.jrk-card__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: start;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.jrk-card__toggle:hover {
+  color: var(--jrk-text-link);
+}
+
+.jrk-card__chevron {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: var(--jrk-icon-md);
+  color: var(--jrk-text-secondary);
+  transition: transform var(--jrk-transition);
+}
+
+/* Closed points along the line, open points down. The state class is on the
+   CARD, so one source drives the glyph and the spacing below. */
+.jrk-card--collapsed .jrk-card__chevron {
+  transform: rotate(-90deg);
+}
+
+.jrk-card--collapsed .jrk-card__chevron:dir(rtl) {
+  transform: rotate(90deg);
+}
+
+/* The subtitle sits under the title TEXT, not under the chevron. */
+.jrk-card--collapsible .jrk-card__subtitle {
+  padding-inline-start: calc(var(--jrk-icon-md) + var(--jrk-space-2));
+}
+
+/* A folded card is its header and its takeaway — the body (and the footer, which
+   belongs to the detail) is `hidden`, so the summary's own bottom padding is the
+   card's last edge. */
+.jrk-card--collapsed .jrk-card__summary {
+  padding-bottom: var(--jrk-space-3);
+}
+
 
 /* THE TABLE HEADER TAKES THE RECESS FILL when it is flush inside a card, which is a
    scoped reversal of the note on `.jrk-table thead th` — that rule moved the fill to
@@ -278,8 +377,19 @@
    a bare `.jrk-table-wrap` keeps the directed treatment.
 
    The sticky header still needs an opaque fill of its own or rows scroll through it;
-   this changes which opaque fill, not whether there is one. */
-.jrk-card__body--flush .jrk-table thead th {
+   this changes which opaque fill, not whether there is one.
+
+   NOT IN A FLUSH CARD, and both rules here carry the same `:not()`. A
+   `.jrk-card--flush` with a `__body--flush` is "a heading over a table, no panel":
+   the card has no edge, no fill and no shadow, so there is nothing to hand the
+   table's edge to and no card header plane to tell the column labels apart from.
+   Unscoped, the table lost its own frame to a card that draws none and took a
+   recess header under open page. In a flush card it keeps exactly what it has
+   standing on the page — its own hairline, its own corner, the white header.
+
+   The higher specificity also reaches the frozen corner cell, which table.css
+   fills at (0,2,2) and which used to stay white in an otherwise grey header row. */
+.jrk-card:not(.jrk-card--flush) .jrk-card__body--flush .jrk-table thead th {
   background: var(--jrk-surface-subtle);
 }
 
@@ -289,7 +399,7 @@
    which a later border-color paints nothing, and the layout does not shift by a pixel
    if the edge is ever restored. Same treatment, same reasoning, as
    `.jrk-expander .jrk-expander__panel .jrk-table-wrap` in expander.css. */
-.jrk-card__body--flush > .jrk-table-wrap {
+.jrk-card:not(.jrk-card--flush) .jrk-card__body--flush > .jrk-table-wrap {
   border-color: transparent;
   border-radius: var(--jrk-radius-none);
 }
@@ -306,12 +416,35 @@
   color: var(--jrk-text-muted);
 }
 
-/* Right-hand slot for a menu, toggle, or time-range control. */
+/* Right-hand slot for a menu, toggle, or time-range control. It wraps its own
+   controls, so a crowded slot breaks onto a second line inside itself rather than
+   pushing past the card's clipped edge. */
 .jrk-card__actions {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: var(--jrk-space-1);
   flex-shrink: 0;
+}
+
+/* ---------- narrow ----------
+ *
+ * Wrapping the header is not enough on its own: the actions slot is
+ * `flex-shrink: 0`, so its base size is its own max-content — 472px of search box,
+ * count and Export, measured — and a second line narrower than that changes
+ * nothing. So at this width the actions take a FULL row, predictably, rather than
+ * sitting beside a short title on one card and under a long one on the next, and
+ * start where the title starts. */
+@media (max-width: 720px) {
+  .jrk-card__header {
+    flex-wrap: wrap;
+  }
+
+  .jrk-card__actions {
+    flex: 1 1 100%;
+    min-width: 0;
+    justify-content: flex-start;
+  }
 }
 
 .jrk-card__body {

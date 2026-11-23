@@ -218,6 +218,37 @@
   text-align: right;
 }
 
+/* A second figure beside the value — units beside a property count. Bar plus
+   number, never two bars: a second axis in a list this small reads as noise.
+   Its own column so both figures stay in straight lines down the list whatever
+   the labels do. */
+.jrk-bars--secondary .jrk-bars__row {
+  grid-template-columns: var(--jrk-bars-label, 140px) minmax(24px, 1fr) auto auto;
+}
+
+.jrk-bars__secondary {
+  min-width: 6ch;
+  font-size: var(--jrk-text-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-muted);
+  text-align: right;
+}
+
+/* `(blank)` is a gap, not a category — muted and italic so it does not read as
+   a name in a column of names. */
+.jrk-bars__label--blank {
+  color: var(--jrk-text-muted);
+  font-style: italic;
+}
+
+/* "+ 12 more". The scale was set by every item, so the shown bars do not
+   re-stretch when the tail is cut. */
+.jrk-bars__more {
+  margin: 0;
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+}
+
 /* ---------- stacked bar ---------- */
 
 /* Segments are separated by a 2px gap in the surface color, one consistent
@@ -232,6 +263,12 @@
 .jrk-stack-bar__seg {
   background: var(--series, var(--jrk-chart-1));
   min-width: 2px;
+}
+
+/* A zero segment stays in the DOM so `:nth-child` keeps every later segment on
+   its own slot — colour follows the entity, not how many are non-zero. */
+.jrk-stack-bar__seg[hidden] {
+  display: none;
 }
 
 .jrk-stack-bar__seg:first-child {
@@ -301,6 +338,11 @@
 .jrk-s6 { --series: var(--jrk-chart-6); --series-dash: var(--jrk-chart-dash-6); }
 .jrk-s7 { --series: var(--jrk-chart-7); --series-dash: var(--jrk-chart-dash-7); }
 .jrk-s8 { --series: var(--jrk-chart-8); --series-dash: var(--jrk-chart-dash-8); }
+
+/* The fold — "Other" — names no category, so it takes chart.neutral rather than
+   spending a slot, and a ninth entity never gets a generated hue. No dash: it is
+   not a series a reader tells apart by pattern, it is the remainder. */
+.jrk-series--neutral { --series: var(--jrk-chart-neutral); }
 
 /* ---------- pastel tints ---------- */
 
@@ -645,4 +687,210 @@ button.jrk-legend__item:hover {
 
 .jrk-chart-card__body {
   padding: var(--jrk-space-2) var(--jrk-space-5) var(--jrk-space-4);
+}
+
+/* ============================== line chart v2 ============================== */
+
+/* THE ZERO LINE, wherever a signed series crosses it. "Which side of zero is
+   this month on" is the whole reading of a signed series, and against four
+   evenly weighted gridlines the reader would first have to find which one is
+   zero. One step stronger than the axis, and only drawn when zero is inside the
+   domain — on a plain count axis zero is already the baseline. */
+.jrk-chart__zero {
+  stroke: var(--jrk-chart-tick);
+  stroke-width: 1;
+  shape-rendering: crispEdges;
+}
+
+/* A series that ASKED for a dash — prior years beside a solid current one.
+   Different from `.jrk-threshold`, which is grey and 1.5px: this is the
+   series' own hue at full weight, so the two stay apart by colour and weight.
+   0-2-0 so it beats the print rule and the redundant-encoding dash alike; the
+   chart turns redundant encoding off once any series names a style. */
+.jrk-chart .jrk-line--dashed {
+  stroke-dasharray: 6 4;
+}
+
+.jrk-chart .jrk-line--solid {
+  stroke-dasharray: none;
+}
+
+/* An isolated reading between two gaps. Smaller than the hover dot so the two
+   are not confused, ringed in the surface like every dot. */
+.jrk-dot--lone {
+  stroke-width: 1.5;
+}
+
+/* A shaded reference range — a peer interquartile range, a forecast interval.
+   chart.neutral, because a range is a reference and not a series; a hue here
+   would claim an identity it does not have. */
+.jrk-chart__band polygon {
+  fill: var(--jrk-chart-neutral);
+  fill-opacity: 0.18;
+  stroke: none;
+}
+
+/* The fitted trend rides `.jrk-threshold` — grey and dashed — so it reads as a
+   reference rather than as data. Non-scaling so a stretched plot keeps it a
+   hairline. */
+.jrk-chart__trend {
+  vector-effect: non-scaling-stroke;
+}
+
+/* The name at a line's last point. TEXT INK, NEVER THE SERIES HUE: a light hue
+   is illegible as text, and identity comes from the dot beside the label. */
+.jrk-chart__end-label {
+  fill: var(--jrk-text-secondary);
+  font-size: var(--jrk-text-xs);
+  font-weight: var(--jrk-weight-medium);
+  stroke: none;
+}
+
+/* Legend keys for the two non-series entries a line chart can carry. */
+.jrk-legend__item--band .jrk-legend__swatch {
+  background: var(--jrk-chart-neutral);
+  opacity: 0.45;
+}
+
+.jrk-legend__item--reference {
+  --series: var(--jrk-chart-tick);
+}
+
+/* A dashed key outside redundant mode, for a series that asked for a dash. */
+.jrk-legend__swatch--line.jrk-legend__swatch--dashed {
+  background: repeating-linear-gradient(90deg, var(--series) 0 4px, transparent 4px 7px);
+}
+
+.jrk-chart-tooltip__row--band .jrk-chart-tooltip__swatch {
+  background: var(--jrk-chart-neutral);
+}
+
+/* A stack's total, under its parts. No swatch: it is not a series. */
+.jrk-chart-tooltip__row--total {
+  margin-top: 2px;
+  padding-top: 3px;
+  border-top: 1px solid var(--jrk-border-subtle);
+}
+
+.jrk-chart-tooltip__row--total .jrk-chart-tooltip__label {
+  color: var(--jrk-text-primary);
+  font-weight: var(--jrk-weight-medium);
+}
+
+/* `useChartTip` — the tooltip follows the pointer in VIEWPORT coordinates, so a
+   card's own overflow can never clip it. */
+.jrk-chart-tooltip--fixed {
+  position: fixed;
+}
+
+/* ============================== column chart ============================== */
+
+/* Same mark rules as every bar: ≤ 24px, rounded at the data end only (the
+   path does that), square at the baseline, a 2px surface gap between stacked
+   segments taken out of the joining edge rather than drawn as a stroke. */
+.jrk-col {
+  fill: var(--series);
+  stroke: none;
+}
+
+/* A column still filling. Lighter AND hatched AND labelled on the axis, so the
+   state never rests on colour alone and a partial month never reads as a
+   fall. */
+.jrk-col--partial {
+  fill-opacity: 0.5;
+}
+
+.jrk-col__hatch {
+  stroke: none;
+}
+
+/* The hatch is surface-coloured stripes over the mark — gaps, not ink. */
+.jrk-col__hatch-line {
+  stroke: var(--jrk-chart-surface);
+  stroke-width: 2;
+}
+
+.jrk-chart__tick--partial {
+  font-style: italic;
+}
+
+/* The pointed column's slot, behind its marks. A wash, not an outline, so it
+   adds no data-weight ink. */
+.jrk-chart__hover-band {
+  fill: var(--jrk-surface-hover);
+  stroke: none;
+  pointer-events: none;
+}
+
+@media print {
+  .jrk-col {
+    print-color-adjust: exact;
+  }
+}
+
+@media (forced-colors: active) {
+  .jrk-col {
+    stroke: CanvasText;
+    stroke-width: 1;
+  }
+}
+
+/* ============================== stack bar legend ============================== */
+
+/* `<StackBar>`'s legend IS its table: label, value and share in aligned columns,
+   so colour is never the only way to tell a segment's size. */
+.jrk-legend--values {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: var(--jrk-space-1) var(--jrk-space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.jrk-legend--values .jrk-legend__item {
+  /* subgrid, not display: contents — contents strips the list-item role in
+     some engines, and this list is the stack's accessible breakdown. */
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  padding: 0;
+}
+
+.jrk-legend--values .jrk-legend__item > .jrk-legend__swatch {
+  display: none;
+}
+
+.jrk-legend__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--jrk-space-1_5);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The swatch moves INSIDE the label cell so the grid keeps three columns. */
+.jrk-legend--values .jrk-legend__label::before {
+  content: '';
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  background: var(--series);
+}
+
+.jrk-legend__value {
+  font-weight: var(--jrk-weight-medium);
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-primary);
+  text-align: right;
+}
+
+.jrk-legend__share {
+  min-width: 5ch;
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-muted);
+  text-align: right;
 }

@@ -59,8 +59,27 @@ export interface SectionNavProps {
    *  enough to need three levels is a layer-1 problem with the page, not a
    *  rendering problem here. */
   headings?: string;
+  /** A named selector for the two common pages, used when `headings` is unset.
+   *  `'document'` (the default) is `h2, h3`. `'cards'` is a screen of cards: each
+   *  TOP-LEVEL card's own header title is a section, and nothing else is — see
+   *  `SECTION_NAV_HEADINGS`. */
+  preset?: keyof typeof SECTION_NAV_HEADINGS;
   className?: string;
 }
+
+/** The selector behind each `preset`.
+ *
+ *  `cards` reads "a card's own header title, where the card is not inside another
+ *  card". The `:not(.jrk-card .jrk-card)` half is load-bearing: without it a
+ *  report card holding cards of its own lists their titles beside the page's real
+ *  sections, implying a structure the page does not have. The `__header` step is a
+ *  DESCENDANT combinator, not a child one, because <Card> wraps its title in an
+ *  unclassed div — a child combinator matches nothing, the index renders null, and
+ *  the page simply looks unwired. */
+export const SECTION_NAV_HEADINGS = {
+  document: 'h2, h3',
+  cards: '.jrk-card:not(.jrk-card .jrk-card) > .jrk-card__header .jrk-card__title',
+} as const;
 
 interface Entry {
   id: string;
@@ -176,9 +195,11 @@ function deriveEntries(root: HTMLElement, headings: string, offset: number): Ent
 export function SectionNav({
   within,
   title = 'On this page',
-  headings = 'h2, h3',
+  headings: headingsProp,
+  preset = 'document',
   className,
 }: SectionNavProps) {
+  const headings = headingsProp ?? SECTION_NAV_HEADINGS[preset];
   const navRef = useRef<HTMLElement>(null);
   const titleId = `${useId()}-title`;
 

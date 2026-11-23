@@ -1,33 +1,213 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import type {
+  ElementType,
+  FocusEvent as ReactFocusEvent,
+  MouseEventHandler,
+  PointerEvent as ReactPointerEvent,
+  ReactNode,
+} from 'react';
 import { cx } from './utils';
 import { Icon } from './Icon';
 
 /* App shell. Layout only — routing and active-state logic stay in the app. */
 
-export function AppShell({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx('jrk-app', className)}>{children}</div>;
+/** The props a nav link is rendered with. Narrow on purpose: anything accepting these — a
+ *  plain `a`, Next's `Link`, a `Link` that carries a pending marker — can be `linkAs`. */
+export interface NavLinkProps {
+  href: string;
+  className?: string;
+  title?: string;
+  'aria-current'?: 'page' | 'location';
+  'aria-busy'?: boolean;
+  'aria-label'?: string;
+  onClick?: MouseEventHandler<HTMLAnchorElement>;
+  children?: ReactNode;
+}
+
+/** Routing goes through this rather than through an import: the library ships no router. */
+export type NavLinkAs = ElementType<NavLinkProps>;
+
+export interface AppShellProps {
+  children: ReactNode;
+  /** A full-width bar ABOVE the rail and the content, instead of a topbar inside the content
+   *  column. Pass a `<Topbar masthead>`: the rail and the page height are offset by its
+   *  sibling, so anything else here would not be measured for. */
+  masthead?: ReactNode;
+  className?: string;
+}
+
+export function AppShell({ children, masthead, className }: AppShellProps) {
+  const app = <div className={cx('jrk-app', className)}>{children}</div>;
+  if (!masthead) return app;
+  return (
+    <>
+      {masthead}
+      {app}
+    </>
+  );
 }
 
 export interface SidebarProps {
-  brand: ReactNode;
+  /** Wordmark row at the top of the rail. Omit it when a `<Topbar masthead>` carries the
+   *  brand — printing the product name on both axes says it twice. */
+  brand?: ReactNode;
   children: ReactNode;
   /** Icon-only verbs above the nav hairline — Home, Create, Search. Destinations
    *  belong in `children`; this row is for things you DO. */
   actions?: ReactNode;
+  /** A search field at the top of the rows. It scrolls with them and keeps its height in
+   *  the collapsed rail, so nothing below it moves when the rail opens. */
+  search?: ReactNode;
   footer?: ReactNode;
   collapsed?: boolean;
+  /** A COLLAPSED rail opens while the mouse is over it, or while keyboard focus is inside
+   *  it, and closes on leave. It overlays the page rather than reflowing it, and it is a
+   *  peek, not a choice — `collapsed` is untouched. */
+  peek?: boolean;
+  /** The narrow-viewport drawer is showing. Always the whole rail: a drawer with its labels
+   *  stripped is the only nav a reader at that width has. */
+  open?: boolean;
+  /** `nav` (default) makes the rail itself the landmark. `aside` puts the landmark on the
+   *  row list, for a rail that also holds things that are not navigation. */
+  as?: 'nav' | 'aside';
+  /** Landmark name. Default "Main". */
+  label?: string;
   className?: string;
 }
 
-export function Sidebar({ brand, children, actions, footer, collapsed, className }: SidebarProps) {
+/* Long enough that a pointer crossing the rail on its way to the page does not flash it
+   open; the same 120ms as --jrk-duration-fast. */
+const PEEK_DELAY_MS = 120;
+
+function focusVisible(el: EventTarget): boolean {
+  try {
+    return el instanceof Element && el.matches(':focus-visible');
+  } catch {
+    return true;
+  }
+}
+
+export function Sidebar({
+  brand,
+  children,
+  actions,
+  search,
+  footer,
+  collapsed,
+  peek,
+  open,
+  as = 'nav',
+  label = 'Main',
+  className,
+}: SidebarProps) {
+  const [hover, setHover] = useState(false);
+  const [focus, setFocus] = useState(false);
+  const timer = useRef<number | null>(null);
+  const clear = () => {
+    if (timer.current !== null) window.clearTimeout(timer.current);
+    timer.current = null;
+  };
+
+  /* A change of `collapsed` ends any peek. Pressing "Collapse" under the pointer would
+     otherwise leave the rail held open by a hover that never sees a fresh enter. */
+  useEffect(() => {
+    clear();
+    setHover(false);
+    setFocus(false);
+  }, [collapsed]);
+  useEffect(() => clear, []);
+
+  const peeking = !!peek && !!collapsed && !open && (hover || focus);
+  const shut = !!collapsed && !open && !peeking;
+
+  /* MOUSE ONLY for hover: a tap fires pointerenter too, and a touch reader would get a rail
+     that opens under their finger and never receives a leave. FOCUS-VISIBLE only for focus:
+     a mouse click on a row also focuses it, and must not hold the rail open after the
+     pointer has gone — a keyboard reader tabbing in gets the labels the ring lands on. */
+  const peekHandlers = peek
+    ? {
+        onPointerEnter: (e: ReactPointerEvent<HTMLElement>) => {
+          if (e.pointerType !== 'mouse' || !collapsed || open) return;
+          clear();
+          timer.current = window.setTimeout(() => setHover(true), PEEK_DELAY_MS);
+        },
+        onPointerLeave: () => {
+          clear();
+          setHover(false);
+        },
+        onFocus: (e: ReactFocusEvent<HTMLElement>) => {
+          if (focusVisible(e.target)) setFocus(true);
+        },
+        onBlur: (e: ReactFocusEvent<HTMLElement>) => {
+          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setFocus(false);
+        },
+      }
+    : {};
+
+  const rows = (
+    <>
+      {search && <div className="jrk-sidebar__search">{search}</div>}
+      {children}
+    </>
+  );
+
+  const Root = as;
   return (
-    <nav className={cx('jrk-sidebar', className)} data-collapsed={collapsed || undefined} aria-label="Main">
-      <div className="jrk-sidebar__brand">{brand}</div>
+    <Root
+      className={cx('jrk-sidebar', className)}
+      /* 'false' only where it means something — a peek or a drawer must stay open under the
+         1024px auto-collapse. Absent otherwise, so that auto-collapse still applies. */
+      data-collapsed={shut ? 'true' : peeking || open ? 'false' : undefined}
+      data-peek={peeking ? 'true' : undefined}
+      data-open={open ? 'true' : undefined}
+      aria-label={as === 'nav' ? label : undefined}
+      {...peekHandlers}
+    >
+      {brand && <div className="jrk-sidebar__brand">{brand}</div>}
       {actions && <div className="jrk-sidebar__actions">{actions}</div>}
-      <div className="jrk-sidebar__nav">{children}</div>
+      {as === 'nav' ? (
+        <div className="jrk-sidebar__nav">{rows}</div>
+      ) : (
+        <nav className="jrk-sidebar__nav" aria-label={label}>
+          {rows}
+        </nav>
+      )}
       {footer && <div className="jrk-sidebar__footer">{footer}</div>}
-    </nav>
+    </Root>
+  );
+}
+
+export interface SidebarToggleProps {
+  collapsed: boolean;
+  onToggle: () => void;
+  /** Default "Expand" / "Collapse". */
+  expandLabel?: string;
+  collapseLabel?: string;
+  className?: string;
+}
+
+/** The rail's collapse control, for its footer. The label is CLIPPED in the collapsed rail,
+ *  not removed — `display: none` there would leave an unnamed button. */
+export function SidebarToggle({
+  collapsed,
+  onToggle,
+  expandLabel = 'Expand',
+  collapseLabel = 'Collapse',
+  className,
+}: SidebarToggleProps) {
+  return (
+    <button
+      type="button"
+      className={cx(
+        'jrk-btn jrk-btn--ghost jrk-btn--sm jrk-btn--block jrk-sidebar__toggle',
+        collapsed && 'jrk-sidebar__toggle--collapsed',
+        className,
+      )}
+      onClick={onToggle}
+    >
+      <Icon name="chevronRight" />
+      <span className="jrk-sidebar__toggle-label">{collapsed ? expandLabel : collapseLabel}</span>
+    </button>
   );
 }
 
@@ -65,21 +245,238 @@ export function SidebarAction({ icon, label, href, onClick, active, className }:
 export interface NavItemProps {
   href: string;
   icon?: ReactNode;
+  /** An emoji or single character in the icon slot, boxed to the icon's size so a glyph row
+   *  and an icon row start their labels on the same pixel. Wins over `icon`. */
+  glyph?: ReactNode;
   children: ReactNode;
   /** Drives both the styling and aria-current, so the visual and the
    *  accessible state can never disagree. */
   active?: boolean;
   badge?: ReactNode;
+  /** A quiet trailing number — muted, tabular. `badge` is for a count with a tone. */
+  count?: ReactNode;
+  /** Trailing controls beside the row — a pin, a caret. SIBLINGS of the link, never inside
+   *  it: a button inside an anchor is two controls claiming one click. */
+  actions?: ReactNode;
+  /** Navigation to this row is in flight. The icon slot becomes a ring and the row takes a
+   *  wash, after a short delay, so a prefetched route that commits in a frame shows nothing. */
+  pending?: boolean;
+  /** Drawn, dimmed, and not a link — a destination that exists and cannot be opened yet.
+   *  Put the reason in `title`. Hide the row instead when the reader may not see it at all. */
+  disabled?: boolean;
+  /** A second-level row: indented under the row that owns it, one step quieter. */
+  sub?: boolean;
+  title?: string;
+  linkAs?: NavLinkAs;
   className?: string;
 }
 
-export function NavItem({ href, icon, children, active, badge, className }: NavItemProps) {
-  return (
-    <a href={href} className={cx('jrk-nav-item', className)} aria-current={active ? 'page' : undefined}>
-      {icon}
+export function NavItem({
+  href,
+  icon,
+  glyph,
+  children,
+  active,
+  badge,
+  count,
+  actions,
+  pending,
+  disabled,
+  sub,
+  title,
+  linkAs,
+  className,
+}: NavItemProps) {
+  const mark = pending ? (
+    <span className="jrk-nav-item__pending" aria-hidden="true" />
+  ) : glyph != null ? (
+    <span className="jrk-nav-item__glyph" aria-hidden="true">
+      {glyph}
+    </span>
+  ) : (
+    icon
+  );
+  const inner = (
+    <>
+      {mark}
       <span className="jrk-nav-item__label">{children}</span>
+      {count != null && <span className="jrk-nav-item__count">{count}</span>}
       {badge && <span className="jrk-nav-item__badge">{badge}</span>}
-    </a>
+      {pending && <span className="jrk-sr-only">Loading</span>}
+    </>
+  );
+  const cls = cx('jrk-nav-item', sub && 'jrk-nav-item--sub', className);
+  const Link = linkAs ?? 'a';
+  const row = disabled ? (
+    <span className={cls} aria-disabled="true" title={title}>
+      {inner}
+    </span>
+  ) : (
+    <Link
+      href={href}
+      className={cls}
+      title={title}
+      aria-current={active ? 'page' : undefined}
+      aria-busy={pending || undefined}
+    >
+      {inner}
+    </Link>
+  );
+  if (!actions) return row;
+  return (
+    <div className="jrk-nav-row">
+      {row}
+      <span className="jrk-nav-row__actions">{actions}</span>
+    </div>
+  );
+}
+
+export interface NavDisclosureProps {
+  href: string;
+  label: ReactNode;
+  /** Names the caret — "Show sections in {name}". Defaults to `label` when that is a string;
+   *  a rail of eight carets otherwise announces eight identical buttons. */
+  name?: string;
+  icon?: ReactNode;
+  glyph?: ReactNode;
+  active?: boolean;
+  /** Controlled. Leave it unset and the row opens on its own while `active`, until the
+   *  reader touches the caret — after which their choice wins and keeps winning. */
+  open?: boolean;
+  defaultOpen?: boolean;
+  onToggle?: (open: boolean) => void;
+  /** Controls before the caret — a `<NavPinButton>`. */
+  actions?: ReactNode;
+  pending?: boolean;
+  title?: string;
+  linkAs?: NavLinkAs;
+  /** The second level: `<NavItem sub>` rows. Unmounted while closed, so a closed row's
+   *  sections are never in the tab order behind a caret that says they are not there. */
+  children: ReactNode;
+  className?: string;
+}
+
+/* A rail row that NAVIGATES, with a separate caret that DISCLOSES its sections inline.
+ *
+ * Two controls on purpose. <NavMenu> bakes label, icon and caret into one <button>, so a
+ * module with sections cannot be clicked to reach its own landing page, middle-clicked or
+ * bookmarked. Splitting that trigger would mean re-deriving the flyout's controller — the
+ * fixed position measured into custom properties, re-placed on capture-phase scroll and
+ * through a ResizeObserver on the rail. An inline list needs none of it: it is in flow, so
+ * there is nothing to place and nothing to clip, and nothing covered means nothing to
+ * dismiss.
+ *
+ * The caret ROTATES on open, where <NavMenu>'s does not: that panel appears beside the row,
+ * this one below it, so here the accordion gesture is the honest one. */
+export function NavDisclosure({
+  href,
+  label,
+  name,
+  icon,
+  glyph,
+  active,
+  open,
+  defaultOpen,
+  onToggle,
+  actions,
+  pending,
+  title,
+  linkAs,
+  children,
+  className,
+}: NavDisclosureProps) {
+  const listId = `${useId()}-sections`;
+  const [choice, setChoice] = useState<boolean | null>(null);
+  const isOpen = open ?? choice ?? defaultOpen ?? !!active;
+  const who = name ?? (typeof label === 'string' ? label : 'this item');
+
+  const toggle = () => {
+    const next = !isOpen;
+    if (open === undefined) setChoice(next);
+    onToggle?.(next);
+  };
+
+  return (
+    <>
+      <NavItem
+        href={href}
+        icon={icon}
+        glyph={glyph}
+        active={active}
+        pending={pending}
+        title={title}
+        linkAs={linkAs}
+        className={className}
+        actions={
+          <>
+            {actions}
+            <button
+              type="button"
+              className="jrk-nav-row__control jrk-nav-disclosure__caret"
+              aria-expanded={isOpen}
+              aria-controls={isOpen ? listId : undefined}
+              aria-label={`${isOpen ? 'Hide' : 'Show'} sections in ${who}`}
+              title={`${isOpen ? 'Hide' : 'Show'} sections`}
+              onClick={toggle}
+            >
+              <Icon name="chevronRight" />
+            </button>
+          </>
+        }
+      >
+        {label}
+      </NavItem>
+      {isOpen && (
+        <div className="jrk-nav-disclosure__sections" id={listId}>
+          {children}
+        </div>
+      )}
+    </>
+  );
+}
+
+export interface NavPinButtonProps {
+  pinned?: boolean;
+  onToggle: () => void;
+  /** What is being pinned — the button's name is "Pin {label}". */
+  label: string;
+  /** The control on a row that is already IN the pinned list: a cross that removes it. */
+  remove?: boolean;
+  className?: string;
+}
+
+/* Hidden until its row is hovered or the button is focused — by opacity and width, never
+ * display:none, so it stays in the tab order. A pinned row keeps it lit: "is this already up
+ * top" is worth reading without hunting for it.
+ *
+ * The name stays "Pin X" in both states and aria-pressed carries the state. Swapping the name
+ * to "Unpin X" as well announces the state twice, and pressed it reads as an instruction to do
+ * the opposite of what the button shows. */
+export function NavPinButton({ pinned = false, onToggle, label, remove, className }: NavPinButtonProps) {
+  if (remove) {
+    return (
+      <button
+        type="button"
+        className={cx('jrk-nav-row__control jrk-nav-pin jrk-nav-pin--remove', className)}
+        aria-label={`Unpin ${label}`}
+        title={`Unpin ${label}`}
+        onClick={onToggle}
+      >
+        <Icon name="close" />
+      </button>
+    );
+  }
+  return (
+    <button
+      type="button"
+      className={cx('jrk-nav-row__control jrk-nav-pin', className)}
+      aria-pressed={pinned}
+      aria-label={`Pin ${label}`}
+      title={pinned ? 'Pinned — click to unpin' : 'Pin to the top of the sidebar'}
+      onClick={onToggle}
+    >
+      <Icon name={pinned ? 'pinFill' : 'pin'} />
+    </button>
   );
 }
 
@@ -318,23 +715,61 @@ export interface TopbarProps {
   /** Ramp for a `vivid` bar. Omitted is the three-hue ribbon; `'blue'` is the
    *  brand anchor deepening across the bar and nothing else, which is what to
    *  use when the bar sits above a row of blue `<VividStat>`s — it is literally
-   *  the same ramp, so the two read as one masthead. Ignored unless `vivid`. */
-  tone?: 'blue';
+   *  the same ramp, so the two read as one masthead. `'brand'` is the product
+   *  masthead — a pale ramp under dark ink in light, a saturated one under white
+   *  in dark. Ignored unless `vivid`. */
+  tone?: 'blue' | 'brand';
+  /** A full-width bar above the rail — pass it as `<AppShell masthead>`. */
+  masthead?: boolean;
   className?: string;
 }
 
-export function Topbar({ children, vivid, tone, className }: TopbarProps) {
+export function Topbar({ children, vivid, tone, masthead, className }: TopbarProps) {
   return (
     <header
       className={cx(
         'jrk-topbar',
         vivid && 'jrk-topbar--vivid',
         vivid && tone && `jrk-topbar--${tone}`,
+        masthead && 'jrk-topbar--masthead',
         className,
       )}
     >
       {children}
     </header>
+  );
+}
+
+export interface BrandMarkProps {
+  /** The wordmark. Clipped, never removed, at phone width — it is the link's name. */
+  name: ReactNode;
+  /** The square: a letter or an SVG. */
+  mark: ReactNode;
+  /** A wordmark that does not go home breaks a convention for nothing. */
+  href?: string;
+  linkAs?: NavLinkAs;
+  className?: string;
+}
+
+/** Product mark and wordmark, for a topbar or the rail's brand row. The mark takes the bar's
+ *  own ink as its fill, so it is the inverse of the text beside it on whatever bar it sits. */
+export function BrandMark({ name, mark, href, linkAs, className }: BrandMarkProps) {
+  /* The mark is a div, not a span: `.jrk-sidebar__brand span` is hidden in the collapsed
+     rail, and a span-wrapped mark would vanish with the wordmark. */
+  const inner = (
+    <>
+      <div className="jrk-brand__mark" aria-hidden="true">
+        {mark}
+      </div>
+      <span className="jrk-brand__text">{name}</span>
+    </>
+  );
+  if (!href) return <div className={cx('jrk-brand', className)}>{inner}</div>;
+  const Link = linkAs ?? 'a';
+  return (
+    <Link href={href} className={cx('jrk-brand', className)}>
+      {inner}
+    </Link>
   );
 }
 

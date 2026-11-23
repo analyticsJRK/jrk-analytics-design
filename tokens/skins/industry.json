@@ -9,9 +9,11 @@
     "$chartNote": "The skin does NOT override one chart slot and that is a measured decision, not an omission. Its light panel (#f4f6f6) is darker than the base card (#ffffff), so every light mark loses about 8% contrast — slot 1 goes 4.02 to 3.70, slot 5 4.13 to 3.81, slot 6 3.65 to 3.36. No slot crosses the 3:1 mark floor and reliefRequired.light is unchanged, so the CVD-derived palette carries over intact. Dark IMPROVES slightly (#1e2224 is darker than #232326). What DID have to move is chart.chrome.surface: it is stroked as the ring around a dot, so leaving it at the base card would have painted a white ring on a #f4f6f6 panel — the same defect this library already recorded when that token sat at a stale #1c1c1e."
   },
   "stamp": "industry",
+  "label": "Industry",
   "variantAxis": {
     "attr": "hazard",
     "default": "yellow",
+    "label": "Hazard hue",
     "$note": "THE ATTRIBUTE, DECLARED RATHER THAN ASSUMED. It was hardcoded in build-tokens.mjs until 2026-08-25, when vitrine gained a colour choice of its own and `hazard` stopped being the right word for every skin: this skin's hue is a hazard SIGNAL, vitrine's is a MATERIAL, and they stamp data-hazard and data-tint respectively. Nothing about this skin changed — the emitted selectors are byte-identical — but the name is now a fact in the token file instead of an assumption in the generator. `default` is yellow, and yellow is the ABSENCE of the attribute rather than a value of it."
   },
   "$varsNote": "Keyed by the CSS variable name WITHOUT the --jrk- prefix, deliberately. The generator's own naming is namespace-specific (color.text.onBanner -> text-on-banner, font.family.sans -> font-sans, chart.chrome.surface -> chart-surface), so a mirror of tokens.json's tree would need a second, divergent mapping table. Instead the build ASSERTS that every name here already exists in the base layer; a typo or a renamed base token fails `npm run build` instead of emitting a colour nothing reads. Skin-only names go in `skinOnly`, which is exempt from that assertion and is the only way to add one.",
@@ -239,8 +241,8 @@
     },
     "status-critical-text": {
       "light": "#b0231c",
-      "dark": "#ff5a4d",
-      "$note": "6.24:1 on the panel, 5.54:1 on its own wash."
+      "dark": "#ff6155",
+      "$note": "6.24:1 on the panel, 5.54:1 on its own wash. Dark re-stepped 2026-11-23, #ff5a4d -> #ff6155: the old value cleared the panel and the wash but sat at 4.39:1 on surface-raised (the .jrk-btn--danger label) and 4.34:1 on surface-active. Now 5.42 panel / 4.57 raised / 4.51 active / 5.40 wash. The mark stays #ff5a4d."
     },
     "status-critical-wash": {
       "light": "#fbe3e1",
@@ -254,6 +256,37 @@
     "status-critical-on-solid": {
       "light": "#ffffff",
       "dark": "#ffffff"
+    },
+    "status-critical-solid-hover": {
+      "light": "#b3231c",
+      "dark": "#b3231c",
+      "$note": "One step deeper than the fill (white x1.18). Replaces the hover's borrow of status-critical-text, which is a pale red in dark."
+    },
+    "status-good-solid": {
+      "light": "#0d7a4f",
+      "dark": "#0d7a4f",
+      "$note": "status-good-mark verbatim: this skin's marks are already deep enough to carry white (5.37:1), the same arrangement status-critical-solid makes with its mark. 2.99:1 on the dark panel, beside critical's 2.88:1 — recorded, not gated."
+    },
+    "status-good-on-solid": {
+      "light": "#ffffff",
+      "dark": "#ffffff"
+    },
+    "status-good-solid-hover": {
+      "light": "#0c6d47",
+      "dark": "#0c6d47"
+    },
+    "status-warning-solid": {
+      "light": "#a8560a",
+      "dark": "#a8560a",
+      "$note": "status-warning-mark verbatim; white 5.25:1, 3.05:1 on the dark panel."
+    },
+    "status-warning-on-solid": {
+      "light": "#ffffff",
+      "dark": "#ffffff"
+    },
+    "status-warning-solid-hover": {
+      "light": "#974d09",
+      "dark": "#974d09"
     },
     "status-neutral-mark": {
       "light": "#515a5e",
@@ -533,8 +566,16 @@
         "status.critical.solid dE 4.6 (protanopia)",
         "status.critical.mark dE 4.6 (protanopia)",
         "status.warning.mark dE 3.2 (protanopia)",
-        "status.serious.mark dE 6.3 (protanopia)"
+        "status.serious.mark dE 6.3 (protanopia)",
+        "status.warning.solid dE 3.2 (protanopia)"
       ],
+      "restriction": {
+        "modes": [
+          "light",
+          "dark"
+        ],
+        "note": "Red is the status reds' hue by construction, so under protanopia the accent and the danger signal converge. Status badges carry icon and label, and a CTA does not share a tile with a danger button. Orange is the nearest hue that clears every status colour."
+      },
       "vars": {
         "accent-solid": {
           "light": "#e32416",

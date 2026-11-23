@@ -1,4 +1,5 @@
-import type { ReactNode } from 'react';
+import { Children, cloneElement, isValidElement, useId } from 'react';
+import type { ReactElement, ReactNode } from 'react';
 import { cx } from './utils';
 import { Icon } from './Icon';
 
@@ -71,38 +72,221 @@ export function Stat({ label, value, unit, delta, spark, footnote, className }: 
   );
 }
 
-/** Decorative by contract — aria-hidden, because the number beside it is the
- *  accessible value. */
-export function Sparkline({ points, className }: { points: number[]; className?: string }) {
-  const w = 96;
-  const h = 40;
-  const pad = 3;
-  const min = Math.min(...points);
-  const max = Math.max(...points);
-  // A flat series would divide by zero; render it as a centered line instead.
-  const span = max - min || 1;
-  const x = (i: number) => pad + (i * (w - pad * 2)) / (points.length - 1);
-  const y = (v: number) => h - pad - ((v - min) / span) * (h - pad * 2);
+export type SparkTone = 'series' | 'neutral' | 'warning' | 'critical' | 'good';
 
-  const line = points.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
-  const area = `${line} L${x(points.length - 1).toFixed(1)},${h} L${x(0).toFixed(1)},${h} Z`;
+export interface SparklineProps {
+  /** The original shape-only series. Still drawn exactly as before: line plus
+   *  area wash, decorative. */
+  points?: number[];
+  /** A series that may have GAPS. `null` breaks the line — a month nobody
+   *  measured is not a zero, and a line drawn across it claims a reading that
+   *  does not exist. A lone reading between two gaps is drawn as a dot. */
+  values?: (number | null)[];
+  /** Makes the sparkline an image: `role="img"` and this label plus the values
+   *  as its accessible name. Without it the sparkline is decorative and
+   *  aria-hidden, because the number beside it is the accessible value. */
+  label?: string;
+  /** One per point. Adds a hover column per point carrying a native <title>
+   *  ("Mar 2026: 41") — no script, so it works in a server component. */
+  labels?: string[];
+  format?: (n: number) => string;
+  /** `series` is slot 1. The status tones are for a line whose SUBJECT is a
+   *  verdict (an alarm count, a failure rate) — never to colour a healthy
+   *  metric green. */
+  tone?: SparkTone;
+  /** Mark the last real reading. On by default for `values`: where the line
+   *  stops is itself the finding, and a bare end is easy to lose at a cell
+   *  edge. */
+  endDot?: boolean;
+  /** A reference value, drawn as a dashed hairline — a target, a normal day. */
+  baseline?: number | null;
+  /** The ~12% wash under the line. Default on for `points`, off for `values`. */
+  area?: boolean;
+  /** `hatch` shades every missing stretch so absence reads as absence. */
+  gaps?: 'break' | 'hatch';
+  /** Include zero in the domain. Off by default: a sparkline is shape only, so
+   *  its own min-max is the right scale — but then two in one column are NOT
+   *  comparable, which is why the figure beside each carries the magnitude. */
+  zero?: boolean;
+  /** `tile` is 96x40 beside a stat; `cell` is 72x22, inline in a table row
+   *  without moving the row height. */
+  size?: 'tile' | 'cell';
+  className?: string;
+}
+
+const SPARK_SIZE = { tile: { w: 96, h: 40, pad: 3 }, cell: { w: 72, h: 22, pad: 2 } } as const;
+
+/** Shape only — no axes, no labels. If the reader needs to read values off it,
+ *  it needs to be a real chart. Decorative unless given a `label`. */
+export function Sparkline({
+  points, values, label, labels, format, tone = 'series', endDot, baseline = null, area, gaps = 'break',
+  zero, size = 'tile', className,
+}: SparklineProps) {
+  const patternId = `jrk-spark-gap-${useId().replace(/:/g, '')}`;
+  const series: (number | null)[] = values ?? points ?? [];
+  const present = series.filter((v): v is number => v != null && Number.isFinite(v));
+  const fmt = format ?? ((n: number) => n.toLocaleString());
+
+  if (present.length < 2) {
+    return label ? (
+      <span className="jrk-spark-empty" aria-label={`${label}: not enough data`}>
+        —
+      </span>
+    ) : null;
+  }
+
+  const { w, h, pad } = SPARK_SIZE[size];
+  const drawArea = area ?? values === undefined;
+  const drawEnd = endDot ?? values !== undefined;
+  const lo = Math.min(...present, ...(baseline != null ? [baseline] : []), ...(zero ? [0] : []));
+  const hi = Math.max(...present, ...(baseline != null ? [baseline] : []), ...(zero ? [0] : []));
+  // A flat series would divide by zero; it draws as a centred line instead.
+  const span = hi - lo || 1;
+  const n = series.length;
+  const x = (i: number) => (n <= 1 ? w / 2 : pad + (i * (w - pad * 2)) / (n - 1));
+  const y = (v: number) => (hi === lo ? h / 2 : h - pad - ((v - lo) / span) * (h - pad * 2));
+
+  const runs: [number, number][][] = [];
+  let run: [number, number][] = [];
+  series.forEach((v, i) => {
+    if (v == null || !Number.isFinite(v)) {
+      if (run.length) runs.push(run);
+      run = [];
+      return;
+    }
+    run.push([i, v]);
+  });
+  if (run.length) runs.push(run);
+
+  const path = (r: [number, number][]) => r.map(([i, v], k) => `${k ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+  const last = runs[runs.length - 1];
+  const end = last[last.length - 1];
+
+  // Missing stretches, as x-ranges reaching halfway to each present neighbour.
+  const gapRects: { x: number; w: number }[] = [];
+  if (gaps === 'hatch') {
+    let start: number | null = null;
+    series.forEach((v, i) => {
+      const missing = v == null || !Number.isFinite(v);
+      if (missing && start === null) start = i;
+      if ((!missing || i === n - 1) && start !== null) {
+        const stop = missing ? i : i - 1;
+        const step = (w - pad * 2) / Math.max(1, n - 1);
+        const x0 = Math.max(0, x(start) - step / 2);
+        const x1 = Math.min(w, x(stop) + step / 2);
+        gapRects.push({ x: x0, w: x1 - x0 });
+        start = null;
+      }
+    });
+  }
+
+  /* A ROUND MARK IS A STROKE, NOT A SHAPE. `preserveAspectRatio="none"` lets the
+     viewBox fill any box and scales x and y differently, so a <circle> comes out
+     an ellipse. A zero-length line with a round cap and a non-scaling stroke is a
+     true circle at any scale. */
+  const dot = (i: number, v: number, cls: string, key?: string | number) => (
+    <line key={key} className={cls} x1={x(i)} y1={y(v)} x2={x(i) + 0.01} y2={y(v)} />
+  );
+
+  const step = n > 1 ? (w - pad * 2) / (n - 1) : w;
+  const accessible = label ? `${label}: ${series.map((v) => (v == null ? 'no data' : fmt(v))).join(', ')}` : undefined;
 
   return (
     <svg
-      className={cx('jrk-stat__spark', className)}
+      className={cx('jrk-stat__spark', tone !== 'series' && `jrk-spark--${tone}`, size === 'cell' && 'jrk-spark--cell', className)}
       viewBox={`0 0 ${w} ${h}`}
       preserveAspectRatio="none"
-      aria-hidden="true"
+      role={label ? 'img' : undefined}
+      aria-label={accessible}
+      aria-hidden={label ? undefined : true}
       focusable="false"
     >
-      <path className="jrk-spark-area" d={area} />
-      <path d={line} />
+      {gapRects.length > 0 && (
+        <>
+          <defs>
+            <pattern id={patternId} width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+              <rect className="jrk-spark__gap-ground" width="4" height="4" />
+              <line className="jrk-spark__gap-line" x1="0" y1="0" x2="0" y2="4" />
+            </pattern>
+          </defs>
+          {gapRects.map((r, i) => (
+            <rect key={`g${i}`} className="jrk-spark__gap" x={r.x} y={0} width={r.w} height={h} fill={`url(#${patternId})`} />
+          ))}
+        </>
+      )}
+      {baseline != null && <line className="jrk-spark__base" x1={0} x2={w} y1={y(baseline)} y2={y(baseline)} />}
+      {drawArea &&
+        runs
+          .filter((r) => r.length > 1)
+          .map((r, i) => (
+            <path
+              key={`a${i}`}
+              className="jrk-spark-area"
+              d={`${path(r)} L${x(r[r.length - 1][0]).toFixed(1)},${h} L${x(r[0][0]).toFixed(1)},${h} Z`}
+            />
+          ))}
+      {runs.map((r, i) => (r.length > 1 ? <path key={`l${i}`} className="jrk-spark__line" d={path(r)} /> : dot(r[0][0], r[0][1], 'jrk-spark__dot', `d${i}`)))}
+      {drawEnd && dot(end[0], end[1], 'jrk-spark__end')}
+      {labels?.length === n &&
+        series.map((v, i) => (
+          <rect key={`h${i}`} className="jrk-spark__hit" x={Math.max(0, x(i) - step / 2)} y={0} width={step} height={h}>
+            <title>{`${labels[i]}: ${v == null ? 'no data' : fmt(v)}`}</title>
+          </rect>
+        ))}
     </svg>
   );
 }
 
-export function StatRow({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={cx('jrk-stat-row', className)}>{children}</div>;
+/** Positional tones for a vivid row, teal first so the band's leading tile and
+ *  the vivid topbar's leading stop are the same colour. Period four, so two
+ *  ADJACENT tiles never share one. */
+const VIVID_ORDER: VividTone[] = ['teal', 'violet', 'blue', 'rose'];
+
+export interface StatRowProps {
+  children: ReactNode;
+  /** Discrete tiles with a gap, each its own enclosure. */
+  split?: boolean;
+  tinted?: boolean;
+  /** A masthead band of vivid tiles, tone by POSITION. The tone is assigned
+   *  here and not at the call site because a tone must never mean the metric —
+   *  half the positional pairs collapse under CVD — and there is then no prop
+   *  to misuse. Implies `split`: the joined row's `background: none` would
+   *  erase every gradient. A `<VividStat>` that names its own tone keeps it
+   *  (a semantic row); every other child gets the next position's. */
+  vivid?: boolean;
+  className?: string;
+}
+
+export function StatRow({ children, split, tinted, vivid, className }: StatRowProps) {
+  let body: ReactNode = children;
+  if (vivid) {
+    // toArray drops `false` children, so the position counts tiles that exist.
+    body = Children.toArray(children)
+      .filter(isValidElement)
+      .map((child, i) => {
+        const tone = VIVID_ORDER[i % VIVID_ORDER.length];
+        const el = child as ReactElement<{ className?: string; tone?: VividStatTone }>;
+        if (el.type === VividStat) {
+          return el.props.tone ? el : cloneElement(el, { tone });
+        }
+        return cloneElement(el, {
+          className: cx(el.props.className, 'jrk-stat--vivid', `jrk-stat--${tone}`),
+        });
+      });
+  }
+  return (
+    <div
+      className={cx(
+        'jrk-stat-row',
+        (split || vivid) && 'jrk-stat-row--split',
+        tinted && 'jrk-stat-row--tinted',
+        vivid && 'jrk-stat-row--vivid',
+        className,
+      )}
+    >
+      {body}
+    </div>
+  );
 }
 
 /* ---------- vivid tile ---------- */

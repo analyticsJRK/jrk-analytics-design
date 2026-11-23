@@ -185,13 +185,18 @@ export const Checkbox = forwardRef<HTMLInputElement, CheckboxProps>(function Che
 
 export interface SwitchProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'type' | 'className'> {
   label: ReactNode;
+  /** A second, quieter line saying what the current state MEANS — "only you can see
+   *  this" under Private. Upstreamed from the portal's shared/private note switch,
+   *  where a switch whose label names only the state left the reader to guess who
+   *  the post was for. Same element and style as Checkbox's hint. */
+  hint?: ReactNode;
   className?: string;
 }
 
 /** For settings that take effect immediately. If the change needs a Save
  *  press, use a Checkbox — a switch that does not apply at once misleads. */
 export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
-  { label, className, id, ...rest },
+  { label, hint, className, id, ...rest },
   ref,
 ) {
   const auto = useId();
@@ -199,7 +204,10 @@ export const Switch = forwardRef<HTMLInputElement, SwitchProps>(function Switch(
   return (
     <label className={cx('jrk-switch', className)} htmlFor={fieldId}>
       <input {...rest} ref={ref} id={fieldId} type="checkbox" role="switch" />
-      <span className="jrk-check__label">{label}</span>
+      <span className="jrk-check__label">
+        {label}
+        {hint && <span className="jrk-check__hint">{hint}</span>}
+      </span>
     </label>
   );
 });

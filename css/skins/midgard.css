@@ -75,6 +75,9 @@
 :root[data-skin='midgard'] .jrk-table__sort,
 :root[data-skin='midgard'] .jrk-tabs--pills,
 :root[data-skin='midgard'] .jrk-tab__count,
+:root[data-skin='midgard'] .jrk-count,
+:root[data-skin='midgard'] .jrk-funnel__tag,
+:root[data-skin='midgard'] .jrk-table__group-count,
 :root[data-skin='midgard'] .jrk-stat__action,
 :root[data-skin='midgard'] .jrk-topbar--vivid.jrk-topbar--brand .jrk-btn-group,
 :root[data-skin='midgard'] .jrk-pagination {
@@ -177,9 +180,11 @@
    short enough that uppercase at 0.18em still reads as a word.
    VALUES ARE DELIBERATELY ABSENT — tracking this wide makes two numbers harder
    to compare, and a stat's value is the thing on the tile a reader is comparing.
-   So is body copy, which is not a label and would become unreadable. */
+   So is body copy, which is not a label and would become unreadable.
+   `thead th`, not `th`: a `<th scope="row">` is a row's NAME — a property, a
+   person, an email address — and in tracked caps every roster shouted. */
 :root[data-skin='midgard'] .jrk-stat__label,
-:root[data-skin='midgard'] .jrk-table th,
+:root[data-skin='midgard'] .jrk-table thead th,
 :root[data-skin='midgard'] .jrk-list__header,
 :root[data-skin='midgard'] .jrk-section-nav__title,
 :root[data-skin='midgard'] .jrk-sheet__band-label,
@@ -219,15 +224,23 @@
    it as their lift and dropping it would flatten the thumb. THAT IS WHY
    shadow-md AND shadow-card MAY NEVER BE `none` IN THIS SKIN: a box-shadow list
    containing `none` is invalid and the whole declaration is discarded, ring and
-   lift together. The token file says so on both. */
+   lift together. The token file says so on both.
+
+   `background-clip: padding-box` IS THE OTHER HALF OF AN INSET RING. An inset
+   shadow is drawn inside the BORDER, while a fill runs under a transparent border
+   by default — and several of these reserve a transparent 1px. So a 1px band of
+   wash showed outside the gold, and the ring read as stopping short of the
+   control. Clipping the fill to the padding box puts its edge where the ring is. */
 :root[data-skin='midgard'] .jrk-btn-group > .jrk-btn[aria-pressed='true'],
 :root[data-skin='midgard'] .jrk-btn-group > .jrk-btn[aria-selected='true'],
+:root[data-skin='midgard'] .jrk-btn-group > .jrk-btn[aria-current='page'],
 :root[data-skin='midgard'] .jrk-tabs--pills .jrk-tab[aria-selected='true'],
 :root[data-skin='midgard'] .jrk-tabs--pills .jrk-tab[aria-current='page'],
 :root[data-skin='midgard'] .jrk-nav-item[aria-current='page'],
 :root[data-skin='midgard'] .jrk-sidebar__action[aria-current='page'],
 :root[data-skin='midgard'] .jrk-list__row[aria-selected='true'] {
   box-shadow: inset 0 0 0 1px var(--jrk-border-accent), var(--jrk-shadow-md);
+  background-clip: padding-box;
 }
 
 /* ── the masthead's gold rule ─────────────────────────────────────────────
@@ -561,4 +574,25 @@
    replaces, which is the opposite of what the compact tile is for. */
 :root[data-skin='midgard'] .jrk-org__card:not(.jrk-org__card--compact) .jrk-org__name {
   font-family: var(--jrk-font-display);
+}
+
+/* ── Components upstreamed from the portal 2026-11-23 ────────────────────── */
+
+/* A ONE-PARAGRAPH MODAL KEEPS ITS BAND. feedback.css closes the gap between a
+   modal's title and a body that is a single paragraph, at (0,3,1) — which beats
+   the band's `padding-block` above at (0,3,0), so the band lost its lower padding
+   and the title sat on the band's edge. The body takes back the gap below a
+   filled band, as `.jrk-card__header + .jrk-card__body` does. */
+:root[data-skin='midgard'] .jrk-modal__header:has(+ .jrk-modal__body > p:only-child) {
+  padding-bottom: var(--jrk-space-2_5);
+}
+
+:root[data-skin='midgard'] .jrk-modal__body:has(> p:only-child) {
+  padding-top: var(--jrk-space-4);
+}
+
+/* The band centres its first child, and a collapsible card's chevron is inside
+   the title — so the subtitle's chevron-width indent pushes a centred line right. */
+:root[data-skin='midgard'] .jrk-card--collapsible .jrk-card__subtitle {
+  padding-inline-start: 0;
 }

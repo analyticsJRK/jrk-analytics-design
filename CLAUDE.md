@@ -478,8 +478,9 @@ is thirty cards wide and the comparison runs ACROSS a row, so centred text gives
 every card in it the same optical centre. The scanning cost is real and is paid on
 the name, which is why `--compact` clamps its name to **two lines**: one long
 property name allowed a third sets the height for the eleven tiles beside it.
-`.jrk-org__group-label` is the one string that stays start-aligned — it heads a
-list rather than belonging to a row.
+`.jrk-org__group-label` was the one string left start-aligned; since 2026-11-23 it is
+CENTRED too, following the portal's later directed change (one exception to a rule
+that is otherwise consistent reads as an error).
 
 **UNDER A SKIN ONLY THE TILE AND THE TYPEFACE CHANGE, and most of that is free
 because the org chart takes its radius from TOKENS.** `.jrk-org__card` reaches for
@@ -1613,6 +1614,39 @@ carries icon **and** label, a delta states direction in text, and an amber `--ct
 does not share a tile with a warning chip whose only mark is its colour. All four
 cool tints clear the whole status set, so **this is the price of the warm one** —
 the same shape as industry's `red`, arrived at from the opposite end of the wheel.
+
+## Upstreamed from the portal — 2026-11-23
+
+The portal had grown more design than this library (skins fixes, hues, org chart,
+charts, tables, filters, toggles). It was ported back in one pass; the component
+list is in `references/components.md` (top) and `references/charts.md`. What the
+code alone will not tell you:
+
+- **Org `palette="generated"` is a deliberate EXCEPTION to the 8-slot cycle.**
+  Directed in the portal ("no two managers share a card"). Opt-in, default
+  `'cycled'`. Golden-angle OKLCH hues with white ink checked per colour at runtime
+  (6.47–7.19:1, slots 1–17). Inline styles, so `check-css` never sees them. It
+  promises no repeats, NOT colourblind separation — do not use it for chart series.
+- **Vitrine `data-scene="clear"`** shows the photograph undulled (clamp and scrim
+  off, overlays opaque, bare chrome — page header, section header, tab row,
+  `.jrk-subnav`, a card-less `.jrk-tablekit` — gets a `surface-default` plane).
+  The photo is `--jrk-vitrine-photo` / `-dark`; the old backdrop hook vanished
+  under any tint.
+- **`svg text { stroke: none }` in base.css.** The icon rule's inherited stroke
+  outlined every chart label and read as bold type. The icon rule itself stays
+  global: bare inline icons rely on it.
+- **`sidebar.collapsed` is 72px** (was 52); shell.css derives the rail from it.
+- **One floating placement** — `react/src/floating.ts`. Menu, ColumnFilter and
+  Combobox all use it; do not copy `place()` again.
+- **Negative money is ($1,000) and red** — `money.ts` + `<NegativeHighlight>` +
+  `::highlight(jrk-negative)`. Money only; scores and percentages keep the minus.
+- **Open, measured, not fixed:** `<OrgNode tone="deep">` on vitrine light is
+  1.025:1 against the panel (bounded only by its hairline); base status text
+  misses 4.5:1 on `surface.track` / `surface.active` in three places (WARN in
+  `validate`); several skin `*.solid` fills sit under 3:1 on the dark panel. Each
+  needs a colour decision, not a gate change.
+- The portal is NOT migrated onto any of this yet. `PORTAL-MIGRATION.md` maps each
+  app file to its library replacement and lists the visible changes to expect.
 
 ## Adding a component
 

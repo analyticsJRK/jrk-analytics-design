@@ -73,9 +73,11 @@
      makes above applies here — the heights are STATED, and the two going out of
      step is the thing to watch.
 
-     --jrk-sheet-toolbar-h has no default because a sheet may have no toolbar; the
-     consumer sets it from `offsetHeight` (the report preview does, through a
-     ResizeObserver) and it falls back to 0px at every read.
+     --jrk-sheet-toolbar-h has no default because a sheet may have no toolbar; it
+     is set from `offsetHeight` by a ResizeObserver — <SheetToolbar> does that, and
+     hand-written markup has to — and it falls back to 0px at every read. Left
+     unset under a real toolbar, the letter bar pins at 0 BEHIND the toolbar and
+     every metric header parks 18px into it, out of sight.
 
      --jrk-sheet-colbar-h IS derivable on paper — 3px + 3px padding, a 9px letter at
      the sheet's 1.25 line-height, and a 1px bottom rule, so 18.25px — and 18px is
@@ -197,6 +199,25 @@
   border-bottom: 1px solid var(--jrk-border-default);
 }
 
+/* THE FOOT TOOLBAR — the same strip at the end of the sheet, for a closing note
+   or a second set of controls. Its own element rather than `__toolbar` with an
+   override, because the toolbar is `position: sticky` at `top: 0`: a closing note
+   carrying that class floats over the FIRST data row instead of following the
+   last. This one is static, ruled on its top edge, and is never measured — a
+   foot toolbar's height must not overwrite the top toolbar's in
+   `--jrk-sheet-toolbar-h`, which is the reason <SheetToolbar> is not used for it. */
+.jrk-sheet__foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  padding: var(--jrk-space-2) var(--jrk-space-3);
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-secondary);
+  background: var(--jrk-surface-subtle);
+  border-top: 1px solid var(--jrk-border-default);
+}
+
 /* ============================== column bar ============================== */
 
 /* The A…Y strip. Sticky on both axes so it survives horizontal scrolling. */
@@ -225,6 +246,18 @@
 .jrk-sheet__colbar > .jrk-sheet__col:first-child {
   position: sticky;
   inset-inline-start: 0;
+  z-index: 1;
+  background: var(--jrk-surface-subtle);
+}
+
+/* AND THE LETTER OVER THE LABEL COLUMN FREEZES WITH IT. The label column is frozen
+   beside the gutter (`.jrk-sheet__cell--label`), so the letter naming it has to be
+   too — left static, a horizontal scroll slides it off by exactly the label width
+   and every letter after it stops naming the column beneath. Same offset as the
+   label cell, same fill as the corner. */
+.jrk-sheet__colbar > .jrk-sheet__col:nth-child(2) {
+  position: sticky;
+  inset-inline-start: var(--jrk-sheet-gutter);
   z-index: 1;
   background: var(--jrk-surface-subtle);
 }

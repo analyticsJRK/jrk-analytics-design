@@ -13,12 +13,19 @@ to be reachable somehow.
 
 | Prop | Type | Default | Notes |
 |---|---|---|---|
-| `series` | `{ name, values }[]` | — | Max 8. Slots assign in order and never cycle. |
-| `labels` | `string[]` | — | One per x position. |
-| `format` | `(n: number) => string` | `toLocaleString` | Tooltip and table values. |
+| `series` | `{ name, values, slot?, style? }[]` | — | Max 8. Slots assign in order and never cycle; `slot` pins one to its entity so a filter cannot repaint it. `values` may hold `null` — a gap, never a zero. `style: 'dashed'` for prior years beside a solid current one (turns redundant dashing off). |
+| `labels` | `string[]` | — | One per x position. Thinned to fit; the data never is. |
+| `tips` | `string[]` | — | Tooltip heading per point, longer than the tick. |
+| `format` | `(n: number) => string` | `toLocaleString` | Tooltip values. |
+| `tickFormat` | `(n: number) => string` | compact | Axis labels. |
 | `height` | `number` | `220` | |
 | `area` | `boolean` | `false` | ~10% wash. Single series only — stacked washes become unreadable past one. |
 | `encoding` | `'hue' \| 'redundant'` | `redundant` at 2+ series, `hue` at 1 | Adds the per-slot dash. |
+| `fromZero` | `boolean` | `true` | Off for a rating. A signed series always keeps zero and draws a zero line. |
+| `endLabels` | `boolean` | `false` | Names each line at its last point; labels are spread so close finishes never overprint. |
+| `trend` | `boolean` | `false` | Dashed least-squares fit in threshold ink. Single series only. |
+| `band` | `{ lo, hi, label }` | — | Shaded reference range in `chart.neutral`. |
+| `label` | `string` | generated | Overrides the `aria-label`. |
 | `className` | `string` | — | |
 
 ## The `encoding` prop
@@ -78,6 +85,5 @@ above. Single series takes the area wash and stays solid:
 </ChartCard>
 ```
 
-Pick data that peaks just under a round number — the axis ceiling is coarse near
-a decade boundary, and a series topping out at 1,402 gets a 2,000 axis, leaving
-the area sitting in the bottom half of the plot.
+Ticks step by 1, 2, 2.5 or 5 x 10^k, so a series topping out at 1,402 gets a
+1,500 axis rather than 2,000. Use `SeriesTable` as the `ChartCard` table.

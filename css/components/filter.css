@@ -1,0 +1,183 @@
+/* Column filter — a funnel on a heading and the panel it opens (<ColumnFilter>).
+
+   Markup contract:
+
+     <th class="jrk-th--filter">
+       Status
+       <button class="jrk-th__funnel" aria-haspopup="dialog" aria-expanded="false">…</button>
+       <div class="jrk-menu jrk-menu--anchored jrk-menu--floating jrk-filter" popover="manual"
+            role="dialog">…</div>
+     </th>
+
+   THE PANEL IS A `.jrk-menu`. The surface, the radius, the shadow, the z-index and every skin's
+   overlay treatment come from feedback.css; this file only lays out what is inside it. A fourth
+   hand-rolled floating panel would be a fourth place for a skin to forget.
+
+   Load AFTER table.css: the heading's reserved room below ties the compact density rule (0,2,2)
+   and wins on order. */
+
+/* ---------- the heading ---------- */
+
+/* The funnel is absolutely placed at the heading's trailing edge, so the heading has to be its
+   containing block. A library heading is `position: sticky`, which already is one; any other
+   table's heading is made relative here at ZERO specificity, so its own `position` still wins. */
+:where(th.jrk-th--filter) {
+  position: relative;
+}
+
+/* Room for the funnel, so a centred label never runs under it. Doubled class: a consuming app's
+   own heading padding (`.x-table thead th`, 0-1-2) must not take the funnel's room. */
+thead th.jrk-th--filter.jrk-th--filter {
+  padding-inline-end: calc(var(--jrk-min-touch) + var(--jrk-space-1) * 2);
+}
+
+/* A slot a DOM adapter appends to a heading to render the funnel into. Lays out as if absent. */
+.jrk-th__slot {
+  display: contents;
+}
+
+/* 24px, the minTouch floor, with the glyph at the heading's type size. It is quiet at rest — a
+   muted glyph on no fill — because every column carries one and a row of eighteen loud controls
+   competes with the labels it sits between. */
+.jrk-th__funnel {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: var(--jrk-space-1);
+  translate: 0 -50%;
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--jrk-min-touch);
+  block-size: var(--jrk-min-touch);
+  padding: 0;
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+  background: none;
+  border: 0;
+  border-radius: var(--jrk-radius-sm);
+  cursor: pointer;
+  transition:
+    background-color var(--jrk-transition),
+    color var(--jrk-transition);
+}
+
+.jrk-th__funnel:hover {
+  color: var(--jrk-text-primary);
+  background: var(--jrk-surface-hover);
+}
+
+.jrk-th__funnel:focus-visible {
+  outline: 2px solid var(--jrk-focus-ring);
+  outline-offset: 1px;
+}
+
+/* FILTERED IS THE SOLID ACCENT, deliberately the loudest thing in the header row. A filter that
+   narrows a table without saying so is how a reader concludes a property is missing; the count
+   in a toolbar is easy to miss, a filled chip on the column that did it is not. The glyph is the
+   ink, so the state is a fill change AND a contrast change and survives greyscale. */
+.jrk-th__funnel--on,
+.jrk-th__funnel--on:hover {
+  color: var(--jrk-accent-on-solid);
+  background: var(--jrk-accent-solid);
+}
+
+/* ---------- the panel ---------- */
+
+/* (0,2,0): over `.jrk-menu`'s padding whatever order the two files load in.
+
+   THE PANEL SITS INSIDE THE HEADING CELL — a popover keeps its DOM place — so it inherits the
+   heading's type: centred, nowrap, semibold, xs, accent ink, and under midgard uppercase with
+   caps tracking; a sortable heading adds a pointer cursor and `user-select: none`. Every one of
+   those is reset here, or a checklist of property names renders as a centred row of blue caps
+   nobody can select. */
+.jrk-menu.jrk-filter {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-2);
+  inline-size: min(260px, calc(100vw - var(--jrk-space-4)));
+  padding: var(--jrk-space-3);
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-regular);
+  line-height: var(--jrk-leading-snug);
+  letter-spacing: normal;
+  text-transform: none;
+  text-align: start;
+  white-space: normal;
+  color: var(--jrk-text-primary);
+  cursor: auto;
+  user-select: text;
+}
+
+.jrk-filter__title {
+  font-weight: var(--jrk-weight-semibold);
+}
+
+.jrk-filter .jrk-input {
+  inline-size: 100%;
+}
+
+/* The list scrolls; the search above it and the buttons below it do not. */
+.jrk-filter__list {
+  display: flex;
+  flex-direction: column;
+  max-block-size: 240px;
+  overflow-y: auto;
+}
+
+/* A whole row is the hit area, and at least the touch floor tall. `.jrk-check` is inline-flex
+   aligned to the first line for a paragraph-length label; here every label is one short value. */
+.jrk-check.jrk-filter__opt {
+  display: flex;
+  align-items: center;
+  min-block-size: var(--jrk-min-touch);
+}
+
+.jrk-filter .jrk-filter__opt input[type='checkbox'] {
+  margin-block-start: 0;
+}
+
+.jrk-filter__opt .jrk-check__label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+/* How many rows hold the value, counted against the other filters. */
+.jrk-filter__n {
+  margin-inline-start: auto;
+  padding-inline-start: var(--jrk-space-2);
+  font-size: var(--jrk-text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-text-muted);
+}
+
+.jrk-filter__all {
+  padding-block-end: var(--jrk-space-2);
+  border-bottom: 1px solid var(--jrk-border-default);
+}
+
+.jrk-filter__none {
+  padding-block: var(--jrk-space-1);
+  color: var(--jrk-text-muted);
+}
+
+.jrk-filter__range {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: var(--jrk-space-2);
+}
+
+.jrk-filter__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--jrk-space-2);
+}
+
+/* ---------- print ---------- */
+
+@media print {
+  .jrk-th__funnel,
+  .jrk-th__slot,
+  .jrk-filter {
+    display: none;
+  }
+}

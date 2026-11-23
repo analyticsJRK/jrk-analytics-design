@@ -2288,6 +2288,960 @@
       Live on the <a href="dashboard.html">dashboard</a>.
     </div>
   </section>
+
+  <!-- ======== upstreamed from the portal 2026-11-23: appearance, outcome buttons, link buttons ======== -->
+  <!-- ======================= outcome buttons ======================= -->
+  <section class="gal-sec">
+    <h2>Outcome buttons — approve, send back, reject</h2>
+    <p class="gal-note">
+      The three filled status buttons, for the confirming row of a decision and
+      nowhere else. Each fills with its family's <code>status.*.solid</code> and labels
+      with its <code>onSolid</code>: a mark cannot carry white (#34c759 is 2.22:1).
+      The green and amber are their gradient tone's <code>from</code>, so a good row and
+      an approve button are one green, as a critical row and a reject button are one red.
+    </p>
+    <div class="gal-demo">
+      <button class="jrk-btn jrk-btn--good-solid">Approve</button>
+      <button class="jrk-btn jrk-btn--warning-solid">Send back</button>
+      <button class="jrk-btn jrk-btn--danger-solid">Reject</button>
+      <button class="jrk-btn jrk-btn--good-solid" data-loading="true" aria-busy="true"><span>Approving</span></button>
+      <button class="jrk-btn jrk-btn--warning-solid" disabled>Send back</button>
+    </div>
+  </section>
+
+  <!-- ======================= link-form buttons ======================= -->
+  <section class="gal-sec">
+    <h2>A button that goes somewhere is a link</h2>
+    <p class="gal-note">
+      <code>&lt;Button href&gt;</code> renders <code>&lt;a class="jrk-btn …"&gt;</code>, and
+      <code>linkAs</code> hands it to a router's Link. Disabled drops the
+      <code>href</code> and sets <code>aria-disabled</code>. A segmented row of links marks
+      the current one with <code>aria-current="page"</code> and takes the same thumb as
+      <code>aria-pressed</code>.
+    </p>
+    <div class="gal-demo">
+      <a class="jrk-btn jrk-btn--ghost jrk-btn--sm" href="#back"><span>Back to overview</span></a>
+      <a class="jrk-btn jrk-btn--secondary" href="#export"><span>Open report</span></a>
+      <a class="jrk-btn jrk-btn--secondary" role="link" aria-disabled="true" tabindex="-1"><span>Unavailable</span></a>
+      <nav class="jrk-btn-group" aria-label="Period">
+        <a class="jrk-btn jrk-btn--sm" href="#month" aria-current="page">Month</a>
+        <a class="jrk-btn jrk-btn--sm" href="#quarter">Quarter</a>
+        <a class="jrk-btn jrk-btn--sm" href="#year">Year</a>
+      </nav>
+    </div>
+  </section>
+
+  <!-- ======================= appearance ======================= -->
+  <section class="gal-sec">
+    <h2>Appearance — theme, skin, hue</h2>
+    <p class="gal-note">
+      <code>&lt;AppearanceMenu&gt;</code>'s panel, drawn open. Three settings that CROSS:
+      the theme, the skin (each with its own light and dark halves) and the layer's
+      own hue axis, whose heading, values and restrictions come from
+      <code>SKIN_LAYERS</code> in <code>dist/tokens.ts</code>. In React the swatches are
+      sampled off the root per hue; in this static copy every swatch shows the
+      current accent.
+    </p>
+    <div class="gal-demo">
+      <div class="jrk-menu" role="group" aria-label="Appearance" style="position:static">
+        <p class="jrk-menu__label">Theme</p>
+        <div class="jrk-appearance__row">
+          <div class="jrk-btn-group" role="group" aria-label="Theme">
+            <button class="jrk-btn jrk-btn--sm" type="button" aria-pressed="false">Light</button>
+            <button class="jrk-btn jrk-btn--sm" type="button" aria-pressed="false">Dark</button>
+            <button class="jrk-btn jrk-btn--sm" type="button" aria-pressed="true">System</button>
+          </div>
+        </div>
+        <hr class="jrk-menu__separator">
+        <p class="jrk-menu__label">Skin</p>
+        <div class="jrk-appearance__row">
+          <div class="jrk-btn-group" role="group" aria-label="Skin">
+            <button class="jrk-btn jrk-btn--sm" type="button" aria-pressed="true">Standard</button>
+            <button class="jrk-btn jrk-btn--sm" type="button" aria-pressed="false">Industry</button>
+            <button class="jrk-btn jrk-btn--sm" type="button" aria-pressed="false">Midgard</button>
+            <button class="jrk-btn jrk-btn--sm" type="button" aria-pressed="false">Vitrine</button>
+          </div>
+        </div>
+        <hr class="jrk-menu__separator">
+        <p class="jrk-menu__label">Accent hue</p>
+        <div class="jrk-appearance__row">
+          <div class="jrk-appearance__hues" role="radiogroup" aria-label="Accent hue">
+            <button class="jrk-appearance__swatch" type="button" role="radio" aria-checked="true" tabindex="0" aria-label="Blue" title="Blue"></button>
+            <button class="jrk-appearance__swatch" type="button" role="radio" aria-checked="false" tabindex="-1" aria-label="Cerulean" title="Cerulean"></button>
+            <button class="jrk-appearance__swatch" type="button" role="radio" aria-checked="false" tabindex="-1" aria-label="Indigo" title="Indigo"></button>
+            <button class="jrk-appearance__swatch" type="button" role="radio" aria-checked="false" tabindex="-1" aria-label="Violet" title="Violet"></button>
+            <button class="jrk-appearance__swatch" type="button" role="radio" aria-checked="false" tabindex="-1" aria-label="Purple" title="Purple"></button>
+            <button class="jrk-appearance__swatch" type="button" role="radio" aria-checked="false" tabindex="-1" aria-label="Magenta" title="Magenta"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== upstreamed from the portal 2026-11-23: section strip, rail, masthead ======== -->
+  <!-- ============================ section strip ============================ -->
+  <section class="gal-sec">
+    <h2>Section strip</h2>
+    <p class="gal-sec__note">
+      A module's screens under its page header. Two levels that do not look alike: the
+      groups are an underline <code class="jrk-mono">.jrk-tabs</code> row, the open group's
+      sections a <code class="jrk-mono">.jrk-btn-group</code>. Both rows are
+      <code class="jrk-mono">&lt;nav&gt;</code>s of links carrying
+      <code class="jrk-mono">aria-current="page"</code> — never a tablist, because they
+      navigate. Only the open group's sections are on screen.
+    </p>
+
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">Two levels, module controls on the tab row, a section control on the section row</span>
+      <div class="jrk-subnav jrk-subnav--grouped">
+        <div class="jrk-subnav__line jrk-subnav__line--tabs">
+          <nav class="jrk-tabs jrk-subnav__tabs" aria-label="Pest sections">
+            <a class="jrk-tab" href="#" aria-current="page">Overview</a>
+            <a class="jrk-tab" href="#">Property</a>
+            <a class="jrk-tab" href="#">Admin</a>
+          </nav>
+          <div class="jrk-subnav__actions">
+            <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" type="button">Guide</button>
+          </div>
+        </div>
+        <div class="jrk-subnav__line">
+          <nav class="jrk-btn-group jrk-subnav__sections" aria-label="Overview sections">
+            <a class="jrk-btn jrk-btn--ghost jrk-btn--sm" href="#" aria-current="page">Portfolio</a>
+            <a class="jrk-btn jrk-btn--ghost jrk-btn--sm" href="#">Action Center<span class="jrk-subnav__alert" role="img" aria-label="4 live infestations" title="4 live infestations">!</span></a>
+            <a class="jrk-btn jrk-btn--ghost jrk-btn--sm" href="#">Financials</a>
+            <a class="jrk-btn jrk-btn--ghost jrk-btn--sm" href="#">Reviews</a>
+            <a class="jrk-btn jrk-btn--ghost jrk-btn--sm" href="#">Calendar</a>
+          </nav>
+          <div class="jrk-subnav__actions">
+            <button class="jrk-btn jrk-btn--ghost jrk-btn--sm" type="button">Pest SOP</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">A closed group carries its sections' alert; an open group with nothing reachable says what it needs</span>
+      <div class="jrk-subnav jrk-subnav--grouped">
+        <div class="jrk-subnav__line jrk-subnav__line--tabs">
+          <nav class="jrk-tabs jrk-subnav__tabs" aria-label="Pest sections">
+            <a class="jrk-tab" href="#">Overview<span class="jrk-subnav__alert" role="img" aria-label="4 live infestations" title="4 live infestations">!</span></a>
+            <a class="jrk-tab" href="#" aria-current="page" title="Property — pick a property first">Property</a>
+            <a class="jrk-tab" href="#">Admin</a>
+          </nav>
+        </div>
+        <div class="jrk-subnav__line">
+          <p class="jrk-subnav__empty">These are one property's screens — open a property to see them.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">One level — no groups — with a module control standing on the rule</span>
+      <div class="jrk-subnav">
+        <div class="jrk-subnav__line jrk-subnav__line--tabs">
+          <nav class="jrk-tabs jrk-subnav__tabs" aria-label="Phone &amp; Internet sections">
+            <a class="jrk-tab" href="#" aria-current="page">Scorecard</a>
+            <a class="jrk-tab" href="#">Assignments</a>
+            <a class="jrk-tab" href="#">Scope</a>
+            <a class="jrk-tab" href="#">Vendors</a>
+          </nav>
+          <div class="jrk-subnav__actions">
+            <select class="jrk-select jrk-select--sm" aria-label="Season"><option>2026–27</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="gal-rule">
+      <strong>The disc is a mark, not a count.</strong> Six pills with a two-digit badge each
+      wrap the row on a laptop. The figure is in the disc's <code class="jrk-mono">title</code>
+      and accessible name and on the screen it opens, and the disc renders nothing at zero —
+      nothing waiting earns no ink.
+    </div>
+  </section>
+
+  <!-- ============================ rail rows ============================ -->
+  <section class="gal-sec">
+    <h2>Rail rows</h2>
+    <p class="gal-sec__note">
+      A row with trailing controls is a <code class="jrk-mono">.jrk-nav-row</code>: the link
+      and its pin and caret are siblings. The row navigates and the caret discloses the
+      sections inline. The pin is hidden until the row is hovered or the pin is focused, and
+      stays lit once pinned; the caret is always there, because it is a state.
+    </p>
+    <div class="gal-demo" style="align-items:flex-start;gap:var(--jrk-space-6)">
+      <nav class="jrk-sidebar" aria-label="Rail, open" style="position:static;height:auto;z-index:auto">
+        <div class="jrk-sidebar__nav">
+          <div class="jrk-sidebar__search">
+            <span class="jrk-input-group">
+              <span class="jrk-input-group__icon"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M10.2 10.2 13.4 13.4M11.2 7.1a4.1 4.1 0 1 1-8.2 0 4.1 4.1 0 0 1 8.2 0Z"/></svg></span>
+              <input class="jrk-input jrk-input--sm" type="search" placeholder="Modules &amp; sections…" aria-label="Search modules and sections">
+            </span>
+          </div>
+          <a class="jrk-nav-item" href="#"><span class="jrk-nav-item__glyph" aria-hidden="true">🧭</span><span class="jrk-nav-item__label">All modules</span><span class="jrk-nav-item__count">24</span></a>
+          <div class="jrk-sidebar__group">Asset Management</div>
+          <div class="jrk-nav-row">
+            <a class="jrk-nav-item" href="#" aria-current="page"><span class="jrk-nav-item__glyph" aria-hidden="true">🐛</span><span class="jrk-nav-item__label">Pest Control</span></a>
+            <span class="jrk-nav-row__actions">
+              <button class="jrk-nav-row__control jrk-nav-pin" type="button" aria-pressed="true" aria-label="Pin Pest Control"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon jrk-icon--fill"><path d="M5.2 2.2h5.6v1.4H9.7v2.4l2.4 1.9v1.2H8.5L8 13.8l-.5-4.7H3.9V7.9l2.4-1.9V3.6H5.2Z"/></svg></button>
+              <button class="jrk-nav-row__control jrk-nav-disclosure__caret" type="button" aria-expanded="true" aria-label="Hide sections in Pest Control"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button>
+            </span>
+          </div>
+          <div class="jrk-nav-disclosure__sections">
+            <a class="jrk-nav-item" href="#" aria-current="page"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M6 3.5 10.5 8 6 12.5"/></svg><span class="jrk-nav-item__label">Overview</span></a>
+            <a class="jrk-nav-item" href="#"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M6 3.5 10.5 8 6 12.5"/></svg><span class="jrk-nav-item__label">Property</span></a>
+          </div>
+          <div class="jrk-nav-row">
+            <a class="jrk-nav-item" href="#"><span class="jrk-nav-item__glyph" aria-hidden="true">📣</span><span class="jrk-nav-item__label">Marketing</span></a>
+            <span class="jrk-nav-row__actions">
+              <button class="jrk-nav-row__control jrk-nav-pin" type="button" aria-pressed="false" aria-label="Pin Marketing"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M5.6 2.6h4.8M6.9 2.6v3.6L4.6 8h6.8L9.1 6.2V2.6M8 8v5.4"/></svg></button>
+              <button class="jrk-nav-row__control jrk-nav-disclosure__caret" type="button" aria-expanded="false" aria-label="Show sections in Marketing"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button>
+            </span>
+          </div>
+          <a class="jrk-nav-item" href="#" aria-busy="true"><span class="jrk-nav-item__pending" aria-hidden="true"></span><span class="jrk-nav-item__label">Snow Tracker</span><span class="jrk-sr-only">Loading</span></a>
+          <span class="jrk-nav-item" aria-disabled="true" title="Utility — coming soon"><span class="jrk-nav-item__glyph" aria-hidden="true">⚡</span><span class="jrk-nav-item__label">Utility</span></span>
+        </div>
+        <div class="jrk-sidebar__footer">
+          <button class="jrk-btn jrk-btn--ghost jrk-btn--sm jrk-btn--block jrk-sidebar__toggle" type="button"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M6 3.5 10.5 8 6 12.5"/></svg><span class="jrk-sidebar__toggle-label">Collapse</span></button>
+        </div>
+      </nav>
+
+      <nav class="jrk-sidebar" data-collapsed="true" aria-label="Rail, collapsed" style="position:static;height:auto;z-index:auto">
+        <div class="jrk-sidebar__nav">
+          <div class="jrk-sidebar__search">
+            <span class="jrk-input-group">
+              <span class="jrk-input-group__icon"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M10.2 10.2 13.4 13.4M11.2 7.1a4.1 4.1 0 1 1-8.2 0 4.1 4.1 0 0 1 8.2 0Z"/></svg></span>
+              <input class="jrk-input jrk-input--sm" type="search" placeholder="Modules &amp; sections…" aria-label="Search modules and sections">
+            </span>
+          </div>
+          <a class="jrk-nav-item" href="#"><span class="jrk-nav-item__glyph" aria-hidden="true">🧭</span><span class="jrk-nav-item__label">All modules</span><span class="jrk-nav-item__count">24</span></a>
+          <div class="jrk-sidebar__group">Asset Management</div>
+          <div class="jrk-nav-row">
+            <a class="jrk-nav-item" href="#" aria-current="page"><span class="jrk-nav-item__glyph" aria-hidden="true">🐛</span><span class="jrk-nav-item__label">Pest Control</span></a>
+            <span class="jrk-nav-row__actions">
+              <button class="jrk-nav-row__control jrk-nav-disclosure__caret" type="button" aria-expanded="true" aria-label="Hide sections in Pest Control"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button>
+            </span>
+          </div>
+          <div class="jrk-nav-disclosure__sections">
+            <a class="jrk-nav-item" href="#" aria-current="page"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M6 3.5 10.5 8 6 12.5"/></svg><span class="jrk-nav-item__label">Overview</span></a>
+            <a class="jrk-nav-item" href="#"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M6 3.5 10.5 8 6 12.5"/></svg><span class="jrk-nav-item__label">Property</span></a>
+          </div>
+          <a class="jrk-nav-item" href="#"><span class="jrk-nav-item__glyph" aria-hidden="true">📣</span><span class="jrk-nav-item__label">Marketing</span></a>
+          <a class="jrk-nav-item" href="#"><span class="jrk-nav-item__glyph" aria-hidden="true">❄️</span><span class="jrk-nav-item__label">Snow Tracker</span></a>
+          <span class="jrk-nav-item" aria-disabled="true" title="Utility — coming soon"><span class="jrk-nav-item__glyph" aria-hidden="true">⚡</span><span class="jrk-nav-item__label">Utility</span></span>
+        </div>
+        <div class="jrk-sidebar__footer">
+          <button class="jrk-btn jrk-btn--ghost jrk-btn--sm jrk-btn--block jrk-sidebar__toggle jrk-sidebar__toggle--collapsed" type="button"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M6 3.5 10.5 8 6 12.5"/></svg><span class="jrk-sidebar__toggle-label">Expand</span></button>
+        </div>
+      </nav>
+    </div>
+    <div class="gal-rule">
+      <strong>One layout, two widths.</strong> The rows are laid out at the open width in both
+      states and the rail clips them, so every icon sits on the same pixel open or closed.
+      Nothing that takes height is removed when the rail closes — the search box shrinks to a
+      pill, captions keep their line, an open section list stays as its chevrons — or every row
+      beneath it jumps when the rail opens.
+    </div>
+  </section>
+
+  <!-- ============================ masthead ============================ -->
+  <section class="gal-sec">
+    <h2>Masthead</h2>
+    <p class="gal-sec__note">
+      <code class="jrk-mono">.jrk-topbar--masthead</code> runs the full window above the rail.
+      The brand mark is the bar's ink inverted, so it measures whatever the wordmark beside it
+      measures, on every ramp and every skin.
+    </p>
+    <div class="gal-demo gal-demo--plain" style="padding:0;overflow:hidden">
+      <header class="jrk-topbar jrk-topbar--vivid jrk-topbar--brand jrk-topbar--masthead" style="position:static;width:100%">
+        <button class="jrk-btn jrk-btn--ghost jrk-btn--icon jrk-topbar__drawer" type="button" aria-label="Open navigation"><svg viewBox="0 0 16 16" aria-hidden="true" class="jrk-icon"><path d="M6 3.5 10.5 8 6 12.5"/></svg></button>
+        <a class="jrk-brand" href="#"><div class="jrk-brand__mark" aria-hidden="true">J</div><span class="jrk-brand__text">JRK Analytics</span></a>
+        <span class="jrk-spacer"></span>
+        <span class="jrk-topbar__user"><span class="jrk-avatar" aria-hidden="true">AL</span><span class="jrk-topbar__user-name">Avery Lin</span></span>
+        <a class="jrk-btn jrk-btn--ghost" href="#">Sign Out</a>
+      </header>
+    </div>
+  </section>
+
+  <!-- ============================ page header actions ============================ -->
+  <section class="gal-sec">
+    <h2>Page header actions wrap</h2>
+    <div class="gal-demo gal-demo--plain" style="max-width:420px">
+      <div class="jrk-page-header">
+        <div>
+          <h1 class="jrk-page-header__title">Snow Tracker</h1>
+          <p class="jrk-page-header__desc">Contracts, bids and pushes by property.</p>
+        </div>
+        <div class="jrk-page-header__actions">
+          <input class="jrk-input jrk-input--sm" type="search" placeholder="Search properties" aria-label="Search properties" style="width:220px">
+          <span class="jrk-caption">91 of 91</span>
+          <button class="jrk-btn jrk-btn--secondary jrk-btn--sm" type="button">Export</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ======== upstreamed from the portal 2026-11-23: alerts, waits, modal, card, badges, sheet foot, docked panel, skeleton, mentions ======== -->
+  <!-- ============================ alert icons ============================ -->
+  <section class="gal-sec">
+    <h2>Alert — the tone picks its glyph</h2>
+    <p class="gal-sec__note">
+      <code class="jrk-mono">&lt;Alert&gt;</code> draws the tone's status glyph by default, because a
+      wash alone is colour as the only signal. <code class="jrk-mono">accent</code> takes the info glyph:
+      it is a box that wants to be noticed, not a fifth severity.
+    </p>
+    <div class="gal-demo gal-demo--stack" style="max-width:560px">
+      <div class="jrk-alert jrk-alert--accent" role="status">
+        <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="infoFill"></svg>
+        <div class="jrk-alert__body">
+          <p class="jrk-alert__title">2 approvals waiting on you</p>
+          <div class="jrk-alert__text">Snow services request at Harbor Point and a lease addendum at Vista Ridge.</div>
+        </div>
+      </div>
+      <div class="jrk-alert jrk-alert--warning" role="status">
+        <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="warningFill"></svg>
+        <div class="jrk-alert__body">
+          <div class="jrk-alert__text">The leasing-rate feed has not loaded since March 24. Rates on this screen are that old.</div>
+        </div>
+      </div>
+      <div class="jrk-alert" role="status">
+        <svg class="jrk-icon jrk-alert__icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="infoFill"></svg>
+        <div class="jrk-alert__body">
+          <div class="jrk-alert__text">Counts are by the month the lead was created.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ waits ============================ -->
+  <section class="gal-sec">
+    <h2>Waits — the split ring, the screen ring, the progress bar</h2>
+    <p class="gal-sec__note">
+      <code class="jrk-mono">.jrk-spinner--em</code> is a box that reveals and a ring inside it that spins,
+      sized in <code class="jrk-mono">em</code> so it can take an icon's slot. It holds back 140&nbsp;ms so a
+      prefetched navigation leaves nothing behind; <code class="jrk-mono">--now</code> drops the hold for a
+      server write.
+    </p>
+
+    <div class="gal-demo">
+      <span class="gal-label">Em ring in text, held and now</span>
+      <span style="font-size:var(--jrk-text-sm);display:inline-flex;gap:var(--jrk-space-2);align-items:center">
+        <span class="jrk-spinner jrk-spinner--em" role="status"><span class="jrk-spinner__ring" aria-hidden="true"></span><span class="jrk-sr-only">Loading…</span></span>
+        Opening Pest Control
+      </span>
+      <span style="font-size:var(--jrk-text-xl);display:inline-flex;gap:var(--jrk-space-2);align-items:center">
+        <span class="jrk-spinner jrk-spinner--em jrk-spinner--now" role="status"><span class="jrk-spinner__ring" aria-hidden="true"></span><span class="jrk-sr-only">Saving…</span></span>
+        Saving
+      </span>
+    </div>
+
+    <div class="gal-demo">
+      <span class="gal-label">A nav row whose page is loading</span>
+      <nav class="jrk-sidebar" style="position:static;height:auto;width:240px" aria-label="Demo">
+        <a class="jrk-nav-item" href="#">
+          <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chartBar"></svg>
+          <span class="jrk-nav-item__label">AM Report</span>
+        </a>
+        <a class="jrk-nav-item" href="#">
+          <span class="jrk-spinner jrk-spinner--em jrk-spinner--now"><span class="jrk-spinner__ring" aria-hidden="true"></span></span>
+          <span class="jrk-nav-item__label">Pest Control</span>
+        </a>
+      </nav>
+    </div>
+
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">Screen ring, labelled (shown in a box here; on a page it covers the viewport)</span>
+      <div style="position:relative;height:180px;border:1px solid var(--jrk-border-subtle);border-radius:var(--jrk-radius-md);overflow:hidden">
+        <div style="padding:var(--jrk-space-4)">
+          <p>Harbor Point — 186 units, 89.8% occupied</p>
+          <p class="jrk-caption">Collections 98.1% of $4,284k billed</p>
+        </div>
+        <span class="jrk-screen-spinner jrk-screen-spinner--labelled" role="status" aria-live="polite" style="position:absolute">
+          <span class="jrk-spinner jrk-spinner--em jrk-spinner--now" aria-hidden="true"><span class="jrk-spinner__ring"></span></span>
+          <span class="jrk-screen-spinner__label">Saving…</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="gal-demo gal-demo--stack">
+      <span class="gal-label">Navigation progress (fixed to the viewport top on a page)</span>
+      <div style="position:relative;height:24px;border:1px solid var(--jrk-border-subtle);overflow:hidden">
+        <div class="jrk-navprogress jrk-navprogress--busy" aria-hidden="true" style="position:absolute;transition:none"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ modal (anatomy) ============================ -->
+  <section class="gal-sec">
+    <h2>Modal — centred, unbolded</h2>
+    <p class="gal-sec__note">
+      Shown inline here. A real modal is opened with <code class="jrk-mono">showModal()</code> and centres
+      itself — <code class="jrk-mono">margin: auto</code> on <code class="jrk-mono">.jrk-modal</code> undoes
+      base.css's <code class="jrk-mono">* { margin: 0 }</code>. The close button is balanced by a spacer so
+      the heading sits on the dialog's centre line; a body that is one paragraph closes the gap to its title.
+    </p>
+    <div class="gal-demo" style="align-items:flex-start;gap:var(--jrk-space-5)">
+      <dialog class="jrk-modal" open aria-label="Why Cascades is flagged" style="position:static;margin:0">
+        <header class="jrk-modal__header">
+          <div>
+            <h2 class="jrk-modal__title">Why Cascades is flagged</h2>
+            <p class="jrk-modal__desc">Lease audit · September 2026</p>
+          </div>
+          <button class="jrk-btn jrk-btn--ghost jrk-btn--icon jrk-modal__close" type="button" aria-label="Close">
+            <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="close"></svg>
+          </button>
+        </header>
+        <div class="jrk-modal__body">
+          <p>Three leases at Cascades bill water through RUBS while the property is on a flat utility fee, so <strong>$1,284</strong> a month is charged twice.</p>
+        </div>
+      </dialog>
+
+      <dialog class="jrk-modal jrk-modal--sm" open aria-label="Escalate 3 accounts" style="position:static;margin:0">
+        <header class="jrk-modal__header">
+          <div><h2 class="jrk-modal__title">Escalate 3 accounts?</h2></div>
+          <button class="jrk-btn jrk-btn--ghost jrk-btn--icon jrk-modal__close" type="button" aria-label="Close">
+            <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="close"></svg>
+          </button>
+        </header>
+        <div class="jrk-modal__body">
+          <form class="jrk-stack">
+            <label class="jrk-field">
+              <span class="jrk-field__label">Reason</span>
+              <select class="jrk-select"><option>Over 60 days past due</option></select>
+            </label>
+          </form>
+        </div>
+        <footer class="jrk-modal__footer">
+          <button class="jrk-btn jrk-btn--ghost" type="button">Cancel</button>
+          <button class="jrk-btn jrk-btn--danger-solid" type="button">Escalate</button>
+        </footer>
+      </dialog>
+    </div>
+  </section>
+
+  <!-- ============================ card: summary, meta, fold ============================ -->
+  <section class="gal-sec">
+    <h2>Card — summary, meta and an opt-in fold</h2>
+    <p class="gal-sec__note">
+      The summary sits between header and body and stays when a collapsible card is folded: folding hides
+      the detail, never the conclusion. The toggle is a button inside the heading, so the actions slot keeps
+      its own links.
+    </p>
+    <div class="gal-demo gal-demo--stack" style="max-width:640px">
+      <section class="jrk-card" id="gal-by-pest">
+        <header class="jrk-card__header">
+          <div><h3 class="jrk-card__title">By pest type</h3><p class="jrk-card__subtitle">Trailing 12 months</p></div>
+          <span class="jrk-card__meta">649 combos · 80 properties</span>
+          <div class="jrk-card__actions"><button class="jrk-btn jrk-btn--secondary jrk-btn--sm" type="button">Export</button></div>
+        </header>
+        <div class="jrk-card__summary"><p>Roaches lead at 41% of reports, concentrated at six properties.</p></div>
+        <div class="jrk-card__body"><p class="jrk-caption">The table of 649 property × pest combinations goes here.</p></div>
+      </section>
+
+      <section class="jrk-card jrk-card--collapsible jrk-card--collapsed">
+        <header class="jrk-card__header">
+          <div>
+            <h3 class="jrk-card__title">
+              <button class="jrk-card__toggle" type="button" aria-expanded="false" aria-controls="gal-rec-body">
+                <span class="jrk-card__chevron" aria-hidden="true"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg></span>
+                Recurring pests
+              </button>
+            </h3>
+            <p class="jrk-card__subtitle">Units with a repeat report inside 90 days</p>
+          </div>
+          <span class="jrk-card__meta">212 units</span>
+        </header>
+        <div class="jrk-card__summary"><p>Recurrence is down 4 points since the route change in July.</p></div>
+        <div class="jrk-card__body" id="gal-rec-body" hidden><p>Detail table.</p></div>
+      </section>
+    </div>
+  </section>
+
+  <!-- ============================ badges: toggle, square, avatar, count ============================ -->
+  <section class="gal-sec">
+    <h2>Badges — pressed toggle, code, avatar, count</h2>
+    <p class="gal-sec__note">
+      A pressable badge is the button that sets it. <code class="jrk-mono">aria-pressed</code> is the state and
+      the style: on is the tone's pill, off is the same word on a dashed grey edge, so the two differ in shape
+      as well as colour.
+    </p>
+    <div class="gal-demo">
+      <span class="gal-label">Toggle</span>
+      <button class="jrk-badge jrk-badge--critical jrk-badge--toggle" type="button" aria-pressed="true" title="Press to remove the flag">HOT</button>
+      <button class="jrk-badge jrk-badge--critical jrk-badge--toggle" type="button" aria-pressed="false" title="Flag this unit HOT">HOT</button>
+      <button class="jrk-badge jrk-badge--critical jrk-badge--toggle" type="button" aria-pressed="false" aria-busy="true" disabled>
+        <span class="jrk-spinner jrk-spinner--em jrk-spinner--now" aria-hidden="true"><span class="jrk-spinner__ring"></span></span>HOT
+      </button>
+      <span class="jrk-badge jrk-badge--critical">HOT property</span>
+    </div>
+    <div class="gal-demo">
+      <span class="gal-label">Square — a code</span>
+      <span class="jrk-badge jrk-badge--square">CCD</span>
+      <span class="jrk-badge jrk-badge--square jrk-badge--accent">WO-104882</span>
+    </div>
+    <div class="gal-demo">
+      <span class="gal-label">Avatar</span>
+      <span class="jrk-avatar jrk-avatar--sm" aria-hidden="true">DR</span>
+      <span class="jrk-avatar" aria-hidden="true">DR</span>
+      <span class="jrk-avatar jrk-avatar--lg" role="img" aria-label="Dana Ruiz">DR</span>
+      <span class="jrk-avatar jrk-avatar--solid" aria-hidden="true">MS</span>
+    </div>
+    <div class="gal-demo">
+      <span class="gal-label">Count</span>
+      <button class="jrk-btn jrk-btn--ghost jrk-btn--icon" type="button" aria-label="Notifications, 3 unread">
+        <span><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="bell"></svg></span>
+        <span class="jrk-count jrk-count--overlay">3</span>
+      </button>
+      <button class="jrk-btn jrk-btn--cta" type="button"><span>Tasks</span> <span class="jrk-count jrk-count--inverse">12</span></button>
+      <span class="jrk-count jrk-count--accent">99+</span>
+    </div>
+  </section>
+
+  <!-- ============================ sheet foot + frozen letter ============================ -->
+  <section class="gal-sec">
+    <h2>Sheet — foot toolbar</h2>
+    <p class="gal-sec__note">
+      <code class="jrk-mono">.jrk-sheet__foot</code> is the toolbar's strip at the END of the sheet: static and
+      ruled on its top edge, where a sticky <code class="jrk-mono">__toolbar</code> would float over the first
+      row. Scroll sideways: the letter over the label column (B) now stays with it.
+    </p>
+    <div class="gal-demo gal-demo--stack">
+      <div class="jrk-sheet" role="grid" aria-label="Collections — Harbor Point" style="--jrk-sheet-height:240px;max-width:520px">
+        <div class="jrk-sheet__toolbar"><strong>Collections</strong></div>
+        <div class="jrk-sheet__colbar" aria-hidden="true">
+          <div class="jrk-sheet__col"></div><div class="jrk-sheet__col">B</div><div class="jrk-sheet__col">C</div><div class="jrk-sheet__col">D</div><div class="jrk-sheet__col">E</div><div class="jrk-sheet__col">F</div><div class="jrk-sheet__col">G</div><div class="jrk-sheet__col">H</div><div class="jrk-sheet__col">I</div><div class="jrk-sheet__col">J</div><div class="jrk-sheet__col">K</div><div class="jrk-sheet__col">L</div><div class="jrk-sheet__col">M</div><div class="jrk-sheet__col">N</div><div class="jrk-sheet__col">O</div><div class="jrk-sheet__col">P</div><div class="jrk-sheet__col">Q</div><div class="jrk-sheet__col">R</div><div class="jrk-sheet__col">S</div>
+        </div>
+        <div class="jrk-sheet__row" role="row">
+          <div class="jrk-sheet__gutter" aria-hidden="true">3</div>
+          <div class="jrk-sheet__cell jrk-sheet__cell--label" role="rowheader">2025</div>
+          <div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell">$401,220</div>
+          <div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell">$398,004</div>
+          <div class="jrk-sheet__cell jrk-sheet__cell--num" role="gridcell">$402,118</div>
+        </div>
+        <div class="jrk-sheet__foot"><span class="jrk-caption">Accrual basis · as of September 30, 2026</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ docked panel ============================ -->
+  <section class="gal-sec">
+    <h2>Docked panel</h2>
+    <p class="gal-sec__note">
+      A rail on the trailing edge that docks BESIDE the content so it can be read while looking at the
+      numbers; below 1100px it overlays. Tabs are the segmented control, and every pane stays mounted so a
+      half-typed note survives a switch. Shown static here; on a page it is fixed under the topbar.
+    </p>
+    <div class="gal-demo">
+      <aside class="jrk-panel" aria-label="Snow Tracker panel" style="position:static;height:300px">
+        <header class="jrk-panel__head">
+          <div class="jrk-tabs jrk-tabs--pills jrk-panel__tabs" role="tablist" aria-label="Snow Tracker panel">
+            <button class="jrk-tab" role="tab" type="button" aria-selected="true">Guide</button>
+            <button class="jrk-tab" role="tab" type="button" aria-selected="false">Notes <span class="jrk-tab__count">4</span></button>
+          </div>
+          <button class="jrk-btn jrk-btn--ghost jrk-btn--icon jrk-btn--sm jrk-panel__close" type="button" aria-label="Close panel">
+            <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="close"></svg>
+          </button>
+        </header>
+        <div class="jrk-panel__body">
+          <div class="jrk-panel__pane" role="tabpanel">
+            <p><strong>% over contract</strong> is actual cost per inch over contracted cost per inch, less one.</p>
+          </div>
+        </div>
+        <footer class="jrk-panel__foot">Snow Tracker · snow2</footer>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============================ page skeleton ============================ -->
+  <section class="gal-sec">
+    <h2>Page skeleton</h2>
+    <p class="gal-sec__note">
+      The real title, a shimmer in the shape of what will land, and one status line. The ring centres over
+      the viewport on a real page.
+    </p>
+    <div class="gal-demo gal-demo--stack">
+      <div class="jrk-stack" aria-busy="true" style="width:100%">
+        <p class="jrk-sr-only" role="status">Loading Pest Control…</p>
+        <div class="jrk-page-header"><div>
+          <h1 class="jrk-page-header__title">Pest Control</h1>
+          <p class="jrk-page-header__desc" style="display:flex;align-items:center;min-height:1.45em"><span class="jrk-skeleton" style="width:22rem;max-width:100%" aria-hidden="true"></span></p>
+        </div></div>
+        <div class="jrk-stat-row jrk-stat-row--split" aria-hidden="true">
+          <div class="jrk-stat"><span class="jrk-stat__label"><span class="jrk-skeleton" style="width:62%"></span></span><span class="jrk-stat__value"><span class="jrk-skeleton" style="width:48%"></span></span></div>
+          <div class="jrk-stat"><span class="jrk-stat__label"><span class="jrk-skeleton" style="width:62%"></span></span><span class="jrk-stat__value"><span class="jrk-skeleton" style="width:48%"></span></span></div>
+          <div class="jrk-stat"><span class="jrk-stat__label"><span class="jrk-skeleton" style="width:62%"></span></span><span class="jrk-stat__value"><span class="jrk-skeleton" style="width:48%"></span></span></div>
+        </div>
+        <section class="jrk-card jrk-card--flush" aria-hidden="true"><div class="jrk-card__body jrk-card__body--flush"><div class="jrk-table-wrap">
+          <table class="jrk-table jrk-table--compact"><tbody>
+            <tr class="jrk-table__skeleton"><td><span class="jrk-skeleton" style="width:64%"></span></td><td><span class="jrk-skeleton" style="width:42%"></span></td><td><span class="jrk-skeleton" style="width:42%"></span></td></tr>
+            <tr class="jrk-table__skeleton"><td><span class="jrk-skeleton" style="width:78%"></span></td><td><span class="jrk-skeleton" style="width:42%"></span></td><td><span class="jrk-skeleton" style="width:42%"></span></td></tr>
+            <tr class="jrk-table__skeleton"><td><span class="jrk-skeleton" style="width:52%"></span></td><td><span class="jrk-skeleton" style="width:42%"></span></td><td><span class="jrk-skeleton" style="width:42%"></span></td></tr>
+          </tbody></table>
+        </div></div></section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================ mention box ============================ -->
+  <section class="gal-sec">
+    <h2>Mention box</h2>
+    <p class="gal-sec__note">
+      Typing <code class="jrk-mono">@</code> opens a list; a tag is highlighted while it is typed by a
+      see-through copy of the text laid over the textarea. The list is a popover in the top layer on a real
+      page; shown static here.
+    </p>
+    <div class="gal-demo gal-demo--stack" style="max-width:460px">
+      <div class="jrk-mention">
+        <textarea class="jrk-textarea" rows="3" aria-autocomplete="list" aria-label="Note">Ask @Dana Ruiz to confirm the vendor visit for @Ma</textarea>
+      </div>
+      <ul class="jrk-mention__list" role="listbox" aria-label="People to tag" style="position:static;width:280px">
+        <li class="jrk-mention__option" role="option" aria-selected="true"><span class="jrk-mention__name">Max McCoy</span><span class="jrk-mention__hint">mmccoy@example.com</span></li>
+        <li class="jrk-mention__option" role="option" aria-selected="false"><span class="jrk-mention__name">Matt Sussman</span><span class="jrk-mention__hint">msussman@example.com</span></li>
+        <li class="jrk-mention__option" role="option" aria-selected="false"><span class="jrk-mention__name">Marketing team</span><span class="jrk-mention__hint">Group · 6 people</span></li>
+      </ul>
+      <p>Posted: Ask <span class="jrk-mention-tag">@Dana Ruiz</span> to confirm the vendor visit.</p>
+    </div>
+  </section>
+
+  <!-- ======== upstreamed from the portal 2026-11-23: sortable headings, column filter, TableKit, combobox, table search ======== -->
+  <!-- ============================ sortable headings ============================ -->
+  <section class="gal-sec">
+    <h2>Sortable headings</h2>
+    <div class="jrk-table-wrap">
+      <table class="jrk-table">
+        <caption class="jrk-sr-only">Sortable headings, button and bare</caption>
+        <thead>
+          <tr>
+            <th scope="col">
+              <button class="jrk-table__sort" type="button">Property
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" aria-hidden="true"><path d="M6 9.5V2.5M3 5.5 6 2.5l3 3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+            </th>
+            <th scope="col" aria-sort="descending">
+              <button class="jrk-table__sort" type="button">Units
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" aria-hidden="true"><path d="M6 9.5V2.5M3 5.5 6 2.5l3 3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+            </th>
+            <th scope="col">
+              <button class="jrk-table__sort" type="button">Occupancy
+                <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" aria-hidden="true"><path d="M6 9.5V2.5M3 5.5 6 2.5l3 3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </button>
+            </th>
+            <th scope="col" class="jrk-th--sortable" tabindex="0" aria-sort="none">Region</th>
+            <th scope="col" class="jrk-th--sortable jrk-th--asc" tabindex="0" aria-sort="ascending">Renews</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Harbor Point</td><td>412</td><td>91.2%</td><td>Southeast</td><td>Jan 31, 2027</td></tr>
+          <tr><td>Chase Knolls</td><td>401</td><td>93.7%</td><td>West</td><td>Jun 30, 2027</td></tr>
+          <tr><td>Bellevue Commons</td><td>248</td><td>96.4%</td><td>Northwest</td><td>Dec 15, 2026</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="gal-rule">
+      A centred heading mirrors its sort arrow with an empty box of the same width, so the
+      label sits on the column's true centre whether the arrow is painted or not — compare
+      "Units" with the figures under it. The leading column starts and takes no mirror.
+      <code class="jrk-mono">.jrk-th--sortable</code> is a heading that IS the control (no
+      inner button): a faint up-down glyph at rest, its direction when sorted.
+    </div>
+  </section>
+
+  <!-- ============================ column filter ============================ -->
+  <section class="gal-sec">
+    <h2>Column filter</h2>
+    <div style="display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:var(--jrk-space-5);align-items:start">
+      <div class="jrk-table-wrap">
+        <table class="jrk-table">
+          <caption class="jrk-sr-only">Work orders with column filters</caption>
+          <thead>
+            <tr>
+              <th scope="col" class="jrk-th--filter">Work order
+                <button class="jrk-th__funnel" type="button" aria-label="Filter Work order" aria-haspopup="dialog" aria-expanded="false">
+                  <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="filter"></svg>
+                </button>
+              </th>
+              <th scope="col" class="jrk-th--filter">Status
+                <button class="jrk-th__funnel jrk-th__funnel--on" type="button" aria-label="Filter Status (filtered)" aria-haspopup="dialog" aria-expanded="true">
+                  <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="filter"></svg>
+                </button>
+              </th>
+              <th scope="col" class="jrk-num jrk-th--filter">Age (days)
+                <button class="jrk-th__funnel" type="button" aria-label="Filter Age (days)" aria-haspopup="dialog" aria-expanded="false">
+                  <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="filter"></svg>
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>WO-48211</td><td>Open</td><td class="jrk-num">3</td></tr>
+            <tr><td>WO-48190</td><td>Awaiting parts</td><td class="jrk-num">11</td></tr>
+            <tr><td>WO-48140</td><td>Open</td><td class="jrk-num">24</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="jrk-menu jrk-filter" role="dialog" aria-label="Filter Status">
+        <div class="jrk-filter__title">Status</div>
+        <label class="jrk-check jrk-filter__opt jrk-filter__all">
+          <input type="checkbox"><span class="jrk-check__label">Select all</span>
+        </label>
+        <div class="jrk-filter__list">
+          <label class="jrk-check jrk-filter__opt"><input type="checkbox" checked><span class="jrk-check__label">Awaiting parts</span><span class="jrk-filter__n">2</span></label>
+          <label class="jrk-check jrk-filter__opt"><input type="checkbox" checked><span class="jrk-check__label">Open</span><span class="jrk-filter__n">3</span></label>
+          <label class="jrk-check jrk-filter__opt"><input type="checkbox"><span class="jrk-check__label">Scheduled</span><span class="jrk-filter__n">1</span></label>
+          <label class="jrk-check jrk-filter__opt"><input type="checkbox"><span class="jrk-check__label">(Blank)</span><span class="jrk-filter__n">0</span></label>
+        </div>
+        <div class="jrk-filter__foot">
+          <button class="jrk-btn jrk-btn--primary jrk-btn--sm" type="button">Clear</button>
+          <button class="jrk-btn jrk-btn--cta jrk-btn--sm" type="button">Done</button>
+        </div>
+      </div>
+    </div>
+    <div class="gal-rule">
+      The funnel is quiet at rest and the solid accent once its column is filtered. The panel
+      is a <code class="jrk-mono">.jrk-menu</code> (drawn here in flow; in the app it floats in
+      the top layer, so no card or table port clips it). Counts are against the other filters.
+    </div>
+  </section>
+
+  <!-- ============================ tablekit ============================ -->
+  <section class="gal-sec">
+    <h2>TableKit — toolbar, row numbers, rows that open, groups, totals</h2>
+    <div class="jrk-tablekit">
+      <div class="jrk-tablekit__bar">
+        <div class="jrk-tablekit__title">Delinquency by property <small class="jrk-tablekit__subtitle">November 2026</small></div>
+        <span class="jrk-tablekit__count">Showing 4 of 12</span>
+        <input class="jrk-input jrk-input--sm jrk-tablekit__search" type="search" placeholder="Search" aria-label="Search delinquency by property">
+        <button class="jrk-btn jrk-btn--sm jrk-btn--primary" type="button">Clear filters</button>
+        <button class="jrk-btn jrk-btn--sm jrk-btn--ghost" type="button">
+          <svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="download"></svg> Export
+        </button>
+      </div>
+      <div class="jrk-table-wrap jrk-tablekit__scroll">
+        <table class="jrk-table jrk-table--numbered jrk-table--expandable jrk-table--grouped">
+          <caption class="jrk-sr-only">Delinquency by property</caption>
+          <thead>
+            <tr class="jrk-table__grouprow">
+              <th colspan="2" aria-hidden="true"></th>
+              <th aria-hidden="true"></th>
+              <th colspan="2" scope="colgroup">
+                <button class="jrk-table__group-toggle" type="button" aria-expanded="true">
+                  <span class="jrk-table__group-twist" aria-hidden="true">−</span><span>Occupancy</span>
+                </button>
+              </th>
+              <th scope="colgroup">
+                <button class="jrk-table__group-toggle" type="button" aria-expanded="false">
+                  <span class="jrk-table__group-twist" aria-hidden="true">+</span><span>Collections</span><span class="jrk-table__group-count">+1</span>
+                </button>
+              </th>
+            </tr>
+            <tr class="jrk-table__colrow">
+              <th scope="col" class="jrk-table__rn">#</th>
+              <th scope="col" class="jrk-table__lead">Property</th>
+              <th scope="col">Region</th>
+              <th scope="col" class="jrk-num">Units</th>
+              <th scope="col" class="jrk-num">Occupancy</th>
+              <th scope="col" class="jrk-num" aria-sort="descending">
+                <button class="jrk-table__sort" type="button">Delinquent
+                  <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" aria-hidden="true"><path d="M6 9.5V2.5M3 5.5 6 2.5l3 3" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                </button>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr aria-expanded="true">
+              <td class="jrk-table__rn"><button class="jrk-table__twist" type="button" aria-expanded="true" aria-label="Close row 1"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronRight"></svg></button>1</td>
+              <td class="jrk-table__lead jrk-table__lead--text">Riverside Flats<span class="jrk-table__sub">RVF</span></td>
+              <td>Southeast</td><td class="jrk-num">156</td><td class="jrk-num">84.0%</td><td class="jrk-num">$61,470</td>
+            </tr>
+            <tr class="jrk-table__child">
+              <td class="jrk-table__rn"></td>
+              <td class="jrk-table__lead"><div class="jrk-table__slide"><div class="jrk-table__slide-in">Building 1</div></div></td>
+              <td></td><td class="jrk-num"><div class="jrk-table__slide"><div class="jrk-table__slide-in">78</div></div></td><td></td><td class="jrk-num"><div class="jrk-table__slide"><div class="jrk-table__slide-in">$40,110</div></div></td>
+            </tr>
+            <tr class="jrk-table__child">
+              <td class="jrk-table__rn"></td>
+              <td class="jrk-table__lead"><div class="jrk-table__slide"><div class="jrk-table__slide-in">Building 2</div></div></td>
+              <td></td><td class="jrk-num"><div class="jrk-table__slide"><div class="jrk-table__slide-in">78</div></div></td><td></td><td class="jrk-num"><div class="jrk-table__slide"><div class="jrk-table__slide-in">$21,360</div></div></td>
+            </tr>
+            <tr class="jrk-table__detail">
+              <td class="jrk-table__rn"></td>
+              <td colspan="5"><div class="jrk-table__slide"><div class="jrk-table__slide-in">Escalated to legal on Nov 12. Payment plan offered to 14 households.</div></div></td>
+            </tr>
+            <tr aria-expanded="false">
+              <td class="jrk-table__rn"><button class="jrk-table__twist" type="button" aria-expanded="false" aria-label="Open row 2"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronRight"></svg></button>2</td>
+              <td class="jrk-table__lead jrk-table__lead--text">Harbor Point<span class="jrk-table__sub">HBP</span></td>
+              <td>Southeast</td><td class="jrk-num">412</td><td class="jrk-num">91.2%</td><td class="jrk-num">$48,210</td>
+            </tr>
+            <tr>
+              <td class="jrk-table__rn"><span class="jrk-table__twist jrk-table__twist--none" aria-hidden="true"></span>3</td>
+              <td class="jrk-table__lead jrk-table__lead--text">Sun Valley<span class="jrk-table__sub">SFV</span></td>
+              <td>West</td><td class="jrk-num">358</td><td class="jrk-num">88.9%</td><td class="jrk-num">$39,920</td>
+            </tr>
+            <tr>
+              <td class="jrk-table__rn"><span class="jrk-table__twist jrk-table__twist--none" aria-hidden="true"></span>4</td>
+              <td class="jrk-table__lead jrk-table__lead--text">Terra Mar<span class="jrk-table__sub">TEM</span></td>
+              <td>West</td><td class="jrk-num">310</td><td class="jrk-num">95.1%</td><td class="jrk-num">($1,840)</td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td class="jrk-table__rn"></td>
+              <td class="jrk-table__lead">Total (4)</td>
+              <td></td><td class="jrk-num jrk-table__nowrap">1,236</td><td></td><td class="jrk-num jrk-table__nowrap">$147,760</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="gal-rule">
+      The <code class="jrk-mono">#</code> column and the name column freeze together, with the
+      divider where the frozen block ends. An open row shares its recessed fill with its child
+      rows (in the table's own columns) and its full-width detail; both slide over
+      <code class="jrk-mono">--jrk-duration-base</code>. Totals follow the filter. Negative
+      money reads ($1,840).
+    </div>
+  </section>
+
+  <!-- ============================ combobox ============================ -->
+  <section class="gal-sec">
+    <h2>Combobox</h2>
+    <div class="gal-demo" style="align-items:flex-start;gap:var(--jrk-space-6)">
+      <div style="width:280px">
+        <label class="jrk-field__label" for="gal-cb-1">Property</label>
+        <div class="jrk-combobox">
+          <button id="gal-cb-1" class="jrk-input jrk-combobox__trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span class="jrk-combobox__value">Riverside Flats</span>
+            <svg class="jrk-icon jrk-combobox__chevron" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg>
+          </button>
+        </div>
+      </div>
+      <div style="width:280px">
+        <div class="jrk-combobox" data-open>
+          <button class="jrk-input jrk-input--sm jrk-combobox__trigger" type="button" aria-haspopup="listbox" aria-expanded="true" aria-label="Vendor: Choose…">
+            <span class="jrk-combobox__value jrk-combobox__value--placeholder">Choose…</span>
+            <svg class="jrk-icon jrk-combobox__chevron" viewBox="0 0 16 16" aria-hidden="true" data-icon="chevronDown"></svg>
+          </button>
+          <div class="jrk-menu jrk-combobox__panel" style="margin-top:var(--jrk-space-1)">
+            <input class="jrk-input jrk-input--sm jrk-input--search" type="text" role="combobox" aria-expanded="true" aria-controls="gal-cb-list" aria-label="Search vendors" value="coast">
+            <ul class="jrk-combobox__list" id="gal-cb-list" role="listbox" aria-label="Vendors">
+              <li class="jrk-combobox__option jrk-combobox__option--active" role="option" aria-selected="false"><span>Coastal Pest Control</span><small class="jrk-combobox__hint">12 properties</small></li>
+              <li class="jrk-combobox__option" role="option" aria-selected="true"><span>Coastline Waste</span><small class="jrk-combobox__hint">4 properties</small></li>
+              <li class="jrk-combobox__option" role="option" aria-selected="false"><span>Gold Coast Snow</span><small class="jrk-combobox__hint">7 properties</small></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="gal-rule">
+      A <code class="jrk-mono">.jrk-input</code> trigger over a <code class="jrk-mono">.jrk-menu</code>
+      panel, so both follow every skin's field and overlay geometry. The highlighted row is the
+      keyboard's; the chosen one carries accent ink and weight.
+    </div>
+  </section>
+
+  <!-- ============================ table search ============================ -->
+  <section class="gal-sec">
+    <h2>Table search</h2>
+    <div class="gal-demo" style="align-items:center">
+      <span class="jrk-input-group jrk-table-search">
+        <span class="jrk-input-group__icon" aria-hidden="true"><svg class="jrk-icon" viewBox="0 0 16 16" aria-hidden="true" data-icon="search"></svg></span>
+        <input class="jrk-input jrk-input--sm" type="search" placeholder="code, property or manager…" aria-label="Search properties">
+      </span>
+      <span class="jrk-caption jrk-search-count">7 of 43 properties</span>
+    </div>
+  </section>
+
+  <!-- ======== upstreamed from the portal 2026-11-23: org canvas and palette, line, column, sankey, stack bar, sparklines, funnel ======== -->
+<!-- Paste these sections into preview/components.html (after the existing Org chart section).
+     Generated by server-rendering the React wrappers, so the markup IS what the components emit. -->
+
+  <!-- ============================ org canvas — zoom, pan, solid deep fills, tones, column ============================ -->
+  <section class="gal-sec">
+    <h2>Org canvas — zoom, pan, solid deep fills, tones, column</h2>
+    <p class="gal-sec__note">Zoom is the CSS <code class="jrk-mono">zoom</code> property, so the port's scrollbars stay right. The two ranks above the grouping take a tone (inverse, bannerDeep) rather than a slot; an unheld rank is a pass-through — the box keeps the row and the connector runs through it. Grouped cards are <code class="jrk-mono">chart.deep</code> under white ink. Static here: the zoom controls need script.</p>
+    <div class="gal-demo gal-demo--stack">
+<div class="jrk-org-canvas"><div class="jrk-org-canvas__bar"><div class="jrk-org-canvas__zoom" role="group" aria-label="Zoom"><button class="jrk-btn jrk-btn--secondary jrk-btn--sm jrk-btn--icon" type="button" aria-label="Zoom out"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="jrk-icon"><path d="M3.2 8h9.6"></path></svg></button><button class="jrk-btn jrk-btn--ghost jrk-btn--sm jrk-org-canvas__pct" type="button" aria-label="Zoom is 100 percent — reset to 100%">100%</button><button class="jrk-btn jrk-btn--secondary jrk-btn--sm jrk-btn--icon" type="button" aria-label="Zoom in"><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" class="jrk-icon"><path d="M8 3.2v9.6M3.2 8h9.6"></path></svg></button></div><button class="jrk-btn jrk-btn--secondary jrk-btn--sm" type="button">Fit to width</button><p class="jrk-org-canvas__hint">Drag to pan · ⌘/Ctrl + scroll to zoom · Drag a card to reassign</p></div><div class="jrk-org-canvas__view" tabindex="0" role="group" aria-label="Org chart — scrollable"><div class="jrk-org-canvas__inner" style="zoom:1;--jrk-org-zoom:1"><ul class="jrk-org jrk-org--group-solid" aria-label="Portfolio reporting structure"><li class="jrk-org__node"><div class="jrk-org__card jrk-org__card--tone-inverse"><span class="jrk-org__name">Jim Lippman</span><span class="jrk-org__role">President</span><span class="jrk-org__meta">96 props · 28,411 un</span></div><ul id="_R_2_" class="jrk-org__branch"><li class="jrk-org__node"><div class="jrk-org__card jrk-org__card--tone-deep"><span class="jrk-org__name">Matt Sussman</span><span class="jrk-org__role">EVP</span><span class="jrk-org__meta">96 props · 28,411 un</span></div><ul id="_R_u_" class="jrk-org__branch"><li class="jrk-org__node"><div class="jrk-org__card jrk-org__card--pass"><span class="jrk-org__name">Max McCoy</span><span class="jrk-org__role">SVP (acting VP)</span><span class="jrk-org__meta">22 props · 6,120 un</span></div><ul id="_R_fu_" class="jrk-org__branch"><li class="jrk-org__node jrk-org__node--group-1"><div class="jrk-org__card jrk-org__card--draggable" draggable="true"><span class="jrk-org__name">Geneva Lacroix</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">7 props · 2,182 un</span></div><ul id="_R_7fu_" class="jrk-org__branch jrk-org__branch--column"><li class="jrk-org__group"><span class="jrk-org__group-label">WA</span><ul class="jrk-org__group-items" aria-label="WA"><li class="jrk-org__node"><div class="jrk-org__card jrk-org__card--compact jrk-org__card--drop"><span class="jrk-org__name">Boulders at Puget Sound</span><span class="jrk-org__code">WST</span><span class="jrk-org__meta">714 un</span></div></li><li class="jrk-org__node"><div class="jrk-org__card jrk-org__card--compact" aria-current="true"><span class="jrk-org__name">Carrolls Creek Landing</span><span class="jrk-org__code">CCL</span><span class="jrk-org__meta">288 un</span></div></li></ul></li><li class="jrk-org__group"><span class="jrk-org__group-label">CA</span><ul class="jrk-org__group-items" aria-label="CA"><li class="jrk-org__node"><div class="jrk-org__card jrk-org__card--compact"><span class="jrk-org__name">Parkside Glen</span><span class="jrk-org__code">PAG</span><span class="jrk-org__meta">180 un</span></div></li></ul></li></ul></li></ul></li><li class="jrk-org__node jrk-org__node--group-2"><div class="jrk-org__card"><span class="jrk-org__name">Jen Carothers</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">6 props · 1,904 un</span></div><ul id="_R_nu_" class="jrk-org__branch jrk-org__branch--column"><li class="jrk-org__group"><span class="jrk-org__group-label">TX</span><ul class="jrk-org__group-items" aria-label="TX"><li class="jrk-org__node"><div class="jrk-org__card jrk-org__card--compact"><span class="jrk-org__name">Harbor Point</span><span class="jrk-org__code">HPT</span><span class="jrk-org__meta">412 un</span></div></li><li class="jrk-org__node"><div class="jrk-org__card jrk-org__card--compact jrk-org__card--vacant"><span class="jrk-org__name">Cedar Grove</span><span class="jrk-org__role">Open — no PM</span><span class="jrk-org__code">CDG</span><span class="jrk-org__meta">204 un</span></div></li></ul></li></ul></li><li class="jrk-org__node"><div class="jrk-org__card jrk-org__card--tone-neutral"><span class="jrk-org__name">Ed Sarti</span><span class="jrk-org__role">Associate</span><span class="jrk-org__meta">4 props · 1,050 un</span></div><ul id="_R_vu_" class="jrk-org__branch"><li class="jrk-org__node jrk-org__node--group-3"><div class="jrk-org__card"><span class="jrk-org__name">Lena Park</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">4 props · 1,050 un</span></div></li></ul></li></ul></li></ul></li></ul></div></div></div>
+    </div>
+  </section>
+
+
+  <!-- ============================ org — generated palette ============================ -->
+  <section class="gal-sec">
+    <h2>Org — generated palette</h2>
+    <p class="gal-sec__note"><code class="jrk-mono">palette="generated"</code>: past eight groups every group still gets its own hue (golden angle, OKLCH, deepened until white clears 4.5:1). No repeats is promised; separability past three is not.</p>
+    <div class="gal-demo gal-demo--stack">
+      <div class="jrk-org-canvas"><div class="jrk-org-canvas__view"><div class="jrk-org-scroll"><ul class="jrk-org jrk-org--group-solid" aria-label="Seventeen managers, generated palette" style="--jrk-org-node:120px"><li class="jrk-org__node" style="--jrk-org-group:#3e86f4;--jrk-org-group-solid:#2a5aa3;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #3e86f4 22%, var(--jrk-surface-default));--jrk-org-group-texture:initial"><div class="jrk-org__card"><span class="jrk-org__name">Manager 1</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 1</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#e0562e;--jrk-org-group-solid:#963a1f;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #e0562e 22%, var(--jrk-surface-default));--jrk-org-group-texture:repeating-linear-gradient(to bottom, #e0562e 0 6px, transparent 6px 10px)"><div class="jrk-org__card"><span class="jrk-org__name">Manager 2</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 2</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#00a084;--jrk-org-group-solid:#006b58;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #00a084 22%, var(--jrk-surface-default));--jrk-org-group-texture:repeating-linear-gradient(to bottom, #00a084 0 2px, transparent 2px 6px)"><div class="jrk-org__card"><span class="jrk-org__name">Manager 3</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 3</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#ac63d7;--jrk-org-group-solid:#734290;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #ac63d7 22%, var(--jrk-surface-default));--jrk-org-group-texture:linear-gradient(to right, #ac63d7 0 1px, transparent 1px 3px, #ac63d7 3px 4px)"><div class="jrk-org__card"><span class="jrk-org__name">Manager 4</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 4</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#a88403;--jrk-org-group-solid:#715802;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #a88403 22%, var(--jrk-surface-default));--jrk-org-group-texture:initial"><div class="jrk-org__card"><span class="jrk-org__name">Manager 5</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 5</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#0797c1;--jrk-org-group-solid:#056581;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #0797c1 22%, var(--jrk-surface-default));--jrk-org-group-texture:repeating-linear-gradient(to bottom, #0797c1 0 6px, transparent 6px 10px)"><div class="jrk-org__card"><span class="jrk-org__name">Manager 6</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 6</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#dd4f7c;--jrk-org-group-solid:#943553;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #dd4f7c 22%, var(--jrk-surface-default));--jrk-org-group-texture:repeating-linear-gradient(to bottom, #dd4f7c 0 2px, transparent 2px 6px)"><div class="jrk-org__card"><span class="jrk-org__name">Manager 7</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 7</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#3ba22e;--jrk-org-group-solid:#286d1f;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #3ba22e 22%, var(--jrk-surface-default));--jrk-org-group-texture:linear-gradient(to right, #3ba22e 0 1px, transparent 1px 3px, #3ba22e 3px 4px)"><div class="jrk-org__card"><span class="jrk-org__name">Manager 8</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 8</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#7577f2;--jrk-org-group-solid:#4e50a2;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #7577f2 22%, var(--jrk-surface-default));--jrk-org-group-texture:initial"><div class="jrk-org__card"><span class="jrk-org__name">Manager 9</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 9</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#cc6c04;--jrk-org-group-solid:#894803;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #cc6c04 22%, var(--jrk-surface-default));--jrk-org-group-texture:repeating-linear-gradient(to bottom, #cc6c04 0 6px, transparent 6px 10px)"><div class="jrk-org__card"><span class="jrk-org__name">Manager 10</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 10</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#0c9d9c;--jrk-org-group-solid:#086969;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #0c9d9c 22%, var(--jrk-surface-default));--jrk-org-group-texture:repeating-linear-gradient(to bottom, #0c9d9c 0 2px, transparent 2px 6px)"><div class="jrk-org__card"><span class="jrk-org__name">Manager 11</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 11</span></div></li><li class="jrk-org__node" style="--jrk-org-group:#c458b9;--jrk-org-group-solid:#833b7c;--jrk-org-solid-ink:var(--jrk-chart-deep-ink);--jrk-org-group-fill:color-mix(in oklab, #c458b9 22%, var(--jrk-surface-default));--jrk-org-group-texture:linear-gradient(to right, #c458b9 0 1px, transparent 1px 3px, #c458b9 3px 4px)"><div class="jrk-org__card"><span class="jrk-org__name">Manager 12</span><span class="jrk-org__role">Regional Manager</span><span class="jrk-org__meta">group 12</span></div></li></ul></div></div></div>
+    </div>
+  </section>
+
+
+  <!-- ============================ line chart — signed, gaps, styles, band, end labels ============================ -->
+  <section class="gal-sec">
+    <h2>Line chart — signed, gaps, styles, band, end labels</h2>
+    <p class="gal-sec__note">A gap is a gap, never a zero. A signed series draws its zero line. Prior years dashed beside a solid current one; the band is neutral because a range is a reference.</p>
+    <div class="gal-demo gal-demo--stack">
+      <div style="max-width:640px"><section class="jrk-chart-card"><header class="jrk-chart-card__header"><div><h3 class="jrk-chart-card__title">Net absorption</h3><p class="jrk-chart-card__subtitle">Units, monthly · Dec 2025 – Nov 2026</p></div><div class="jrk-card__actions"></div></header><div class="jrk-chart-card__body"><div><div class="jrk-chart"><div class="jrk-chart__plot"><svg viewBox="0 0 600 240" role="img" aria-label="Line chart. 2 series (2026, 2025) across 12 points from Dec to Nov. Full values in the table view."><g class="jrk-grid"><line x1="36" x2="553.6" y1="179.69051967458077" y2="179.69051967458077"></line><line x1="36" x2="553.6" y1="137.76788975593558" y2="137.76788975593558"></line><line x1="36" x2="553.6" y1="95.84525983729039" y2="95.84525983729039"></line><line x1="36" x2="553.6" y1="53.922629918645214" y2="53.922629918645214"></line><line x1="36" x2="553.6" y1="12" y2="12"></line></g><g class="jrk-chart__band"><polygon points="36.0,87.5 83.1,87.5 130.1,87.5 177.2,87.5 224.2,87.5 271.3,87.5 318.3,87.5 365.4,87.5 412.4,87.5 459.5,87.5 506.5,87.5 553.6,87.5 553.6,154.5 506.5,154.5 459.5,154.5 412.4,154.5 365.4,154.5 318.3,154.5 271.3,154.5 224.2,154.5 177.2,154.5 130.1,154.5 83.1,154.5 36.0,154.5"></polygon></g><g class="jrk-axis"><text x="28" y="183.69051967458077" text-anchor="end">-25</text><text x="28" y="141.76788975593558" text-anchor="end">0</text><text x="28" y="99.84525983729039" text-anchor="end">25</text><text x="28" y="57.922629918645214" text-anchor="end">50</text><text x="28" y="16" text-anchor="end">75</text><text x="36" y="232" text-anchor="middle">Dec</text><text x="83.05454545454546" y="232" text-anchor="middle">Jan</text><text x="130.10909090909092" y="232" text-anchor="middle">Feb</text><text x="177.16363636363639" y="232" text-anchor="middle">Mar</text><text x="224.21818181818182" y="232" text-anchor="middle">Apr</text><text x="271.27272727272725" y="232" text-anchor="middle">May</text><text x="318.32727272727277" y="232" text-anchor="middle">Jun</text><text x="365.38181818181823" y="232" text-anchor="middle">Jul</text><text x="412.43636363636364" y="232" text-anchor="middle">Aug</text><text x="459.49090909090916" y="232" text-anchor="middle">Sep</text><text x="506.54545454545456" y="232" text-anchor="middle">Oct</text><text x="553.6" y="232" text-anchor="middle">Nov</text></g><line class="jrk-chart__zero" x1="36" x2="553.6" y1="137.76788975593558" y2="137.76788975593558"></line><g class="jrk-s1"><path class="jrk-line jrk-line--solid" d="M36.0,117.6 L83.1,204.8 L130.1,124.4 L177.2,85.8 L224.2,100.9 L271.3,147.8 L318.3,64.0 L365.4,52.2 L412.4,107.6 L459.5,157.9"></path></g><g class="jrk-s2"><path class="jrk-line jrk-line--dashed" d="M36.0,131.1 L83.1,174.7 L130.1,112.6 L177.2,104.2 L224.2,87.5 L271.3,121.0 L318.3,94.2 L365.4,79.1 L412.4,100.9 L459.5,132.7 L506.5,151.2 L553.6,162.9"></path></g><g class="jrk-s1"><circle class="jrk-dot" cx="459.49090909090916" cy="157.89075211688527" r="4"></circle><text class="jrk-chart__end-label" x="467.49090909090916" y="157.89075211688527" dominant-baseline="middle">2026</text></g><g class="jrk-s2"><circle class="jrk-dot" cx="553.6" cy="162.9214677071227" r="4"></circle><text class="jrk-chart__end-label" x="561.6" y="170.89075211688527" dominant-baseline="middle">2025</text></g></svg></div><div class="jrk-legend"><span class="jrk-legend__item jrk-s1"><span class="jrk-legend__swatch jrk-legend__swatch--line" aria-hidden="true"></span>2026</span><span class="jrk-legend__item jrk-s2"><span class="jrk-legend__swatch jrk-legend__swatch--line jrk-legend__swatch--dashed" aria-hidden="true"></span>2025</span><span class="jrk-legend__item jrk-legend__item--band"><span class="jrk-legend__swatch" aria-hidden="true"></span>Peer middle 50%</span></div></div></div></div></section></div>
+      <div style="max-width:640px"><section class="jrk-chart-card"><header class="jrk-chart-card__header"><div><h3 class="jrk-chart-card__title">Operating expense</h3><p class="jrk-chart-card__subtitle">$ / unit, monthly</p></div><div class="jrk-card__actions"></div></header><div class="jrk-chart-card__body"><div><div class="jrk-chart"><div class="jrk-chart__plot"><svg viewBox="0 0 600 200" role="img" aria-label="Line chart. 1 series (Opex) across 12 points from Dec to Nov. Full values in the table view."><g class="jrk-grid"><line x1="36" x2="584" y1="174" y2="174"></line><line x1="36" x2="584" y1="141.6" y2="141.6"></line><line x1="36" x2="584" y1="109.2" y2="109.2"></line><line x1="36" x2="584" y1="76.8" y2="76.8"></line><line x1="36" x2="584" y1="44.400000000000006" y2="44.400000000000006"></line><line x1="36" x2="584" y1="12" y2="12"></line></g><g class="jrk-axis"><line x1="36" x2="584" y1="174" y2="174"></line><text x="28" y="178" text-anchor="end">375</text><text x="28" y="145.6" text-anchor="end">400</text><text x="28" y="113.2" text-anchor="end">425</text><text x="28" y="80.8" text-anchor="end">450</text><text x="28" y="48.400000000000006" text-anchor="end">475</text><text x="28" y="16" text-anchor="end">500</text><text x="36" y="192" text-anchor="middle">Dec</text><text x="85.81818181818181" y="192" text-anchor="middle">Jan</text><text x="135.63636363636363" y="192" text-anchor="middle">Feb</text><text x="185.45454545454547" y="192" text-anchor="middle">Mar</text><text x="235.27272727272728" y="192" text-anchor="middle">Apr</text><text x="285.0909090909091" y="192" text-anchor="middle">May</text><text x="334.90909090909093" y="192" text-anchor="middle">Jun</text><text x="384.72727272727275" y="192" text-anchor="middle">Jul</text><text x="434.54545454545456" y="192" text-anchor="middle">Aug</text><text x="484.3636363636364" y="192" text-anchor="middle">Sep</text><text x="534.1818181818182" y="192" text-anchor="middle">Oct</text><text x="584" y="192" text-anchor="middle">Nov</text></g><path class="jrk-threshold jrk-chart__trend" d="M36.0,131.0 L584.0,37.1"></path><g class="jrk-s1"><path class="jrk-line" d="M36.0,126.0 L85.8,115.7 L135.6,140.3 L185.5,98.8 L235.3,88.5 L285.1,92.4 L334.9,74.2 L384.7,63.8 L434.5,78.1 L484.4,49.6 L534.2,37.9 L584.0,43.1"></path></g></svg></div><div class="jrk-legend"><span class="jrk-legend__item jrk-legend__item--reference"><span class="jrk-legend__swatch jrk-legend__swatch--line jrk-legend__swatch--dashed" aria-hidden="true"></span>Linear trend</span></div></div></div></div></section></div>
+    </div>
+  </section>
+
+
+  <!-- ============================ column chart ============================ -->
+  <section class="gal-sec">
+    <h2>Column chart</h2>
+    <p class="gal-sec__note">One series draws columns; several stack, with losses below a drawn zero line. The month still filling is lighter, hatched and labelled "to date".</p>
+    <div class="gal-demo gal-demo--stack">
+      <div style="max-width:640px"><section class="jrk-chart-card"><header class="jrk-chart-card__header"><div><h3 class="jrk-chart-card__title">Where the bills went</h3><p class="jrk-chart-card__subtitle">$ thousands · stacked, losses below zero · Nov to date</p></div><div class="jrk-card__actions"></div></header><div class="jrk-chart-card__body"><div><div class="jrk-chart jrk-column-chart"><div class="jrk-chart__plot"><svg viewBox="0 0 600 260" role="img" aria-label="Column chart, 3 stacked series (Collected, Delinquent, Formulas) across 12 columns from Dec to Nov. Full values in the table view."><defs><pattern id="jrk-col-hatch-_R_d_" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="jrk-col__hatch-line" x1="0" y1="0" x2="0" y2="6"></line></pattern></defs><g class="jrk-grid"><line x1="46.5" x2="592" y1="112.53255080969461" y2="112.53255080969461"></line><line x1="46.5" x2="592" y1="12" y2="12"></line></g><g class="jrk-axis"><text x="38.5" y="217.06510161938922" text-anchor="end">0</text><text x="38.5" y="116.53255080969461" text-anchor="end">500</text><text x="38.5" y="16" text-anchor="end">1,000</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M57.22916666666667,48.19171829149006h24v164.87338332789915h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M57.22916666666667,46.19171829149006V40.12781219432671Q57.22916666666667,36.12781219432671 61.22916666666667,36.12781219432671H77.22916666666667Q81.22916666666667,36.12781219432671 81.22916666666667,40.12781219432671V46.19171829149006Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M57.22916666666667,213.06510161938922V217.10770568416478Q57.22916666666667,221.10770568416478 61.22916666666667,221.10770568416478H77.22916666666667Q81.22916666666667,221.10770568416478 81.22916666666667,217.10770568416478V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="46.5" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="69.22916666666667" y="252" text-anchor="middle">Dec</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M102.68750000000001,54.22367134007173h24v158.84143027931748h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M102.68750000000001,52.22367134007173V43.74698402347571Q102.68750000000001,39.74698402347571 106.68750000000001,39.74698402347571H122.68750000000001Q126.68750000000001,39.74698402347571 126.68750000000001,43.74698402347571V52.22367134007173Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M102.68750000000001,213.06510161938922V216.705575480926Q102.68750000000001,220.705575480926 106.68750000000001,220.705575480926H122.68750000000001Q126.68750000000001,220.705575480926 126.68750000000001,216.705575480926V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="91.95833333333334" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="114.68750000000001" y="252" text-anchor="middle">Jan</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M148.14583333333334,51.2076948157809h24v161.85740680360834h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M148.14583333333334,49.2076948157809V43.54591892185632Q148.14583333333334,39.54591892185632 152.14583333333334,39.54591892185632H168.14583333333334Q172.14583333333334,39.54591892185632 172.14583333333334,43.54591892185632V49.2076948157809Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M148.14583333333334,213.06510161938922V217.50983588740357Q148.14583333333334,221.50983588740357 152.14583333333334,221.50983588740357H168.14583333333334Q172.14583333333334,221.50983588740357 172.14583333333334,217.50983588740357V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="137.41666666666669" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="160.14583333333334" y="252" text-anchor="middle">Feb</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M193.60416666666666,46.18106727529617h24v166.88403434409304h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M193.60416666666666,44.18106727529617V37.31290077165526Q193.60416666666666,33.31290077165526 197.60416666666666,33.31290077165526H213.60416666666666Q217.60416666666666,33.31290077165526 217.60416666666666,37.31290077165526V44.18106727529617Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M193.60416666666666,213.06510161938922V216.10238017606784Q193.60416666666666,220.10238017606784 197.60416666666666,220.10238017606784H213.60416666666666Q217.60416666666666,220.10238017606784 217.60416666666666,216.10238017606784V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="182.875" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="205.60416666666666" y="252" text-anchor="middle">Mar</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M239.0625,41.95870014128899h24v171.10640147810022h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M239.0625,39.95870014128899V33.693728942506254Q239.0625,29.69372894250625 243.0625,29.69372894250625H259.0625Q263.0625,29.69372894250625 263.0625,33.693728942506254V39.95870014128899Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M239.0625,213.06510161938922V215.0970546679709Q239.0625,219.0970546679709 243.0625,219.0970546679709H259.0625Q263.0625,219.0970546679709 263.0625,215.0970546679709V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="228.33333333333334" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="251.0625" y="252" text-anchor="middle">Apr</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M284.52083333333337,43.7682860558635h24v169.29681556352574h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M284.52083333333337,41.7682860558635V33.693728942506254Q284.52083333333337,29.69372894250625 288.52083333333337,29.69372894250625H304.52083333333337Q308.52083333333337,29.69372894250625 308.52083333333337,33.693728942506254V41.7682860558635Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M284.52083333333337,213.06510161938922V217.91196609064232Q284.52083333333337,221.91196609064232 288.52083333333337,221.91196609064232H304.52083333333337Q308.52083333333337,221.91196609064232 308.52083333333337,217.91196609064232V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="273.7916666666667" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="296.52083333333337" y="252" text-anchor="middle">May</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M329.9791666666667,40.14911422671449h24v172.91598739267474h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M329.9791666666667,38.14911422671449V30.878817519834804Q329.9791666666667,26.878817519834804 333.9791666666667,26.878817519834804H349.9791666666667Q353.9791666666667,26.878817519834804 353.9791666666667,30.878817519834804V38.14911422671449Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M329.9791666666667,213.06510161938922V217.30877078578416Q329.9791666666667,221.30877078578416 333.9791666666667,221.30877078578416H349.9791666666667Q353.9791666666667,221.30877078578416 353.9791666666667,217.30877078578416V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="319.25" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="341.9791666666667" y="252" text-anchor="middle">Jun</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M375.43750000000006,37.13313770242365h24v175.93196391696557h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M375.43750000000006,35.13313770242365V29.27029670687969Q375.43750000000006,25.27029670687969 379.43750000000006,25.27029670687969H395.43750000000006Q399.43750000000006,25.27029670687969 399.43750000000006,29.27029670687969V35.13313770242365Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M375.43750000000006,213.06510161938922V216.90664058254538Q375.43750000000006,220.90664058254538 379.43750000000006,220.90664058254538H395.43750000000006Q399.43750000000006,220.90664058254538 399.43750000000006,216.90664058254538V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="364.70833333333337" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="387.43750000000006" y="252" text-anchor="middle">Jul</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M420.89583333333337,38.94272361699815h24v174.1223780023911h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M420.89583333333337,36.94272361699815V30.476687316596024Q420.89583333333337,26.476687316596024 424.89583333333337,26.476687316596024H440.89583333333337Q444.89583333333337,26.476687316596024 444.89583333333337,30.476687316596024V36.94272361699815Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M420.89583333333337,213.06510161938922V216.30344527768725Q420.89583333333337,220.30344527768725 424.89583333333337,220.30344527768725H440.89583333333337Q444.89583333333337,220.30344527768725 444.89583333333337,216.30344527768725V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="410.1666666666667" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="432.89583333333337" y="252" text-anchor="middle">Aug</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M466.3541666666667,36.12781219432671h24v176.93728942506252h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M466.3541666666667,34.12781219432671V25.852189979350072Q466.3541666666667,21.852189979350072 470.3541666666667,21.852189979350072H486.3541666666667Q490.3541666666667,21.852189979350072 490.3541666666667,25.852189979350072V34.12781219432671Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M466.3541666666667,213.06510161938922V215.70024997282906Q466.3541666666667,219.70024997282906 470.3541666666667,219.70024997282906H486.3541666666667Q490.3541666666667,219.70024997282906 490.3541666666667,215.70024997282906V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="455.625" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="478.3541666666667" y="252" text-anchor="middle">Sep</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M511.81250000000006,33.715030974894034h24v179.3500706444952h-24Z"></path></g><g class="jrk-s2"><path class="jrk-col" d="M511.81250000000006,31.715030974894034V24.444734268014347Q511.81250000000006,20.444734268014347 515.8125,20.444734268014347H531.8125Q535.8125,20.444734268014347 535.8125,24.444734268014347V31.715030974894034Z"></path></g><g class="jrk-s3"><path class="jrk-col" d="M511.81250000000006,213.06510161938922V215.29811976959027Q511.81250000000006,219.29811976959027 515.8125,219.29811976959027H531.8125Q535.8125,219.29811976959027 535.8125,215.29811976959027V213.06510161938922Z"></path></g><rect class="jrk-chart__hit" x="501.08333333333337" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick" x="523.8125" y="252" text-anchor="middle">Oct</text></g><g><g class="jrk-s1"><path class="jrk-col jrk-col--partial" d="M557.2708333333334,130.62840995543962h24v82.4366916639496h-24Z"></path><path class="jrk-col__hatch" d="M557.2708333333334,130.62840995543962h24v82.4366916639496h-24Z" fill="url(#jrk-col-hatch-_R_d_)"></path></g><g class="jrk-s2"><path class="jrk-col jrk-col--partial" d="M557.2708333333334,128.62840995543962V110.50059776111293Q557.2708333333334,106.50059776111293 561.2708333333334,106.50059776111293H577.2708333333334Q581.2708333333334,106.50059776111293 581.2708333333334,110.50059776111293V128.62840995543962Z"></path><path class="jrk-col__hatch" d="M557.2708333333334,128.62840995543962V110.50059776111293Q557.2708333333334,106.50059776111293 561.2708333333334,106.50059776111293H577.2708333333334Q581.2708333333334,106.50059776111293 581.2708333333334,110.50059776111293V128.62840995543962Z" fill="url(#jrk-col-hatch-_R_d_)"></path></g><g class="jrk-s3"><path class="jrk-col jrk-col--partial" d="M557.2708333333334,213.06510161938922V213.06510161938922Q557.2708333333334,215.88001304206068 560.0857447560048,215.88001304206068H578.4559219106619Q581.2708333333334,215.88001304206068 581.2708333333334,213.06510161938922V213.06510161938922Z"></path><path class="jrk-col__hatch" d="M557.2708333333334,213.06510161938922V213.06510161938922Q557.2708333333334,215.88001304206068 560.0857447560048,215.88001304206068H578.4559219106619Q581.2708333333334,215.88001304206068 581.2708333333334,213.06510161938922V213.06510161938922Z" fill="url(#jrk-col-hatch-_R_d_)"></path></g><rect class="jrk-chart__hit" x="546.5416666666667" y="12" width="45.458333333333336" height="222"></rect><text class="jrk-chart__tick jrk-chart__tick--partial" x="569.2708333333334" y="252" text-anchor="middle">to date</text></g><g class="jrk-axis"><line x1="46.5" x2="592" y1="213.06510161938922" y2="213.06510161938922"></line></g></svg></div><div class="jrk-legend"><span class="jrk-legend__item jrk-s1"><span class="jrk-legend__swatch" aria-hidden="true"></span>Collected</span><span class="jrk-legend__item jrk-s2"><span class="jrk-legend__swatch" aria-hidden="true"></span>Delinquent</span><span class="jrk-legend__item jrk-s3"><span class="jrk-legend__swatch" aria-hidden="true"></span>Formulas</span></div></div></div></div></section></div>
+      <div style="max-width:640px"><section class="jrk-chart-card"><header class="jrk-chart-card__header"><div><h3 class="jrk-chart-card__title">Mold work orders</h3><p class="jrk-chart-card__subtitle">Count, monthly · Nov to date</p></div><div class="jrk-card__actions"></div></header><div class="jrk-chart-card__body"><div><div class="jrk-chart jrk-column-chart"><div class="jrk-chart__plot"><svg viewBox="0 0 600 200" role="img" aria-label="Column chart, Work orders across 12 columns from Dec to Nov. Full values in the table view."><defs><pattern id="jrk-col-hatch-_R_d2_" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line class="jrk-col__hatch-line" x1="0" y1="0" x2="0" y2="6"></line></pattern></defs><g class="jrk-grid"><line x1="36" x2="592" y1="133.5" y2="133.5"></line><line x1="36" x2="592" y1="93" y2="93"></line><line x1="36" x2="592" y1="52.5" y2="52.5"></line><line x1="36" x2="592" y1="12" y2="12"></line></g><g class="jrk-axis"><text x="28" y="178" text-anchor="end">0</text><text x="28" y="137.5" text-anchor="end">20</text><text x="28" y="97" text-anchor="end">40</text><text x="28" y="56.5" text-anchor="end">60</text><text x="28" y="16" text-anchor="end">80</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M47.16666666666667,174V94.975Q47.16666666666667,90.975 51.16666666666667,90.975H67.16666666666667Q71.16666666666667,90.975 71.16666666666667,94.975V174Z"></path></g><rect class="jrk-chart__hit" x="36" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="59.16666666666667" y="192" text-anchor="middle">Dec</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M93.50000000000001,174V101.05Q93.50000000000001,97.05 97.50000000000001,97.05H113.50000000000001Q117.50000000000001,97.05 117.50000000000001,101.05V174Z"></path></g><rect class="jrk-chart__hit" x="82.33333333333334" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="105.50000000000001" y="192" text-anchor="middle">Jan</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M139.83333333333334,174V72.69999999999999Q139.83333333333334,68.69999999999999 143.83333333333334,68.69999999999999H159.83333333333334Q163.83333333333334,68.69999999999999 163.83333333333334,72.69999999999999V174Z"></path></g><rect class="jrk-chart__hit" x="128.66666666666669" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="151.83333333333334" y="192" text-anchor="middle">Feb</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M186.16666666666666,174V82.825Q186.16666666666666,78.825 190.16666666666666,78.825H206.16666666666666Q210.16666666666666,78.825 210.16666666666666,82.825V174Z"></path></g><rect class="jrk-chart__hit" x="175" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="198.16666666666666" y="192" text-anchor="middle">Mar</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M232.5,174V56.5Q232.5,52.5 236.5,52.5H252.5Q256.5,52.5 256.5,56.5V174Z"></path></g><rect class="jrk-chart__hit" x="221.33333333333334" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="244.5" y="192" text-anchor="middle">Apr</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M278.83333333333337,174V44.349999999999994Q278.83333333333337,40.349999999999994 282.83333333333337,40.349999999999994H298.83333333333337Q302.83333333333337,40.349999999999994 302.83333333333337,44.349999999999994V174Z"></path></g><rect class="jrk-chart__hit" x="267.6666666666667" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="290.83333333333337" y="192" text-anchor="middle">May</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M325.1666666666667,174V34.225Q325.1666666666667,30.225 329.1666666666667,30.225H345.1666666666667Q349.1666666666667,30.225 349.1666666666667,34.225V174Z"></path></g><rect class="jrk-chart__hit" x="314" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="337.1666666666667" y="192" text-anchor="middle">Jun</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M371.50000000000006,174V60.550000000000004Q371.50000000000006,56.550000000000004 375.50000000000006,56.550000000000004H391.50000000000006Q395.50000000000006,56.550000000000004 395.50000000000006,60.550000000000004V174Z"></path></g><rect class="jrk-chart__hit" x="360.33333333333337" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="383.50000000000006" y="192" text-anchor="middle">Jul</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M417.83333333333337,174V78.775Q417.83333333333337,74.775 421.83333333333337,74.775H437.83333333333337Q441.83333333333337,74.775 441.83333333333337,78.775V174Z"></path></g><rect class="jrk-chart__hit" x="406.6666666666667" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="429.83333333333337" y="192" text-anchor="middle">Aug</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M464.1666666666667,174V88.9Q464.1666666666667,84.9 468.1666666666667,84.9H484.1666666666667Q488.1666666666667,84.9 488.1666666666667,88.9V174Z"></path></g><rect class="jrk-chart__hit" x="453" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="476.1666666666667" y="192" text-anchor="middle">Sep</text></g><g><g class="jrk-s1"><path class="jrk-col" d="M510.50000000000006,174V99.02499999999999Q510.50000000000006,95.02499999999999 514.5,95.02499999999999H530.5Q534.5,95.02499999999999 534.5,99.02499999999999V174Z"></path></g><rect class="jrk-chart__hit" x="499.33333333333337" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick" x="522.5" y="192" text-anchor="middle">Oct</text></g><g><g class="jrk-s1"><path class="jrk-col jrk-col--partial" d="M556.8333333333334,174V153.7Q556.8333333333334,149.7 560.8333333333334,149.7H576.8333333333334Q580.8333333333334,149.7 580.8333333333334,153.7V174Z"></path><path class="jrk-col__hatch" d="M556.8333333333334,174V153.7Q556.8333333333334,149.7 560.8333333333334,149.7H576.8333333333334Q580.8333333333334,149.7 580.8333333333334,153.7V174Z" fill="url(#jrk-col-hatch-_R_d2_)"></path></g><rect class="jrk-chart__hit" x="545.6666666666667" y="12" width="46.333333333333336" height="162"></rect><text class="jrk-chart__tick jrk-chart__tick--partial" x="568.8333333333334" y="192" text-anchor="middle">to date</text></g><g class="jrk-axis"><line x1="36" x2="592" y1="174" y2="174"></line></g></svg></div></div></div></div></section></div>
+    </div>
+  </section>
+
+
+  <!-- ============================ sankey ============================ -->
+  <section class="gal-sec">
+    <h2>Sankey</h2>
+    <p class="gal-sec__note">Slotted categories carry hue; everything else is <code class="jrk-mono">chart.neutral</code>. Every node is labelled with its value and share.</p>
+    <div class="gal-demo gal-demo--stack">
+      <div style="max-width:640px"><section class="jrk-chart-card"><header class="jrk-chart-card__header"><div><h3 class="jrk-chart-card__title">Lines by carrier and service</h3><p class="jrk-chart-card__subtitle">Billed lines · Oct 2026</p></div><div class="jrk-card__actions"></div></header><div class="jrk-chart-card__body"><div><div class="jrk-chart jrk-sankey"><div class="jrk-sankey__plot"><svg viewBox="0 0 760 240" role="img" aria-label="Telecom lines from carrier to service, October 2026"><g><path d="M18,8 C297,8 297,14 576,14 L576,63.19626168224299 C297,63.19626168224299 297,57.19626168224299 18,57.19626168224299 Z" class="jrk-sankey__ribbon jrk-s1"><title>AT&amp;T → Phone: 140</title></path><path d="M18,57.19626168224299 C297,57.19626168224299 297,85.73831775700936 576,85.73831775700936 L576,106.82242990654207 C297,106.82242990654207 297,78.2803738317757 18,78.2803738317757 Z" class="jrk-sankey__ribbon jrk-s2"><title>AT&amp;T → Internet: 60</title></path><path d="M18,90.2803738317757 C297,90.2803738317757 297,106.82242990654207 576,106.82242990654207 L576,148.99065420560748 C297,148.99065420560748 297,132.44859813084113 18,132.44859813084113 Z" class="jrk-sankey__ribbon jrk-s2"><title>Comcast Business → Internet: 120</title></path><path d="M18,132.44859813084113 C297,132.44859813084113 297,192.61682242990656 576,192.61682242990656 L576,206.67289719626172 C297,206.67289719626172 297,146.5046728971963 18,146.5046728971963 Z" class="jrk-sankey__ribbon jrk-s3"><title>Comcast Business → Cable: 40</title></path><path d="M18,158.50467289719626 C297,158.50467289719626 297,148.99065420560748 576,148.99065420560748 L576,173.588785046729 C297,173.588785046729 297,183.10280373831776 18,183.10280373831776 Z" class="jrk-sankey__ribbon jrk-s2"><title>Spectrum → Internet: 70</title></path><path d="M18,183.10280373831776 C297,183.10280373831776 297,206.67289719626172 576,206.67289719626172 L576,226.00000000000003 C297,226.00000000000003 297,202.42990654205607 18,202.42990654205607 Z" class="jrk-sankey__ribbon jrk-s3"><title>Spectrum → Cable: 55</title></path><path d="M18,214.42990654205607 C297,214.42990654205607 297,63.19626168224299 576,63.19626168224299 L576,73.73831775700934 C297,73.73831775700934 297,224.97196261682242 18,224.97196261682242 Z" class="jrk-sankey__ribbon jrk-s1"><title>Other (12 carriers) → Phone: 30</title></path><path d="M18,224.97196261682242 C297,224.97196261682242 297,173.588785046729 576,173.588785046729 L576,180.61682242990656 C297,180.61682242990656 297,232 18,232 Z" class="jrk-sankey__ribbon jrk-s2"><title>Other (12 carriers) → Internet: 20</title></path></g><g class="jrk-sankey__group"><rect class="jrk-sankey__node jrk-sankey__node--neutral" x="4" y="8" width="14" height="70.2803738317757" rx="2"><title>AT&amp;T: 200 (37.4%)</title></rect><text class="jrk-sankey__label" x="24" y="43.14018691588785" text-anchor="start" dominant-baseline="middle"><title>AT&amp;T: 200 (37.4%)</title><tspan class="jrk-sankey__name">AT&amp;T</tspan><tspan class="jrk-sankey__value"> 200</tspan><tspan class="jrk-sankey__share"> (37.4%)</tspan></text></g><g class="jrk-sankey__group"><rect class="jrk-sankey__node jrk-sankey__node--neutral" x="4" y="90.2803738317757" width="14" height="56.22429906542056" rx="2"><title>Comcast Business: 160 (29.9%)</title></rect><text class="jrk-sankey__label" x="24" y="118.39252336448598" text-anchor="start" dominant-baseline="middle"><title>Comcast Business: 160 (29.9%)</title><tspan class="jrk-sankey__name">Comcast Business</tspan><tspan class="jrk-sankey__value"> 160</tspan><tspan class="jrk-sankey__share"> (29.9%)</tspan></text></g><g class="jrk-sankey__group"><rect class="jrk-sankey__node jrk-sankey__node--neutral" x="4" y="158.50467289719626" width="14" height="43.925233644859816" rx="2"><title>Spectrum: 125 (23.4%)</title></rect><text class="jrk-sankey__label" x="24" y="180.46728971962617" text-anchor="start" dominant-baseline="middle"><title>Spectrum: 125 (23.4%)</title><tspan class="jrk-sankey__name">Spectrum</tspan><tspan class="jrk-sankey__value"> 125</tspan><tspan class="jrk-sankey__share"> (23.4%)</tspan></text></g><g class="jrk-sankey__group"><rect class="jrk-sankey__node jrk-sankey__node--neutral jrk-sankey__node--muted" x="4" y="214.42990654205607" width="14" height="17.570093457943926" rx="2"><title>Other (12 carriers): 50 (9.3%)</title></rect><text class="jrk-sankey__label" x="24" y="223.21495327102804" text-anchor="start" dominant-baseline="middle"><title>Other (12 carriers): 50 (9.3%)</title><tspan class="jrk-sankey__name">Other (12 carriers)</tspan><tspan class="jrk-sankey__value"> 50</tspan><tspan class="jrk-sankey__share"> (9.3%)</tspan></text></g><g class="jrk-sankey__group"><rect class="jrk-sankey__node jrk-s1" x="576" y="14" width="14" height="59.73831775700935" rx="2"><title>Phone: 170 (31.8%)</title></rect><text class="jrk-sankey__label" x="596" y="43.86915887850468" text-anchor="start" dominant-baseline="middle"><title>Phone: 170 (31.8%)</title><tspan class="jrk-sankey__name">Phone</tspan><tspan class="jrk-sankey__value"> 170</tspan><tspan class="jrk-sankey__share"> (31.8%)</tspan></text></g><g class="jrk-sankey__group"><rect class="jrk-sankey__node jrk-s2" x="576" y="85.73831775700936" width="14" height="94.8785046728972" rx="2"><title>Internet: 270 (50.5%)</title></rect><text class="jrk-sankey__label" x="596" y="133.17757009345794" text-anchor="start" dominant-baseline="middle"><title>Internet: 270 (50.5%)</title><tspan class="jrk-sankey__name">Internet</tspan><tspan class="jrk-sankey__value"> 270</tspan><tspan class="jrk-sankey__share"> (50.5%)</tspan></text></g><g class="jrk-sankey__group"><rect class="jrk-sankey__node jrk-s3" x="576" y="192.61682242990656" width="14" height="33.38317757009346" rx="2"><title>Cable: 95 (17.8%)</title></rect><text class="jrk-sankey__label" x="596" y="209.30841121495328" text-anchor="start" dominant-baseline="middle"><title>Cable: 95 (17.8%)</title><tspan class="jrk-sankey__name">Cable</tspan><tspan class="jrk-sankey__value"> 95</tspan><tspan class="jrk-sankey__share"> (17.8%)</tspan></text></g></svg></div><div class="jrk-legend"><span class="jrk-legend__item jrk-s1"><span class="jrk-legend__swatch" aria-hidden="true"></span>Phone</span><span class="jrk-legend__item jrk-s2"><span class="jrk-legend__swatch" aria-hidden="true"></span>Internet</span><span class="jrk-legend__item jrk-s3"><span class="jrk-legend__swatch" aria-hidden="true"></span>Cable</span></div></div></div></div></section></div>
+    </div>
+  </section>
+
+
+  <!-- ============================ stack bar and bar list ============================ -->
+  <section class="gal-sec">
+    <h2>Stack bar and bar list</h2>
+    <p class="gal-sec__note">Part-to-whole takes a stacked bar, never a donut: length on one axis reads more accurately than angle. The bar list carries a second figure, a limit and a blank row.</p>
+    <div class="gal-demo gal-demo--stack">
+      <div style="max-width:640px"><section class="jrk-chart-card"><header class="jrk-chart-card__header"><div><h3 class="jrk-chart-card__title">Units by asset manager</h3><p class="jrk-chart-card__subtitle">Top 4 of 9 · 28,411 units</p></div><div class="jrk-card__actions"></div></header><div class="jrk-chart-card__body"><div><div class="jrk-chart jrk-stack-chart"><div class="jrk-stack-bar" role="img" aria-label="Units by asset manager. Matt Sussman 9,120 (32.1%), Max McCoy 6,120 (21.5%), Lisa Baeck 5,480 (19.3%), Tyler Stromsborg 3,310 (11.7%), Other (5) 4,381 (15.4%)."><span class="jrk-stack-bar__seg" style="flex-grow:9120;flex-basis:0" title="Matt Sussman: 9,120 (32.1%)"></span><span class="jrk-stack-bar__seg" style="flex-grow:6120;flex-basis:0" title="Max McCoy: 6,120 (21.5%)"></span><span class="jrk-stack-bar__seg" style="flex-grow:5480;flex-basis:0" title="Lisa Baeck: 5,480 (19.3%)"></span><span class="jrk-stack-bar__seg" style="flex-grow:3310;flex-basis:0" title="Tyler Stromsborg: 3,310 (11.7%)"></span><span class="jrk-stack-bar__seg" style="flex-grow:4381;flex-basis:0" title="Other (5): 4,381 (15.4%)"></span></div><ul class="jrk-legend jrk-legend--values"><li class="jrk-legend__item jrk-s1"><span class="jrk-legend__swatch" aria-hidden="true"></span><span class="jrk-legend__label">Matt Sussman</span><span class="jrk-legend__value">9,120</span><span class="jrk-legend__share">32.1%</span></li><li class="jrk-legend__item jrk-s2"><span class="jrk-legend__swatch" aria-hidden="true"></span><span class="jrk-legend__label">Max McCoy</span><span class="jrk-legend__value">6,120</span><span class="jrk-legend__share">21.5%</span></li><li class="jrk-legend__item jrk-s3"><span class="jrk-legend__swatch" aria-hidden="true"></span><span class="jrk-legend__label">Lisa Baeck</span><span class="jrk-legend__value">5,480</span><span class="jrk-legend__share">19.3%</span></li><li class="jrk-legend__item jrk-s4"><span class="jrk-legend__swatch" aria-hidden="true"></span><span class="jrk-legend__label">Tyler Stromsborg</span><span class="jrk-legend__value">3,310</span><span class="jrk-legend__share">11.7%</span></li><li class="jrk-legend__item jrk-s5"><span class="jrk-legend__swatch" aria-hidden="true"></span><span class="jrk-legend__label">Other (5)</span><span class="jrk-legend__value">4,381</span><span class="jrk-legend__share">15.4%</span></li></ul></div></div></div></section></div>
+      <section class="jrk-chart-card"><header class="jrk-chart-card__header"><div><h3 class="jrk-chart-card__title">Properties by region</h3><p class="jrk-chart-card__subtitle">Properties · units</p></div><div class="jrk-card__actions"></div></header><div class="jrk-chart-card__body"><div><div class="jrk-bars jrk-bars--secondary" style="--jrk-bars-label:160px"><div class="jrk-bars__row"><span class="jrk-bars__label" title="Pacific Northwest">Pacific Northwest</span><span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:100%"></span></span><span class="jrk-bars__value">22</span><span class="jrk-bars__secondary">6,120</span></div><div class="jrk-bars__row"><span class="jrk-bars__label" title="Southern California">Southern California</span><span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:86.36363636363636%"></span></span><span class="jrk-bars__value">19</span><span class="jrk-bars__secondary">5,480</span></div><div class="jrk-bars__row"><span class="jrk-bars__label" title="Texas">Texas</span><span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:63.63636363636363%"></span></span><span class="jrk-bars__value">14</span><span class="jrk-bars__secondary">4,012</span></div><div class="jrk-bars__row"><span class="jrk-bars__label jrk-bars__label--blank" title="(blank)">(blank)</span><span class="jrk-bars__track"><span class="jrk-bars__fill" style="width:13.636363636363635%"></span></span><span class="jrk-bars__value">3</span><span class="jrk-bars__secondary">410</span></div><p class="jrk-bars__more">+ 1 more</p></div></div></div></section>
+    </div>
+  </section>
+
+
+  <!-- ============================ sparklines and a vivid row ============================ -->
+  <section class="gal-sec">
+    <h2>Sparklines and a vivid row</h2>
+    <p class="gal-sec__note">Cell-size sparklines with gaps, a hatched missing stretch, a baseline and status tones; a vivid StatRow toned by position.</p>
+    <div class="gal-demo gal-demo--stack">
+      <div class="jrk-table-wrap"><table class="jrk-table jrk-table--compact"><thead><tr><th>Property</th><th>Score trend</th><th>Open reports</th></tr></thead><tbody>
+        <tr><td>Harbor Point</td><td><svg class="jrk-stat__spark jrk-spark--critical jrk-spark--cell" viewBox="0 0 72 22" preserveAspectRatio="none" role="img" aria-label="Harbor Point score: 20, 24, no data, no data, 30, 41, 39, 52" focusable="false"><defs><pattern id="jrk-spark-gap-_R_0_" width="4" height="4" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect class="jrk-spark__gap-ground" width="4" height="4"></rect><line class="jrk-spark__gap-line" x1="0" y1="0" x2="0" y2="4"></line></pattern></defs><rect class="jrk-spark__gap" x="16.57142857142857" y="0" width="19.42857142857143" height="22" fill="url(#jrk-spark-gap-_R_0_)"></rect><path class="jrk-spark__line" d="M2.0,20.0 L11.7,17.8"></path><path class="jrk-spark__line" d="M40.9,14.4 L50.6,8.2 L60.3,9.3 L70.0,2.0"></path><line class="jrk-spark__end" x1="70" y1="2" x2="70.01" y2="2"></line><rect class="jrk-spark__hit" x="0" y="0" width="9.714285714285714" height="22"><title>Dec: 20</title></rect><rect class="jrk-spark__hit" x="6.857142857142857" y="0" width="9.714285714285714" height="22"><title>Jan: 24</title></rect><rect class="jrk-spark__hit" x="16.57142857142857" y="0" width="9.714285714285714" height="22"><title>Feb: no data</title></rect><rect class="jrk-spark__hit" x="26.285714285714285" y="0" width="9.714285714285714" height="22"><title>Mar: no data</title></rect><rect class="jrk-spark__hit" x="36" y="0" width="9.714285714285714" height="22"><title>Apr: 30</title></rect><rect class="jrk-spark__hit" x="45.714285714285715" y="0" width="9.714285714285714" height="22"><title>May: 41</title></rect><rect class="jrk-spark__hit" x="55.42857142857143" y="0" width="9.714285714285714" height="22"><title>Jun: 39</title></rect><rect class="jrk-spark__hit" x="65.14285714285714" y="0" width="9.714285714285714" height="22"><title>Jul: 52</title></rect></svg></td><td>12</td></tr>
+        <tr><td>Parkside Glen</td><td><svg class="jrk-stat__spark jrk-spark--neutral jrk-spark--cell" viewBox="0 0 72 22" preserveAspectRatio="none" role="img" aria-label="Parkside Glen score: 8, 7, 9, 6, 5, 6, 4, 4" focusable="false"><line class="jrk-spark__base" x1="0" x2="72" y1="12.8" y2="12.8"></line><path class="jrk-spark__line" d="M2.0,5.6 L11.7,9.2 L21.4,2.0 L31.1,12.8 L40.9,16.4 L50.6,12.8 L60.3,20.0 L70.0,20.0"></path><line class="jrk-spark__end" x1="70" y1="20" x2="70.01" y2="20"></line></svg></td><td>3</td></tr>
+        <tr><td>Cedar Grove</td><td><svg class="jrk-stat__spark jrk-spark--cell" viewBox="0 0 72 22" preserveAspectRatio="none" role="img" aria-label="Cedar Grove score: no data, 3, no data, 5, 6, no data, 7, 8" focusable="false"><line class="jrk-spark__dot" x1="11.714285714285714" y1="20" x2="11.724285714285713" y2="20"></line><path class="jrk-spark__line" d="M31.1,12.8 L40.9,9.2"></path><path class="jrk-spark__line" d="M60.3,5.6 L70.0,2.0"></path><line class="jrk-spark__end" x1="70" y1="2" x2="70.01" y2="2"></line></svg></td><td>5</td></tr>
+      </tbody></table></div>
+      <div class="jrk-stat-row jrk-stat-row--split jrk-stat-row--vivid"><div class="jrk-stat jrk-stat--vivid jrk-stat--teal"><span class="jrk-stat__label">Occupancy</span><span class="jrk-stat__value">94.2<span class="jrk-stat__unit">%</span></span></div><div class="jrk-stat jrk-stat--vivid jrk-stat--violet"><span class="jrk-stat__label">Leases signed</span><span class="jrk-stat__value">892</span></div><div class="jrk-stat jrk-stat--vivid jrk-stat--blue"><span class="jrk-stat__label">Move-ins</span><span class="jrk-stat__value">1,240</span></div><div class="jrk-stat jrk-stat--vivid jrk-stat--rose"><span class="jrk-stat__label">Net absorption</span><span class="jrk-stat__value">+74</span></div></div>
+    </div>
+  </section>
+
+
+  <!-- ============================ funnel — unfed and floored stages, compact ============================ -->
+  <section class="gal-sec">
+    <h2>Funnel — unfed and floored stages, compact</h2>
+    <p class="gal-sec__note">An unfed stage keeps its slot as a dashed outline and states no rate across it; a stage under the floor is drawn at it and says "not to scale".</p>
+    <div class="gal-demo gal-demo--stack">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));gap:var(--jrk-space-4)"><section class="jrk-chart-card"><header class="jrk-chart-card__header"><div><h3 class="jrk-chart-card__title">Leasing funnel</h3><p class="jrk-chart-card__subtitle">Tours not fed this window</p></div><div class="jrk-card__actions"></div></header><div class="jrk-chart-card__body"><div><ol class="jrk-funnel jrk-funnel--compact" role="list"><li class="jrk-funnel__stage"><span class="jrk-funnel__head"><span class="jrk-funnel__label" title="Leads">Leads</span><span class="jrk-funnel__value">12,940</span><span class="jrk-funnel__share">100%</span></span><span class="jrk-funnel__track"><span class="jrk-funnel__fill" style="--jrk-funnel-width:100%"></span></span></li><li class="jrk-funnel__stage jrk-funnel__stage--unfed"><p class="jrk-funnel__step"><span class="jrk-funnel__step-rate">—</span><span class="jrk-funnel__step-loss">no rate across an unfed stage</span></p><span class="jrk-funnel__head"><span class="jrk-funnel__label" title="Tours">Tours</span><span class="jrk-funnel__tag">not fed</span><span class="jrk-funnel__value">—</span><span class="jrk-funnel__share">—</span></span><span class="jrk-funnel__track"><span class="jrk-funnel__fill jrk-funnel__fill--unfed" style="--jrk-funnel-width:100%"></span></span></li><li class="jrk-funnel__stage"><p class="jrk-funnel__step"><span class="jrk-funnel__step-rate">—</span><span class="jrk-funnel__step-loss">no rate across an unfed stage</span></p><span class="jrk-funnel__head"><span class="jrk-funnel__label" title="Applications">Applications</span><span class="jrk-funnel__value">1,240</span><span class="jrk-funnel__share">9.6%</span></span><span class="jrk-funnel__track"><span class="jrk-funnel__fill" style="--jrk-funnel-width:9.582689335394127%"></span></span></li><li class="jrk-funnel__stage"><p class="jrk-funnel__step"><span class="jrk-funnel__step-rate">2.5% continue</span><span class="jrk-funnel__step-loss">1,209 dropped</span></p><span class="jrk-funnel__head"><span class="jrk-funnel__label" title="Leases">Leases</span><span class="jrk-funnel__tag">not to scale</span><span class="jrk-funnel__value">31</span><span class="jrk-funnel__share">0.2%</span></span><span class="jrk-funnel__track"><span class="jrk-funnel__fill" style="--jrk-funnel-width:4%"></span></span></li></ol></div></div></section><section class="jrk-chart-card"><header class="jrk-chart-card__header"><div><h3 class="jrk-chart-card__title">Portfolio</h3><p class="jrk-chart-card__subtitle">Same window</p></div><div class="jrk-card__actions"></div></header><div class="jrk-chart-card__body"><div><ol class="jrk-funnel jrk-funnel--compact" role="list"><li class="jrk-funnel__stage"><span class="jrk-funnel__head"><span class="jrk-funnel__label" title="Leads">Leads</span><span class="jrk-funnel__value">9,800</span><span class="jrk-funnel__share">100%</span></span><span class="jrk-funnel__track"><span class="jrk-funnel__fill" style="--jrk-funnel-width:100%"></span></span></li><li class="jrk-funnel__stage"><p class="jrk-funnel__step"><span class="jrk-funnel__step-rate">42% continue</span><span class="jrk-funnel__step-loss">5,700 dropped</span></p><span class="jrk-funnel__head"><span class="jrk-funnel__label" title="Tours">Tours</span><span class="jrk-funnel__value">4,100</span><span class="jrk-funnel__share">42%</span></span><span class="jrk-funnel__track"><span class="jrk-funnel__fill" style="--jrk-funnel-width:41.83673469387755%"></span></span></li><li class="jrk-funnel__stage"><p class="jrk-funnel__step"><span class="jrk-funnel__step-rate">27% continue</span><span class="jrk-funnel__step-loss">2,998 dropped</span></p><span class="jrk-funnel__head"><span class="jrk-funnel__label" title="Applications">Applications</span><span class="jrk-funnel__value">1,102</span><span class="jrk-funnel__share">11%</span></span><span class="jrk-funnel__track"><span class="jrk-funnel__fill" style="--jrk-funnel-width:11.244897959183673%"></span></span></li><li class="jrk-funnel__stage"><p class="jrk-funnel__step"><span class="jrk-funnel__step-rate">58% continue</span><span class="jrk-funnel__step-loss">462 dropped</span></p><span class="jrk-funnel__head"><span class="jrk-funnel__label" title="Leases">Leases</span><span class="jrk-funnel__value">640</span><span class="jrk-funnel__share">6.5%</span></span><span class="jrk-funnel__track"><span class="jrk-funnel__fill" style="--jrk-funnel-width:6.530612244897959%"></span></span></li></ol></div></div></section></div>
+    </div>
+  </section>
 </div>
 
 <script type="module" src="preview.js"></script>

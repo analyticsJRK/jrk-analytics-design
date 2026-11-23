@@ -122,6 +122,37 @@ for (const [name, parts] of Object.entries(T.color.status)) {
     const cw = contrast(parts.text[mode], parts.wash[mode]);
     cw >= 4.5 ? pass(`status.${name} text-on-wash ${mode} ${cw.toFixed(2)}:1`)
               : fail(`status.${name} text-on-wash ${mode} ${cw.toFixed(2)}:1 — needs 4.5:1`);
+
+    // Status text also lands on the planes a row, a well and a button take:
+    // raised (the .jrk-btn--danger label), hover (a table row), track (a well),
+    // active (a pressed row). validate:skin GATES these for every skin; the base
+    // set predates the check and misses on three, so they are reported, not
+    // failed, until someone decides to re-step an Apple-derived status value.
+    for (const plane of ['raised', 'hover', 'track', 'active']) {
+      const cp = contrast(parts.text[mode], T.color.surface[plane][mode]);
+      if (cp < 4.5) warn(`status.${name}.text on surface.${plane} ${mode} ${cp.toFixed(2)}:1 — under 4.5:1 (gated in every skin, not yet here)`);
+    }
+  }
+
+  // A filled status button: the label on the fill and on its hover, and the fill
+  // bounding itself on the dark card (it carries no border). Every status that
+  // publishes a solid owes all three.
+  if (parts.solid) {
+    for (const mode of ['light', 'dark']) {
+      const on = parts.onSolid?.[mode];
+      if (!on) { fail(`status.${name}.solid has no onSolid — its label would borrow an ink that moves with something else`); continue; }
+      const c = contrast(on, parts.solid[mode]);
+      c >= 4.5 ? pass(`status.${name}.onSolid on solid ${mode} ${c.toFixed(2)}:1`)
+               : fail(`status.${name}.onSolid on solid ${mode} ${c.toFixed(2)}:1 — needs 4.5:1`);
+      if (parts.solidHover) {
+        const ch = contrast(on, parts.solidHover[mode]);
+        ch >= 4.5 ? pass(`status.${name}.onSolid on solidHover ${mode} ${ch.toFixed(2)}:1`)
+                  : fail(`status.${name}.onSolid on solidHover ${mode} ${ch.toFixed(2)}:1 — needs 4.5:1`);
+      }
+    }
+    const cb = contrast(parts.solid.dark, T.color.surface.default.dark);
+    cb >= 3 ? pass(`status.${name}.solid bounds itself on the dark card ${cb.toFixed(2)}:1`)
+            : fail(`status.${name}.solid on the dark card ${cb.toFixed(2)}:1 — under 3:1, the button has no edge in dark`);
   }
 }
 

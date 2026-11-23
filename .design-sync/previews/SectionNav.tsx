@@ -194,3 +194,23 @@ export const CustomTitle = () => (
     </div>
   </Frame>
 );
+
+/* `preset="cards"` — a screen of cards, where every card title is an <h3> and the
+   default 'h2, h3' would list the tiles. The preset indexes each TOP-LEVEL card's own
+   title and nothing nested in it: "Month by month" lives inside the Cost card and is
+   not a section of the page, so it is not in the index. */
+export const CardScreen = () => (
+  <Frame>
+    <div className="jrk-section-layout">
+      <div className="jrk-section-layout__body">
+        <Card title="Coverage" subtitle="2,918 of 28,694 units visited in the last 90 days" />
+        <Card title="Cost" subtitle="Pest service and supplies against budget, T-12">
+          <Card title="Month by month" subtitle="Nested inside Cost, so not a section" />
+        </Card>
+        <Card title="Open reports" subtitle="41 work orders open, 9 past 14 days" />
+        <Card title="Vendors" subtitle="3 vendors service 92 properties" />
+      </div>
+      <SectionNav preset="cards" className="pv-reveal" />
+    </div>
+  </Frame>
+);

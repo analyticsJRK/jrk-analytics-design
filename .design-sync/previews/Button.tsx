@@ -27,6 +27,31 @@ export const Variants = () => (
   </div>
 );
 
+/* THE OUTCOME SET — approve, send back, reject — as three solid fills of one weight,
+   so a review screen reads them as a choice between equals rather than one action
+   and two afterthoughts. Upstreamed from the portal's Forms and Pest reviews, which
+   had hand-rolled the green and amber with raw hex. Each fills with its status
+   family's `solid` and labels with its measured `onSolid`. */
+export const Outcomes = () => (
+  <div className="jrk-row" style={{ flexWrap: 'wrap' }}>
+    <Button variant="good-solid">Approve</Button>
+    <Button variant="warning-solid">Send back</Button>
+    <Button variant="danger-solid">Reject</Button>
+  </div>
+);
+
+/* A button that GOES somewhere is a link: `href` renders `<a class="jrk-btn">`, so
+   middle-click, copy-link and the status-bar preview all work. `linkAs` takes a
+   router's link component (Next.js `Link`, for one) without this library importing
+   any router. */
+export const AsLink = () => (
+  <div className="jrk-row" style={{ flexWrap: 'wrap', alignItems: 'center' }}>
+    <Button variant="ghost" size="sm" href="#overview">← All properties</Button>
+    <Button variant="primary" href="#export">Open the export</Button>
+    <Button variant="secondary" href="#locked" disabled>Locked</Button>
+  </div>
+);
+
 /* `primary` is TINTED and `cta` is the solid accent, which is the whole
    hierarchy: primary is the everyday button and appears as often as it needs to,
    cta appears at most once per view. Reach for cta when the button commits

@@ -73,6 +73,42 @@ svg {
   flex-shrink: 0;
 }
 
+/* CHART TEXT IS NOT AN ICON, SO IT IS NOT STROKED. The rule above is inherited by
+   every descendant of every <svg>, <text> included, and a chart's text sets `fill`
+   and has no reason to think about `stroke` — so every axis tick and direct label
+   carried a 1px outline in its own colour. It presents as BOLD TYPE (the outline
+   thickens stems and fills counters), which is why it survived review: the portal
+   measured `font-weight: 400` on ticks that looked 600, and the outline also turned
+   every series-coloured direct label black at 11px. Upstreamed from the portal
+   2026-11-23, where fourteen charts were inheriting it.
+
+   Not scoped to `.jrk-icon` instead: bare inline <svg>s in this library (the alert
+   glyph, field adornments, the stat spark and gauge) rely on the inherited stroke,
+   so narrowing the icon rule would blank them. Marks still set their own stroke. */
+svg text {
+  stroke: none;
+}
+
+/* EVERY SCROLL TARGET CLEARS THE STICKY TOPBAR. `.jrk-topbar` is sticky at
+   topbar.default, so a fragment jump, a `scrollIntoView` on a focused field or a
+   restored scroll position lands the target UNDER the bar — it reads as a broken
+   link ("it didn't take me there"), and the skip link is worst, because its whole
+   audience cannot see where they landed. `[id]` and not a list of anchors: the bar
+   covers the top for any scroll, so this is a property of the page, not of being a
+   heading. `:where()` keeps it at 0-1-0 so SectionNav's own offset, or any element
+   that needs a different one, wins by simply saying so. Upstreamed from the portal. */
+:where(.jrk-app) [id] {
+  scroll-margin-top: calc(var(--jrk-topbar-default) + var(--jrk-space-4));
+}
+
+/* NEGATIVE MONEY IS RED. <NegativeHighlight> (react/src/NegativeHighlight.tsx) finds
+   every ($1,000) on the page and registers it under this name; this paints it. No DOM
+   changes, so no hydration risk, and only the figure is coloured, not its sentence.
+   status.critical.text, the token already measured for red text on the card. */
+::highlight(jrk-negative) {
+  color: var(--jrk-status-critical-text);
+}
+
 /* ============================== typography ============================== */
 
 h1,

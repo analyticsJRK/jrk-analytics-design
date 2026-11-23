@@ -20,6 +20,21 @@ PageHeader SectionNav Select Sidebar SidebarAction Sparkline Spinner Stat StatRo
 Switch TabPanel Tabs Tag Textarea Topbar` plus `cx`, `setTheme`,
 `variantClass`, `MAX_SERIES`, `MAX_SERIES_ALL_PAIRS`, `MAX_FUNNEL_STAGES`.
 
+**Upstreamed from the portal 2026-11-23** (each has a `.design-sync` doc + preview
+and a gallery block in `preview/components.html`):
+
+| Area | Components / helpers |
+|---|---|
+| Tables | `TableKit` (toolbar, `#` column, 3-state sort with blanks last, column filters, sum footer, column groups, rows that slide open; view state is controlled), `ColumnFilter` + `filterCore` (values / tags / number / date / text), `Combobox`, `TableSearch` / `SearchCount` / `useTableSearch`, `useFitHeight`, `enhanceTable` (sort + funnels on a rendered `<table>`), `.jrk-th--sortable`; `DataTable maxHeight` now sets `--jrk-table-height` so print still resets it |
+| Overlays & feedback | `Modal` (native `<dialog>`; `.jrk-modal` now centres — `margin: auto` — keeps its footer reachable and is never bold), `ScreenSpinner` / `BusySpinner` + `beginBusy` / `useBusy`, `Spinner delay`, `NavProgress` / `useNavProgress`, `DockedPanel` / `PanelHost`, `PageSkeleton`, `MentionBox` / `MentionText`, `Alert` picks its glyph from the tone |
+| Cards, badges, sheet | `Card` `id` / `summary` / `meta` / `collapsible`; `Badge pressed` (a toggle pill); `Avatar`; `CountBadge`; `SheetToolbar` (writes `--jrk-sheet-toolbar-h`) / `SheetFoot`; `Switch hint` |
+| Shell & nav | `SubNav` (the two-level section strip: `.jrk-tabs` groups over a `.jrk-btn-group` of links with `aria-current`; never a tablist) + `subNavActive`, `NavItem` `actions` / `glyph` / `pending` / `disabled`, `NavDisclosure`, `NavPinButton`, `SidebarToggle`, `Sidebar peek` / `search`, `BrandMark`, `Topbar masthead`, `NavTypeahead`, `SectionNav preset="cards"`; rail is "one layout, two widths" at a 72px collapsed width; page-header actions wrap |
+| Buttons | `good-solid` / `warning-solid` (approve / send back beside `danger-solid`), `Button href` + `linkAs`, `.jrk-btn-group > [aria-current='page']` thumb, segmented controls scroll at ≤1024px |
+| Appearance | `AppearanceMenu`, `ThemeControl`, `SkinControl`, `HueSwatches`, `applyTheme` / `applySkin` / `applyVariant` / `applyAppearance`, `readStoredAppearance`, `themeScript` (pre-paint), driven by `VARIANT_AXES` / `SKIN_LAYERS` exported from `dist/tokens.ts`; vitrine `data-scene="clear"` |
+| Org & charts | `OrgCanvas` (zoom, pan, fit, print fit), `OrgNode` drag / `passThrough` / `tone`, `assignGroups`, `palette="generated"` (opt-in), `chartToPng` / `printElement` / `download`; charts listed in charts.md |
+| Money | `usd`, `usdShort`, `paren`, `NEGATIVE_MONEY`, `<NegativeHighlight>` — negative money reads ($1,000), painted red via `::highlight(jrk-negative)` |
+| Floating | `placeFloating` / `useFloatingPanel` — one placement routine for every top-layer panel (Menu, ColumnFilter, Combobox) |
+
 ## Button
 
 `.jrk-btn` + one variant + optional size.

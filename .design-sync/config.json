@@ -80,6 +80,49 @@
     },
     "Glossary": {
       "cardMode": "column"
+    },
+    "AppearanceMenu": {
+      "cardMode": "single",
+      "primaryStory": "Open",
+      "viewport": "760x420"
+    },
+    "SubNav": {
+      "cardMode": "column",
+      "viewport": "1120x800"
+    },
+    "OrgCanvas": {
+      "cardMode": "column",
+      "viewport": "1120x800"
+    },
+    "TableKit": {
+      "cardMode": "column",
+      "viewport": "1120x800"
+    },
+    "ColumnChart": {
+      "cardMode": "column"
+    },
+    "Sankey": {
+      "cardMode": "column"
+    },
+    "StackBar": {
+      "cardMode": "column"
+    },
+    "SeriesTable": {
+      "cardMode": "column"
+    },
+    "DockedPanel": {
+      "cardMode": "column",
+      "viewport": "1120x700"
+    },
+    "PageSkeleton": {
+      "cardMode": "column",
+      "viewport": "1120x700"
+    },
+    "ColumnFilter": {
+      "cardMode": "column"
+    },
+    "Combobox": {
+      "cardMode": "column"
     }
   },
   "runtimeFontPrefixes": [

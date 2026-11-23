@@ -97,6 +97,17 @@
     position: relative;
     z-index: 1;
   }
+
+  /* THE CONSUMER'S PHOTOGRAPH, through the hook the skin reads on every tint:
+     --jrk-vitrine-photo. Absolute paths: a relative url() inside a custom
+     property may resolve against the stylesheet that USES it (css/skins/), and
+     engines have disagreed on which base applies.
+     Set only under data-scene="clear" so the default page still shows the
+     skin's own token-built scene. */
+  :root[data-scene="clear"] {
+    --jrk-vitrine-photo: url("/preview/assets/vitrine-scene-light.jpg");
+    --jrk-vitrine-photo-dark: url("/preview/assets/vitrine-scene-dark.jpg");
+  }
 </style>
 </head>
 <body>
@@ -131,6 +142,13 @@
       <div>
         <div class="gal-note" style="margin-bottom:6px"><strong>Tint</strong></div>
         <div class="tint" role="radiogroup" aria-label="Tint" id="tint"></div>
+      </div>
+      <div>
+        <div class="gal-note" style="margin-bottom:6px"><strong>Scene</strong></div>
+        <div class="jrk-btn-group" role="group" aria-label="Scene">
+          <button class="jrk-btn jrk-btn--sm" data-scene-btn="" type="button">Clamped</button>
+          <button class="jrk-btn jrk-btn--sm" data-scene-btn="clear" type="button">Clear</button>
+        </div>
       </div>
     </div>
   </header>
@@ -386,9 +404,18 @@
       referenced or not. The skin exposes a hook instead and ships a token-built
       ramp as its default, so it looks like itself standalone:
     </p>
-    <pre class="gal-code"><code>:root[data-skin='vitrine'] {
-  --jrk-vitrine-backdrop: url('/factory.webp');
+    <pre class="gal-code"><code>:root {
+  --jrk-vitrine-photo: url('/scene-light.jpg');
+  --jrk-vitrine-photo-dark: url('/scene-dark.jpg');   /* optional */
 }</code></pre>
+    <p class="gal-note">
+      <strong>Not</strong> <code>--jrk-vitrine-backdrop</code>, which this page used to
+      show: every tint re-declares that variable at (0,3,0), so a photograph set on
+      <code>:root[data-skin='vitrine']</code> (0,2,0) vanished the moment a tint was
+      picked. Nothing declares <code>--jrk-vitrine-photo</code>, so a consumer's value
+      wins at any specificity, and the tint's gradient stays underneath it as the
+      fallback.
+    </p>
     <p class="gal-note">
       Set it in this page's devtools to watch the scrim do its job: the panes stay
       legible over anything you point it at, which is the entire purpose of
@@ -497,6 +524,43 @@
     </div>
   </section>
 
+  <section class="gal-sec">
+    <h2>data-scene="clear": the photograph, undulled</h2>
+    <p class="gal-note">
+      Press <strong>Clear</strong> above. The clamp and the scrim go, so the page
+      shows the photograph as it is &mdash; and everything that was glass or bare
+      ink on it is bought back: the overlays (menus, modals, hovercards, the
+      masthead) go opaque, and the page header, section headings, the section
+      rail and the tab row each take <code>surface-default</code>, the plane their
+      ink was solved against. A header followed by its tab strip is one slab.
+    </p>
+    <div class="jrk-stack">
+      <div class="jrk-page-header">
+        <div>
+          <h1 class="jrk-page-header__title">Pest control</h1>
+          <p class="jrk-page-header__desc">Visits, coverage and cost across the portfolio.</p>
+        </div>
+      </div>
+      <div class="jrk-tabs" role="tablist" aria-label="Section">
+        <button class="jrk-tab" role="tab" aria-selected="true" type="button">Overview</button>
+        <button class="jrk-tab" role="tab" aria-selected="false" type="button">Weekly route</button>
+        <button class="jrk-tab" role="tab" aria-selected="false" type="button">Reviews</button>
+      </div>
+      <div class="jrk-section">
+        <div class="jrk-section__header"><h2 class="jrk-section__title">Coverage</h2></div>
+      </div>
+      <div class="jrk-card" style="padding:16px">
+        Card contents were never in question: content is opaque in every scene.
+      </div>
+    </div>
+    <div class="gal-sec__note">
+      Measured on the portal's photographs before this existed, bare ink on the
+      unclamped scene fell to <strong>1.02:1</strong> (light ink on a sunlit ridge).
+      A consumer's own toolbar or lead paragraph on the bare page is not in this
+      list and needs <code>surface-default</code> the same way.
+    </div>
+  </section>
+
 </div>
 
 <script type="module">
@@ -602,6 +666,24 @@ const t0 = url0.searchParams.get('tint');
 applyTint(TINTS.includes(t0) ? t0 : 'green');
 /* After the skin stamp lands, or every swatch samples the BASE accent. */
 sampleTints();
+
+/* The scene, in the URL like the skin. Clear removes the clamp and the scrim;
+   see the section at the foot of the page. */
+function applyScene(v) {
+  if (v) document.documentElement.dataset.scene = v;
+  else delete document.documentElement.dataset.scene;
+  const u = new URL(location.href);
+  if (v) u.searchParams.set('scene', v);
+  else u.searchParams.delete('scene');
+  history.replaceState(null, '', u);
+  document.querySelectorAll('[data-scene-btn]').forEach((b) => {
+    b.setAttribute('aria-pressed', String(b.dataset.sceneBtn === (v || '')));
+  });
+}
+document.querySelectorAll('[data-scene-btn]').forEach((b) => {
+  b.addEventListener('click', () => applyScene(b.dataset.sceneBtn));
+});
+applyScene(url0.searchParams.get('scene') === 'clear' ? 'clear' : '');
 </script>
 </body>
 </html>

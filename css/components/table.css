@@ -139,6 +139,8 @@
 /* Sortable headers are real buttons so keyboard and screen-reader users get
    the same affordance as a mouse click. */
 .jrk-table__sort {
+  /* The arrow's box, stated once so the centring spacer below can mirror it. */
+  --jrk-table-sort-arrow: 12px;
   display: inline-flex;
   align-items: center;
   gap: var(--jrk-space-1);
@@ -152,6 +154,30 @@
   cursor: pointer;
 }
 
+/* A library icon as the arrow is 1em at font-size 1.15em (icon.css), so its box is 1.15em of
+   the button's own type — the unit the spacer below resolves in, since it inherits the same
+   font. */
+.jrk-table__sort:has(> svg.jrk-icon) {
+  --jrk-table-sort-arrow: 1.15em;
+}
+
+/* A CENTRED HEADING MIRRORS ITS ARROW. The arrow is hidden with `opacity`, so it keeps its box
+   on every heading at all times while being painted on one, and a centred cell then centres
+   [label][gap][arrow] — the label sat half an arrow off the figures under it, on every column.
+   An empty box of the arrow's width on the leading side makes the button symmetric, so the label
+   lands on the true centre whether the arrow is painted or not. The portal carried this as four
+   per-screen patches before it came here.
+
+   Only where the heading is centred: a start or end aligned label is meant to sit on its edge,
+   and a spacer there would push it off the edge of the cells it names. The leading column starts
+   by default (see "THE LEADING COLUMN STARTS" below) and `.jrk-col-center` is its way back. */
+.jrk-table thead th:not(:first-child, .jrk-col-start, .jrk-col-end, .jrk-table__lead) > .jrk-table__sort::before,
+.jrk-table thead th.jrk-col-center > .jrk-table__sort::before {
+  content: '';
+  flex: none;
+  inline-size: var(--jrk-table-sort-arrow);
+}
+
 /* The label does NOT change colour on hover or when sorted, and that is a
    consequence of the accent header rather than an omission. Both states used to go
    text.primary, which was a step UP in ink from a muted grey label; from an accent
@@ -161,24 +187,102 @@
    greyscale and both dichromacies, so nothing is lost by not doubling it in colour. */
 
 .jrk-table__sort svg:not(.jrk-icon) {
-  width: 12px;
-  height: 12px;
+  width: var(--jrk-table-sort-arrow);
+  height: var(--jrk-table-sort-arrow);
   stroke-width: 2.5;
+}
+
+/* THE THREE ARROW STATES APPLY TO ANY ARROW, a library icon included. They used to sit on the
+   `:not(.jrk-icon)` size rule above, so an icon arrow skipped the hidden resting state and was
+   painted on every column — and then FADED to 0.4 on hover, the reverse of the signal. Sizing
+   stays bare-svg only, because an icon's size is its em contract (see icon.css). */
+.jrk-table__sort > svg {
   opacity: 0;
   transition: opacity var(--jrk-transition);
 }
 
-.jrk-table__sort:hover svg {
+.jrk-table__sort:hover > svg,
+.jrk-table__sort:focus-visible > svg {
   opacity: 0.4;
 }
 
-/* The active sort column keeps its arrow visible. */
-.jrk-table th[aria-sort] .jrk-table__sort svg {
+/* The active sort column keeps its arrow visible. `aria-sort="none"` is a valid value meaning
+   "sortable, not sorted" and some DOM adapters write it on every heading, so it is excluded —
+   otherwise every arrow in the row is painted at full and none of them says anything. */
+.jrk-table th[aria-sort]:not([aria-sort='none']) .jrk-table__sort > svg {
   opacity: 1;
 }
 
-.jrk-table th[aria-sort='descending'] .jrk-table__sort svg {
+.jrk-table th[aria-sort='descending'] .jrk-table__sort > svg {
   transform: rotate(180deg);
+}
+
+/* ---------- a heading that IS the sort control ----------
+
+   For a table whose headings sort without a button inside them — what `enhanceTable` makes of a
+   table it did not render, or any hand-written markup that puts the click on the `<th>` itself.
+   The heading carries `tabindex="0"`, `aria-sort` and one of the two direction modifiers; the
+   glyph is drawn here so it never enters the cell's text, which a copy, a filter or an export
+   reads.
+
+   UNLIKE `.jrk-table__sort`, THE GLYPH SHOWS AT REST, faintly, as an up-down pair. A button is an
+   affordance by itself; a bare heading is not, and a sortable column that looks exactly like an
+   unsortable one is found only by accident. The sorted column swaps it for its direction at full
+   strength, so the state is still a SHAPE change and survives greyscale.
+
+   Masks, not `content: '▲'`: a geometric glyph comes from whatever font has it, at that font's
+   size and baseline, and never matches the button arrow beside it. */
+.jrk-th--sortable {
+  --jrk-th-sort-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.8 6.6 8 3.4l3.2 3.2M4.8 9.4 8 12.6l3.2-3.2'/%3E%3C/svg%3E");
+  cursor: pointer;
+  user-select: none;
+}
+
+.jrk-th--sortable::after {
+  content: '';
+  display: inline-block;
+  inline-size: 12px;
+  block-size: 12px;
+  margin-inline-start: var(--jrk-space-1);
+  vertical-align: middle;
+  background: currentColor;
+  -webkit-mask: var(--jrk-th-sort-glyph) center / contain no-repeat;
+  mask: var(--jrk-th-sort-glyph) center / contain no-repeat;
+  opacity: 0.4;
+}
+
+.jrk-th--asc,
+.jrk-th--desc {
+  --jrk-th-sort-glyph: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='black' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 13V3.2M3.9 7.3 8 3.2l4.1 4.1'/%3E%3C/svg%3E");
+}
+
+.jrk-th--asc::after,
+.jrk-th--desc::after {
+  opacity: 1;
+}
+
+.jrk-th--desc::after {
+  transform: rotate(180deg);
+}
+
+/* The same mirror `.jrk-table__sort` takes, for the same reason, on a centred heading. */
+.jrk-table thead th.jrk-th--sortable:not(:first-child, .jrk-col-start, .jrk-col-end, .jrk-table__lead)::before,
+.jrk-table thead th.jrk-th--sortable.jrk-col-center::before {
+  content: '';
+  display: inline-block;
+  inline-size: 12px;
+  margin-inline-end: var(--jrk-space-1);
+}
+
+/* Listed twice: the second clears the frozen corner's own fill (0-2-2) on a first column. */
+.jrk-th--sortable:hover,
+.jrk-table thead th.jrk-th--sortable:hover {
+  background: var(--jrk-surface-subtle);
+}
+
+.jrk-th--sortable:focus-visible {
+  outline: 2px solid var(--jrk-focus-ring);
+  outline-offset: -2px;
 }
 
 /* ---------- body ---------- */
@@ -446,14 +550,386 @@
    see the long note at the top of this file. This modifier is retained because
    `<DataTable maxHeight>` emits it and consumers write it, and because it still
    says something true about the element it is on. It turns on nothing the base
-   rule does not: a wrap carrying a `maxHeight` inline style is capped at that
-   height, and a wrap without one is capped at `--jrk-table-height` anyway. */
+   rule does not: `maxHeight` is written into `--jrk-table-height` on the wrap.
+
+   NEVER AN INLINE `max-height`. It did that until 2026-11-23, and an inline
+   declaration beats every stylesheet rule — the print reset at the foot of this
+   file included — so a table given a height printed its first screenful and
+   dropped the rest. The custom property feeds the base rule's own `max-height`,
+   which the print block then overrides normally. Same for `useFitHeight`. */
 .jrk-table-wrap--capped {
   overflow: auto;
 }
 
 .jrk-table--zebra tbody tr:hover td {
   background: var(--jrk-surface-hover);
+}
+
+/* ---------- row numbers and a frozen name column ----------
+
+   `.jrk-table--numbered` puts a `#` column before the row's name: numbered over the rows ON
+   SCREEN, so it renumbers after a sort or a filter and reads as "the 12th of the rows I am
+   looking at", which is what a reader quoting a row to a colleague means. <TableKit> draws it.
+
+   Both columns freeze. The `#` is the first child, so the base freeze above already holds it at
+   the edge; the name column (`.jrk-table__lead`) is the second and freezes at the `#` column's
+   width, which is why that width is FIXED rather than content-sized — a sticky offset has to be
+   known in CSS, and a `#` column that grew from 99 to 100 rows would slide the name column under
+   it. The frozen-pane divider moves from the `#` to the name column, so the line sits where the
+   frozen block ends rather than between two frozen columns.
+
+   The name column STARTS, as the leading column does (see "THE LEADING COLUMN STARTS" above):
+   the portal centred it and this is the library rule winning. The `#` centres — it is a value. */
+.jrk-table--numbered {
+  --jrk-table-rn-w: 3.25rem;
+}
+
+/* A chevron shares the `#` cell when rows open, so the column takes the chevron's width too. */
+.jrk-table--expandable {
+  --jrk-table-rn-w: calc(3rem + var(--jrk-min-touch));
+}
+
+/* (0,2,2) against the base freeze's (0,2,1) and the leading column's (0,2,2), and later in the
+   file — written out per section for that reason rather than as one `:is()`. */
+.jrk-table thead th.jrk-table__rn,
+.jrk-table tbody td.jrk-table__rn,
+.jrk-table tfoot td.jrk-table__rn {
+  box-sizing: border-box;
+  inline-size: var(--jrk-table-rn-w, 3.25rem);
+  min-inline-size: var(--jrk-table-rn-w, 3.25rem);
+  max-inline-size: var(--jrk-table-rn-w, 3.25rem);
+  padding-inline: var(--jrk-space-2);
+  color: var(--jrk-text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-align: center;
+  /* Transparent, never removed: the 1px stays so the column's width is the same with or
+     without the divider (see the `border: 0` note at the top of card.css). */
+  border-inline-end-color: transparent;
+}
+
+.jrk-table--expandable tbody td.jrk-table__rn {
+  padding-inline: var(--jrk-space-1);
+  text-align: start;
+}
+
+.jrk-table thead th.jrk-table__lead,
+.jrk-table tbody td.jrk-table__lead,
+.jrk-table tfoot td.jrk-table__lead {
+  position: sticky;
+  inset-inline-start: var(--jrk-table-rn-w, 0px);
+  z-index: 2;
+  text-align: start;
+  border-inline-end: 1px solid var(--jrk-border-default);
+}
+
+/* The fills, per section, for the reason the base freeze states: a sticky cell without one shows
+   the columns sliding under it. Row hover and `aria-selected` are (0,2,3) and still reach it. */
+.jrk-table thead th.jrk-table__lead,
+.jrk-table tbody td.jrk-table__lead {
+  background: var(--jrk-surface-default);
+}
+
+.jrk-table thead th.jrk-table__lead {
+  z-index: 4;
+}
+
+.jrk-table tfoot td.jrk-table__lead {
+  background: var(--jrk-surface-subtle);
+}
+
+/* A name column of prose gets a floor on a wide screen, or eighteen figure columns squeeze it
+   to one word per line. Not on a narrow one, where the floor would be most of the port. */
+@media (min-width: 900px) {
+  .jrk-table tbody td.jrk-table__lead--text {
+    min-inline-size: 12rem;
+  }
+}
+
+/* Per-column wrapping: dates and figures stay on one line; a long prose column wraps inside a
+   band wide enough to read. */
+.jrk-table .jrk-table__nowrap {
+  white-space: nowrap;
+}
+
+.jrk-table .jrk-table__wrap {
+  white-space: normal;
+  min-inline-size: 220px;
+  max-inline-size: 420px;
+}
+
+/* A muted second line under a cell's value — a property's code under its name. Block, so it
+   always takes its own line; never part of what the cell sorts, filters or exports by. */
+.jrk-table__sub {
+  display: block;
+  margin-block-start: var(--jrk-space-0_5);
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+  white-space: normal;
+}
+
+/* An absent value. An em-dash, muted so it reads as "nothing here" rather than as a figure. */
+.jrk-table__blank {
+  color: var(--jrk-text-muted);
+}
+
+/* A row that opens something. Focusable, so the row is reachable without a mouse; the ring is
+   inset because the wrap clips anything drawn outside the row. */
+.jrk-table tbody tr.jrk-table__row--click {
+  cursor: pointer;
+}
+
+.jrk-table tbody tr.jrk-table__row--click:focus-visible {
+  outline: 2px solid var(--jrk-focus-ring);
+  outline-offset: -2px;
+}
+
+/* ---------- rows that open ----------
+
+   A row can open to show more of itself in two shapes, drawn under it and never sorted, filtered,
+   numbered or exported — they belong to the row above them:
+
+     .jrk-table__child   rows IN THE TABLE'S OWN COLUMNS, so a child's figures sit under the
+                         headings they belong to (a property's units under the property)
+     .jrk-table__detail  one full-width row of anything (a note, a sub-table, a form)
+
+   The chevron that opens them lives in the `#` cell (`.jrk-table__twist`), so the ROW carries the
+   control rather than one of its cells. The open row and what it opened share the recessed fill
+   and read as one block. */
+.jrk-table__twist {
+  display: inline-grid;
+  place-items: center;
+  inline-size: var(--jrk-min-touch);
+  block-size: var(--jrk-min-touch);
+  margin-inline-end: var(--jrk-space-0_5);
+  padding: 0;
+  vertical-align: middle;
+  color: var(--jrk-text-secondary);
+  background: none;
+  border: 0;
+  border-radius: var(--jrk-radius-sm);
+  cursor: pointer;
+}
+
+.jrk-table__twist:hover {
+  color: var(--jrk-text-primary);
+  background: var(--jrk-surface-hover);
+}
+
+.jrk-table__twist:focus-visible {
+  outline: 2px solid var(--jrk-focus-ring);
+  outline-offset: 1px;
+}
+
+.jrk-table__twist .jrk-icon {
+  transition: transform var(--jrk-duration-base) var(--jrk-ease-standard);
+}
+
+/* In the RTL mirror the closed chevron points left, so it turns the other way to point down. */
+.jrk-table__twist[aria-expanded='true'] .jrk-icon {
+  transform: rotate(90deg);
+}
+
+.jrk-table__twist[aria-expanded='true']:dir(rtl) .jrk-icon {
+  transform: rotate(-90deg);
+}
+
+/* A row that cannot open keeps the chevron's room, so the numbers still line up down the column. */
+.jrk-table__twist--none {
+  visibility: hidden;
+}
+
+.jrk-table--expandable tbody tr > td {
+  transition: background-color var(--jrk-duration-base) var(--jrk-ease-standard);
+}
+
+/* (0,3,3): over the row hover, so an open row does not flash white under the pointer. */
+.jrk-table tbody tr[aria-expanded='true'] > td,
+.jrk-table tbody tr.jrk-table__child > td,
+.jrk-table tbody tr.jrk-table__child:hover > td,
+.jrk-table tbody tr.jrk-table__detail > td,
+.jrk-table tbody tr.jrk-table__detail:hover > td {
+  background: var(--jrk-surface-subtle);
+}
+
+/* A dashed rule between children: a sub-row, not a row of the table. */
+.jrk-table tbody tr.jrk-table__child > td {
+  border-top: 1px dashed var(--jrk-border-subtle);
+}
+
+/* The detail is free content, so it does not inherit the centred figure alignment. */
+.jrk-table tbody tr.jrk-table__detail > td {
+  padding: var(--jrk-space-2) var(--jrk-space-3);
+  text-align: start;
+}
+
+/* THEY SLIDE. A table row has no height to animate, so each cell's content sits in
+   `.jrk-table__slide`, whose single grid row runs 0fr -> 1fr while the cell's own padding grows
+   from 0. The content is clipped only WHILE it moves (`__slide-in` takes `overflow: hidden` for
+   the length of the animation and gives it back), so a focus ring or a menu inside an open
+   detail is not cut off afterwards.
+
+   Closing is the same run backwards on rows marked `data-closing`. <TableKit> keeps those rows
+   for the length of `--jrk-duration-base`, read from the computed style, then drops them — so
+   retuning the token retunes both halves. Exit takes the exit easing, entry the entry easing. */
+.jrk-table__slide {
+  display: grid;
+  grid-template-rows: 1fr;
+  animation: jrk-table-slide-open var(--jrk-duration-base) var(--jrk-ease-enter);
+}
+
+.jrk-table__slide-in {
+  min-height: 0;
+  animation: jrk-table-slide-clip var(--jrk-duration-base);
+}
+
+.jrk-table tbody tr.jrk-table__child > td,
+.jrk-table tbody tr.jrk-table__detail > td {
+  animation: jrk-table-cell-open var(--jrk-duration-base) var(--jrk-ease-enter);
+}
+
+.jrk-table tbody tr[data-closing] .jrk-table__slide {
+  animation: jrk-table-slide-close var(--jrk-duration-base) var(--jrk-ease-exit) forwards;
+}
+
+.jrk-table tbody tr[data-closing] .jrk-table__slide-in {
+  overflow: hidden;
+}
+
+.jrk-table tbody tr[data-closing] > td {
+  animation: jrk-table-cell-close var(--jrk-duration-base) var(--jrk-ease-exit) forwards;
+  pointer-events: none;
+}
+
+@keyframes jrk-table-slide-open {
+  from { grid-template-rows: 0fr; opacity: 0; }
+  to { grid-template-rows: 1fr; opacity: 1; }
+}
+
+@keyframes jrk-table-slide-close {
+  from { grid-template-rows: 1fr; opacity: 1; }
+  to { grid-template-rows: 0fr; opacity: 0; }
+}
+
+@keyframes jrk-table-slide-clip {
+  from, to { overflow: hidden; }
+}
+
+@keyframes jrk-table-cell-open {
+  from { padding-block: 0; border-top-width: 0; }
+}
+
+@keyframes jrk-table-cell-close {
+  to { padding-block: 0; border-top-width: 0; }
+}
+
+/* base.css already zeroes the durations; this states the outcome rather than relying on a
+   0ms animation's end state, and takes a closing row out at once. */
+@media (prefers-reduced-motion: reduce) {
+  .jrk-table__slide,
+  .jrk-table__slide-in,
+  .jrk-table tbody tr.jrk-table__child > td,
+  .jrk-table tbody tr.jrk-table__detail > td {
+    animation: none;
+  }
+
+  .jrk-table tbody tr[data-closing] {
+    display: none;
+  }
+}
+
+/* ---------- column groups ----------
+
+   A header row of collapsible column groups over the column row (<TableKit> `groups`), the
+   shape a pricing worksheet takes: "Current lease", "Market", "Offer", each folding to one
+   summary column. The group row's height is DECLARED so the column row can pin directly under
+   it — two sticky rows need a known offset, and a measured one would be a script. */
+.jrk-table--grouped {
+  --jrk-table-group-h: 2rem;
+}
+
+.jrk-table--grouped thead tr.jrk-table__grouprow > th {
+  top: 0;
+  block-size: var(--jrk-table-group-h);
+  padding: 0;
+  border-bottom: 1px solid var(--jrk-border-subtle);
+}
+
+.jrk-table--grouped thead tr.jrk-table__grouprow > th + th {
+  border-inline-start: 1px solid var(--jrk-border-default);
+}
+
+.jrk-table--grouped thead tr.jrk-table__colrow > th {
+  top: var(--jrk-table-group-h);
+}
+
+/* The toggle is the whole group cell. Card plane and accent ink, the header's own pair (by
+   direction): it is a header label first and a control second, so it does not take a button's
+   fill. + and − sit in one fixed box so the caption does not shift as the group opens. */
+.jrk-table__group-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--jrk-space-1_5);
+  inline-size: 100%;
+  block-size: var(--jrk-table-group-h, 2rem);
+  padding-inline: var(--jrk-space-3);
+  font: inherit;
+  font-weight: var(--jrk-weight-semibold);
+  white-space: nowrap;
+  color: var(--jrk-accent-text);
+  background: var(--jrk-surface-default);
+  border: 0;
+  cursor: pointer;
+}
+
+.jrk-table__group-toggle:hover {
+  background: var(--jrk-surface-subtle);
+}
+
+.jrk-table__group-toggle:focus-visible {
+  outline: 2px solid var(--jrk-focus-ring);
+  outline-offset: -2px;
+}
+
+.jrk-table__group-twist {
+  inline-size: 0.75em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+/* "+4": how many columns a collapsed group is holding back. */
+.jrk-table__group-count {
+  padding-inline: var(--jrk-space-1);
+  font-size: var(--jrk-text-xs);
+  font-variant-numeric: tabular-nums;
+  color: var(--jrk-accent-wash-text);
+  background: var(--jrk-accent-wash);
+  border-radius: var(--jrk-radius-full);
+}
+
+/* ---------- rows a filter took out ----------
+
+   A DOM filter (`enhanceTable`) hides a row with the `hidden` attribute rather than removing it,
+   so it can come back without a re-render. A module rule giving rows a `display` would beat the
+   UA's `[hidden]` and show it again, hence the `!important` — scoped to this library's tables, so
+   it reaches nobody else's markup. */
+.jrk-table tbody > tr[hidden] {
+  display: none !important;
+}
+
+/* ---------- a field in a cell keeps a readable width ----------
+
+   `.jrk-table` is `width: 100%` and `.jrk-input` is `width: 100%`, so a cell holding a field has
+   almost no min-content width: a table of fields stays at exactly the card's width and CRUSHES
+   them — measured in the portal at 390px, two inputs rendered 38px and 26px wide with their
+   placeholders clipped to two letters. A floor makes the PORT scroll instead, which is what the
+   wrap is for. Narrow screens only, where the crush happens; a filter panel's own fields are
+   left alone (they sit inside a heading, and inside the wrap's DOM). */
+@media (max-width: 1024px) {
+  .jrk-table-wrap :is(.jrk-input, .jrk-select, .jrk-textarea):not(.jrk-filter *) {
+    min-inline-size: 9rem;
+  }
 }
 
 /* ---------- in-cell bar ---------- */
@@ -729,8 +1205,17 @@
   .jrk-table thead th,
   .jrk-table th:first-child,
   .jrk-table td:first-child,
+  .jrk-table thead th.jrk-table__lead,
+  .jrk-table tbody td.jrk-table__lead,
+  .jrk-table tfoot td.jrk-table__lead,
   .jrk-table-wrap .jrk-table-footer {
     position: static;
+  }
+
+  /* Controls are screen affordances; a closing row is on its way out. */
+  .jrk-table__twist,
+  .jrk-table tbody tr[data-closing] {
+    display: none;
   }
 
   .jrk-table thead {

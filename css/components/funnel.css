@@ -231,3 +231,55 @@
     outline-offset: -1px;
   }
 }
+
+/* ---------- unfed, floored, compact ---------- */
+
+/* A STAGE WITH NO SOURCE keeps its slot as an OUTLINE at the width above it, so
+   the silhouette holds and the absence reads as absence. Dashed is the
+   library's word for "not a measured value" (threshold, vacant seat); the
+   value prints "—" and the tag says "not fed" in words, so the dash is never
+   the only signal. The ramp still advances past it — position is the meaning. */
+.jrk-funnel__fill--unfed {
+  background: transparent;
+  border: 1px dashed var(--jrk-border-strong);
+}
+
+.jrk-funnel__stage--unfed .jrk-funnel__label {
+  color: var(--jrk-text-muted);
+}
+
+/* "not fed" / "not to scale". A word, not an icon, and in the head row so it
+   never sits on the band. */
+.jrk-funnel__tag {
+  flex: 0 0 auto;
+  padding: 0 var(--jrk-space-1_5);
+  font-size: var(--jrk-text-2xs);
+  font-weight: var(--jrk-weight-medium);
+  color: var(--jrk-text-secondary);
+  background: var(--jrk-surface-subtle);
+  border-radius: var(--jrk-radius-full);
+  white-space: nowrap;
+}
+
+/* Two funnels side by side. The band thins and the type steps down one rung;
+   the figures stay — a compact funnel without its counts is a decoration. */
+.jrk-funnel--compact {
+  --jrk-funnel-band: 16px;
+  gap: 0;
+}
+
+.jrk-funnel--compact .jrk-funnel__label,
+.jrk-funnel--compact .jrk-funnel__value {
+  font-size: var(--jrk-text-xs);
+}
+
+.jrk-funnel--compact .jrk-funnel__step {
+  padding-block: var(--jrk-space-1);
+}
+
+@media (forced-colors: active) {
+  .jrk-funnel__fill--unfed {
+    outline: 0;
+    border-color: CanvasText;
+  }
+}

@@ -9,6 +9,7 @@
     "$darkNote": "DARK IS THE FAITHFUL HALF AND LIGHT IS A DESIGN DECISION, the arrangement midgard records. The reference is a dark scene lit from within; inverting it produces a pale ground under a green that cannot be read on it, which is what the stepped light accent roles exist to avoid."
   },
   "stamp": "vitrine",
+  "label": "Vitrine",
   "vars": {
     "$comment": "Keyed by CSS variable name without the --jrk- prefix. The build asserts every one exists in the base layer; skin-only names go in skinOnly.",
     "surface-canvas": {
@@ -160,8 +161,9 @@
       "dark": "#24db80"
     },
     "status-good-text": {
-      "light": "#057c41",
-      "dark": "#20df80"
+      "light": "#046f3a",
+      "dark": "#20df80",
+      "$note": "Light re-stepped 2026-11-23, #057c41 -> #046f3a: 3.82:1 on surface-track and 4.33:1 on surface-active. Now 5.42 panel / 4.54 track / 5.14 active / 5.41 wash."
     },
     "status-good-wash": {
       "light": "#d6f5e6",
@@ -172,8 +174,9 @@
       "dark": "#f9a006"
     },
     "status-warning-text": {
-      "light": "#925f06",
-      "dark": "#df9920"
+      "light": "#855605",
+      "dark": "#df9920",
+      "$note": "Light re-stepped 2026-11-23, #925f06 -> #855605: 3.92:1 on surface-track. Now 5.43 panel / 4.55 track / 5.15 active / 5.29 wash."
     },
     "status-warning-wash": {
       "light": "#f5ead6",
@@ -184,8 +187,9 @@
       "dark": "#f2610d"
     },
     "status-serious-text": {
-      "light": "#af4507",
-      "dark": "#e06c29"
+      "light": "#a54107",
+      "dark": "#e48046",
+      "$note": "Re-stepped 2026-11-23. Light #af4507 -> #a54107 (4.12:1 on surface-track, now 4.51); dark #e06c29 -> #e48046 (4.33:1 on surface-raised and 3.83:1 on surface-active, now 5.10 / 4.52)."
     },
     "status-serious-wash": {
       "light": "#f5e1d6",
@@ -196,8 +200,9 @@
       "dark": "#e62019"
     },
     "status-critical-text": {
-      "light": "#c50e08",
-      "dark": "#e65550"
+      "light": "#c10e08",
+      "dark": "#eb7874",
+      "$note": "Re-stepped 2026-11-23. Light #c50e08 -> #c10e08 (4.40:1 on surface-track, now 4.54). Dark #e65550 -> #eb7874: 3.94:1 on surface-raised, which is the .jrk-btn--danger label, and 3.49:1 on surface-active; now 5.87 panel / 5.10 raised / 4.51 active / 5.82 wash."
     },
     "status-critical-wash": {
       "light": "#f5d7d6",
@@ -211,14 +216,45 @@
       "light": "#ffffff",
       "dark": "#ffffff"
     },
+    "status-critical-solid-hover": {
+      "light": "#931c18",
+      "dark": "#a41f1b",
+      "$note": "One step deeper than the fill (white x1.18). Replaces the hover's borrow of status-critical-text, which is a pale red in dark."
+    },
+    "status-good-solid": {
+      "light": "#15874e",
+      "dark": "#15874e",
+      "$note": "The nearest step down from status-good-mark where white clears 4.5:1 (4.56:1). 3.62:1 on the dark panel. Shallower than this skin's critical solid, which is deep for its own reasons; matching its luminance would make the warning fill a brown."
+    },
+    "status-good-on-solid": {
+      "light": "#ffffff",
+      "dark": "#ffffff"
+    },
+    "status-good-solid-hover": {
+      "light": "#137a46",
+      "dark": "#137a46"
+    },
+    "status-warning-solid": {
+      "light": "#a46a04",
+      "dark": "#a46a04",
+      "$note": "The nearest step down from status-warning-mark where white clears 4.5:1 (4.52:1). 3.65:1 on the dark panel."
+    },
+    "status-warning-on-solid": {
+      "light": "#ffffff",
+      "dark": "#ffffff"
+    },
+    "status-warning-solid-hover": {
+      "light": "#935f04",
+      "dark": "#935f04"
+    },
     "status-neutral-mark": {
       "light": "#758e89",
       "dark": "#738c87"
     },
     "status-neutral-text": {
-      "light": "#536a66",
-      "dark": "#809591",
-      "$note": "RE-STEPPED OFF text-muted, which it otherwise mirrors. Muted clears the panel and the page but lands at 4.00:1 on status-neutral-wash — the neutral wash is the LIGHTEST ground any dark ink sits on in this palette, so it binds where the panel does not. Solved against all three grounds at once."
+      "light": "#4f6561",
+      "dark": "#8b9e9b",
+      "$note": "RE-STEPPED OFF text-muted, which it otherwise mirrors. Muted clears the panel and the page but lands at 4.00:1 on status-neutral-wash — the neutral wash is the LIGHTEST ground any dark ink sits on in this palette, so it binds where the panel does not. Solved against all three grounds at once. Re-stepped again 2026-11-23 for surface-track and surface-active: light #536a66 -> #4f6561 (track 4.18 -> 4.50), dark #809591 -> #8b9e9b (active 4.00 -> 4.51)."
     },
     "status-neutral-wash": {
       "light": "#edf0ef",
@@ -322,7 +358,7 @@
     "vitrine-backdrop": {
       "light": "radial-gradient(58% 44% at 20% 26%, rgba(16, 209, 119, 0.20) 0%, rgba(16, 209, 119, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(45, 170, 190, 0.18) 0%, rgba(45, 170, 190, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(120, 140, 136, 0.16) 0%, rgba(120, 140, 136, 0) 70%), repeating-linear-gradient(118deg, rgba(120, 140, 136, 0.10) 0 2px, rgba(120, 140, 136, 0) 2px 54px), linear-gradient(155deg, #e6ebe9 0%, #d6dedb 100%)",
       "dark": "radial-gradient(58% 44% at 20% 26%, rgba(46, 239, 149, 0.30) 0%, rgba(46, 239, 149, 0) 62%), radial-gradient(52% 40% at 80% 60%, rgba(40, 190, 214, 0.24) 0%, rgba(40, 190, 214, 0) 64%), radial-gradient(66% 52% at 52% 92%, rgba(46, 239, 149, 0.14) 0%, rgba(46, 239, 149, 0) 70%), repeating-linear-gradient(118deg, rgba(180, 236, 214, 0.10) 0 2px, rgba(180, 236, 214, 0) 2px 54px), linear-gradient(155deg, #0d1413 0%, #060a09 100%)",
-      "$note": "THE DEFAULT BACKDROP, AND IT HAS TO HAVE STRUCTURE OR THE SKIN IS NOT FROSTED. backdrop-filter blurs WHAT IS BEHIND THE ELEMENT: over a flat fill it returns the same flat fill and the blur is a no-op. The first version of this skin defaulted to none and shipped a pane with nothing behind it — measurably correct, and visibly not glass. So the default is a scene: two coloured pools, a dim floor wash, and a fine diagonal rule at 54px. THE RULE IS THE PART THAT READS — a gradient blurs to almost itself, but repeating hairlines smear into soft bands, which is what a viewer recognises as frosting. A consumer replaces this wholesale with their own url(); anything they supply is bounded by vitrine-clamp before it reaches the glass."
+      "$note": "THE DEFAULT BACKDROP, AND IT HAS TO HAVE STRUCTURE OR THE SKIN IS NOT FROSTED. backdrop-filter blurs WHAT IS BEHIND THE ELEMENT: over a flat fill it returns the same flat fill and the blur is a no-op. The first version of this skin defaulted to none and shipped a pane with nothing behind it — measurably correct, and visibly not glass. So the default is a scene: two coloured pools, a dim floor wash, and a fine diagonal rule at 54px. THE RULE IS THE PART THAT READS — a gradient blurs to almost itself, but repeating hairlines smear into soft bands, which is what a viewer recognises as frosting. A consumer's photograph goes in --jrk-vitrine-photo, which css/skins/vitrine.css layers OVER this, not in this token: every tint re-declares it at (0,3,0), so a url() set here on the (0,2,0) skin stamp vanished the moment a tint was picked. Anything the consumer supplies is bounded by vitrine-clamp before it reaches the glass, unless data-scene=\"clear\" turns the clamp off."
     },
     "vitrine-scrim": {
       "light": "rgba(238, 242, 241, 0.25)",
@@ -360,6 +396,7 @@
   "variantAxis": {
     "attr": "tint",
     "default": "green",
+    "label": "Tint",
     "$note": "THE AXIS IS NAMED FOR WHAT A VALUE MEANS, WHICH IS WHY THIS IS NOT data-hazard. Industry's hue is a hazard SIGNAL and its attribute says so; this skin's accent is a MATERIAL — the colour the glass is lit by — so `tint` is the honest word and `hazard` would have been a name that lies about the design. The build refuses variants without this block rather than defaulting to industry's attribute, because a skin that ships hues without saying what they are called is the kind of silent contract this toolchain exists to catch.\n\n`default` is green, and green is NOT a variant: it is the ABSENCE of data-tint, so nothing that does not stamp the attribute can change and the shipped skin is untouched by this whole section. Declaring it in `variants` as well would put a button in the gallery that changes nothing, which the build also refuses."
   },
   "variants": {
@@ -733,6 +770,13 @@
         "status.warning.mark dE 8.9 (deuteranopia)",
         "status.serious.mark dE 7.0 (deuteranopia)"
       ],
+      "restriction": {
+        "modes": [
+          "light",
+          "dark"
+        ],
+        "note": "Amber separates from the warning colours only by lightness, so under deuteranopia the accent joins the status set. Status badges carry icon and label, deltas state direction in text, and an amber CTA does not share a tile with a warning chip."
+      },
       "vars": {
         "accent-solid": {
           "light": "#d79909",

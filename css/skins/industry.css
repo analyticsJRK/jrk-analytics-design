@@ -408,6 +408,7 @@
 :root[data-skin='industry'] .jrk-nav-flyout,
 :root[data-skin='industry'] .jrk-spotlight,
 :root[data-skin='industry'] .jrk-toast,
+:root[data-skin='industry'] .jrk-mention__list,
 :root[data-skin='industry'] .jrk-chart-tooltip {
   border-radius: 0;
 }
@@ -460,6 +461,9 @@
 :root[data-skin='industry'] .jrk-table__sort,
 :root[data-skin='industry'] .jrk-tabs--pills,
 :root[data-skin='industry'] .jrk-tab__count,
+:root[data-skin='industry'] .jrk-count,
+:root[data-skin='industry'] .jrk-funnel__tag,
+:root[data-skin='industry'] .jrk-table__group-count,
 :root[data-skin='industry'] .jrk-stat__action,
 :root[data-skin='industry'] .jrk-topbar--vivid.jrk-topbar--brand .jrk-btn-group,
 :root[data-skin='industry'] .jrk-pagination {
@@ -806,9 +810,11 @@
    skin). It is legible only BECAUSE it is uppercase and short. VALUES ARE
    DELIBERATELY ABSENT from this list — tracking that wide makes two numbers
    harder to compare, and a stat's value is the one thing on the tile a reader
-   is comparing. */
+   is comparing. `thead th`, not `th`: a `<th scope="row">` is a row's NAME — a
+   property, a person, an email address — not a label, and in tracked caps every
+   roster shouted. */
 :root[data-skin='industry'] .jrk-stat__label,
-:root[data-skin='industry'] .jrk-table th,
+:root[data-skin='industry'] .jrk-table thead th,
 :root[data-skin='industry'] .jrk-list__header,
 :root[data-skin='industry'] .jrk-section-nav__title,
 :root[data-skin='industry'] .jrk-sheet__band-label,
@@ -1110,3 +1116,14 @@
 
    If a chamfer is ever wanted on a node, the only safe target is a non-link
    full-size card in an ungrouped chart — which is not a case worth a rule. */
+
+/* ── the hue swatches take the chamfer ───────────────────────────────────
+   `.jrk-appearance__swatch` reaches for radius-sm, which this skin sets to 0, so
+   it is already square; the cut is this skin's own geometry and the token cannot
+   say it. notch-sm rather than a literal, so the swatch is cut like everything
+   else here. The cut goes on the ::before that paints the fill, never on the
+   button: clip-path clips the outline and the shadow with everything else, and
+   the outline is the selection signal and the shadow the focus ring. */
+:root[data-skin='industry'] .jrk-appearance__swatch::before {
+  clip-path: polygon(0 0, calc(100% - var(--jrk-notch-sm)) 0, 100% var(--jrk-notch-sm), 100% 100%, 0 100%);
+}

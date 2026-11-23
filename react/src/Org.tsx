@@ -1,5 +1,6 @@
-import { Children, createContext, isValidElement, useContext, useId, useState, type CSSProperties, type ReactNode } from 'react';
+import { Children, createContext, isValidElement, useContext, useId, useState, type CSSProperties, type DragEvent, type ReactNode } from 'react';
 import { Icon } from './Icon';
+import { generatedGroupStyle } from './orgPalette';
 import { cx } from './utils';
 
 /* Tracks whether a grouping is already in force above, AND WHICH KIND, because the
@@ -43,6 +44,9 @@ const GroupFill = createContext(false);
  * `compact` on a node still wins in both directions — pass it to opt a stray card
  * in, or `compact={false}` to opt one out. */
 const CompactCards = createContext(false);
+
+/* Which palette an explicit `group={n}` draws from — see `OrgChart palette`. */
+const GroupPalette = createContext<'cycled' | 'generated'>('cycled');
 
 /* Adjacent tints stop being distinguishable at the 4|5 pair: dE 7.0 light / 8.6
  * dark against validate's floor of 10, where the first four are 14.5 / 17.1. The
@@ -180,12 +184,26 @@ export interface OrgChartProps {
    *  and both classes on one list is a coin toss decided by source order. Warns in
    *  development. */
   groupSolid?: boolean;
+  /** Where `<OrgNode group={n}>` takes its colour.
+   *
+   *  `'cycled'` (default) is the eight-slot palette with texture as the second
+   *  channel: the first eight groups fully distinguishable, group 9 identical
+   *  to group 1. `'generated'` gives every group its own golden-angle hue, so
+   *  no two groups ever share a card — the exception for a chart grouped by
+   *  something with more than eight values (seventeen regional managers). It
+   *  promises NO repeats, not separability: see `orgPalette.ts` for what is and
+   *  is not guaranteed, and for the measured contrast on the deep fill. Applies
+   *  to explicit `group` only; a `rollup` is positional and stays cycled. */
+  palette?: 'cycled' | 'generated';
+  /** A card is being dragged: every card dims except valid drop targets. Set it
+   *  for the duration of a drag — see `<OrgNode draggable dropTarget>`. */
+  dragging?: boolean;
   children: ReactNode;
   className?: string;
 }
 
 export function OrgChart({
-  label, nodeWidth, scroll = true, rollup, groupFill, groupSolid, children, className,
+  label, nodeWidth, scroll = true, rollup, groupFill, groupSolid, palette = 'cycled', dragging, children, className,
 }: OrgChartProps) {
   if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
     if (rollup && groupFill) warnGroupFill(Children.toArray(children).length, '<OrgChart rollup>');
@@ -219,6 +237,7 @@ export function OrgChart({
         /* Same reasoning as the fill above — root, not branch, so every card is
            reachable by descent. */
         groupSolid && 'jrk-org--group-solid',
+        dragging && 'jrk-org--dragging',
         className,
       )}
       aria-label={label}
@@ -232,7 +251,9 @@ export function OrgChart({
           root-grouped chart warns rather than quietly laying a second palette
           over the first. */}
       <InRollup.Provider value={rollup ? 'rollup' : 'none'}>
-        <GroupFill.Provider value={Boolean(groupFill)}>{children}</GroupFill.Provider>
+        <GroupFill.Provider value={Boolean(groupFill)}>
+          <GroupPalette.Provider value={palette}>{children}</GroupPalette.Provider>
+        </GroupFill.Provider>
       </InRollup.Provider>
     </ul>
   );
@@ -395,6 +416,35 @@ export interface OrgNodeProps {
    *  against `surface.default` is guaranteed, and inverse is the only namespace
    *  that makes that promise. A fixed hex makes no promise at all. */
   style?: CSSProperties;
+  /** A rank that takes no palette slot — the levels ABOVE the grouping. Set on
+   *  the CARD, so it never inherits into the subtree. Fills only under
+   *  `groupSolid`; elsewhere it colours the keyline and hairline.
+   *    `inverse`  surface.inverse — the apex; flips with the theme.
+   *    `deep`     surface.bannerDeep — a fixed navy (degrades under vitrine).
+   *    `neutral`  a grey under white type — ranks between apex and grouping. */
+  tone?: 'inverse' | 'deep' | 'neutral';
+  /** A rank nobody holds: the box keeps its height so the level stays a row,
+   *  the text is hidden from the eye (not from assistive tech) and the
+   *  connector runs straight through. Pass the acting holder as `name`/`role`. */
+  passThrough?: boolean;
+  /** Make the CARD a native drag source. Handlers go on the card, never the
+   *  `<li>`: the node box extends under its whole subtree, so a drop anywhere in
+   *  a manager's column would land on the manager. Inside `<OrgCanvas>` the pan
+   *  gesture already steps aside for `[draggable="true"]`. */
+  draggable?: boolean;
+  onDragStart?: (e: DragEvent<HTMLElement>) => void;
+  onDragEnd?: (e: DragEvent<HTMLElement>) => void;
+  /** This card accepts a drop. The component calls `preventDefault` on
+   *  dragover — what MAKES an element a drop target, silently — and on drop. */
+  dropTarget?: boolean;
+  /** The drop target currently under the pointer. */
+  dropOver?: boolean;
+  onDragOver?: (e: DragEvent<HTMLElement>) => void;
+  onDragLeave?: (e: DragEvent<HTMLElement>) => void;
+  onDrop?: (e: DragEvent<HTMLElement>) => void;
+  /** `data-*` attributes land on the card, so a delegated handler or a test can
+   *  identify it without smuggling an id through `className`. */
+  [data: `data-${string}`]: string | number | boolean | undefined;
 }
 
 export function OrgNode({
@@ -420,8 +470,20 @@ export function OrgNode({
   children,
   className,
   style,
+  tone,
+  passThrough,
+  draggable,
+  onDragStart,
+  onDragEnd,
+  dropTarget,
+  dropOver,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+  ...rest
 }: OrgNodeProps) {
   const branchId = useId();
+  const palette = useContext(GroupPalette);
   const kids = Children.toArray(children);
   const hasKids = kids.length > 0;
   const alreadyGrouped = useContext(InRollup);
@@ -496,8 +558,48 @@ export function OrgNode({
     isCompact && 'jrk-org__card--compact',
     vacant && 'jrk-org__card--vacant',
     (href || onClick) && 'jrk-org__card--link',
+    tone && `jrk-org__card--tone-${tone}`,
+    passThrough && 'jrk-org__card--pass',
+    draggable && 'jrk-org__card--draggable',
+    dropTarget && 'jrk-org__card--drop',
+    dropTarget && dropOver && 'jrk-org__card--drop-over',
     className,
   );
+
+  // Only `data-*` passes through; anything else in `rest` is not ours to forward.
+  const dataAttrs: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(rest)) if (k.startsWith('data-')) dataAttrs[k] = v;
+
+  const dnd = {
+    ...dataAttrs,
+    draggable: draggable || undefined,
+    onDragStart: draggable
+      ? (e: DragEvent<HTMLElement>) => {
+          onDragStart?.(e);
+          // Some engines refuse to start a drag with an empty dataTransfer.
+          if (e.dataTransfer.types.length === 0) {
+            e.dataTransfer.setData('text/plain', typeof name === 'string' ? name : '');
+          }
+          if (e.dataTransfer.effectAllowed === 'uninitialized') e.dataTransfer.effectAllowed = 'move';
+        }
+      : undefined,
+    onDragEnd: draggable ? onDragEnd : undefined,
+    onDragOver: dropTarget
+      ? (e: DragEvent<HTMLElement>) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          onDragOver?.(e);
+        }
+      : undefined,
+    onDragLeave: dropTarget ? onDragLeave : undefined,
+    onDrop: dropTarget
+      ? (e: DragEvent<HTMLElement>) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onDrop?.(e);
+        }
+      : undefined,
+  };
 
   const cardInner = (
     <>
@@ -517,18 +619,22 @@ export function OrgNode({
   let card: ReactNode;
   if (href) {
     card = (
-      <a className={cardClass} style={style} href={href} aria-current={current || undefined}>
+      <a className={cardClass} style={style} href={href} aria-current={current || undefined} {...dnd}>
         {cardInner}
       </a>
     );
   } else if (onClick) {
     card = (
-      <button type="button" className={cardClass} style={style} onClick={onClick} aria-current={current || undefined}>
+      <button type="button" className={cardClass} style={style} onClick={onClick} aria-current={current || undefined} {...dnd}>
         {cardInner}
       </button>
     );
   } else {
-    card = <div className={cardClass} style={style} aria-current={current || undefined}>{cardInner}</div>;
+    card = (
+      <div className={cardClass} style={style} aria-current={current || undefined} {...dnd}>
+        {cardInner}
+      </div>
+    );
   }
 
   const setCollapsed = (next: boolean) => {
@@ -540,12 +646,15 @@ export function OrgNode({
      Doing it in the component means a caller may number groups 1..n and let the
      library decide what happens past the palette — the same place the repeat is
      documented. */
-  const slot = group !== undefined && Number.isInteger(group) && group >= 1
-    ? ((group - 1) % 8) + 1
-    : undefined;
+  const validGroup = group !== undefined && Number.isInteger(group) && group >= 1;
+  const generated = validGroup && palette === 'generated';
+  const slot = validGroup && !generated ? ((group - 1) % 8) + 1 : undefined;
 
   return (
-    <li className={cx('jrk-org__node', slot !== undefined && `jrk-org__node--group-${slot}`)}>
+    <li
+      className={cx('jrk-org__node', slot !== undefined && `jrk-org__node--group-${slot}`)}
+      style={generated ? (generatedGroupStyle(group as number) as CSSProperties) : undefined}
+    >
       {card}
 
       {hasToggle && (
@@ -584,7 +693,7 @@ export function OrgNode({
             value={
               alreadyGrouped === 'rollup' || rollup
                 ? 'rollup'
-                : slot !== undefined || alreadyGrouped === 'group'
+                : slot !== undefined || generated || alreadyGrouped === 'group'
                   ? 'group'
                   : 'none'
             }
@@ -672,4 +781,44 @@ export function OrgGroup({ label, children, className }: OrgGroupProps) {
       </ul>
     </li>
   );
+}
+
+/** Number groups for `<OrgNode group>` in READING ORDER and carry each slot down
+ *  its subtree.
+ *
+ *  `keyOf` returns the grouping identity for a node AT the colour-by level (a
+ *  manager's name) and `undefined` for every other node. The first identity met
+ *  in a depth-first, left-to-right walk is slot 1, the next new one slot 2 —
+ *  which is what puts consecutive slots on the groups a reader compares across
+ *  a level, the one guarantee the palette order was searched for. Never number
+ *  by a hash or an alphabetical key. One identity keeps one slot wherever it
+ *  appears.
+ *
+ *  Every node BELOW a keyed node inherits its slot, so a card that is rendered
+ *  away from its `<li>` (a stacked branch, a custom card) can still state its
+ *  own colour; nodes above stay unslotted. Returns the per-node slots and the
+ *  number of distinct groups. Pure — the input is not mutated. */
+export function assignGroups<T extends { children?: readonly T[] }>(
+  roots: readonly T[],
+  keyOf: (node: T) => string | undefined,
+): { slots: Map<T, number>; count: number } {
+  const ids = new Map<string, number>();
+  const slots = new Map<T, number>();
+  const walk = (nodes: readonly T[], inherited: number | undefined) => {
+    for (const node of nodes) {
+      let slot = inherited;
+      const key = keyOf(node);
+      if (key !== undefined) {
+        slot = ids.get(key);
+        if (slot === undefined) {
+          slot = ids.size + 1;
+          ids.set(key, slot);
+        }
+      }
+      if (slot !== undefined) slots.set(node, slot);
+      walk(node.children ?? [], slot);
+    }
+  };
+  walk(roots, undefined);
+  return { slots, count: ids.size };
 }

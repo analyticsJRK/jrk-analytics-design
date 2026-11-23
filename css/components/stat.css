@@ -68,11 +68,16 @@
 
 .jrk-stat__meta {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: var(--jrk-space-2);
+  gap: var(--jrk-space-1) var(--jrk-space-2);
   font-size: var(--jrk-text-xs);
   color: var(--jrk-text-muted);
+  /* A two-line meta wraps to two balanced lines rather than one word hanging
+     under a full line — in a centred stack the orphan sits alone in the middle
+     and reads as a separate fact. */
+  text-wrap: balance;
 }
 
 /* ---------- delta ---------- */
@@ -126,9 +131,15 @@
 
 /* A sparkline has no axes and no labels — it shows shape only. If the reader
    needs to read values off it, it needs to be a real chart. */
+.jrk-stat__spark {
+  /* Slot 1 unless a tone says otherwise. One variable, so the line, the area,
+     the dots and the end mark cannot disagree about the colour. */
+  --jrk-spark-ink: var(--jrk-chart-1);
+}
+
 .jrk-stat__spark path {
   fill: none;
-  stroke: var(--jrk-chart-1);
+  stroke: var(--jrk-spark-ink, var(--jrk-chart-1));
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -136,9 +147,71 @@
 }
 
 .jrk-stat__spark .jrk-spark-area {
-  fill: var(--jrk-chart-1);
+  fill: var(--jrk-spark-ink, var(--jrk-chart-1));
   opacity: 0.12;
   stroke: none;
+}
+
+/* The status tones, for a line whose SUBJECT is a verdict. The mark is the
+   status MARK, which in light sits under 3:1 for warning and good — legal only
+   because a sparkline is redundant with the figure beside it, and the reason
+   a status sparkline must never stand without one. */
+.jrk-spark--neutral  { --jrk-spark-ink: var(--jrk-status-neutral-mark); }
+.jrk-spark--warning  { --jrk-spark-ink: var(--jrk-status-warning-mark); }
+.jrk-spark--critical { --jrk-spark-ink: var(--jrk-status-critical-mark); }
+.jrk-spark--good     { --jrk-spark-ink: var(--jrk-status-good-mark); }
+
+/* Dots are zero-length LINES with a round cap and a non-scaling stroke — the
+   only round mark that stays round under `preserveAspectRatio="none"`. */
+.jrk-spark__dot,
+.jrk-spark__end {
+  fill: none;
+  stroke: var(--jrk-spark-ink, var(--jrk-chart-1));
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.jrk-spark__dot { stroke-width: 3; }
+.jrk-spark__end { stroke-width: 5; }
+
+/* A reference value — a target, a normal day — so it takes the threshold's
+   dash and recessive tick ink, never a series hue. */
+.jrk-spark__base {
+  stroke: var(--jrk-chart-tick);
+  stroke-width: 1;
+  stroke-dasharray: 3 2;
+  vector-effect: non-scaling-stroke;
+}
+
+/* Missing stretches, hatched so absence reads as absence rather than as a
+   flat line. Pattern parts state fill and stroke: base.css strokes every svg
+   child with currentColor. */
+.jrk-spark__gap { stroke: none; }
+.jrk-spark__gap-ground { fill: var(--jrk-surface-subtle); stroke: none; }
+.jrk-spark__gap-line { stroke: var(--jrk-border-default); stroke-width: 1.5; }
+
+/* Per-point hover columns. Transparent and unstroked — base.css's inherited
+   stroke would otherwise draw each one as an outlined box. */
+.jrk-spark__hit {
+  fill: transparent;
+  stroke: none;
+}
+
+/* The table-cell size: inline, so it sits on the text baseline of its row
+   without moving the row height. */
+.jrk-stat__spark.jrk-spark--cell {
+  display: inline-block;
+  width: 72px;
+  height: 22px;
+  vertical-align: middle;
+}
+
+.jrk-stat__spark.jrk-spark--cell path {
+  stroke-width: 1.5;
+}
+
+.jrk-spark-empty {
+  color: var(--jrk-text-muted);
 }
 
 /* ---------- KPI row ---------- */
@@ -205,7 +278,9 @@
   display: grid;
   /* 180px, not 200: with a 16px gap, 200 puts the fourth tile on its own row
      at common dashboard widths, which reads as a mistake rather than a wrap. */
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  /* `min(180px, 100%)` so the floor RELEASES in a container narrower than one
+     tile — a bare 180px forced a phone-width card to scroll sideways. */
+  grid-template-columns: repeat(auto-fit, minmax(min(180px, 100%), 1fr));
   gap: var(--jrk-space-4);
   background: none;
   border: 0;
@@ -498,6 +573,11 @@
    line that is already the thinnest mark on the tile. */
 .jrk-stat--vivid .jrk-stat__spark path {
   stroke: var(--jrk-gradient-mark);
+}
+
+/* The dots and end mark read the variable, so the variable moves too. */
+.jrk-stat--vivid .jrk-stat__spark {
+  --jrk-spark-ink: var(--jrk-gradient-mark);
 }
 
 .jrk-stat--vivid .jrk-stat__spark .jrk-spark-area {

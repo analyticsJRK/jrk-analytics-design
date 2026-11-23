@@ -57,3 +57,15 @@ export const WithSparkTile = () => (
     />
   </StatRow>
 );
+
+/* `vivid` makes the row a masthead band and assigns each tile its tone by
+   POSITION (teal, violet, blue, rose) — there is no prop to misuse, because a
+   tone must never mean the metric. Implies `split`. One band, at the top. */
+export const VividMasthead = () => (
+  <StatRow vivid>
+    <Stat label="Occupancy" value="94.2" unit="%" />
+    <Stat label="Leases signed" value="892" />
+    <Stat label="Move-ins" value="1,240" />
+    <Stat label="Net absorption" value="+74" />
+  </StatRow>
+);

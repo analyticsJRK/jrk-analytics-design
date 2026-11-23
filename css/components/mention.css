@@ -1,0 +1,115 @@
+/* Mention box — a textarea with @-autocomplete, and the tags it writes.
+ *
+ *   <div class="jrk-mention">
+ *     <textarea class="jrk-textarea" aria-autocomplete="list" …></textarea>
+ *     <div class="jrk-mention__highlight" aria-hidden="true">Ask <mark>@Dana Ruiz</mark> …</div>
+ *     <ul class="jrk-mention__list" role="listbox" popover="manual">
+ *       <li class="jrk-mention__option" role="option" aria-selected="true">
+ *         <span class="jrk-mention__name">Dana Ruiz</span>
+ *         <span class="jrk-mention__hint">druiz@example.com</span>
+ *       </li>
+ *     </ul>
+ *   </div>
+ *
+ * A TAG IS HIGHLIGHTED WHILE IT IS TYPED, not only after the note is posted. A
+ * textarea cannot colour part of its own text, so a see-through COPY of the text
+ * sits exactly over it with each tag marked. <MentionBox> copies the textarea's
+ * font, padding, border widths, size and scroll onto the copy; only the marks
+ * paint, and it takes no pointer events, so the textarea underneath is what the
+ * reader types into and selects in.
+ *
+ * THE LIST IS A POPOVER IN THE TOP LAYER, placed in viewport coordinates. A list
+ * hung `absolute` under the box is clipped by any scrolling dialog body or panel
+ * pane it sits in, and a `fixed` one is trapped by an ancestor with a backdrop
+ * filter — which vitrine puts on every modal. The UA popover sheet centres and
+ * borders a popover; the resets below undo that. Without popover support the
+ * same rules leave it a fixed layer at the popover rung.
+ */
+
+.jrk-mention {
+  position: relative;
+  width: 100%;
+}
+
+.jrk-mention > textarea {
+  width: 100%;
+}
+
+.jrk-mention__highlight {
+  position: absolute;
+  z-index: var(--jrk-z-raised);
+  margin: 0;
+  overflow: hidden;
+  color: transparent;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  background: transparent;
+  border-style: solid;
+  border-color: transparent;
+  pointer-events: none;
+}
+
+.jrk-mention__highlight mark {
+  color: transparent;
+  background: color-mix(in srgb, var(--jrk-accent-solid) 20%, transparent);
+  border-radius: var(--jrk-radius-sm);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--jrk-accent-solid) 20%, transparent);
+}
+
+.jrk-mention__list {
+  position: fixed;
+  inset: auto;
+  z-index: var(--jrk-z-popover);
+  max-height: 260px;
+  margin: 0;
+  padding: var(--jrk-space-1);
+  overflow-y: auto;
+  color: var(--jrk-text-primary);
+  list-style: none;
+  background: var(--jrk-surface-raised);
+  border: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-lg);
+  box-shadow: var(--jrk-shadow-lg);
+}
+
+.jrk-mention__option {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: var(--jrk-space-1_5) var(--jrk-space-2);
+  font-size: var(--jrk-text-sm);
+  border-radius: var(--jrk-radius-md);
+  cursor: pointer;
+}
+
+/* The active option is the one Enter or Tab would pick. The pointer moves it, so
+   hover and keyboard never disagree about which row that is. */
+.jrk-mention__option[aria-selected='true'] {
+  color: var(--jrk-accent-wash-text);
+  background: var(--jrk-accent-wash);
+}
+
+.jrk-mention__name {
+  font-weight: var(--jrk-weight-medium);
+}
+
+.jrk-mention__hint {
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+}
+
+.jrk-mention__option[aria-selected='true'] .jrk-mention__hint {
+  color: inherit;
+}
+
+/* A tag in posted text — the same word the box highlighted, now drawn as a tag.
+   Its own block because it is read far from any mention box: a table cell, a
+   comment thread, an export preview. */
+.jrk-mention-tag {
+  padding: 0 2px;
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-accent-wash-text);
+  background: var(--jrk-accent-wash);
+  border-radius: var(--jrk-radius-sm);
+}
