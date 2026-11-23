@@ -284,7 +284,7 @@ export function currentMode(): Mode {
    reaches the menu on the next build. */
 
 /** A layer: the unskinned base (`standard`) or a skin. The value a picker stores. */
-export type SkinName = 'standard' | 'industry' | 'midgard' | 'vitrine';
+export type SkinName = 'standard' | 'industry' | 'lucent' | 'midgard' | 'vitrine';
 
 /** The attribute a layer's hue stamps, without `data-`. */
 export type VariantAttr = 'accent' | 'hazard' | 'inlay' | 'tint';
@@ -407,6 +407,13 @@ export const SKIN_LAYERS: Readonly<Record<SkinName, SkinLayer>> = {
       ]
     }
   },
+  lucent: {
+    skin: 'lucent',
+    stamp: 'lucent',
+    label: 'Lucent',
+    font: null,
+    axis: null
+  },
   midgard: {
     skin: 'midgard',
     stamp: 'midgard',
@@ -503,12 +510,13 @@ export const SKIN_LAYERS: Readonly<Record<SkinName, SkinLayer>> = {
 };
 
 /** Layers in picker order: the base first, then the skins alphabetically. */
-export const SKIN_NAMES: readonly SkinName[] = ['standard', 'industry', 'midgard', 'vitrine'];
+export const SKIN_NAMES: readonly SkinName[] = ['standard', 'industry', 'lucent', 'midgard', 'vitrine'];
 
 /** Each layer's hue axis, or null where it declares none. */
 export const VARIANT_AXES: Readonly<Record<SkinName, VariantAxis | null>> = {
   standard: SKIN_LAYERS.standard.axis,
   industry: SKIN_LAYERS.industry.axis,
+  lucent: SKIN_LAYERS.lucent.axis,
   midgard: SKIN_LAYERS.midgard.axis,
   vitrine: SKIN_LAYERS.vitrine.axis,
 };

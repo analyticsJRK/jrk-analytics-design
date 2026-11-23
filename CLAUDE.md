@@ -868,7 +868,7 @@ the default.
 
 ## Skins — a THIRD AXIS (see `data-accent` above for the second)
 
-**THREE SKINS SHIP — `industry`, `midgard` and `vitrine` — and the differences
+**FOUR SKINS SHIP — `industry`, `midgard`, `vitrine` and `lucent` — and the differences
 between them are the useful thing in this section.** Everything down to the end of `validate:skin`
 below is INFRASTRUCTURE and applies to both. Everything after that is per-skin,
 and the second skin's real value is that it *tested* the first one's rules: three
@@ -1615,6 +1615,56 @@ does not share a tile with a warning chip whose only mark is its colour. All fou
 cool tints clear the whole status set, so **this is the price of the warm one** —
 the same shape as industry's `red`, arrived at from the opposite end of the wheel.
 
+### `lucent` — liquid glass over CONTENT, and the material is gated (2026-11-23)
+
+**What vitrine was meant to be: chrome floats over the page as clear glossy glass,
+and the page scrolls under it.** Capsule topbar, glass menus / popovers / modal /
+toasts, a 1px specular catch, content solid. Gallery: `preview/skin-lucent.html`
+(`?scroll=N` pulls content under the bar for a headless capture — a real scroll of
+sticky chrome mis-composites there; `?open=fly-perf` opens a flyout).
+
+**IT RESTATES NO COLOUR.** `vars` is empty, the palette is base's, and
+`validate:skin` now falls back to `dist/jrk-tokens.css` for any name a skin does not
+declare — then SKIPS the palette block for a skin whose `vars` is empty, because
+base's own gate already measures it with base's documented relief cases (light
+status marks, the `cardHover` light no-op), which the skin rules would re-fail.
+Restate one colour and the whole block runs again.
+
+**THE GLASS IS BOUNDED, NOT RECORDED — and that is the reusable part.**
+`glass-filter` = `saturate()` FIRST, then `contrast()`/`brightness()` as a clamp;
+`validate:skin` parses it into a per-channel band, lays `glass-tint` and every
+`glass-sheen` stop over both ends, and holds every glass ink to BOTH extremes. A
+function that can move a channel anywhere (saturate, hue-rotate…) AFTER the clamp
+resets the band to [0, 1], so a misordered filter fails instead of lying. Measured
+in Chrome against pure black/white/RGB under the bar: light darkest `#a9a9a9`
+exactly as modelled, dark lightest `#3d3d3e` inside the modelled `#434344`.
+**34% of the content's range shows through the light bar, 20% dark** — the band is
+exactly as wide as `text-secondary` allows (4.65 / 4.79:1). Overlays are denser
+(18% / 13%).
+
+**ON GLASS, FOUR VARIABLES ARE RE-POINTED:** `text-muted` → `text-secondary`
+(muted is 2.16:1 on the dark end), `accent-text` / `text-link` / `focus-ring` →
+`glass-accent-text` (the anchor is 2.22:1 there), and `shadow-focus` →
+`glass-focus`, which draws a `focus-offset` collar. `glass-rim` / `glass-gloss` are
+exempt from the ink budget ONLY because they are unblurred 1px insets — the gate
+fails anything wider — and `glass-lens` must move the ground AWAY from the ink
+(pale glow in light, dark falloff in dark), also gated.
+
+**THREE THINGS THE FIRST BUILD GOT WRONG, all invisible to the gates.** (1)
+**Glazing the rail** — `backdrop-filter` makes it the containing block for the
+fixed nav flyouts; moving the filter to a `::before` then blurred the WHOLE PAGE
+wherever a rail is `position: static` (every gallery frame). The rail is now an
+opaque floating pane: nothing scrolls behind it, so the blur bought nothing. (2)
+**The gloss on `.jrk-btn--secondary` hit every segment**, which is built from that
+class — `:not(.jrk-btn-group > .jrk-btn)`. (3) **A top + bottom catch on a pill
+closes into a ring** and reads as the border every control gave up — gloss is top
+only. The in-shell bar floats; `--masthead` takes the glass and stays a band,
+because the rail's offset under it is computed from the bar's height.
+
+**A CONSUMER MUST IMPORT BOTH FILES.** `SKIN_LAYERS` lists `lucent` automatically,
+so the portal's appearance picker will offer it after a sync — and picking it does
+nothing until `dist/jrk-skin-lucent.css` + `css/skins/lucent.css` are imported.
+
 ## Upstreamed from the portal — 2026-11-23
 
 The portal had grown more design than this library (skins fixes, hues, org chart,
@@ -1658,8 +1708,9 @@ code alone will not tell you:
    reaches the Design System pane.
 5. `npm test`, then look at the gallery.
 
-**And check it under ALL THREE skins** — `preview/skin-industry.html`,
-`preview/skin-midgard.html` and `preview/skin-vitrine.html`, which stamp
+**And check it under ALL FOUR skins** — `preview/skin-industry.html`,
+`preview/skin-midgard.html`, `preview/skin-vitrine.html` and
+`preview/skin-lucent.html`, which stamp
 `data-skin` and nothing else. A new
 component picks a skin's colours up for free (they are the same variables) but its
 GEOMETRY does not, and each skin has its own list to be added to: if it takes

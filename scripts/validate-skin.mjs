@@ -78,6 +78,84 @@ function equals(label, a, b) {
     : fail(`${label} — ${a} does not track ${b}. A measuring or ring colour that drifts from the surface it names fails silently: it paints the wrong colour rather than nothing.`);
 }
 
+/* ── the base layer, as the cascade sees it ─────────────────────────────────
+   A skin declares only what it CHANGES; everything else falls through to the
+   base layer at runtime. This gate used to read the skin file alone, so a skin
+   that inherited a value was measured as if the value did not exist — and a skin
+   that inherits its whole palette (lucent) could not be measured at all. The
+   generated base file is the cascade's own source, so reading it here means the
+   gate sees exactly the value a browser would. npm test builds before it
+   validates, so this file is always current when the gate runs. */
+function baseLayer() {
+  const css = readFileSync(join(root, 'dist/jrk-tokens.css'), 'utf8');
+  const block = (re) => {
+    const m = css.match(re);
+    const out = new Map();
+    if (!m) return out;
+    for (const [, k, val] of m[1].matchAll(/--jrk-([a-z0-9_-]+):\s*([^;]+);/g)) out.set(k, val.trim());
+    return out;
+  };
+  return {
+    light: block(/^:root \{([\s\S]*?)^\}/m),
+    dark: block(/^:root\[data-theme="dark"\] \{([\s\S]*?)^\}/m),
+  };
+}
+const BASE = baseLayer();
+
+// ── glass: the composite of a pane over arbitrary content ─────────────────
+const clamp01 = (n) => Math.min(1, Math.max(0, n));
+const num = (s) => (s.trim().endsWith('%') ? parseFloat(s) / 100 : parseFloat(s));
+const toHex = (rgb) => '#' + rgb.map((c) => Math.round(clamp01(c) * 255).toString(16).padStart(2, '0')).join('');
+function rgba(s) {
+  const m = String(s).match(/rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+%?)\s*)?\)/);
+  if (m) return { rgb: [m[1], m[2], m[3]].map((x) => parseFloat(x) / 255), a: m[4] === undefined ? 1 : num(m[4]) };
+  const h = String(s).match(/#([0-9a-fA-F]{6})\b/);
+  if (h) return { rgb: [0, 2, 4].map((i) => parseInt(h[1].slice(i, i + 2), 16) / 255), a: 1 };
+  return null;
+}
+
+/** The channel band a backdrop-filter list leaves behind, starting from ANY
+ *  content ([0, 1]). Only contrast() and brightness() are understood as bounds;
+ *  blur() moves nothing; anything else — saturate() included — can push a
+ *  channel anywhere, so it resets the band to [0, 1]. That is what makes the
+ *  ORDER gate itself: a saturate() placed after the clamp undoes it, the band
+ *  comes back full width, and the ink checks below fail instead of lying. */
+function filterBand(s) {
+  let [lo, hi] = [0, 1];
+  const unknown = [];
+  for (const [, fn, arg] of String(s).matchAll(/([a-z-]+)\(([^)]*)\)/g)) {
+    if (fn === 'blur') continue;
+    if (fn === 'contrast') { const k = num(arg); [lo, hi] = [clamp01(k * (lo - 0.5) + 0.5), clamp01(k * (hi - 0.5) + 0.5)]; continue; }
+    if (fn === 'brightness') { const b = num(arg); [lo, hi] = [clamp01(lo * b), clamp01(hi * b)]; continue; }
+    if (fn === 'saturate' && num(arg) === 1) continue;
+    // Harmless while the band is still full width; a reset AFTER a clamp is
+    // the misordering this exists to catch, so only that is reported.
+    if (lo > 0 || hi < 1) unknown.push(fn);
+    [lo, hi] = [0, 1];
+  }
+  return { lo, hi, reset: unknown };
+}
+
+/** Top-level comma split — a shadow list has commas inside rgba(). */
+function layers(s) {
+  const out = [];
+  let depth = 0, cur = '';
+  for (const ch of String(s)) {
+    if (ch === '(') depth++;
+    if (ch === ')') depth--;
+    if (ch === ',' && depth === 0) { out.push(cur.trim()); cur = ''; } else cur += ch;
+  }
+  if (cur.trim()) out.push(cur.trim());
+  return out;
+}
+function shadow(layer) {
+  const colour = rgba(layer);
+  const rest = layer.replace(/rgba?\([^)]*\)|#[0-9a-fA-F]{3,8}/g, ' ');
+  const lens = (rest.match(/-?[\d.]+(?:px)?/g) ?? []).map((x) => parseFloat(x));
+  const [x = 0, y = 0, blur = 0, spread = 0] = lens;
+  return { inset: /\binset\b/.test(layer), x, y, blur, spread, colour };
+}
+
 // ── the skin files ─────────────────────────────────────────────────────────
 const skinsDir = join(root, 'tokens/skins');
 const files = existsSync(skinsDir) ? readdirSync(skinsDir).filter((f) => f.endsWith('.json')).sort() : [];
@@ -93,19 +171,35 @@ for (const file of files) {
 
   /** One mode's value for a variable name, from `vars` or `skinOnly`. */
   const src = { ...(S.vars ?? {}), ...(S.skinOnly ?? {}) };
+  /* The skin's value, else the base layer's — the same fall-through the cascade
+     performs. `have` follows it, so a check runs on an inherited value too. */
   const v = (name, mode) => {
     const e = src[name];
-    if (e === undefined) return undefined;
+    if (e === undefined) return BASE[mode].get(name);
     if (typeof e === 'string') return e;
     return e[mode];
   };
-  const have = (name) => src[name] !== undefined;
+  const have = (name) => src[name] !== undefined || BASE.light.has(name);
+
+  /* A skin that restates NOTHING in `vars` inherits the base palette whole, and
+     the base palette has its own gate. `npm run validate` measures it with the
+     base library's documented relief cases — light status marks under 3:1 beside
+     a mandatory label, cardHover as a deliberate light no-op — which this file's
+     stricter skin rules would re-litigate as failures of a skin that changed none
+     of them. So the palette block is skipped and the skin is held to what it
+     DOES declare: its material, below. Restate one colour and the whole block
+     runs again, against the full fall-through. */
+  const inheritsPalette = !Object.keys(S.vars ?? {}).some((k) => !k.startsWith('$'));
 
   for (const mode of MODES) {
     console.log(`\n-- ${mode} --`);
     const panel = v('surface-default', mode);
     if (!isHex(panel)) {
       fail(`surface-default is not a flat colour in ${mode}; every other check measures against it`);
+      continue;
+    }
+    if (inheritsPalette) {
+      note(`palette inherited whole from the base layer (panel ${panel}) — gated by npm run validate, not here`);
       continue;
     }
 
@@ -224,6 +318,90 @@ for (const file of files) {
         const best = Math.max(...bands.map((b) => contrast(b, panel)));
         const msg = `shadow-focus (${mode}) — bands ${bands.join(' + ')}, best ${r2(best)}:1 against the panel`;
         best >= MARK_FLOOR ? pass(msg) : fail(`${msg} — no band reaches ${MARK_FLOOR}:1, so the ring cannot be seen`);
+      }
+    }
+  }
+
+  /* ---- GLASS. A pane over arbitrary content has no fixed ink ground, so its
+     ground is a RANGE, and every ink on it owes both ends. The range comes from
+     four tokens, all of which hide their colour inside a string no other gate
+     parses:
+
+       glass-filter   the backdrop's channel band after the clamp  [lo, hi]
+       glass-tint*    the pane's own body, laid over that band     -> composite
+       glass-sheen    the gloss, laid over the tint                -> its stops
+       glass-lens     the thickness, which must move AWAY from the ink
+
+     Darkest composite = the band's lo under the tint under the PALEST sheen
+     stop; lightest = hi under the tint under the STRONGEST. Then every glass ink
+     against both. This is vitrine's "measure against the extremes, never the
+     recorded middle" rule made mechanical, and it is the thing that lets this
+     skin be as clear as it is: the band is exactly as wide as the inks allow. */
+  if (src['glass-filter'] !== undefined) {
+    console.log('\n-- glass --');
+    const css = existsSync(join(root, 'css/skins', `${stamp}.css`)) ? readFileSync(join(root, 'css/skins', `${stamp}.css`), 'utf8') : '';
+    const mutedRepointed = css.includes('--jrk-text-muted: var(--jrk-text-secondary)');
+    const glassInks = ['text-primary', 'text-secondary', 'glass-accent-text', ...(mutedRepointed ? [] : ['text-muted'])];
+    if (mutedRepointed) note('text-muted is re-pointed to text-secondary on glass, so secondary is the weakest ink measured');
+
+    for (const mode of MODES) {
+      const band = filterBand(v('glass-filter', mode));
+      if (band.reset.length) note(`[${mode}] glass-filter: ${band.reset.join(', ')} can move a channel anywhere, so the band is reset to [0, 1] after it — put every such function BEFORE the clamp`);
+      note(`[${mode}] glass-filter leaves the backdrop in [${band.lo.toFixed(3)}, ${band.hi.toFixed(3)}] per channel`);
+
+      const sheenStops = (String(v('glass-sheen', mode) ?? '').match(/rgba?\([^)]*\)/g) ?? []).map(rgba).filter(Boolean);
+      const over = (base, layer) => base.map((c, i) => layer.a * layer.rgb[i] + (1 - layer.a) * c);
+
+      for (const [tintName, label] of [['glass-tint', 'chrome'], ['glass-tint-raised', 'overlay']]) {
+        if (!have(tintName)) continue;
+        const t = rgba(v(tintName, mode));
+        if (!t) { fail(`[${mode}] ${tintName} is not an rgba() colour, so the composite cannot be derived`); continue; }
+        const body = (c) => over([c, c, c], t);
+        const withSheen = (rgb) => (sheenStops.length ? sheenStops.map((s) => over(rgb, s)) : [rgb]);
+        const darks = withSheen(body(band.lo));
+        const lights = withSheen(body(band.hi));
+        const darkest = toHex(darks.reduce((a, b) => (luminance(toHex(b)) < luminance(toHex(a)) ? b : a)));
+        const lightest = toHex(lights.reduce((a, b) => (luminance(toHex(b)) > luminance(toHex(a)) ? b : a)));
+        note(`[${mode}] ${label} glass composites to ${darkest} .. ${lightest}; ${(100 * (1 - t.a) * (band.hi - band.lo)).toFixed(0)}% of the content's range shows through`);
+        for (const ink of glassInks) {
+          floor(`[${mode}] ${ink} on ${label} glass, darkest end`, v(ink, mode), darkest, TEXT_FLOOR);
+          floor(`[${mode}] ${ink} on ${label} glass, lightest end`, v(ink, mode), lightest, TEXT_FLOOR);
+        }
+
+        /* The lens may only push the ground away from the ink: lighter than the
+           darkest composite in light, darker than the lightest in dark. Measured
+           against the chrome composite, which is the wider of the two. */
+        if (tintName === 'glass-tint') {
+          for (const layer of layers(v('glass-lens', mode) ?? '')) {
+            const s = shadow(layer);
+            if (!s.inset || !s.colour) continue;
+            const L = luminance(toHex(s.colour.rgb));
+            const ok = mode === 'light' ? L >= luminance(darkest) : L <= luminance(lightest);
+            const msg = `[${mode}] glass-lens layer "${layer}" ${mode === 'light' ? 'lightens' : 'darkens'} the ground under the ink`;
+            ok ? pass(msg) : fail(`[${mode}] glass-lens layer "${layer}" moves the ground TOWARD the ink — on glass that is a contrast loss no other check sees`);
+          }
+        }
+      }
+
+      // The rim is exempt from the ink budget ONLY because it is one pixel on the
+      // pane's own edge. Anything wider reaches toward the glyphs.
+      for (const tok of ['glass-rim', 'glass-gloss']) {
+        if (!have(tok)) continue;
+        for (const layer of layers(v(tok, mode) ?? '')) {
+          const s = shadow(layer);
+          const rim = s.inset && s.blur === 0 && Math.abs(s.x) <= 1 && Math.abs(s.y) <= 1 && s.spread <= 1;
+          rim ? pass(`[${mode}] ${tok} "${layer}" is a 1px edge, outside every ink`) : fail(`[${mode}] ${tok} "${layer}" is wider than a 1px inset edge — move it to glass-lens, where its direction is checked`);
+        }
+      }
+
+      // The ring on glass is glass-accent-text (already >= 4.5:1 on both ends
+      // above), seated on the focus-offset collar glass-focus must draw.
+      if (have('glass-focus')) {
+        const f = String(v('glass-focus', mode));
+        f.includes('var(--jrk-focus-offset)')
+          ? pass(`[${mode}] glass-focus draws the focus-offset collar`)
+          : fail(`[${mode}] glass-focus draws no focus-offset collar, so the ring has no known plane beside it on glass`);
+        floor(`[${mode}] focus ring (glass-accent-text) on its collar`, v('glass-accent-text', mode), v('focus-offset', mode), MARK_FLOOR);
       }
     }
   }

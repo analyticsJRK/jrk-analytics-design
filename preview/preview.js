@@ -15,6 +15,7 @@ const PAGES = [
   ['skin-industry.html', 'Industry skin'],
   ['skin-midgard.html', 'Midgard skin'],
   ['skin-vitrine.html', 'Vitrine skin'],
+  ['skin-lucent.html', 'Lucent skin'],
 ];
 
 const STORAGE_KEY = 'jrk-preview-theme';
