@@ -96,6 +96,11 @@ export const chartChrome = {
     light: '#3c3c43',
     dark: '#b4b4ba'
   },
+  neutral: {
+    light: '#8e8e93',
+    dark: '#8e8e93',
+    $note: 'A NEUTRAL DATA MARK — a Sankey node that is a stage rather than a category, an \'Other\' bucket, a total bar beside coloured parts. Added 2026-11-23 from the portal, whose three Sankeys borrowed chart.axis for this and drew nodes at 1.5:1, which reads as a hairline rather than a mark. A mark has to clear WCAG 1.4.11\'s 3:1 against the card it sits on: #8e8e93 is 3.26:1 on #ffffff and 4.81:1 on #232326 (hand-measured; chrome tokens are not in the validator\'s mark set). It is deliberately NOT one of the eight series slots — a neutral is the absence of a category, and taking a slot for it would spend the colourblind order on a non-category.'
+  },
   deltaUp: {
     light: '#1e7a34',
     dark: '#4cd964'
@@ -119,6 +124,21 @@ export const status = {
     wash: {
       light: '#e3f7e8',
       dark: '#0e3a1b'
+    },
+    solid: {
+      light: '#00813a',
+      dark: '#00813a',
+      use: 'fill of the filled approve / positive-outcome button — .jrk-btn--good-solid, never a status mark'
+    },
+    onSolid: {
+      light: '#ffffff',
+      dark: '#ffffff',
+      use: 'label ON status.good.solid'
+    },
+    solidHover: {
+      light: '#007434',
+      dark: '#007434',
+      use: 'the .jrk-btn--good-solid hover'
     }
   },
   warning: {
@@ -133,6 +153,21 @@ export const status = {
     wash: {
       light: '#fff1e0',
       dark: '#402a06'
+    },
+    solid: {
+      light: '#b45400',
+      dark: '#b45400',
+      use: 'fill of the filled send-back / hold button — .jrk-btn--warning-solid, never a status mark'
+    },
+    onSolid: {
+      light: '#ffffff',
+      dark: '#ffffff',
+      use: 'label ON status.warning.solid'
+    },
+    solidHover: {
+      light: '#a14b00',
+      dark: '#a14b00',
+      use: 'the .jrk-btn--warning-solid hover'
     }
   },
   serious: {
@@ -171,6 +206,11 @@ export const status = {
       light: '#ffffff',
       dark: '#ffffff',
       use: 'label ON status.critical.solid'
+    },
+    solidHover: {
+      light: '#c31c12',
+      dark: '#c31c12',
+      use: 'the .jrk-btn--danger-solid hover'
     }
   },
   neutral: {
@@ -237,3 +277,242 @@ export function currentMode(): Mode {
   if (stamped === 'dark' || stamped === 'light') return stamped;
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
+
+/* ── appearance: theme x skin x hue ───────────────────────────────────────────
+   Generated from tokens.json accentVariants and tokens/skins/*.json. A picker
+   reads these rather than transcribing them, so a hue added to a token file
+   reaches the menu on the next build. */
+
+/** A layer: the unskinned base (`standard`) or a skin. The value a picker stores. */
+export type SkinName = 'standard' | 'industry' | 'midgard' | 'vitrine';
+
+/** The attribute a layer's hue stamps, without `data-`. */
+export type VariantAttr = 'accent' | 'hazard' | 'inlay' | 'tint';
+
+/** A hue that ships with a condition the reader cannot see in the swatch. Render
+ *  `note` beside the picker while `value` is chosen in one of `modes`. */
+export interface VariantRestriction {
+  readonly value: string;
+  readonly modes: readonly Mode[];
+  readonly note: string;
+}
+
+export interface VariantAxis {
+  /** Stamped as `data-<attr>` on <html>. */
+  readonly attr: VariantAttr;
+  /** The picker heading, in the layer's own word: a hazard is a signal, a tint a material. */
+  readonly label: string;
+  /** The hue that is the ABSENCE of the attribute. Never stamped. */
+  readonly default: string;
+  /** Default first, then the token file's order — the order arrow keys walk. */
+  readonly values: readonly { readonly value: string; readonly label: string }[];
+  readonly restrictions: readonly VariantRestriction[];
+}
+
+export interface SkinLayer {
+  readonly skin: SkinName;
+  /** The `data-skin` value; null for the unskinned base. */
+  readonly stamp: string | null;
+  readonly label: string;
+  /** The skin's typeface stylesheet, copied from the `@import url()` at the top of
+   *  css/skins/<stamp>.css. Inject it per active skin: a bundler that drops url()
+   *  imports leaves the skin in the base face with no error. */
+  readonly font: string | null;
+  readonly axis: VariantAxis | null;
+}
+
+export const SKIN_LAYERS: Readonly<Record<SkinName, SkinLayer>> = {
+  standard: {
+    skin: 'standard',
+    stamp: null,
+    label: 'Standard',
+    font: null,
+    axis: {
+      attr: 'accent',
+      label: 'Accent hue',
+      default: 'blue',
+      values: [
+        {
+          value: 'blue',
+          label: 'Blue'
+        },
+        {
+          value: 'cerulean',
+          label: 'Cerulean'
+        },
+        {
+          value: 'indigo',
+          label: 'Indigo'
+        },
+        {
+          value: 'violet',
+          label: 'Violet'
+        },
+        {
+          value: 'purple',
+          label: 'Purple'
+        },
+        {
+          value: 'magenta',
+          label: 'Magenta'
+        }
+      ],
+      restrictions: []
+    }
+  },
+  industry: {
+    skin: 'industry',
+    stamp: 'industry',
+    label: 'Industry',
+    font: 'https://fonts.googleapis.com/css2?family=Inter+Tight:ital,wght@0,100..900;1,100..900&display=swap',
+    axis: {
+      attr: 'hazard',
+      label: 'Hazard hue',
+      default: 'yellow',
+      values: [
+        {
+          value: 'yellow',
+          label: 'Yellow'
+        },
+        {
+          value: 'orange',
+          label: 'Orange'
+        },
+        {
+          value: 'red',
+          label: 'Red'
+        },
+        {
+          value: 'purple',
+          label: 'Purple'
+        },
+        {
+          value: 'blue',
+          label: 'Blue'
+        },
+        {
+          value: 'green',
+          label: 'Green'
+        }
+      ],
+      restrictions: [
+        {
+          value: 'red',
+          modes: [
+            'light',
+            'dark'
+          ],
+          note: 'Red is the status reds\' hue by construction, so under protanopia the accent and the danger signal converge. Status badges carry icon and label, and a CTA does not share a tile with a danger button. Orange is the nearest hue that clears every status colour.'
+        }
+      ]
+    }
+  },
+  midgard: {
+    skin: 'midgard',
+    stamp: 'midgard',
+    label: 'Midgard',
+    font: 'https://fonts.googleapis.com/css2?family=Cinzel:wght@400..700&display=swap',
+    axis: {
+      attr: 'inlay',
+      label: 'Inlay',
+      default: 'gold',
+      values: [
+        {
+          value: 'gold',
+          label: 'Gold'
+        },
+        {
+          value: 'moss',
+          label: 'Moss'
+        },
+        {
+          value: 'verdigris',
+          label: 'Verdigris'
+        },
+        {
+          value: 'frost',
+          label: 'Frost'
+        },
+        {
+          value: 'sapphire',
+          label: 'Sapphire'
+        },
+        {
+          value: 'amethyst',
+          label: 'Amethyst'
+        }
+      ],
+      restrictions: [
+        {
+          value: 'gold',
+          modes: [
+            'dark'
+          ],
+          note: 'In dark, the gold and the warm status colours are one hue under protanopia. Status badges carry icon and label, deltas state direction in text, and a gold CTA does not share a tile with a warning chip. Any inlay retires this.'
+        }
+      ]
+    }
+  },
+  vitrine: {
+    skin: 'vitrine',
+    stamp: 'vitrine',
+    label: 'Vitrine',
+    font: 'https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap',
+    axis: {
+      attr: 'tint',
+      label: 'Tint',
+      default: 'green',
+      values: [
+        {
+          value: 'green',
+          label: 'Green'
+        },
+        {
+          value: 'azure',
+          label: 'Azure'
+        },
+        {
+          value: 'cyan',
+          label: 'Cyan'
+        },
+        {
+          value: 'violet',
+          label: 'Violet'
+        },
+        {
+          value: 'magenta',
+          label: 'Magenta'
+        },
+        {
+          value: 'amber',
+          label: 'Amber'
+        }
+      ],
+      restrictions: [
+        {
+          value: 'amber',
+          modes: [
+            'light',
+            'dark'
+          ],
+          note: 'Amber separates from the warning colours only by lightness, so under deuteranopia the accent joins the status set. Status badges carry icon and label, deltas state direction in text, and an amber CTA does not share a tile with a warning chip.'
+        }
+      ]
+    }
+  }
+};
+
+/** Layers in picker order: the base first, then the skins alphabetically. */
+export const SKIN_NAMES: readonly SkinName[] = ['standard', 'industry', 'midgard', 'vitrine'];
+
+/** Each layer's hue axis, or null where it declares none. */
+export const VARIANT_AXES: Readonly<Record<SkinName, VariantAxis | null>> = {
+  standard: SKIN_LAYERS.standard.axis,
+  industry: SKIN_LAYERS.industry.axis,
+  midgard: SKIN_LAYERS.midgard.axis,
+  vitrine: SKIN_LAYERS.vitrine.axis,
+};
+
+/** Every attribute any layer stamps. Clear all of them before stamping one: the
+ *  attribute the previous skin wrote is still on <html>. */
+export const VARIANT_ATTRS: readonly VariantAttr[] = ['accent', 'hazard', 'inlay', 'tint'];

@@ -25,6 +25,11 @@ export interface FunnelStage {
    *  when the loss has a name — "expired", "disqualified" — and not to restate
    *  a number the component already prints. */
   note?: string;
+  /** The stage has NO SOURCE in this window — not zero, absent. It keeps its
+   *  slot as a dashed outline at the width above it, prints "—", and states no
+   *  rate into or out of it, because a rate against a number nobody measured
+   *  is invented. */
+  unfed?: boolean;
 }
 
 export interface FunnelProps {
@@ -37,6 +42,12 @@ export interface FunnelProps {
   /** Step conversion at or below this fraction takes the alert tone. The tone
    *  is redundant: the rate is printed either way. */
   alertBelow?: number;
+  /** Smallest band width, as a fraction of `max`. A stage under it is drawn AT
+   *  it and tagged "not to scale" — a band of 0.3% would otherwise vanish, and
+   *  a floor that is not said is a misdrawn number. Off by default. */
+  minWidth?: number;
+  /** Tighter rows and a thinner band, for two funnels side by side. */
+  compact?: boolean;
   className?: string;
 }
 
@@ -45,7 +56,7 @@ export interface FunnelProps {
  *  Bands are centred, which is what produces the funnel silhouette — but value
  *  stays on LENGTH, and every band prints its count and its share of entry,
  *  because two centred bars share no datum to compare against. */
-export function Funnel({ stages, format, max, alertBelow, className }: FunnelProps) {
+export function Funnel({ stages, format, max, alertBelow, minWidth, compact, className }: FunnelProps) {
   if (stages.length > MAX_FUNNEL_STAGES) {
     throw new RangeError(
       `${stages.length} stages exceeds the ${MAX_FUNNEL_STAGES}-step ordinal ramp. The ramp is not ` +
@@ -56,7 +67,7 @@ export function Funnel({ stages, format, max, alertBelow, className }: FunnelPro
   }
 
   if (typeof process !== 'undefined' && process.env.NODE_ENV !== 'production') {
-    const climb = stages.findIndex((s, i) => i > 0 && s.value > stages[i - 1].value);
+    const climb = stages.findIndex((s, i) => i > 0 && !s.unfed && !stages[i - 1].unfed && s.value > stages[i - 1].value);
     if (climb > 0) {
       console.warn(
         `[jrk] <Funnel> stage "${stages[climb].label}" is larger than the stage before it. A funnel ` +
@@ -67,27 +78,44 @@ export function Funnel({ stages, format, max, alertBelow, className }: FunnelPro
     }
   }
 
-  const entry = stages[0]?.value ?? 0;
-  const peak = max ?? entry;
+  const entry = stages[0] && !stages[0].unfed ? stages[0].value : 0;
+  const peak = max ?? Math.max(entry, ...stages.filter((s) => !s.unfed).map((s) => s.value));
   const fmt = format ?? ((n: number) => n.toLocaleString());
 
+  // Band widths, as fractions of the peak. An unfed stage keeps the width above
+  // it so its slot holds the silhouette instead of collapsing it.
+  const widths: number[] = [];
+  const floored: boolean[] = [];
+  stages.forEach((s, i) => {
+    if (s.unfed) {
+      widths.push(i > 0 ? widths[i - 1] : 1);
+      floored.push(false);
+      return;
+    }
+    const raw = peak > 0 ? Math.max(0, s.value) / peak : 0;
+    const under = minWidth !== undefined && raw < minWidth;
+    widths.push(under ? minWidth : raw);
+    floored.push(under);
+  });
+
   return (
-    <ol className={cx('jrk-funnel', className)} role="list">
+    <ol className={cx('jrk-funnel', compact && 'jrk-funnel--compact', className)} role="list">
       {stages.map((stage, i) => {
         const prev = i > 0 ? stages[i - 1] : undefined;
-        const rate = prev && prev.value > 0 ? stage.value / prev.value : undefined;
-        const lost = prev ? prev.value - stage.value : 0;
+        const measured = prev && !prev.unfed && !stage.unfed;
+        const rate = measured && prev.value > 0 ? stage.value / prev.value : undefined;
+        const lost = measured ? prev.value - stage.value : 0;
         const alert = alertBelow !== undefined && rate !== undefined && rate <= alertBelow;
 
         return (
-          <li className="jrk-funnel__stage" key={stage.label}>
+          <li className={cx('jrk-funnel__stage', stage.unfed && 'jrk-funnel__stage--unfed')} key={stage.label}>
             {prev && (
               <p className={cx('jrk-funnel__step', alert && 'jrk-funnel__step--alert')}>
                 <span className="jrk-funnel__step-rate">
                   {rate === undefined ? '—' : `${pct(rate)} continue`}
                 </span>
                 <span className="jrk-funnel__step-loss">
-                  {stage.note ?? `${fmt(lost)} dropped`}
+                  {!measured ? 'no rate across an unfed stage' : stage.note ?? `${fmt(lost)} dropped`}
                 </span>
               </p>
             )}
@@ -99,14 +127,19 @@ export function Funnel({ stages, format, max, alertBelow, className }: FunnelPro
               <span className="jrk-funnel__label" title={stage.label}>
                 {stage.label}
               </span>
-              <span className="jrk-funnel__value">{fmt(stage.value)}</span>
-              <span className="jrk-funnel__share">{entry > 0 ? pct(stage.value / entry) : '—'}</span>
+              {(stage.unfed || floored[i]) && (
+                <span className="jrk-funnel__tag">{stage.unfed ? 'not fed' : 'not to scale'}</span>
+              )}
+              <span className="jrk-funnel__value">{stage.unfed ? '—' : fmt(stage.value)}</span>
+              <span className="jrk-funnel__share">
+                {stage.unfed || !(entry > 0) ? '—' : pct(stage.value / entry)}
+              </span>
             </span>
 
             <span className="jrk-funnel__track">
               <span
-                className="jrk-funnel__fill"
-                style={cssVar('--jrk-funnel-width', peak > 0 ? `${(stage.value / peak) * 100}%` : '0')}
+                className={cx('jrk-funnel__fill', stage.unfed && 'jrk-funnel__fill--unfed')}
+                style={cssVar('--jrk-funnel-width', `${widths[i] * 100}%`)}
               />
             </span>
           </li>

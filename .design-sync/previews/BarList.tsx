@@ -132,3 +132,26 @@ export const WideLabels = () => (
     </ChartCard>
   </div>
 );
+
+/* A roll-up: properties as the bar, units beside it as a second figure (never a
+   second bar), the top N with a "+N more" line, and the blank bucket styled as
+   a gap rather than a name. The scale is set by ALL items, so cutting the tail
+   never re-stretches what is shown. */
+export const Rollup = () => (
+  <div style={{ maxWidth: 560 }}>
+    <ChartCard title="Properties by region" subtitle="Properties · units">
+      <BarList
+        items={[
+          { label: 'Pacific Northwest', value: 22, secondary: 6120 },
+          { label: 'Southern California', value: 19, secondary: 5480 },
+          { label: 'Texas', value: 14, secondary: 4012 },
+          { label: '(blank)', value: 3, secondary: 410 },
+          { label: 'Mountain', value: 2, secondary: 380 },
+        ]}
+        limit={4}
+        blankLabel="(blank)"
+        moreLabel={(n) => `+ ${n} more with fewer properties`}
+      />
+    </ChartCard>
+  </div>
+);

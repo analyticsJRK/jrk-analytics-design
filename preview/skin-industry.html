@@ -270,7 +270,9 @@
       Column headers are uppercase at <code>tracking-caps</code> (0.14em under
       this skin) — the signature. Values are deliberately left alone: tracking
       that wide makes two numbers harder to compare, and the numbers are what a
-      reader is comparing.
+      reader is comparing. The first cell of each row is a <code>&lt;th scope="row"&gt;</code>
+      and keeps the body type: a row's NAME is not a label, and in tracked caps a
+      roster of names and email addresses shouts. Only <code>thead th</code> is capped.
     </p>
     <div class="jrk-table-wrap">
       <table class="jrk-table jrk-table--zebra">
@@ -279,10 +281,10 @@
           <tr><th scope="col">Asset</th><th scope="col">Region</th><th scope="col">Units</th><th scope="col">NOI &Delta;</th><th scope="col">Status</th></tr>
         </thead>
         <tbody>
-          <tr><td>Talos Court</td><td>Valley</td><td>184</td><td><span class="jrk-delta jrk-delta--good">&#9650; 3.4%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
-          <tr><td>Rhine Yard</td><td>North</td><td>96</td><td><span class="jrk-delta jrk-delta--bad">&#9660; 1.1%</span></td><td><span class="jrk-badge jrk-badge--warning">Watch</span></td></tr>
-          <tr><td>Industry Row</td><td>Basin</td><td>212</td><td><span class="jrk-delta jrk-delta--good">&#9650; 8.0%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
-          <tr><td>Kesler Flats</td><td>Valley</td><td>58</td><td><span class="jrk-delta jrk-delta--flat">&mdash; flat</span></td><td><span class="jrk-badge jrk-badge--critical">Flagged</span></td></tr>
+          <tr><th scope="row">Talos Court</th><td>Valley</td><td>184</td><td><span class="jrk-delta jrk-delta--good">&#9650; 3.4%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
+          <tr><th scope="row">Rhine Yard</th><td>North</td><td>96</td><td><span class="jrk-delta jrk-delta--bad">&#9660; 1.1%</span></td><td><span class="jrk-badge jrk-badge--warning">Watch</span></td></tr>
+          <tr><th scope="row">Industry Row</th><td>Basin</td><td>212</td><td><span class="jrk-delta jrk-delta--good">&#9650; 8.0%</span></td><td><span class="jrk-badge jrk-badge--good">Stabilized</span></td></tr>
+          <tr><th scope="row">Kesler Flats</th><td>Valley</td><td>58</td><td><span class="jrk-delta jrk-delta--flat">&mdash; flat</span></td><td><span class="jrk-badge jrk-badge--critical">Flagged</span></td></tr>
         </tbody>
       </table>
     </div>

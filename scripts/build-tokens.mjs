@@ -275,6 +275,75 @@ const accentHeader = accentVariants.length
    which is invisible in a browser — so the name is ASSERTED against the base layer
    here, and only `skinOnly` is exempt. */
 const baseNames = new Set(vars.map(([n]) => n));
+
+/* ── the appearance axes, as data for a picker ───────────────────────────────
+   One entry per LAYER — the unskinned base plus each skin — naming the attribute
+   its hue stamps, the default (the ABSENCE of that attribute), every value with a
+   label, the skin's typeface and any restriction a hue ships with. Emitted into
+   dist/tokens.ts as VARIANT_AXES so a consumer stops transcribing it by hand: the
+   portal's copy went stale once already (midgard's inlays shipped with no picker).
+
+   The base layer's key is `standard`, the word a picker stores for "no data-skin". */
+const BASE_LAYER = 'standard';
+const MODE_NAMES = new Set(['light', 'dark']);
+const titleCase = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** A restriction is DATA a picker renders, so its shape is checked here rather
+ *  than discovered as a blank note in the menu. */
+function restrictionOf(where, value, r) {
+  if (!r) return null;
+  const modes = r.modes ?? [];
+  if (!Array.isArray(modes) || !modes.length || modes.some((m) => !MODE_NAMES.has(m)) || typeof r.note !== 'string' || !r.note.trim()) {
+    throw new Error(`${where}: the restriction on "${value}" needs { modes: ["light"|"dark", ...], note: "…" }`);
+  }
+  return { value, modes, note: r.note };
+}
+
+function layerEntry(where, { skin, stamp, label, axis, variants, font }) {
+  if (!label) throw new Error(`${where}: no layer label — the name a picker shows for this skin`);
+  const hasVariants = Object.keys(variants ?? {}).some((k) => !isMeta(k));
+  if (!hasVariants) return { skin, stamp, label, font, axis: null };
+  if (!axis?.label) throw new Error(`${where}: variantAxis has no "label" — the heading a picker shows for this hue`);
+  const values = [{ value: axis.default, label: titleCase(axis.default) }];
+  const restrictions = [];
+  const dr = restrictionOf(where, axis.default, axis.defaultRestriction);
+  if (dr) restrictions.push(dr);
+  for (const [vName, V] of Object.entries(variants)) {
+    if (isMeta(vName)) continue;
+    values.push({ value: vName, label: V.label ?? titleCase(vName) });
+    const r = restrictionOf(where, vName, V.restriction);
+    if (r) restrictions.push(r);
+  }
+  return {
+    skin, stamp, label, font,
+    axis: { attr: axis.attr, label: axis.label, default: axis.default, values, restrictions },
+  };
+}
+
+const layers = [];
+if (AV) {
+  layers.push(layerEntry('tokens.json accentVariants', {
+    skin: BASE_LAYER,
+    stamp: null,
+    label: AV.variantAxis.layerLabel,
+    axis: AV.variantAxis,
+    variants: AV.variants,
+    // Inter is css/fonts.css's and always loaded; the base layer requests nothing.
+    font: null,
+  }));
+}
+
+/* A skin's face is requested by the `@import url()` at the top of its own
+   stylesheet. That line is the single source; a consumer whose bundler drops a
+   url() import (Tailwind v4's inliner does) injects the same URL from this data
+   instead of keeping a second copy of it. */
+function skinFont(stamp) {
+  const p = join(root, 'css/skins', `${stamp}.css`);
+  if (!existsSync(p)) return null;
+  const m = readFileSync(p, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '').match(/@import\s+url\(\s*['"]?([^'")]+)['"]?\s*\)/);
+  return m ? m[1] : null;
+}
+
 const skinsDir = join(root, 'tokens/skins');
 const skinFiles = existsSync(skinsDir)
   ? readdirSync(skinsDir).filter((f) => f.endsWith('.json')).sort()
@@ -432,6 +501,16 @@ ${d}
 `
     : '';
 
+  if (stamp === BASE_LAYER) throw new Error(`tokens/skins/${file}: "${BASE_LAYER}" is the name of the unskinned layer`);
+  layers.push(layerEntry(`tokens/skins/${file}`, {
+    skin: stamp,
+    stamp,
+    label: S.label,
+    axis,
+    variants: S.variants,
+    font: skinFont(stamp),
+  }));
+
   skins.push({
     stamp,
     file: `dist/jrk-skin-${stamp}.css`,
@@ -450,12 +529,23 @@ const twMap = (twName, jrkName) => tw.push(`  --${twName}: var(--${PREFIX}-${jrk
 for (const g of ['surface', 'text', 'border', 'accent']) {
   for (const k of Object.keys(T.color[g])) {
     if (isMeta(k)) continue;
-    twMap(`color-${g === 'text' ? 'ink' : g}-${kebab(k)}`, `${g}-${k}`);
+    // kebab() on the variable side too: `${g}-${k}` named --jrk-accent-solidHover,
+    // --jrk-text-onBanner and twelve more that the token layer declares kebab-cased,
+    // so those utilities resolved to nothing.
+    twMap(`color-${g === 'text' ? 'ink' : g}-${kebab(k)}`, `${g}-${kebab(k)}`);
   }
 }
 for (const [s, parts] of Object.entries(T.color.status)) {
   if (isMeta(s)) continue;
-  for (const p of Object.keys(parts)) twMap(`color-${s}-${p}`, `status-${s}-${p}`);
+  for (const p of Object.keys(parts)) {
+    if (isMeta(p)) continue;
+    // kebab() on BOTH sides. The variable side was raw, so `onSolid` mapped onto
+    // --jrk-status-critical-onSolid, a name the token layer never declares: the
+    // utility existed and painted nothing. The camelCase utility name is kept as an
+    // alias so nothing that spelled it that way breaks.
+    twMap(`color-${s}-${kebab(p)}`, `status-${s}-${kebab(p)}`);
+    if (kebab(p) !== p) twMap(`color-${s}-${p}`, `status-${s}-${kebab(p)}`);
+  }
 }
 T.chart.categorical.slots.forEach((s) => twMap(`color-chart-${s.slot}`, `chart-${s.slot}`));
 T.chart.tint.slots.forEach((s) => twMap(`color-tint-${s.slot}`, `chart-tint-${s.slot}`));
@@ -469,7 +559,9 @@ for (const [k, v] of Object.entries(T.space)) if (!isMeta(k)) tw.push(`  --spaci
 for (const [k, v] of Object.entries(T.radius)) if (!isMeta(k)) tw.push(`  --radius-${kebab(k)}: ${v};`);
 tw.push(`  --font-sans: ${T.font.family.sans};`);
 tw.push(`  --font-mono: ${T.font.family.mono};`);
-for (const k of Object.keys(T.shadow)) if (!isMeta(k)) twMap(`shadow-${k}`, `shadow-${k}`);
+// The variable side kebab-cased for the same reason as the colours above
+// (--jrk-shadow-cardRaise was declared nowhere); the utility keeps its name.
+for (const k of Object.keys(T.shadow)) if (!isMeta(k)) twMap(`shadow-${k}`, `shadow-${kebab(k)}`);
 
 const tailwind = `/* GENERATED by scripts/build-tokens.mjs — do not edit. Source: tokens/tokens.json */
 /* Tailwind v4 theme. Import AFTER tailwindcss and AFTER jrk-tokens.css:
@@ -485,6 +577,18 @@ ${tw.join('\n')}
 `;
 
 // ============================== emit TS ==============================
+/* A token subtree as a TS object literal, single-quoted. Each string is re-quoted
+   with its own apostrophes escaped: the old form swapped every " for ' blindly,
+   so the first $note with an apostrophe in it (chart.chrome.neutral) broke
+   dist/tokens.ts. `dropMeta` drops the $-keys, which are documentation. */
+const tsLiteral = (o, dropMeta = false) =>
+  JSON.stringify(o, (k, v) => (dropMeta && k.startsWith('$') ? undefined : v), 2)
+    .replace(/"((?:[^"\\]|\\.)*)"(\s*:)?/g, (_, body, colon) => {
+      if (colon && /^[A-Za-z_$][\w$]*$/.test(body)) return `${body}:`;
+      const q = `'${body.replace(/\\"/g, '"').replace(/'/g, "\\'")}'`;
+      return colon ? `${q}:` : q;
+    });
+
 const ts = `/* GENERATED by scripts/build-tokens.mjs — do not edit. Source: tokens/tokens.json */
 
 export type Mode = 'light' | 'dark';
@@ -560,9 +664,9 @@ export function divergingStep(value: number, max: number): { arm: 'negative' | '
   return { arm: value < 0 ? 'negative' : 'positive', step };
 }
 
-export const chartChrome = ${JSON.stringify(T.chart.chrome, null, 2).replace(/"([^"]+)":/g, '$1:').replace(/"/g, "'")} as const;
+export const chartChrome = ${tsLiteral(T.chart.chrome)} as const;
 
-export const status = ${JSON.stringify(T.color.status, (k, v) => (k.startsWith('$') ? undefined : v), 2).replace(/"([^"]+)":/g, '$1:').replace(/"/g, "'")} as const;
+export const status = ${tsLiteral(T.color.status, true)} as const;
 
 export type StatusName = keyof typeof status;
 
@@ -612,6 +716,63 @@ export function currentMode(): Mode {
   if (stamped === 'dark' || stamped === 'light') return stamped;
   return window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
+
+/* ── appearance: theme x skin x hue ───────────────────────────────────────────
+   Generated from tokens.json accentVariants and tokens/skins/*.json. A picker
+   reads these rather than transcribing them, so a hue added to a token file
+   reaches the menu on the next build. */
+
+/** A layer: the unskinned base (\`${BASE_LAYER}\`) or a skin. The value a picker stores. */
+export type SkinName = ${layers.map((l) => `'${l.skin}'`).join(' | ')};
+
+/** The attribute a layer's hue stamps, without \`data-\`. */
+export type VariantAttr = ${[...new Set(layers.filter((l) => l.axis).map((l) => l.axis.attr))].map((a) => `'${a}'`).join(' | ')};
+
+/** A hue that ships with a condition the reader cannot see in the swatch. Render
+ *  \`note\` beside the picker while \`value\` is chosen in one of \`modes\`. */
+export interface VariantRestriction {
+  readonly value: string;
+  readonly modes: readonly Mode[];
+  readonly note: string;
+}
+
+export interface VariantAxis {
+  /** Stamped as \`data-<attr>\` on <html>. */
+  readonly attr: VariantAttr;
+  /** The picker heading, in the layer's own word: a hazard is a signal, a tint a material. */
+  readonly label: string;
+  /** The hue that is the ABSENCE of the attribute. Never stamped. */
+  readonly default: string;
+  /** Default first, then the token file's order — the order arrow keys walk. */
+  readonly values: readonly { readonly value: string; readonly label: string }[];
+  readonly restrictions: readonly VariantRestriction[];
+}
+
+export interface SkinLayer {
+  readonly skin: SkinName;
+  /** The \`data-skin\` value; null for the unskinned base. */
+  readonly stamp: string | null;
+  readonly label: string;
+  /** The skin's typeface stylesheet, copied from the \`@import url()\` at the top of
+   *  css/skins/<stamp>.css. Inject it per active skin: a bundler that drops url()
+   *  imports leaves the skin in the base face with no error. */
+  readonly font: string | null;
+  readonly axis: VariantAxis | null;
+}
+
+export const SKIN_LAYERS: Readonly<Record<SkinName, SkinLayer>> = ${tsLiteral(Object.fromEntries(layers.map((l) => [l.skin, l])))};
+
+/** Layers in picker order: the base first, then the skins alphabetically. */
+export const SKIN_NAMES: readonly SkinName[] = [${layers.map((l) => `'${l.skin}'`).join(', ')}];
+
+/** Each layer's hue axis, or null where it declares none. */
+export const VARIANT_AXES: Readonly<Record<SkinName, VariantAxis | null>> = {
+${layers.map((l) => `  ${l.skin}: SKIN_LAYERS.${l.skin}.axis,`).join('\n')}
+};
+
+/** Every attribute any layer stamps. Clear all of them before stamping one: the
+ *  attribute the previous skin wrote is still on <html>. */
+export const VARIANT_ATTRS: readonly VariantAttr[] = [${[...new Set(layers.filter((l) => l.axis).map((l) => l.axis.attr))].map((a) => `'${a}'`).join(', ')}];
 `;
 
 // ============================== emit icons ==============================

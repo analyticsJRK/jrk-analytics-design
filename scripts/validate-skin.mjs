@@ -157,9 +157,31 @@ for (const file of files) {
       floor(`status-${s}-text on the panel`, v(`status-${s}-text`, mode), panel, TEXT_FLOOR);
       floor(`status-${s}-text on its own wash`, v(`status-${s}-text`, mode), v(`status-${s}-wash`, mode), TEXT_FLOOR);
       floor(`text-primary on the ${s} wash`, v('text-primary', mode), v(`status-${s}-wash`, mode), TEXT_FLOOR);
+      /* AND ON THE PLANES A STATUS LABEL ACTUALLY LANDS ON. raised is the
+         .jrk-btn--danger label; hover a table row; track a well; active a pressed
+         row. vitrine shipped critical text at 3.94:1 on its own raised plane and
+         every light status text under 4.5:1 on its track, with the panel and the
+         wash both passing — the two grounds this loop used to check. */
+      for (const plane of ['surface-raised', 'surface-hover', 'surface-track', 'surface-active']) {
+        if (have(plane)) floor(`status-${s}-text on ${plane}`, v(`status-${s}-text`, mode), v(plane, mode), TEXT_FLOOR);
+      }
     }
-    if (have('status-critical-on-solid')) {
-      floor('status-critical-on-solid on status-critical-solid', v('status-critical-on-solid', mode), v('status-critical-solid', mode), TEXT_FLOOR);
+
+    /* Every filled status button: the label on the fill and on its hover. The fill
+       against the dark panel is RECORDED, not gated — critical has sat under 3:1
+       there in all three skins since they shipped, and the new solids are each
+       derived as their skin's critical is. */
+    for (const s of ['good', 'warning', 'critical']) {
+      if (!have(`status-${s}-solid`)) continue;
+      if (!have(`status-${s}-on-solid`)) {
+        fail(`status-${s}-solid has no status-${s}-on-solid — the base value would label this skin's fill`);
+        continue;
+      }
+      floor(`status-${s}-on-solid on status-${s}-solid`, v(`status-${s}-on-solid`, mode), v(`status-${s}-solid`, mode), TEXT_FLOOR);
+      if (have(`status-${s}-solid-hover`)) {
+        floor(`status-${s}-on-solid on status-${s}-solid-hover`, v(`status-${s}-on-solid`, mode), v(`status-${s}-solid-hover`, mode), TEXT_FLOOR);
+      }
+      if (mode === 'dark') note(`status-${s}-solid vs the dark panel = ${r2(contrast(v(`status-${s}-solid`, mode), panel))}:1  (a filled button's only edge in dark)`);
     }
 
     // ---- a boundary that means something owes 3:1
@@ -236,7 +258,7 @@ for (const file of files) {
      `data-hazard`, vitrine `data-tint`), so nothing here may hardcode one: this
      loop reads it for its labels, and the picker check below reads it for the
      identifier it expects in the gallery. */
-  const STATUS_ROLES = ['critical-solid', 'critical-mark', 'warning-mark', 'serious-mark', 'good-mark'];
+  const STATUS_ROLES = ['critical-solid', 'critical-mark', 'warning-mark', 'serious-mark', 'good-mark', 'good-solid', 'warning-solid'];
   const axis = S.variantAxis ?? { attr: 'hazard', default: 'yellow' };
   for (const [vName, V] of Object.entries(S.variants ?? {})) {
     if (vName.startsWith('$')) continue;
@@ -335,6 +357,19 @@ for (const file of files) {
         : (failures++, console.error(`  FAIL  ${msg}, NOT acknowledged — add it to $acknowledgedStatusCollisions with the deltaE, or change the hue`));
     }
     if (!found.length) pass(`[${vName}] accent-solid clears dE ${CVD_FLOOR} against every status colour`);
+    /* AN ACKNOWLEDGED COLLISION MUST REACH THE READER. The $-key is documentation
+       the build drops; `restriction` is the data dist/tokens.ts carries into
+       SKIN_LAYERS, which is what a picker renders beside the swatch. Acknowledging
+       a collision without it leaves the condition in a file nobody choosing a hue
+       ever reads. */
+    if (found.length) {
+      const r = V.restriction;
+      if (!r || typeof r.note !== 'string' || !r.note.trim()) {
+        fail(`[${vName}] acknowledges a status collision but declares no "restriction": { modes, note } — the picker has nothing to tell the reader`);
+      } else {
+        pass(`[${vName}] carries its restriction to the picker (${r.modes.join(', ')})`);
+      }
+    }
     // An acknowledgement for a collision that no longer exists is stale prose,
     // and stale prose next to a number is how this repo's worst notes happened.
     for (const line of V.$acknowledgedStatusCollisions ?? []) {

@@ -127,8 +127,231 @@
   animation: jrk-spin 0.7s linear infinite;
 }
 
-.jrk-spinner--sm { width: var(--jrk-icon-sm); height: var(--jrk-icon-sm); }
-.jrk-spinner--lg { width: 32px; height: 32px; border-width: 3px; }
+/* The size modifiers also publish the size as a variable, which is all the
+   `--em` form below reads. On the bare ring they are the same declarations they
+   always were; `--md` is a no-op there because md is the bare ring's default. */
+.jrk-spinner--sm {
+  width: var(--jrk-icon-sm);
+  height: var(--jrk-icon-sm);
+  --jrk-spinner-size: var(--jrk-icon-sm);
+}
+.jrk-spinner--md { --jrk-spinner-size: var(--jrk-icon-lg); }
+.jrk-spinner--lg {
+  width: 32px;
+  height: 32px;
+  border-width: 3px;
+  --jrk-spinner-size: 32px;
+  --jrk-spinner-weight: 3px;
+}
+
+/* THE SPLIT RING — a box that REVEALS and a ring inside it that SPINS.
+ *
+ *   <span class="jrk-spinner jrk-spinner--em" role="status">
+ *     <span class="jrk-spinner__ring" aria-hidden="true"></span>
+ *     <span class="jrk-sr-only">Loading…</span>
+ *   </span>
+ *
+ * WHY TWO ELEMENTS. The bare ring above owns the `animation` shorthand for its
+ * spin, so a reveal delay cannot be layered onto it — any rule that adds one has
+ * to restate the spin, and two copies of the spin are two places for its speed
+ * to drift. Split, each element has one animation and one job.
+ *
+ * WHY A REVEAL DELAY. A prefetched navigation commits in about a frame, and a
+ * ring that appears and vanishes that fast reads as a rendering fault rather than
+ * progress. The box mounts transparent and fades in only if the wait outlasts
+ * 140ms, so a fast click leaves nothing behind. `--now` drops the hold for a wait
+ * that is never short (a server write): delaying the only feedback there removes
+ * it in exactly the window where the reader decides whether the click registered.
+ *
+ * SIZED IN em by default, like `.jrk-icon`, so it can take an icon's slot — same
+ * box, nothing reflows when it swaps in — and track the text it sits in. The size
+ * modifiers still apply, through `--jrk-spinner-size`.
+ *
+ * The delay is a literal on purpose: base.css zeroes every duration token under
+ * reduced motion, and a delay written as a token would collapse to zero there and
+ * turn every fast click back into a flash. */
+.jrk-spinner--em {
+  --jrk-spinner-delay: 140ms;
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: var(--jrk-spinner-size, 1em);
+  height: var(--jrk-spinner-size, 1em);
+  border: 0;
+  border-radius: 0;
+  opacity: 0;
+  animation: jrk-spinner-reveal var(--jrk-duration-fast) linear var(--jrk-spinner-delay) forwards;
+}
+
+.jrk-spinner--em > .jrk-spinner__ring {
+  width: 100%;
+  height: 100%;
+  border: var(--jrk-spinner-weight, 2px) solid var(--jrk-border-strong);
+  border-top-color: var(--jrk-accent-solid);
+  border-radius: var(--jrk-radius-full);
+  animation: jrk-spin 0.7s linear infinite;
+}
+
+/* Scoped to the split form: on the bare ring `animation: none` would stop the
+   spin, which is the one thing a spinner must not do. */
+.jrk-spinner--em.jrk-spinner--now {
+  opacity: 1;
+  animation: none;
+}
+
+@keyframes jrk-spinner-reveal {
+  to { opacity: 1; }
+}
+
+/* REDUCED MOTION KEEPS THE MOVEMENT AND DROPS THE SWEEP. base.css cuts every
+   animation to one 0.01ms iteration under the preference, which stops a ring
+   dead — and a static ring is not feedback, it is a bullet point. Eight discrete
+   ticks a second say "working" without a smooth rotation. `!important` because
+   base.css's guard is `!important` too; specificity decides between the two, and
+   these selectors outrank its `*`. The reveal needs no rule: its delay is not a
+   duration and survives the guard. */
+@media (prefers-reduced-motion: reduce) {
+  .jrk-spinner:not(.jrk-spinner--em),
+  .jrk-spinner--em > .jrk-spinner__ring {
+    animation: jrk-spin 1s steps(8) infinite !important;
+  }
+}
+
+/* ---------- the wait, in the middle of the screen ----------
+ *
+ * One ring centred over the viewport on a faint wash. It marks a wait; it does not
+ * disable the page — `pointer-events: none`, so a reader who clicked the wrong tab
+ * can click another mid-wait. A scrim that swallowed that click would make a slow
+ * page feel broken as well as slow.
+ *
+ * <ScreenSpinner> shows it as a `popover="manual"` so it paints in the TOP LAYER.
+ * `position: fixed` alone positions against the viewport but does not escape a
+ * stacking context: an ancestor with a transform, a filter or an opacity under 1
+ * traps it, and the chart beside it paints over the ring. The popover resets below
+ * undo the UA popover sheet (centred, bordered, system colours); `display` is set
+ * here rather than left to the UA, so markup with no popover support still shows
+ * it, as a fixed layer at the toast rung.
+ *
+ * A labelled wait (a write: "Saving…") stacks the words under the ring on a
+ * heavier wash, because words have to be readable over whatever they land on. */
+.jrk-screen-spinner {
+  position: fixed;
+  inset: 0;
+  z-index: var(--jrk-z-toast);
+  display: grid;
+  place-items: center;
+  width: auto;
+  height: auto;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  overflow: visible;
+  color: var(--jrk-text-primary);
+  background: color-mix(in srgb, var(--jrk-surface-default) 45%, transparent);
+  pointer-events: none;
+}
+
+.jrk-screen-spinner .jrk-spinner {
+  --jrk-spinner-size: var(--jrk-control-lg);
+  --jrk-spinner-weight: 3px;
+}
+
+/* `place-items` alone centres each child in its OWN implicit row, which put the
+   ring a quarter down the viewport and the words three quarters down.
+   `align-content` centres the two rows as one block. */
+.jrk-screen-spinner--labelled {
+  grid-auto-flow: row;
+  align-content: center;
+  justify-items: center;
+  gap: var(--jrk-space-3);
+  background: color-mix(in srgb, var(--jrk-surface-default) 70%, transparent);
+}
+
+.jrk-screen-spinner__label {
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-primary);
+}
+
+/* The whole layer — wash included — held back like the em ring, for a wait that
+   may be a prefetched navigation. A full-screen wash for one frame is worse than
+   no feedback at all. */
+.jrk-screen-spinner--delay {
+  opacity: 0;
+  animation: jrk-spinner-reveal var(--jrk-duration-fast) linear 140ms forwards;
+}
+
+/* ---------- a nav row whose navigation is in flight ----------
+ *
+ * The row leans in, so "which one did I click" is legible from across the rail
+ * and not only from a 13px ring. The `:has()` arm means a row that swaps its icon
+ * for the em ring gets the wash with nothing else to remember; the modifier is
+ * for a row that marks the wait some other way. A flyout row sits on the raised
+ * plane, so it takes the raised hover (surface.hover IS surface.raised in dark). */
+.jrk-nav-item--pending,
+.jrk-sidebar .jrk-nav-item:has(.jrk-spinner--em) {
+  background: var(--jrk-surface-hover);
+  color: var(--jrk-text-primary);
+}
+
+.jrk-menu__item--pending,
+.jrk-nav-flyout .jrk-menu__item:has(.jrk-spinner--em) {
+  background: var(--jrk-surface-raised-hover);
+}
+
+/* ---------- navigation progress ----------
+ *
+ * Two pixels across the top of the viewport while a navigation is in flight —
+ * the feedback for a same-route `?param=` change, where nothing suspends and the
+ * old page sits there complete and wrong. See <NavProgress> for how it is armed.
+ *
+ * `transform: scaleX`, not `width`: a width animation lays out every frame, during
+ * the render of a page that is already the slowest thing on screen. No route
+ * progress is knowable, so it eases to 90% and waits there — a bar that reaches
+ * the end and hangs is a worse lie than one that visibly has not finished. The
+ * crawl is a literal for that reason; it is a shape, not a speed.
+ *
+ * Fading out by opacity, not `visibility`: an invisible bar keeps its transform,
+ * and re-showing it would jump straight to 90% instead of growing. The transform
+ * resets only after the fade has finished. */
+.jrk-navprogress {
+  --jrk-navprogress-crawl: 4s;
+  position: fixed;
+  inset-block-start: 0;
+  inset-inline: 0;
+  z-index: var(--jrk-z-toast);
+  height: 2px;
+  background: var(--jrk-accent-solid);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--jrk-duration-base) linear 60ms,
+    transform 0s linear calc(var(--jrk-duration-base) + 60ms);
+}
+
+.jrk-navprogress:dir(rtl) {
+  transform-origin: 100% 50%;
+}
+
+.jrk-navprogress--busy {
+  opacity: 1;
+  transform: scaleX(0.9);
+  transition:
+    transform var(--jrk-navprogress-crawl) var(--jrk-ease-enter),
+    opacity var(--jrk-duration-fast) linear;
+}
+
+/* No growth under reduced motion: it appears and disappears. "Something is
+   happening" does not need the movement to carry it. */
+@media (prefers-reduced-motion: reduce) {
+  .jrk-navprogress--busy {
+    transform: scaleX(1);
+  }
+}
 
 /* A spinner alone announces nothing. Pair it with visible or sr-only text and
    aria-busy on the region it covers. */
@@ -419,6 +642,9 @@
   width: 100%;
   padding: var(--jrk-space-1_5) var(--jrk-space-2_5);
   font-size: var(--jrk-text-sm);
+  /* Tight tracking, as the rail's rows: a menu and the rail are one surface of
+     nav text, and the portal ran both at `tracking.tight` since 2026-09-23. */
+  letter-spacing: var(--jrk-tracking-tight);
   color: var(--jrk-text-primary);
   text-align: start;
   text-decoration: none;
@@ -474,17 +700,63 @@
 /* ============================== modal ============================== */
 
 /* Built on <dialog> so focus trapping, Esc, and inertness come from the
-   platform instead of a script that has to get them right. */
+   platform instead of a script that has to get them right.
+
+   Markup (what <Modal> renders):
+     <dialog class="jrk-modal" aria-label="…">
+       <header class="jrk-modal__header">
+         <div>
+           <h2 class="jrk-modal__title">…</h2>
+           <p class="jrk-modal__desc">…</p>
+         </div>
+         <button class="jrk-btn jrk-btn--ghost jrk-btn--icon jrk-modal__close" aria-label="Close">…</button>
+       </header>
+       <div class="jrk-modal__body">…</div>
+       <footer class="jrk-modal__footer">…</footer>
+     </dialog>
+
+   `margin: auto` IS THE LINE THAT CENTRES IT, AND IT IS NOT REDUNDANT. The UA
+   sheet centres a modal dialog with `margin: auto`; base.css sets
+   `* { margin: 0 }`, which matches the dialog and wins, because any author rule
+   beats a UA rule. Without this every modal renders hard against the top-left
+   corner. Fixed here rather than by loosening the reset, which does real work
+   everywhere else.
+
+   THE DIALOG STATES ITS OWN WEIGHT AND WRAPPING. `showModal()` moves the
+   painting to the top layer, not the DOM position, so a dialog still inherits
+   from where it was WRITTEN. Opened from a `<th scope="row">` (UA-bold) every
+   unstyled line in it computed 700; opened from a cell with `white-space: nowrap`
+   its description ran off its own right edge under the close button. A modal has
+   to look the same wherever it is mounted. */
 .jrk-modal {
+  margin: auto;
   width: min(560px, calc(100vw - var(--jrk-space-8)));
   max-height: calc(100vh - var(--jrk-space-16));
   padding: 0;
+  font-weight: var(--jrk-weight-regular);
+  white-space: normal;
   color: var(--jrk-text-primary);
   background: var(--jrk-surface-raised);
   border: 1px solid var(--jrk-border-default);
   border-radius: var(--jrk-radius-2xl);
   box-shadow: var(--jrk-shadow-xl);
   overflow: hidden;
+}
+
+/* THE FOOTER IS ALWAYS REACHABLE. Capping the body at one viewport-derived height
+   and the dialog at another does not compose — a tall header plus a tall footer
+   pushed the footer past the dialog's `overflow: hidden` and Save simply was not
+   there. So the dialog is a column, header and footer keep their height, and the
+   body takes what is left. `min-height: 0` is the load-bearing half: a flex
+   item's default `min-height: auto` refuses to shrink below its content.
+
+   `[open]` IS REQUIRED. `display: flex` on the bare class would beat the UA's
+   `dialog:not([open]) { display: none }` and a closed dialog would render inline
+   on the page — and a controller that calls `showModal()` in an effect has a real
+   frame where the attribute is absent. */
+.jrk-modal[open] {
+  display: flex;
+  flex-direction: column;
 }
 
 /* The wash is a token now (overlay.scrim), holding the value this rule carried
@@ -499,28 +771,109 @@
 .jrk-modal--sm { width: min(400px, calc(100vw - var(--jrk-space-8))); }
 .jrk-modal--lg { width: min(800px, calc(100vw - var(--jrk-space-8))); }
 
+/* CENTRED AND UNBOLDED — directed 2026-08-21: "no modal should have bold
+ * lettering, make it clean and centre justified".
+ *
+ * A dialog carries one thing, the reader asked for it, and nothing in it competes
+ * for a first glance — so the hierarchy a screen needs (weight to find the heading,
+ * a leading edge to scan down) does no work here and reads as shouting. Size and
+ * space carry it instead: `text-lg` for the title against `text-sm` for the note,
+ * and the centre line as the only axis.
+ *
+ * The header stays a flex row because of the close button: the title centres in
+ * the space the button leaves, and a spacer as wide as the button on the other
+ * side is what puts the heading on the DIALOG's centre line rather than 16px left
+ * of it. The spacer appears only when there is a close button to balance. */
 .jrk-modal__header {
   display: flex;
+  flex: 0 0 auto;
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--jrk-space-4);
   padding: var(--jrk-space-5) var(--jrk-space-5) var(--jrk-space-3);
+  text-align: center;
 }
 
+.jrk-modal__header > :first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.jrk-modal__header:has(> .jrk-modal__close)::before {
+  content: '';
+  flex: 0 0 auto;
+  width: var(--jrk-control-md);
+}
+
+.jrk-modal__close {
+  flex: 0 0 auto;
+}
+
+/* `weight-regular` stated, not omitted: `<h2>` is bold by UA default and base.css
+   sets headings semibold, so the weight has to be said to be removed. */
 .jrk-modal__title {
-  font-size: var(--jrk-text-xl);
-  font-weight: var(--jrk-weight-semibold);
+  font-size: var(--jrk-text-lg);
+  font-weight: var(--jrk-weight-regular);
+  letter-spacing: var(--jrk-tracking-tight);
 }
 
+.jrk-modal__desc {
+  margin-top: var(--jrk-space-1);
+  font-size: var(--jrk-text-sm);
+  line-height: var(--jrk-leading-normal);
+  color: var(--jrk-text-muted);
+}
+
+/* Centred with the header — a left-aligned body under a centred title puts the
+   heading on one axis and the content on another. Content that is SCANNED rather
+   than read in one line opts back out: a form is scanned down its labels, a list
+   down its items, a dt/dd grid down its terms, and a centred column of those
+   starts every line somewhere new. The common shapes opt out by themselves;
+   `--start` is the switch for anything else (a review's prose, a fact grid). */
 .jrk-modal__body {
-  padding: 0 var(--jrk-space-5) var(--jrk-space-5);
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: var(--jrk-space-5);
   overflow-y: auto;
   font-size: var(--jrk-text-md);
   color: var(--jrk-text-secondary);
+  text-align: center;
+}
+
+.jrk-modal__body--start,
+.jrk-modal__body :is(form, fieldset, label, ul, ol, dl, .jrk-field, .jrk-list, .jrk-table-wrap) {
+  text-align: start;
+}
+
+/* base.css zeroes every margin, so stacked children need a rhythm stated. */
+.jrk-modal__body > * + * {
+  margin-top: var(--jrk-space-4);
+}
+
+/* A BODY THAT IS ONE PARAGRAPH CLOSES THE GAP TO ITS TITLE. Header bottom plus
+   body top is 32px — right under a heading that introduces a form or a table, far
+   too much air above a single sentence in a two-line dialog. The condition IS the
+   composition, so there is nothing for a caller to remember. */
+.jrk-modal__header:has(+ .jrk-modal__body > p:only-child) {
+  padding-bottom: 0;
+}
+
+.jrk-modal__body:has(> p:only-child) {
+  padding-top: var(--jrk-space-3);
+}
+
+/* NOTHING INSIDE A MODAL IS BOLD. The rule is about the surface, so it lives on
+   the surface: a body that writes <strong>, or a badge, should not need to know
+   about this. One bold clause in an unbolded dialog is worse than a bold one. */
+.jrk-modal :is(strong, b),
+.jrk-modal .jrk-badge {
+  font-weight: var(--jrk-weight-regular);
 }
 
 .jrk-modal__footer {
   display: flex;
+  flex: 0 0 auto;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: flex-end;
   gap: var(--jrk-space-2);

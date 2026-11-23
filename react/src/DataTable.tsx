@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { cx } from './utils';
 
 export type SortDir = 'ascending' | 'descending';
@@ -73,7 +73,9 @@ export interface DataTableProps<Row> {
    *
    *  So pass this to retune the port for a particular screen — `'50vh'` under a
    *  tall page header, `'min(70vh, 820px)'` to stop a table growing on a large
-   *  display — not to switch the freeze on. */
+   *  display — not to switch the freeze on. It is written to `--jrk-table-height`,
+   *  so the table still prints in full. To end the port at the window's bottom
+   *  edge instead of a fixed length, use `useFitHeight`. */
   maxHeight?: string;
   zebra?: boolean;
   loading?: boolean;
@@ -134,7 +136,9 @@ export function DataTable<Row>({
   return (
     <div
       className={cx('jrk-table-wrap', maxHeight && 'jrk-table-wrap--capped', className)}
-      style={maxHeight ? { maxHeight } : undefined}
+      // The PROPERTY, not an inline `max-height`: an inline declaration beats the print reset in
+      // table.css, so a capped table printed its visible rows and silently dropped the rest.
+      style={maxHeight ? ({ '--jrk-table-height': maxHeight } as CSSProperties) : undefined}
     >
       <table
         className={cx(

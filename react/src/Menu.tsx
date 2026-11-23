@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import { Button } from './Button';
 import type { ButtonProps } from './Button';
 import { cx } from './utils';
+import { placeFloating } from './floating';
 
 /* Lets an item dismiss the panel it is in without the consumer threading a
  * close handler down. Defaults to a no-op so a <MenuItem> rendered outside a
@@ -55,69 +56,13 @@ const MenuClose = createContext<() => void>(() => {});
  * screen. The dismissal stays here, where it always was.
  */
 
-/* Viewport geometry for the floating panel. GAP is --jrk-space-1, the distance
-   the anchored rule hangs the panel from its trigger. EDGE keeps the panel off
-   the viewport's own edge, where its shadow would be cut. */
-const GAP = 4;
-const EDGE = 8;
-
-/* Places `panel` against `trigger` in viewport coordinates, through the custom
-   properties `.jrk-menu--floating` reads. Below the trigger unless the panel
-   does not fit there and there is more room above, and never taller than the
-   room on the side it opens to: a fixed panel has no page scroll to reveal its
-   bottom.
-
-   Returns false when the trigger has scrolled out of view, so the caller can
-   close the panel. A panel left behind by its trigger looks like it belongs to
-   whatever is under it now. */
-function place(trigger: HTMLElement, panel: HTMLElement, align: 'start' | 'end'): boolean {
-  const r = trigger.getBoundingClientRect();
-  const vw = document.documentElement.clientWidth;
-  const vh = document.documentElement.clientHeight;
-  if (!shown(trigger, r, vw, vh)) return false;
-
-  const below = vh - r.bottom - GAP - EDGE;
-  const above = r.top - GAP - EDGE;
-  // scrollHeight is the content's full height even while max-height caps the
-  // box; the difference of the other two adds the borders back.
-  const natural = panel.scrollHeight + panel.offsetHeight - panel.clientHeight;
-  const up = natural > below && above > below;
-  panel.dataset.side = up ? 'top' : 'bottom';
-  panel.style.setProperty('--jrk-menu-y', `${up ? vh - r.top + GAP : r.bottom + GAP}px`);
-  panel.style.setProperty('--jrk-menu-room', `${Math.max(0, up ? above : below)}px`);
-
-  // Measure the width at x = 0. A shrink-to-fit panel measured where it last
-  // sat near the right edge comes back narrower than it is.
-  panel.style.setProperty('--jrk-menu-x', '0px');
-  const w = panel.offsetWidth;
-  // `start` is the left edge in LTR and the right edge in RTL.
-  const leftEdge = (align === 'start') !== (getComputedStyle(trigger).direction === 'rtl');
-  const x = leftEdge ? r.left : r.right - w;
-  panel.style.setProperty('--jrk-menu-x', `${Math.max(EDGE, Math.min(x, vw - w - EDGE))}px`);
-  return true;
-}
-
-/* Whether any of the trigger is still visible: inside the viewport AND inside
-   every ancestor that clips or scrolls. The viewport alone is not enough. A
-   menu in a table cell scrolls out of `.jrk-table-wrap` long before it leaves
-   the screen, and the panel would then float over the sticky header. The
-   absolute panel never had this problem, because the wrap clipped it too. */
-function shown(trigger: HTMLElement, r: DOMRect, vw: number, vh: number): boolean {
-  let top = 0;
-  let left = 0;
-  let bottom = vh;
-  let right = vw;
-  for (let a = trigger.parentElement; a && a !== document.body; a = a.parentElement) {
-    const s = getComputedStyle(a);
-    if (s.overflowX === 'visible' && s.overflowY === 'visible') continue;
-    const b = a.getBoundingClientRect();
-    top = Math.max(top, b.top);
-    left = Math.max(left, b.left);
-    bottom = Math.min(bottom, b.bottom);
-    right = Math.min(right, b.right);
-  }
-  return r.bottom > top && r.top < bottom && r.right > left && r.left < right;
-}
+/* Placement — `placeFloating` in floating.ts, shared with <ColumnFilter> and
+   <Combobox>: below the trigger unless the panel does not fit there and there is more
+   room above, never taller than the room on its side, and false once the trigger has
+   scrolled out of view (inside the viewport AND every clipping ancestor), so the
+   caller can close a panel its trigger has left behind. */
+const place = (trigger: HTMLElement, panel: HTMLElement, align: 'start' | 'end') =>
+  placeFloating(trigger, panel, align);
 
 /* The same SSR swap Shell.tsx and Chart.tsx use: a client component is still
    server-rendered for the first HTML, and useLayoutEffect warns there. */

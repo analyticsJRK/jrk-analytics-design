@@ -1,0 +1,156 @@
+/* Section strip — a module's screens under its page header, one level or two.
+ *
+ * ------------------------------------------------------------------------
+ * TWO LEVELS, AND THE LEVELS DO NOT LOOK ALIKE
+ * ------------------------------------------------------------------------
+ *     Overview | Property | Admin            <- groups: a .jrk-tabs underline row
+ *     [ Portfolio  Action Center  … ]        <- the open group's sections: .jrk-btn-group
+ *
+ * A first cut rendered every group as its own pill cluster on one row, so a fourteen-
+ * section module put two captions and fourteen pills in a line beside its controls. The
+ * levels have to differ in TREATMENT, not only in position: an underline tab and a pill
+ * toggle are two different-looking things, which is what lets a reader see without a
+ * caption that one selects the area and the other the view within it. Only the open
+ * group's sections are on screen — the reason this is two levels and not fourteen tabs.
+ * A module with no groups is the underline row alone.
+ *
+ * ------------------------------------------------------------------------
+ * LINKS CARRYING aria-current, AT BOTH LEVELS — NEVER role="tablist"
+ * ------------------------------------------------------------------------
+ * Both rows navigate to addressable routes, and `role="tab"` promises a panel in this
+ * document that aria-controls can point at. So each row is a <nav> of <a aria-current>,
+ * which shell.css's `.jrk-tab[aria-current]` and button.css's
+ * `.jrk-btn-group > .jrk-btn[aria-current]` paint as the selected tab and the segmented
+ * thumb. Borrowing a widget's look is fine; borrowing its semantics when it behaves
+ * differently is not.
+ *
+ * NEITHER LEVEL IS RESTYLED HERE. `.jrk-tabs` and `.jrk-btn-group` are the library's, and
+ * the segmented control's well, thumb, weight step and contrast argument are load-bearing —
+ * see button.css. This file owns the two rows' relationship to each other, to the module's
+ * controls, and the alert disc.
+ *
+ * Markup contract:
+ *   .jrk-subnav[.jrk-subnav--grouped]
+ *     > .jrk-subnav__line.jrk-subnav__line--tabs
+ *         > nav.jrk-tabs.jrk-subnav__tabs > a.jrk-tab[aria-current]
+ *         + .jrk-subnav__actions
+ *     + .jrk-subnav__line                                     (grouped only)
+ *         > nav.jrk-btn-group.jrk-subnav__sections > a.jrk-btn.jrk-btn--ghost.jrk-btn--sm
+ *           | p.jrk-subnav__empty
+ *         + .jrk-subnav__actions
+ *   a section or tab may end in span.jrk-subnav__alert ("!", named by aria-label)
+ *
+ * NO OUTER MARGIN. The gap beneath the strip is the page's to set — `.jrk-content__inner`
+ * already spaces its children — and a component that brings its own margin double-spaces
+ * the first time it lands in a flex column. */
+
+.jrk-subnav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-3);
+  /* Never held open to the width of either row: a strip that widens the page scrolls the
+     whole document sideways, and the rail slides off with it. */
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* One row, and the controls at its trailing edge. Controls WRAP under the tabs rather than
+   squeezing them: the tabs are navigation, and a filter must not compress a route out of
+   reach. */
+.jrk-subnav__line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--jrk-space-3);
+  min-width: 0;
+}
+
+/* The underline row STANDS its controls on the rule rather than floating them centred above
+   it. The tabs take the free width, so the rule runs up to the controls and the tab row keeps
+   its own scroll. */
+.jrk-subnav__line--tabs {
+  align-items: flex-end;
+}
+
+.jrk-subnav__tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Both rows' controls share ONE trailing edge. Beside the strip in a side column they made
+   both rows stop short of it, and a control at the end of the section row sat left of one
+   at the end of the tab row. */
+.jrk-subnav__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  margin-inline-start: auto;
+}
+
+.jrk-subnav__sections {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* What a link does not inherit from a button. `.jrk-btn-group > .jrk-btn` already strips
+   the fill and supplies the thumb. */
+.jrk-subnav__sections > .jrk-btn {
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+/* A GROUP WITH NOTHING REACHABLE HERE — one property's screens read from the portfolio. The
+   tab is drawn at every scope on purpose, so where the pills would be there is a sentence
+   saying what to do instead. Spaced like the segmented well it replaces, so pressing between
+   the two tabs does not shift the page. */
+.jrk-subnav__empty {
+  margin: 0;
+  padding-block: var(--jrk-space-2);
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-muted);
+}
+
+/* THE "!" ON A SECTION THAT HAS SOMETHING WAITING.
+ *
+ * A DISC AND NOT A COUNT, because the strip is horizontally tight: six pills plus a
+ * two-digit badge on each wraps the row on a laptop, and the row wrapping is a worse failure
+ * than the number being one hover away. The figure is on the element's title and in its
+ * accessible name, and on the screen the section opens — so neither colour nor shape is the
+ * only channel. A closed group's tab carries its sections' discs rolled into one.
+ *
+ * `status.critical.solid` / `.onSolid`, a pair measured against each other, so the mark
+ * reads the same in the selected segment and the unselected ones. A circle under every skin:
+ * like a status glyph, its shape is part of what it says, and `50%` is untouched by the
+ * radius tokens a skin overrides. */
+.jrk-subnav__alert {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 1.05em;
+  height: 1.05em;
+  margin-inline-start: var(--jrk-space-1);
+  border-radius: 50%;
+  background: var(--jrk-status-critical-solid);
+  color: var(--jrk-status-critical-on-solid);
+  font-size: 0.72em;
+  font-weight: var(--jrk-weight-semibold);
+  line-height: 1;
+  /* The glyph sits a hair high in most faces at this size; nudged so the disc reads centred
+     rather than the bounding box being centred. */
+  padding-block-end: 0.05em;
+  vertical-align: text-top;
+}
+
+/* ============================== narrow ============================== */
+
+/* The section row scrolls rather than widening the page at 1024px and under — that
+   is button.css's `.jrk-btn-group` rule, which this row IS, so nothing is restated here. */
+
+/* Controls that no longer fit beside a row drop to their own line and wrap among
+   themselves, rather than running off the edge of the card that holds the strip. */
+@media (max-width: 720px) {
+  .jrk-subnav__actions {
+    flex-wrap: wrap;
+  }
+}

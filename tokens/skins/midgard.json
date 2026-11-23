@@ -12,6 +12,7 @@
     "$noVariantsNote": "NO HAZARD VARIANTS, deliberately. Industry's accent is a hazard signal, and a signal can be re-hued without touching what the design means. This accent is a MATERIAL — aged gold on slate, with a vellum half derived from it — and a purple or green 'gold' is a different skin rather than a variant of this one. If a hue axis is ever wanted here, the thing to vary is the METAL (steel, bronze), and every gold role in the file would have to be re-derived because the light half's roles are all stepped away from the fill rather than equal to it."
   },
   "stamp": "midgard",
+  "label": "Midgard",
   "$varsNote": "Keyed by the CSS variable name WITHOUT the --jrk- prefix. The build ASSERTS every name here exists in the base layer, so a typo fails `npm run build` rather than emitting a colour nothing reads; skin-only names go in `skinOnly`, which is the only exemption.",
   "vars": {
     "surface-canvas": {
@@ -235,7 +236,8 @@
     },
     "status-critical-text": {
       "light": "#b0231c",
-      "dark": "#ff5a4d"
+      "dark": "#ff695e",
+      "$note": "Dark re-stepped 2026-11-23, #ff5a4d -> #ff695e: 4.47:1 on surface-raised (the .jrk-btn--danger label) and 4.16:1 on surface-active. Now 5.80 panel / 4.87 raised / 4.53 active / 5.77 wash. The mark stays #ff5a4d."
     },
     "status-critical-wash": {
       "light": "#fae2de",
@@ -249,6 +251,37 @@
       "light": "#ffffff",
       "dark": "#ffffff",
       "$note": "White, and NOT accent-on-solid: this skin's gold takes dark ink and its red takes white, so borrowing the accent's ink direction for a danger button would flip it every time the accent moved. That is the base library's recorded mistake with .jrk-btn--danger-solid."
+    },
+    "status-critical-solid-hover": {
+      "light": "#b3231c",
+      "dark": "#b3231c",
+      "$note": "One step deeper than the fill (white x1.18). Replaces the hover's borrow of status-critical-text, which is a pale red in dark."
+    },
+    "status-good-solid": {
+      "light": "#0d7a4f",
+      "dark": "#0d7a4f",
+      "$note": "status-good-mark verbatim, as industry: white 5.37:1, 3.05:1 on the slate plate."
+    },
+    "status-good-on-solid": {
+      "light": "#ffffff",
+      "dark": "#ffffff"
+    },
+    "status-good-solid-hover": {
+      "light": "#0c6d47",
+      "dark": "#0c6d47"
+    },
+    "status-warning-solid": {
+      "light": "#a8560a",
+      "dark": "#a8560a",
+      "$note": "status-warning-mark verbatim: white 5.25:1, 3.12:1 on the slate plate."
+    },
+    "status-warning-on-solid": {
+      "light": "#ffffff",
+      "dark": "#ffffff"
+    },
+    "status-warning-solid-hover": {
+      "light": "#974d09",
+      "dark": "#974d09"
     },
     "status-neutral-mark": {
       "light": "#5a5344",
@@ -383,6 +416,13 @@
   "variantAxis": {
     "attr": "inlay",
     "default": "gold",
+    "label": "Inlay",
+    "defaultRestriction": {
+      "modes": [
+        "dark"
+      ],
+      "note": "In dark, the gold and the warm status colours are one hue under protanopia. Status badges carry icon and label, deltas state direction in text, and a gold CTA does not share a tile with a warning chip. Any inlay retires this."
+    },
     "$note": "THE AXIS IS NAMED FOR WHAT A VALUE MEANS, which is why this is neither data-hazard nor data-tint. Industry’s hue is a hazard SIGNAL; vitrine’s is the light its glass is lit BY; this skin’s is the material set INTO the console — gold, patina, stone. `inlay` is the honest word for that, and the plural the picker gate derives from it (INLAYS) is the one the gallery reads.\n\n`default` is gold, and gold is NOT a variant: it is the ABSENCE of data-inlay, so the shipped skin is untouched by this whole section and nothing that does not stamp the attribute can change. Declaring it in `variants` as well would put a button in the gallery that changes nothing, which the build refuses."
   },
   "variants": {

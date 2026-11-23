@@ -55,10 +55,27 @@
    backdrop-filter blurs WHAT IS BEHIND THE ELEMENT; over a flat fill it returns
    the same flat fill and the blur is a no-op. Shipping `none` gave a pane with
    nothing behind it — measurably correct and visibly not glass. So
-   vitrine-backdrop defaults to a token-built scene with STRUCTURE in it, and a
-   consumer replaces it wholesale:
+   vitrine-backdrop defaults to a token-built scene with STRUCTURE in it.
 
-     :root[data-skin='vitrine'] { --jrk-vitrine-backdrop: url('/factory.webp'); }
+   A CONSUMER'S PHOTOGRAPH GOES IN --jrk-vitrine-photo, NOT IN THE BACKDROP:
+
+     :root {
+       --jrk-vitrine-photo: url('/scene-light.jpg');
+       --jrk-vitrine-photo-dark: url('/scene-dark.jpg');    optional
+     }
+
+   This file used to document `--jrk-vitrine-backdrop: url(…)` on
+   :root[data-skin='vitrine'] as the hook, and that is a trap: every tint
+   re-declares vitrine-backdrop at :root[data-skin='vitrine'][data-tint='…'],
+   which is (0,3,0) against the hook's (0,2,0). The photograph showed on the
+   default green and VANISHED the moment anybody picked a tint, replaced by that
+   hue's gradient, with nothing failing. No token declares vitrine-photo, so a
+   consumer's value wins at any specificity; the dark half falls back to the
+   light one, and this file picks between them on all three theme branches so the
+   consumer never has to. The tint's gradient stays underneath as the 404
+   fallback: under `cover` it shows only while the photograph is loading or missing.
+   Give an ABSOLUTE url: a relative one inside a custom property may resolve
+   against this stylesheet rather than the consumer's.
 
    FIXED, because the backdrop is a property of the viewport rather than of the
    document — the same reasoning the other skins' page textures record. On a long
@@ -93,10 +110,22 @@
   inset: 0;
   z-index: -2;
   pointer-events: none;
-  background-image: var(--jrk-vitrine-backdrop);
+  background-image: var(--jrk-vitrine-photo, none), var(--jrk-vitrine-backdrop);
   background-size: cover;
   background-position: center;
   filter: var(--jrk-vitrine-clamp);
+}
+
+/* The dark photograph, on both dark branches: an explicit stamp and the OS
+   setting under no stamp. Absent, the light one is used. */
+:root[data-skin='vitrine'][data-theme='dark'] body::before {
+  background-image: var(--jrk-vitrine-photo-dark, var(--jrk-vitrine-photo, none)), var(--jrk-vitrine-backdrop);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin='vitrine']:not([data-theme='light']) body::before {
+    background-image: var(--jrk-vitrine-photo-dark, var(--jrk-vitrine-photo, none)), var(--jrk-vitrine-backdrop);
+  }
 }
 
 /* THE SCRIM: A TINT NOW, NOT A VEIL. This rule used to be the load-bearing one
@@ -254,7 +283,8 @@
 :root[data-skin='vitrine'] .jrk-hovercard,
 :root[data-skin='vitrine'] .jrk-nav-flyout,
 :root[data-skin='vitrine'] .jrk-spotlight,
-:root[data-skin='vitrine'] .jrk-toast {
+:root[data-skin='vitrine'] .jrk-toast,
+:root[data-skin='vitrine'] .jrk-mention__list {
   border-radius: var(--jrk-radius-xl);
 }
 
@@ -264,7 +294,8 @@
   :root[data-skin='vitrine'] .jrk-hovercard,
   :root[data-skin='vitrine'] .jrk-nav-flyout,
   :root[data-skin='vitrine'] .jrk-spotlight,
-  :root[data-skin='vitrine'] .jrk-toast {
+  :root[data-skin='vitrine'] .jrk-toast,
+  :root[data-skin='vitrine'] .jrk-mention__list {
     background: var(--jrk-surface-glass-raised);
     -webkit-backdrop-filter: blur(var(--jrk-glass-blur-raised)) saturate(1.5);
     backdrop-filter: blur(var(--jrk-glass-blur-raised)) saturate(1.5);
@@ -357,9 +388,11 @@
    Outfit runs visually heavier than Inter at the same numeric weight, so the
    ladder steps DOWN rather than matching. Values are deliberately absent from
    this list: a stat's value is the one thing a reader compares, and thinning it
-   costs legibility over a busy backdrop for nothing. */
+   costs legibility over a busy backdrop for nothing. `thead th` and not `th`,
+   for the reason industry records: a `<th scope="row">` is a row's name, and it
+   keeps the body weight and tracking. */
 :root[data-skin='vitrine'] .jrk-stat__label,
-:root[data-skin='vitrine'] .jrk-table th,
+:root[data-skin='vitrine'] .jrk-table thead th,
 :root[data-skin='vitrine'] .jrk-section__title,
 :root[data-skin='vitrine'] .jrk-page-header__desc {
   font-weight: 400;
@@ -386,7 +419,8 @@
   :root[data-skin='vitrine'] .jrk-alert,
   :root[data-skin='vitrine'] .jrk-auth__panel,
   :root[data-skin='vitrine'] .jrk-modal,
-  :root[data-skin='vitrine'] .jrk-menu {
+  :root[data-skin='vitrine'] .jrk-menu,
+  :root[data-skin='vitrine'] .jrk-mention__list {
     background: var(--jrk-surface-default);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
@@ -483,6 +517,16 @@
      ends; a pane wants the radius all the way round, and the shorthand at 0-3-0
      beats base's longhands at 0-1-0. */
   border-radius: var(--jrk-radius-md);
+  /* THE UNDERLINE'S 3px MOVES INTO PADDING. The rim below is an INSET shadow,
+     which stops at the inside of the border, while the pane's fill (and its
+     blur) ran on under base's 3px transparent underline — so the pane hung 3px
+     below its own rim. This skin never draws that underline, so the border goes
+     and its room becomes padding: 2px, plus the 1px of base's -1px margin, which
+     would otherwise push the pane's bottom edge under the row's clip. Same row
+     height, nothing reflows, and the rim closes round the pane. */
+  border-bottom-width: 0;
+  margin-bottom: 0;
+  padding-bottom: calc(var(--jrk-space-2_5) + 2px);
 }
 
 :root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab:hover:not(:disabled) {
@@ -521,4 +565,145 @@
 :root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab[aria-selected='true'] .jrk-tab__count,
 :root[data-skin='vitrine'] .jrk-tabs:not(.jrk-tabs--pills) > .jrk-tab[aria-current='page'] .jrk-tab__count {
   background: var(--jrk-surface-track);
+}
+
+/* ── data-scene="clear": THE PHOTOGRAPH, UNDULLED ─────────────────────────
+   <html data-skin="vitrine" data-scene="clear">. Opt-in, directed 2026-08-26 in
+   the portal ("Vitrine shows the photograph undulled") and carried here so that
+   decision is one attribute rather than a page of consumer overrides.
+
+   WHAT IT SPENDS. The clamp compresses whatever is behind the glass into a
+   narrow luminance band, and every ink on a GLASS surface was solved against that
+   band. Clear turns the clamp and the scrim off, so the ground behind a pane is
+   whatever the photograph is at that pixel — a near-white sky and a near-black
+   ridge inside one card. Content is opaque since 2026-08-26 and loses nothing.
+   What is left on glass, or on nothing, is bought back below:
+
+   1. THE OVERLAY PANE GOES OPAQUE. surface-glass-raised becomes surface-raised,
+      which re-points every frosted overlay (menu, modal, hovercard, nav flyout,
+      spotlight, toast) and the masthead's fill at once. A hovercard at 0.62
+      alpha over a KPI row let the row read straight through it. An overlay has
+      no argument for translucency: its job is to be read in front of the page.
+   2. BARE CHROME GETS A PLANE. A page title, a section heading, the section
+      rail and the tab row carry ink with no pane under them; measured on the
+      portal's photographs that ink fell to 1.02:1 (light ink on a sunlit
+      ridge). Each takes surface-default — the plane its colour was solved
+      against — so the guarantee comes back by moving the INK onto a known
+      ground, not by dulling the photograph.
+
+   Opaque surface-default rather than glass: rgba(27,35,34,0.50) over a sunlit
+   ridge composites to a mid-tone, which is the 1.02:1 failure at half strength.
+   A large card gets away with translucency; a one-line heading does not.
+
+   THE SELECTED TAB STAYS GLASS — it now sits on its row's opaque plane, so its
+   composite is bounded again. A consumer's own toolbar or lead paragraph sitting
+   bare on the page is NOT reached by this list and reads poorly until it takes
+   surface-default the same way; the probe is "walk every text node up to <body>
+   and find one with no painted ancestor".
+
+   Each theme branch is restated, at (0,3,0) light and (0,4,0) dark, because the
+   skin declares these variables at those specificities; one rule on the stamp
+   would undull the light half and leave dark clamped. */
+:root[data-skin='vitrine'][data-scene='clear'] {
+  --jrk-vitrine-clamp: none;
+  --jrk-vitrine-scrim: transparent;
+  --jrk-surface-glass-raised: var(--jrk-surface-raised);
+}
+
+:root[data-skin='vitrine'][data-scene='clear'][data-theme='dark'] {
+  --jrk-vitrine-clamp: none;
+  --jrk-vitrine-scrim: transparent;
+  --jrk-surface-glass-raised: var(--jrk-surface-raised);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root[data-skin='vitrine'][data-scene='clear']:not([data-theme='light']) {
+    --jrk-vitrine-clamp: none;
+    --jrk-vitrine-scrim: transparent;
+    --jrk-surface-glass-raised: var(--jrk-surface-raised);
+  }
+}
+
+/* The planes. A section header inside a card is already on one, so it is left
+   alone; padding it there would move the heading for nothing. */
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-page-header,
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-section__header:not(.jrk-card *),
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-section-nav {
+  background: var(--jrk-surface-default);
+  border-radius: var(--jrk-radius-lg);
+  padding: var(--jrk-space-2_5) var(--jrk-space-3);
+}
+
+/* The tab row. Pills are a well with an opaque track of their own and need
+   nothing. Square at the foot, because what follows a tab row is its panel. */
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-tabs:not(.jrk-tabs--pills) {
+  background: var(--jrk-surface-default);
+  border-radius: var(--jrk-radius-lg) var(--jrk-radius-lg) 0 0;
+}
+
+/* A PAGE HEADER AND THE TAB STRIP UNDER IT ARE ONE SLAB. Both got a plane and
+   they sit flush, so the page opened on two slabs with a seam and mismatched
+   corners. The strip takes padding (safe: its bottom rule is already
+   transparent here, so there is no border for padding to detach), the header
+   gives up its bottom corners and the strip its top ones. */
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-page-header + .jrk-tabs:not(.jrk-tabs--pills) {
+  border-radius: 0 0 var(--jrk-radius-lg) var(--jrk-radius-lg);
+  padding: var(--jrk-space-1_5) var(--jrk-space-3);
+}
+
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-page-header:has(+ .jrk-tabs:not(.jrk-tabs--pills)) {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+  padding-bottom: var(--jrk-space-1);
+}
+
+/* In a .jrk-stack the gap would leave the joined corners square with a band of
+   photograph between them, so the strip is pulled up across it. */
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-stack > .jrk-page-header + .jrk-tabs:not(.jrk-tabs--pills) {
+  margin-top: calc(-1 * var(--jrk-stack-gap, var(--jrk-space-4)));
+}
+
+/* THE SECTION STRIP (`.jrk-subnav`) IS ONE SLAB under a clear scene — tab row,
+   section row and their controls together. Painting only the tab row left the
+   section pills and row actions on the photograph beside a band that stopped short
+   of them. The rows inside are not painted again. Ported from the portal's
+   skins.css, restated on library classes. */
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-subnav {
+  background: var(--jrk-surface-default);
+  border-radius: var(--jrk-radius-lg);
+  padding: var(--jrk-space-1_5) var(--jrk-space-3);
+}
+
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-subnav .jrk-tabs:not(.jrk-tabs--pills) {
+  background: transparent;
+}
+
+/* A page header and the strip under it share one outline, as with a bare tab row
+   above. A header may sit inside a wrapper div (the portal's Portfolio Info), so
+   the join also matches that shape. */
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-page-header:has(+ .jrk-subnav),
+:root[data-skin='vitrine'][data-scene='clear'] div:has(+ .jrk-subnav) > .jrk-page-header:last-child {
+  border-end-start-radius: 0;
+  border-end-end-radius: 0;
+  padding-bottom: var(--jrk-space-1);
+}
+
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-page-header + .jrk-subnav,
+:root[data-skin='vitrine'][data-scene='clear'] div:has(> .jrk-page-header:last-child) + .jrk-subnav {
+  border-start-start-radius: 0;
+  border-start-end-radius: 0;
+}
+
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-stack > :is(.jrk-page-header, div:has(> .jrk-page-header:last-child)) + .jrk-subnav {
+  margin-top: calc(-1 * var(--jrk-stack-gap, var(--jrk-space-4)));
+}
+
+/* TableKit: the toolbar and its table are ONE object, so under a clear scene they
+   get one panel — the table's wrap is already opaque, and painting only the bar
+   left a seam of photograph between the two. Not inside a card, which is already
+   the panel. Ported from the portal's skins.css (`.tk`). */
+:root[data-skin='vitrine'][data-scene='clear'] .jrk-tablekit:not(.jrk-card *) {
+  background: var(--jrk-surface-default);
+  border-radius: var(--jrk-radius-lg);
+  padding: var(--jrk-space-2_5) var(--jrk-space-3);
 }

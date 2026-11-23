@@ -104,3 +104,27 @@ export const Shapes = () => (
     ))}
   </div>
 );
+
+/* `values` may hold gaps: a month nobody measured breaks the line rather than
+   claiming a reading, `gaps="hatch"` shades the stretch, and the end dot sits on
+   the last REAL reading. `size="cell"` fits a table row without moving its
+   height; `labels` give each point a native tooltip with no script. A status
+   tone is for a line whose subject is a verdict — never to paint a healthy
+   metric green. */
+export const CellWithGaps = () => (
+  <table className="jrk-table jrk-table--compact" style={{ maxWidth: 420 }}>
+    <thead>
+      <tr><th>Property</th><th>Score, 8 months</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Harbor Point</td>
+        <td><Sparkline values={[20, 24, null, null, 30, 41, 39, 52]} label="Harbor Point score" gaps="hatch" tone="critical" size="cell" labels={['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov']} /></td>
+      </tr>
+      <tr>
+        <td>Parkside Glen</td>
+        <td><Sparkline values={[8, 7, 9, 6, 5, 6, 4, 4]} label="Parkside Glen score" baseline={6} tone="neutral" size="cell" /></td>
+      </tr>
+    </tbody>
+  </table>
+);

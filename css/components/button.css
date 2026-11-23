@@ -148,7 +148,9 @@
    the thing that note says not to erode. */
 .jrk-btn--primary,
 .jrk-btn--cta,
-.jrk-btn--danger-solid {
+.jrk-btn--danger-solid,
+.jrk-btn--good-solid,
+.jrk-btn--warning-solid {
   font-weight: var(--jrk-weight-medium);
 }
 
@@ -313,8 +315,48 @@
   box-shadow: var(--jrk-shadow-md);
 }
 
+/* solidHover, not status.critical.text. The text step is the right deepening in
+   light and a pale #ff6961 in dark, where it put the white label at 2.82:1 under
+   the pointer. */
 .jrk-btn--danger-solid:hover:not(:disabled) {
-  background: var(--jrk-status-critical-text);
+  background: var(--jrk-status-critical-solid-hover);
+}
+
+/* THE OTHER TWO OUTCOMES, so approve / send back / reject read as one set. Each
+   fills with its status family's SOLID and labels with that family's onSolid,
+   for the reason --danger-solid records: a mark cannot carry white (#34c759 is
+   2.22:1, #ff9500 2.20:1) and an ink borrowed from the accent moves with it.
+   Both solids are their gradient tone's `from`, so a good row and an approve
+   button are one green, as a critical row and a reject button are one red.
+
+   Same rule as --danger-solid: for the confirming button of an outcome, not for
+   a toolbar. A row of three filled buttons is the loudest thing this library can
+   draw, so it belongs where the three outcomes ARE the decision. The colour is
+   redundant with the label; never ship one unlabelled. */
+.jrk-btn--good-solid {
+  background: var(--jrk-status-good-solid);
+  color: var(--jrk-status-good-on-solid);
+  box-shadow: var(--jrk-shadow-md);
+}
+
+.jrk-btn--good-solid:hover:not(:disabled) {
+  background: var(--jrk-status-good-solid-hover);
+}
+
+.jrk-btn--warning-solid {
+  background: var(--jrk-status-warning-solid);
+  color: var(--jrk-status-warning-on-solid);
+  box-shadow: var(--jrk-shadow-md);
+}
+
+.jrk-btn--warning-solid:hover:not(:disabled) {
+  background: var(--jrk-status-warning-solid-hover);
+}
+
+.jrk-btn--good-solid:active:not(:disabled),
+.jrk-btn--warning-solid:active:not(:disabled),
+.jrk-btn--danger-solid:active:not(:disabled) {
+  box-shadow: none;
 }
 
 .jrk-btn--danger-quiet {
@@ -387,6 +429,14 @@
    is its own, for the reason recorded on --danger-solid. */
 .jrk-btn--danger-solid[data-loading='true']::after {
   color: var(--jrk-status-critical-on-solid);
+}
+
+.jrk-btn--good-solid[data-loading='true']::after {
+  color: var(--jrk-status-good-on-solid);
+}
+
+.jrk-btn--warning-solid[data-loading='true']::after {
+  color: var(--jrk-status-warning-on-solid);
 }
 
 .jrk-btn--danger[data-loading='true']::after,
@@ -495,8 +545,14 @@
    For the same reason, do not go further in this direction. A white or neutral
    thumb in this well is the version that already failed at 1.00:1 in light: the
    tint is doing the little work that separates this from that. */
+/* `aria-current='page'` is the LINK form: a segmented row of <a>s that each go
+   to an address (a section strip, a period switcher kept in the URL). It is the
+   same thumb, so it is in the same rule; when it lived only in a consumer's
+   sheet, every new link-built control shipped with no visible selection until
+   somebody remembered to opt in. */
 .jrk-btn-group > .jrk-btn[aria-pressed='true'],
-.jrk-btn-group > .jrk-btn[aria-selected='true'] {
+.jrk-btn-group > .jrk-btn[aria-selected='true'],
+.jrk-btn-group > .jrk-btn[aria-current='page'] {
   background: var(--jrk-accent-wash);
   /* washText, not accent.text: the ink sits on the wash, where the anchor is
      4.49:1 — under the floor by 0.01. That 0.01 is the entire reason washText
@@ -512,13 +568,15 @@
 }
 
 .jrk-btn-group > .jrk-btn[aria-pressed='true']:hover:not(:disabled),
-.jrk-btn-group > .jrk-btn[aria-selected='true']:hover:not(:disabled) {
+.jrk-btn-group > .jrk-btn[aria-selected='true']:hover:not(:disabled),
+.jrk-btn-group > .jrk-btn[aria-current='page']:hover:not(:disabled) {
   background: var(--jrk-accent-wash-hover);
   color: var(--jrk-accent-wash-text);
 }
 
 .jrk-btn-group > .jrk-btn[aria-pressed='true']:active:not(:disabled),
-.jrk-btn-group > .jrk-btn[aria-selected='true']:active:not(:disabled) {
+.jrk-btn-group > .jrk-btn[aria-selected='true']:active:not(:disabled),
+.jrk-btn-group > .jrk-btn[aria-current='page']:active:not(:disabled) {
   background: var(--jrk-accent-wash-active);
 }
 
@@ -526,4 +584,38 @@
    neighbour it overlaps. */
 .jrk-btn-group > .jrk-btn:focus-visible {
   z-index: 2;
+}
+
+/* ON A NARROW SCREEN THE WELL SCROLLS rather than pushing the page sideways.
+   inline-flex with no wrap makes the group exactly as wide as its segments, so
+   it is the commonest source of horizontal page scroll there is.
+
+   SCROLLED, NOT WRAPPED: a wrapped well draws two half-pills with the track's
+   curve through the middle of the control. `.jrk-tabs` already answers the same
+   question with overflow-x and a hidden scrollbar; this matches it.
+
+   NOT UNCONDITIONAL, because overflow clips at the PADDING box and the well has
+   2px of it: the thumb's shadow-md and a focused segment's ring would be shaved
+   on every segmented control at every width. Above 1024px a control this wide is
+   a layout fault worth seeing, not one to hide.
+
+   `flex: 0 0 auto` is what produces something to scroll; without it the
+   segments shrink and crush their labels instead. */
+@media (max-width: 1024px) {
+  .jrk-btn-group {
+    max-width: 100%;
+    overflow-x: auto;
+    /* A swipe that runs out of segments must not drag the page or fire the
+       browser's back gesture. */
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .jrk-btn-group::-webkit-scrollbar {
+    display: none;
+  }
+
+  .jrk-btn-group > .jrk-btn {
+    flex: 0 0 auto;
+  }
 }

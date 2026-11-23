@@ -23,7 +23,7 @@ const frameCss = `
 }
 .pv-frame .jrk-app { min-height: 0; height: 100%; }
 .pv-frame .jrk-sidebar { height: 100%; position: static; }
-.pv-frame .jrk-sidebar:not([data-collapsed='true']) { width: var(--jrk-sidebar-expanded); }
+.pv-frame .jrk-sidebar:not([data-collapsed='true']) { width: var(--jrk-rail-width, var(--jrk-sidebar-expanded)); }
 .pv-frame .jrk-topbar { position: static; }
 .pv-frame .jrk-content { overflow: hidden; }
 `;
@@ -328,6 +328,44 @@ export const CollapsedRail = () => (
           <Card title="Active still reads" subtitle="AM Report keeps its accent wash">
             The wash fills the centred 64px row, so the current page is still obvious with no label painted.
           </Card>
+        </Content>
+      </Main>
+    </AppShell>
+  </Frame>
+);
+
+/* The rest of the row's vocabulary. `glyph` puts an emoji in the icon's box, so its label
+   starts on the same pixel as an SVG row's. `count` is a quiet number; `badge` is one with
+   a tone. `pending` turns the icon into a ring and washes the row while its route loads.
+   `disabled` draws a destination that cannot be opened yet — dimmed, not a link, reason in
+   the title. `sub` is a second-level row. */
+export const RailVocabulary = () => (
+  <Frame>
+    <AppShell>
+      <Sidebar brand={<Brand />}>
+        <NavItem href="#/" glyph="🧭" count={24}>
+          All modules
+        </NavItem>
+        <NavGroup>Asset Management</NavGroup>
+        <NavItem href="#/pest" glyph="🐛" active>
+          Pest Control
+        </NavItem>
+        <NavItem href="#/pest/property" icon={<ReportIcon />} sub>
+          Property
+        </NavItem>
+        <NavItem href="#/snow" glyph="❄️" pending>
+          Snow Tracker
+        </NavItem>
+        <NavItem href="#/utility" glyph="⚡" disabled title="Utility — coming soon">
+          Utility
+        </NavItem>
+      </Sidebar>
+      <Main>
+        <Topbar>
+          <span style={{ fontWeight: 'var(--jrk-weight-semibold)' }}>Pest Control</span>
+        </Topbar>
+        <Content>
+          <PageHeader title="Row vocabulary" description="Glyph, count, pending, disabled and a second-level row." />
         </Content>
       </Main>
     </AppShell>

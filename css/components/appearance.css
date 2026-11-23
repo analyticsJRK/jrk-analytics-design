@@ -1,0 +1,121 @@
+/* Appearance — the theme, skin and hue controls (react/src/Appearance.tsx).
+ *
+ * The two segmented rows are plain .jrk-btn-group; the menu is .jrk-menu. What is
+ * here is only what those need to sit together in one panel, plus the swatches. */
+
+/* ── the panel rows ────────────────────────────────────────────────────────
+   .jrk-menu pads to space-1 and .jrk-menu__label pads its text to space-2_5, so
+   a well dropped straight into the panel sits 6px left of its caption — which
+   reads as a broken component. The inline padding is the label's, restated.
+
+   A GRID, NOT A WIDTH. The panel is shrink-to-fit above its 180px floor, so its
+   width is its widest row (the Skin row, under a wide skin face). A grid item
+   stretches to its column, so the Theme row comes out the same width with no
+   number written down; .jrk-btn-group is inline-flex and would otherwise leave
+   the two wells ragged. */
+.jrk-appearance__row {
+  display: grid;
+  padding: 0 var(--jrk-space-2_5) var(--jrk-space-1);
+}
+
+/* `1 0 auto`, not `1 1 0`: the segments share the surplus and never shrink below
+   their own label. A zero basis makes three equal cells and clips the longest
+   word in whichever skin's face is widest. */
+.jrk-appearance__row > .jrk-btn-group > .jrk-btn {
+  flex: 1 0 auto;
+}
+
+/* button.css makes every well scroll at <=1024px. Inside this panel that is
+   wrong on a wide enough screen: a scroll container has no min-content width, so
+   the shrink-to-fit panel stopped growing and the Skin row scrolled inside it.
+   Below 721px the panel hangs from a trigger near the viewport's edge and can
+   run off screen, so there the row keeps scrolling. (0,2,0) beats button.css's
+   (0,1,0) in any order. */
+@media (min-width: 721px) {
+  .jrk-appearance__row > .jrk-btn-group {
+    max-width: none;
+    overflow-x: visible;
+  }
+}
+
+/* ON A PHONE THE TRIGGER IS ITS ICON. At 390px a topbar cannot fit the word,
+   an account name and a bell, and flexbox crushes the trigger first. The label
+   is clipped rather than removed, so the button keeps its accessible name. */
+@media (max-width: 640px) {
+  .jrk-appearance > .jrk-btn > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .jrk-appearance > .jrk-btn > svg:last-child {
+    display: none;
+  }
+}
+
+/* ── the hue swatches ──────────────────────────────────────────────────────
+   A strip, not a grid: fixed squares that must not stretch to the Skin row.
+
+   THE FILL IS ::before, NOT THE BUTTON. HueSwatches samples each hue off the root
+   and hands it over as --jrk-swatch; painting it on a pseudo-element is what lets
+   industry.css chamfer the FILL while the button itself stays unclipped —
+   clip-path clips outlines and shadows too, and the outline is the selection
+   signal. The fallback is the current accent, so a swatch is a colour rather than
+   a hole before the sampler runs.
+
+   radius-sm makes the corner follow the layer for free: 6px base, 0 under
+   industry and midgard, 8px under vitrine. 26px clears the 24px minTouch floor. */
+.jrk-appearance__hues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--jrk-space-1_5);
+  padding-block: var(--jrk-space-1);
+}
+
+.jrk-appearance__swatch {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--jrk-radius-sm);
+}
+
+.jrk-appearance__swatch::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--jrk-swatch, var(--jrk-accent-solid));
+  /* The edge is what bounds a pale hue against the panel (a light tint, a gold
+     on vellum); border-default rather than subtle for that reason. */
+  border: 1px solid var(--jrk-border-default);
+  border-radius: inherit;
+}
+
+/* text-primary, not the accent: the swatch IS an accent, and ringing a hue in a
+   sibling hue is how the selection disappears on exactly one of six. */
+.jrk-appearance__swatch[aria-checked='true'] {
+  outline: 2px solid var(--jrk-text-primary);
+  outline-offset: 2px;
+}
+
+.jrk-appearance__swatch:focus-visible {
+  box-shadow: var(--jrk-shadow-focus);
+}
+
+/* A hue's restriction. Set as the menu's own caption rather than body copy — it is
+   chrome explaining a control — and capped so a three-line note does not widen
+   the panel past its rows. */
+.jrk-appearance__note {
+  max-width: 28ch;
+  padding: 0 0 var(--jrk-space-1_5);
+  font-size: var(--jrk-text-xs);
+  line-height: var(--jrk-leading-snug);
+  color: var(--jrk-text-muted);
+  text-wrap: pretty;
+}

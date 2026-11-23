@@ -45,6 +45,12 @@
 @import './components/icon.css';
 @import './components/stat.css';
 @import './components/table.css';
+/* Table add-ons: the column filter (funnel + panel), TableKit's toolbar, and the
+   searchable combobox. After table.css because the filter's heading room ties a
+   density rule on specificity; the panels are .jrk-menu surfaces. */
+@import './components/filter.css';
+@import './components/tablekit.css';
+@import './components/combobox.css';
 @import './components/list.css';
 @import './components/sheet.css';
 @import './components/shell.css';
@@ -52,6 +58,7 @@
    mirrors .jrk-content__inner, so it is read alongside the shell rather than as
    a standalone widget. Nothing in it overrides a shell rule. */
 @import './components/section-nav.css';
+@import './components/subnav.css';
 /* Beside the section index because it is the other half of the same job — that
    one tells you where you are in a document, these three tell you what the
    document is saying. Nothing in it overrides another component (no shared
@@ -59,6 +66,9 @@
    for a reader of this list rather than for the cascade. */
 @import './components/explain.css';
 @import './components/feedback.css';
+@import './components/panel.css';
+@import './components/mention.css';
+@import './components/appearance.css';
 @import './components/chart.css';
 /* After chart.css — the funnel is a chart form and reads alongside the rest of
    the data-viz layer. Nothing in it overrides a chart rule; it shares no
@@ -66,6 +76,7 @@
    categorical slots), so the position is for a reader of this list rather than
    for the cascade. */
 @import './components/funnel.css';
+@import './components/sankey.css';
 @import './components/org.css';
 @import './components/auth.css';
 @import './components/spotlight.css';

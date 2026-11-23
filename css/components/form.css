@@ -841,6 +841,16 @@
   cursor: not-allowed;
 }
 
+.jrk-switch input:disabled + .jrk-check__label {
+  color: var(--jrk-text-disabled);
+}
+
+/* A switch with a hint (`<Switch hint>`) carries two lines; the track stays centred on
+   the pair, and the label keeps its control weight so it still reads as the name. */
+.jrk-switch .jrk-check__label:has(> .jrk-check__hint) {
+  line-height: var(--jrk-leading-tight);
+}
+
 /* ============================== filter bar ============================== */
 
 /* Filters sit in ONE row above the charts they govern — never scattered

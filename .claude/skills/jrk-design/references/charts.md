@@ -125,6 +125,14 @@ Dashed is reserved for `.jrk-threshold` (a reference value). A dashed gridline
 reads as data. **One exception:** under `data-encoding="redundant"` series lines
 take their per-slot dash — see §3a. The threshold stays distinguishable there by
 color (recessive tick grey, never a series hue) and weight (1.5 vs 2).
+**A second exception (2026-11-23):** `Series.style: 'dashed'` on `<LineChart>` —
+prior years beside a solid current one. It keeps its series hue at 2px, so it
+stays apart from the grey 1.5px threshold on both channels.
+
+**`chart.neutral` (`--jrk-chart-neutral`) is the neutral DATA mark** — a Sankey
+stage node, an "Other" bucket, a total beside coloured parts
+(`.jrk-series--neutral`). It is not a ninth slot and never carries identity; it
+replaces `chart.axis`, which is a hairline colour and drew such marks at 1.5:1.
 
 ## 3a. The second identity channel
 
@@ -279,6 +287,30 @@ override turns it into a pill for free and the two squared skins leave it at 4px
   See §8
 - `.jrk-legend` + `__item` `__swatch` (`--line` `--dot`)
 - `.jrk-grid`, `.jrk-axis` (chart chrome, inside SVG)
+
+Upstreamed from the portal 2026-11-23 (React):
+
+- `<LineChart>` v2 — `values` may hold `null` (a gap, never a zero; a lone point
+  draws as a dot), a signed axis with a zero line, round 1/2/2.5/5 ticks, end
+  labels pushed apart, per-series `style`, `trend` (dashed least-squares) and
+  `band` (a neutral lo/hi range)
+- `<ColumnChart>` — vertical columns, stacked, negatives below a zero line,
+  `partial` last column (hatched, "to date"); columns cap at 24px. No grouped
+  columns: bars have no per-slot second channel
+- `<Sankey>` — one ribbon engine; slotted categories take `.jrk-sN`, stages take
+  `chart.neutral`; hover dims unrelated flows
+- `<StackBar>` — the React wrapper over `.jrk-stack-bar`. **There is no donut, on
+  purpose:** part-to-whole is a stacked bar (the portal's `ShareRing` was left out)
+- `<SeriesTable>` — the table view for a chart's series
+- `<Sparkline values>` — gaps, `tone` from status marks, `endDot`, `baseline`,
+  `area`; the old `points` prop is unchanged
+- `<Funnel>` — `unfed` stages (dashed outline + "not fed" tag), `compact`, a
+  "not to scale" tag when a `minWidth` floor lifts a band
+- `<BarList>` — `secondary` figure, `limit` (top N + "+N more"), `blankLabel`
+- Helpers: `useContainerWidth`, `useChartTip`, `niceStep`, `axisTicks`,
+  `thinLabels`, `spreadLabels`, `linearFit`, `runsOf`
+- **Never cycle the palette to fit more series** — the portal had one chart doing
+  `i % SERIES.length`; fold into "Other" or facet
 
 ## Anti-patterns
 

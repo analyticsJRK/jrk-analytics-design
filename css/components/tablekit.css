@@ -1,0 +1,130 @@
+/* TableKit — the toolbar and states around a full data table (<TableKit>), and the standalone
+   search box and count (<TableSearch>, <SearchCount>).
+
+   The table itself is a plain `.jrk-table` in a `.jrk-table-wrap`: row numbers, the frozen name
+   column, rows that open, column groups and sortable headings are all table.css, so a hand-built
+   table can have any of them without this file. What is here is only what sits AROUND the table.
+
+   Markup contract:
+
+     <div class="jrk-tablekit">
+       <div class="jrk-tablekit__bar">
+         <div class="jrk-tablekit__title">Snow contracts <small class="jrk-tablekit__subtitle">…</small></div>
+         <span class="jrk-tablekit__count">Showing 12 of 35</span>
+         <input class="jrk-input jrk-input--sm jrk-tablekit__search" type="search">
+         …buttons, the export menu, `.jrk-tablekit__actions`
+       </div>
+       <div class="jrk-table-wrap jrk-tablekit__scroll">
+         <table class="jrk-table jrk-table--numbered">…</table>
+       </div>
+     </div> */
+
+.jrk-tablekit {
+  display: flex;
+  flex-direction: column;
+  gap: var(--jrk-space-2);
+  min-inline-size: 0;
+}
+
+/* One row that wraps: title, then the count pushing everything after it to the trailing edge.
+   On a narrow screen the controls drop to a second line rather than squeezing the title. */
+.jrk-tablekit__bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--jrk-space-2);
+}
+
+.jrk-tablekit__title {
+  margin-inline-end: var(--jrk-space-2);
+  font-size: var(--jrk-text-md);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-primary);
+}
+
+.jrk-tablekit__subtitle {
+  margin-inline-start: var(--jrk-space-2);
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-regular);
+  color: var(--jrk-text-secondary);
+}
+
+/* The only thing on screen that says a filter is narrowing the table — the rows just get fewer. */
+.jrk-tablekit__count {
+  margin-inline-end: auto;
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.jrk-tablekit__search {
+  inline-size: 200px;
+  max-inline-size: 100%;
+}
+
+.jrk-tablekit__busy {
+  font-size: var(--jrk-text-sm);
+  color: var(--jrk-text-secondary);
+}
+
+.jrk-tablekit__actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--jrk-space-2);
+}
+
+/* The file extension beside an export choice: what you will get, quieter than the choice. */
+.jrk-tablekit__ext {
+  margin-inline-start: var(--jrk-space-1);
+  color: var(--jrk-text-muted);
+}
+
+/* A list port is shorter than the library's 70vh by default, because a TableKit carries a toolbar
+   above it that a bare table does not. `height` / `useFitHeight` retune it per screen. */
+.jrk-tablekit__scroll {
+  --jrk-table-height: 62vh;
+}
+
+/* "No rows match" and "nothing here yet" — different sentences for different situations, so a
+   reader can tell a filter that excluded everything from a table with nothing in it. Spans the
+   columns, so it is not the frozen first cell and takes no freeze. */
+.jrk-tablekit__empty {
+  padding: var(--jrk-space-4);
+  color: var(--jrk-text-secondary);
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .jrk-tablekit__search {
+    flex: 1 1 140px;
+    inline-size: auto;
+  }
+}
+
+@media print {
+  .jrk-tablekit__bar > :not(.jrk-tablekit__title, .jrk-tablekit__count) {
+    display: none;
+  }
+}
+
+/* ---------- a search box for a table you render yourself (<TableSearch>) ----------
+
+   A `.jrk-input-group` holding a `type="search"` field, so it takes the library's tinted search
+   look, its focus ring and its glyph placement with nothing restated. This only sizes it for a
+   card header's action row: wide enough for "code, property or manager…", and able to give way
+   before the row wraps. */
+.jrk-table-search {
+  flex: 0 1 auto;
+  min-inline-size: 0;
+}
+
+.jrk-table-search .jrk-input {
+  inline-size: min(230px, 40vw);
+  min-inline-size: 0;
+}
+
+.jrk-search-count {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}

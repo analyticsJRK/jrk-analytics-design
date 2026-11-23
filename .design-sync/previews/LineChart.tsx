@@ -105,3 +105,41 @@ export const HueOnlyEightSeries = () => (
     </ChartCard>
   </div>
 );
+
+/* Signed, with gaps: a month that has not happened is a GAP (null), never a
+   zero; a signed series keeps zero in the domain and draws a zero line. Prior
+   year dashed beside a solid current one (`style`), pinned to their slots so a
+   filter cannot repaint them, and named at their last points. The band is a
+   reference range, so it is neutral, never a hue. */
+const ABS_MONTHS = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
+export const SignedWithGapsAndBand = () => (
+  <div style={{ maxWidth: 720 }}>
+    <ChartCard title="Net absorption" subtitle="Units, monthly · Dec 2025 – Nov 2026">
+      <LineChart
+        labels={ABS_MONTHS}
+        series={[
+          { name: '2026', values: [12, -40, 8, 31, 22, -6, 44, 51, 18, -12, null, null], slot: 1, style: 'solid' },
+          { name: '2025', values: [4, -22, 15, 20, 30, 10, 26, 35, 22, 3, -8, -15], slot: 2, style: 'dashed' },
+        ]}
+        band={{ lo: ABS_MONTHS.map(() => -10), hi: ABS_MONTHS.map(() => 30), label: 'Peer middle 50%' }}
+        endLabels
+        height={240}
+      />
+    </ChartCard>
+  </div>
+);
+
+/* A dashed least-squares trend in threshold ink, single series only, and a
+   rating-style axis that does not start at zero. */
+export const Trend = () => (
+  <div style={{ maxWidth: 720 }}>
+    <ChartCard title="Operating expense" subtitle="$ per unit, monthly">
+      <LineChart
+        labels={ABS_MONTHS}
+        series={[{ name: 'Opex', values: [412, 420, 401, 433, 441, 438, 452, 460, 449, 471, 480, 476] }]}
+        trend
+        fromZero={false}
+      />
+    </ChartCard>
+  </div>
+);

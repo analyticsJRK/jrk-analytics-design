@@ -1,0 +1,133 @@
+/* Sankey — columns of nodes joined by filled ribbons.
+
+   COLOUR IS A CATEGORY OR IT IS NEUTRAL. A slotted node or ribbon takes
+   `--series` from `.jrk-sN` (chart.css); everything else takes chart.neutral,
+   which exists for exactly this — a data mark that names no category. The
+   portal filled its neutral nodes with `chart.axis`, a HAIRLINE colour at
+   ~1.5:1, and every uncategorised node rendered as a near-white box.
+
+   EVERY MARK STATES ITS OWN FILL AND STROKE. base.css paints `svg` children
+   with `stroke: currentColor` for its icon set, and that reaches every chart a
+   consumer draws; a ribbon without `stroke: none` gets a dark outline that
+   reads as data. */
+
+.jrk-sankey__plot {
+  /* A Sankey under ~480px has no lane left for its labels, so the port scrolls
+     rather than shrinking the type. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.jrk-sankey__plot svg {
+  min-width: 480px;
+}
+
+/* ---------- ribbons ---------- */
+
+/* 0.45 at rest so overlapping ribbons still read as separate bands; the lit
+   one comes up to near-solid and the rest fall away while something is
+   pointed at. */
+.jrk-sankey__ribbon {
+  fill: var(--series, var(--jrk-chart-neutral));
+  fill-opacity: 0.45;
+  stroke: none;
+  transition: fill-opacity var(--jrk-transition);
+}
+
+.jrk-sankey__ribbon--neutral {
+  --series: var(--jrk-chart-neutral);
+}
+
+.jrk-sankey__ribbon--lit {
+  fill-opacity: 0.85;
+}
+
+.jrk-sankey__ribbon--dim {
+  fill-opacity: 0.08;
+}
+
+/* ---------- nodes ---------- */
+
+.jrk-sankey__node {
+  fill: var(--series, var(--jrk-chart-neutral));
+  stroke: none;
+  shape-rendering: crispEdges;
+}
+
+.jrk-sankey__node--neutral {
+  --series: var(--jrk-chart-neutral);
+}
+
+/* A loss or an "Other": lighter, so the eye follows the trunk. The label still
+   carries the figure in full ink, so nothing is read off the fill. */
+.jrk-sankey__node--muted {
+  fill-opacity: 0.5;
+}
+
+.jrk-sankey__group {
+  transition: opacity var(--jrk-transition);
+}
+
+.jrk-sankey__group--dim {
+  opacity: 0.25;
+}
+
+/* ---------- labels ---------- */
+
+/* Text wears text tokens, never the series colour. Name regular, value
+   semibold, share muted — that hierarchy is what makes a column of twenty
+   labels scannable. The surface halo keeps a label legible where a ribbon runs
+   under it; `paint-order` draws the stroke beneath the glyphs. */
+.jrk-sankey__label {
+  fill: var(--jrk-text-primary);
+  font-size: var(--jrk-text-xs);
+  paint-order: stroke fill;
+  stroke: var(--jrk-chart-surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.jrk-sankey__name {
+  font-weight: var(--jrk-weight-regular);
+}
+
+.jrk-sankey__value {
+  font-weight: var(--jrk-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.jrk-sankey__share {
+  fill: var(--jrk-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- print & forced colors ---------- */
+
+@media print {
+  .jrk-sankey__ribbon,
+  .jrk-sankey__node {
+    print-color-adjust: exact;
+  }
+
+  .jrk-sankey__ribbon--dim {
+    fill-opacity: 0.45;
+  }
+
+  .jrk-sankey__group--dim {
+    opacity: 1;
+  }
+}
+
+/* Forced colours flatten fills to the system palette; an outline keeps each
+   ribbon and node a shape. */
+@media (forced-colors: active) {
+  .jrk-sankey__ribbon,
+  .jrk-sankey__node {
+    stroke: CanvasText;
+    stroke-width: 1;
+  }
+
+  .jrk-sankey__label {
+    stroke: Canvas;
+  }
+}

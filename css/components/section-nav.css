@@ -41,6 +41,8 @@
  * dashboard lists the tiles, and "require an id" does not save you. Scope the
  * selector positionally at the call site. See preview/dashboard.html for the scoped
  * form and preview/sections.html for the prose page where the default is right.
+ * A screen made of cards has a ready-made scope: `preset="cards"` indexes each
+ * top-level card's own title and nothing nested in it (SECTION_NAV_HEADINGS).
  *
  * Layout contract — the two-column form:
  *   .jrk-section-layout > .jrk-section-layout__body + .jrk-section-nav

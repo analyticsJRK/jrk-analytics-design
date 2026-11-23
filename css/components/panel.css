@@ -1,0 +1,132 @@
+/* Docked panel — a rail on the trailing edge that sits BESIDE the content.
+ *
+ *   <div class="jrk-panel-host jrk-panel-host--open"> …the page… </div>
+ *   <aside class="jrk-panel" aria-label="Snow Tracker panel">
+ *     <header class="jrk-panel__head">
+ *       <div class="jrk-tabs jrk-tabs--pills jrk-panel__tabs" role="tablist">…</div>
+ *       <button class="jrk-btn jrk-btn--ghost jrk-btn--icon jrk-btn--sm jrk-panel__close">…</button>
+ *     </header>
+ *     <div class="jrk-panel__body">
+ *       <div class="jrk-panel__pane" role="tabpanel">…</div>
+ *       <div class="jrk-panel__pane" role="tabpanel" hidden>…</div>
+ *     </div>
+ *     <footer class="jrk-panel__foot">…</footer>
+ *   </aside>
+ *
+ * IT DOCKS, IT DOES NOT OVERLAY, because the point is reading the panel WHILE
+ * looking at the numbers. A drawer covering the table makes the reader memorise a
+ * row and then dismiss the thing explaining it. Below 1100px there is no room for
+ * both, so it overlays there — the one width where covering the content is the
+ * lesser evil, and the shadow is what says "over" rather than "beside".
+ *
+ * A RAIL, NOT A CARD. Fixed to the viewport rather than a sticky column in the
+ * page's flow, for two measured reasons: a 380px column in flow scrolls the whole
+ * page sideways on any viewport narrower than content + 380, and a sticky card
+ * scrolls its own header — the tab strip and the close button — out of reach.
+ * Only the leading edge is drawn; the other three are window edges, and a rounded
+ * rectangle floating against them would read as the card this stopped being.
+ *
+ * It starts under the topbar (`--jrk-panel-top`), never over it: covering the bar
+ * hides the account menu and the theme control to buy height the panel does not
+ * need. At the sticky rung — above the content plane, below the overlay rung so a
+ * mobile nav drawer still wins.
+ *
+ * The host reserves the rail's width with PADDING, not a grid track: padding
+ * cannot push the page wider than the viewport, so no horizontal scroll appears.
+ */
+
+:root {
+  --jrk-panel-width: 380px;
+}
+
+.jrk-panel-host--open {
+  padding-inline-end: var(--jrk-panel-width);
+}
+
+.jrk-panel {
+  position: fixed;
+  top: var(--jrk-panel-top, var(--jrk-topbar-default));
+  bottom: 0;
+  inset-inline-end: 0;
+  z-index: var(--jrk-z-sticky);
+  display: flex;
+  flex-direction: column;
+  width: var(--jrk-panel-width);
+  background: var(--jrk-surface-raised);
+  border-inline-start: 1px solid var(--jrk-border-default);
+  border-radius: var(--jrk-radius-none);
+  overflow: hidden;
+}
+
+/* The bar carrying the close button must never be compressed or scrolled away,
+   however tall the pane below it is. */
+.jrk-panel__head {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--jrk-space-2);
+  padding: var(--jrk-space-2) var(--jrk-space-2) var(--jrk-space-2) var(--jrk-space-3);
+  background: var(--jrk-surface-subtle);
+  border-bottom: 1px solid var(--jrk-border-subtle);
+}
+
+/* The tabs are the library's segmented control, so a panel's tabs and a page's
+   pill tabs are one widget. `min-width: 0` lets a long set scroll inside its own
+   well (`.jrk-tabs` is `overflow-x: auto`) instead of pushing the close button
+   off the rail. */
+.jrk-panel__tabs {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* A panel with one pane names it instead of offering a one-tab tablist. */
+.jrk-panel__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--jrk-text-sm);
+  font-weight: var(--jrk-weight-semibold);
+  color: var(--jrk-text-primary);
+}
+
+.jrk-panel__close {
+  flex: 0 0 auto;
+  margin-inline-start: auto;
+}
+
+.jrk-panel__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* Every pane stays MOUNTED and the inactive ones are hidden, so switching tabs
+   does not discard a half-typed note. The `[hidden]` rule is stated because a
+   pane given a display by a consumer class would otherwise beat the UA's. */
+.jrk-panel__pane {
+  padding: var(--jrk-space-3);
+}
+
+.jrk-panel__pane[hidden] {
+  display: none;
+}
+
+.jrk-panel__foot {
+  flex-shrink: 0;
+  padding: var(--jrk-space-2) var(--jrk-space-3);
+  font-size: var(--jrk-text-xs);
+  color: var(--jrk-text-muted);
+  background: var(--jrk-surface-subtle);
+  border-top: 1px solid var(--jrk-border-subtle);
+}
+
+@media (max-width: 1100px) {
+  .jrk-panel-host--open {
+    padding-inline-end: 0;
+  }
+
+  .jrk-panel {
+    width: min(var(--jrk-panel-width), 92vw);
+    box-shadow: var(--jrk-shadow-xl);
+  }
+}
