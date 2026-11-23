@@ -1,0 +1,68 @@
+{
+  "$meta": {
+    "name": "Lucent",
+    "version": "0.1.0",
+    "description": "A liquid-glass SKIN: chrome floats over the content as clear, glossy glass — a capsule topbar the page scrolls under, glass overlays, a floating rail — while content stays solid. Generated into dist/jrk-skin-lucent.css by scripts/build-tokens.mjs. Never hand-edit the generated file.",
+    "$paletteNote": "THE PALETTE IS THE BASE LIBRARY'S, UNCHANGED. Nothing in `vars` is restated: the Apple neutrals, the blue anchor, the status set and the chart slots are inherited whole, so every figure `npm run validate` prints about them is true under this skin too. validate:skin falls back to the base value for any name a skin does not declare, which is what lets a skin say only what it changes.",
+    "$glassNote": "WHAT THIS SKIN ADDS IS A MATERIAL, and the material has a measurable bound. Glass over arbitrary content has no fixed ink ground, so the composite is BOUNDED rather than recorded: glass-filter compresses whatever is behind the pane into a channel band before the tint lands on it, and validate:skin parses the filter, the tint and the sheen and measures every glass ink against BOTH ends of the resulting composite. Vitrine bounded a SCENE and flattened it; this skin bounds CONTENT and keeps roughly a third of it visible — the band is as wide as the weakest glass ink allows and no wider.",
+    "$chromeNote": "CHROME IS GLASS, CONTENT IS SOLID — vitrine's finding, adopted from the start rather than rediscovered. Cards, tables, sheets and charts keep their opaque planes; the glass is the topbar, menus, popovers, the modal and toasts — the surfaces whose job is to sit IN FRONT of what you are reading. The rail floats but is NOT glazed: nothing scrolls behind it, so a blur there blurs a flat page (see css/skins/lucent.css)."
+  },
+  "stamp": "lucent",
+  "label": "Lucent",
+  "vars": {
+    "$comment": "Deliberately empty — see $paletteNote. Keyed by CSS variable name without the --jrk- prefix if anything is ever restated; the build asserts each one exists in the base layer."
+  },
+  "skinOnly": {
+    "$comment": "The material. Every value here is read by css/skins/lucent.css and every one is measured by validate:skin's glass block — the colours live inside rgba() and filter strings, which no other gate can parse.",
+    "glass-filter": {
+      "light": "blur(16px) saturate(1.8) contrast(0.29) brightness(1.55)",
+      "dark": "blur(16px) saturate(1.8) brightness(0.34)",
+      "$note": "THE BOUND, AND THE ORDER IS LOAD-BEARING. saturate() first, because it pushes channels outward and can land anywhere in [0, 1]; only then the clamp. Light: contrast(0.29) lands every channel in [0.355, 0.645] and brightness(1.55) lifts that to [0.550, 1.000] — black content shows as a mid grey, white stays white. Dark: brightness(0.34) lands every channel in [0, 0.34]. Put saturate() AFTER the clamp and the bound is gone; validate:skin resets the band to [0, 1] when it sees that, so the ink checks fail rather than lie."
+    },
+    "glass-tint": {
+      "light": "rgba(255, 255, 255, 0.25)",
+      "dark": "rgba(22, 22, 26, 0.4)",
+      "$note": "CHROME — the topbar. The thinnest tint the inks allow. Light darkest composite #a9a9a9: text-secondary 4.65:1, text-primary 8.93:1. Dark lightest composite (sheen included) #434344: text-secondary 4.79:1, text-primary 8.32:1. Roughly a third of the content's range survives in light and a fifth in dark."
+    },
+    "glass-tint-raised": {
+      "light": "rgba(255, 255, 255, 0.6)",
+      "dark": "rgba(30, 30, 34, 0.62)",
+      "$note": "OVERLAYS — menus, popovers, the modal, toasts. Denser than chrome because an overlay's job is to be read IN FRONT of the page, and a menu opened over a chart must not let the chart's labels through as a second line of text. Light darkest #d1d1d1, dark lightest #3a3a3c."
+    },
+    "glass-sheen": {
+      "light": "linear-gradient(180deg, rgba(255, 255, 255, 0.42) 0%, rgba(255, 255, 255, 0.1) 45%, rgba(255, 255, 255, 0) 100%)",
+      "dark": "linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0) 50%)",
+      "$note": "THE GLOSS, painted as background-image over the tint. In light it only ever lightens, so it can only help dark ink and is as strong as the look wants. In dark it LIGHTENS UNDER LIGHT INK, so it is budgeted: validate:skin folds its strongest stop into the lightest composite. 0.03 is what the dark band had left."
+    },
+    "glass-rim": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.95), inset 0 -1px 0 rgba(255, 255, 255, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.3)",
+      "dark": "inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(255, 255, 255, 0.12), inset 0 0 0 1px rgba(255, 255, 255, 0.07)",
+      "$note": "THE SPECULAR EDGE — the bright catch along the top and the fainter one along the bottom that make a pane read as a lens. ONE PIXEL ONLY, and that is the condition that keeps it out of the ink budget: it is drawn on the pane's own edge, inside the padding, where no glyph ever sits. validate:skin exempts a 1px, unblurred inset and nothing wider."
+    },
+    "glass-gloss": {
+      "light": "inset 0 1px 0 rgba(255, 255, 255, 0.6)",
+      "dark": "inset 0 1px 0 rgba(255, 255, 255, 0.16)",
+      "$note": "THE RIM FOR A CONTROL, which is the rim minus its ring. glass-rim's all-round `inset 0 0 0 1px` is what bounds a PANE; on a button it reads as a border, and no button in this library has drawn one since 2026-08-20. So a filled control and the segmented thumb take the TOP CATCH ONLY — gloss, not outline. Not the bottom one either: on a pill the two crescents meet round the ends and close into a ring again, which the first captures showed in both themes (on every dark button, and as a dark-looking edge on the light CTA). Light from above, nothing below. Same 1px rule as the rim, same exemption, same check."
+    },
+    "glass-lens": {
+      "light": "inset 0 0 14px rgba(255, 255, 255, 0.35)",
+      "dark": "inset 0 14px 18px -16px rgba(0, 0, 0, 0.75), inset 0 -12px 16px -14px rgba(0, 0, 0, 0.5)",
+      "$note": "THE THICKNESS. Wider than a rim, so it reaches toward the ink and must only ever move the ground AWAY from it: a pale glow in light, a dark falloff under the top and bottom edges in dark (the shading under the rim in the reference). validate:skin fails any lens layer whose colour sits on the ink's side of the composite."
+    },
+    "glass-drop": {
+      "light": "0 0 0 0.5px rgba(16, 21, 28, 0.08), 0 12px 32px -8px rgba(16, 21, 28, 0.22), 0 2px 8px rgba(16, 21, 28, 0.08)",
+      "dark": "0 0 0 0.5px rgba(0, 0, 0, 0.6), 0 14px 40px rgba(0, 0, 0, 0.55)",
+      "$note": "THE FLOAT. Outside the pane, so it never sits under ink. In light the 0.5px ring is what bounds a pale pane over a white card — the rim is white-on-white there. In dark the shadow renders next to nothing on #141416 (the base library's shadow.card finding) and the rim is the elevation."
+    },
+    "glass-accent-text": {
+      "light": "#003d7e",
+      "dark": "#72bcff",
+      "$note": "THE ACCENT, STEPPED FOR GLASS. #0069d9 is 2.22:1 on the light darkest composite, so a link or an accent label on a glass pane takes this instead: the anchor's own hue scaled down until it clears 4.5:1 (4.54:1 light), and lifted in dark (base #64b5ff is 4.52:1 there — tangency, so one step up, 4.87:1). Re-pointed onto accent-text and text-link inside glass only; on a card the base accent is untouched."
+    },
+    "glass-focus": {
+      "light": "0 0 0 1px var(--jrk-focus-offset), 0 0 0 4.5px rgba(0, 105, 217, 0.3)",
+      "dark": "0 0 0 1px var(--jrk-focus-offset), 0 0 0 4.5px rgba(100, 181, 255, 0.4)",
+      "$note": "THE RING NEEDS A COLLAR ON GLASS. focus-ring is 2.22:1 on the light darkest composite, so a ring drawn straight onto glass vanishes over dark content. The 1px focus-offset collar fills the outline-offset gap, putting the ring against a known plane: 5.22:1 light, 7.16:1 dark. Industry's two-tone ring, for a different reason. The halo is the base shadow.focus colour, unchanged."
+    }
+  }
+}

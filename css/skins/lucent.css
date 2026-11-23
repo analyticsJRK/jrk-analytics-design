@@ -1,0 +1,390 @@
+/* Lucent skin — GEOMETRY AND MATERIAL ONLY.
+ *
+ * Liquid glass: the chrome floats over the content as clear, glossy panes — a
+ * capsule topbar the page scrolls UNDER, glass menus, popovers, dialogs and
+ * toasts, a floating (opaque) rail — and the content itself stays solid.
+ *
+ * The colour half is tokens/skins/lucent.json, generated into
+ * dist/jrk-skin-lucent.css. This file holds NOT ONE colour value: every tint,
+ * sheen, rim and shadow below is a var(). The palette is the BASE library's,
+ * inherited whole — this skin adds a material, not a colour scheme.
+ *
+ * OPT-IN, in this order, and the skin CSS goes LAST:
+ *
+ *   @import "@jrk/design/tokens.css";
+ *   @import "@jrk/design/css";                      the component layer
+ *   @import "@jrk/design/dist/jrk-skin-lucent.css"; the glass tokens
+ *   @import "@jrk/design/css/skins/lucent.css";     this file
+ *
+ * Then stamp the root: <html data-skin="lucent">. Orthogonal to the theme, as
+ * every skin is. Every selector is prefixed :root[data-skin='lucent'] so it beats
+ * a base modifier on specificity rather than on source order.
+ *
+ * NO TYPEFACE IMPORT. The reference look is Apple's, and Inter is already this
+ * library's SF stand-in — a second face would be a different look, not a
+ * truer one.
+ *
+ * ── WHAT IS DIFFERENT FROM VITRINE, which was the first attempt at this ──────
+ * Vitrine frosted a SCENE: a backdrop behind the page, clamped hard enough
+ * (contrast 0.18) that a photograph went to white cardboard, under panes dense
+ * enough that very little of it survived. This skin frosts CONTENT: the glass is
+ * chrome that sits over the page and the page scrolls beneath it, so what the
+ * glass shows is the reader's own charts and tiles going by. The clamp is as
+ * loose as the weakest glass ink allows — about a third of the content's range
+ * survives in light and a fifth in dark — and the specular rim and the lens
+ * shading are what make it read as glass rather than as tinted plastic.
+ *
+ * THE MATERIAL IS FIVE TOKENS AND ONE ORDER:
+ *   background-color  glass-tint / glass-tint-raised   the body of the pane
+ *   background-image  glass-sheen                      the gloss, top-lit
+ *   backdrop-filter   glass-filter                     blur + saturate + THE BOUND
+ *   box-shadow        glass-rim, glass-lens, glass-drop  edge, thickness, float
+ * validate:skin parses all of them and measures every glass ink against both
+ * ends of the composite they produce. Change one and the gate re-derives the
+ * rest; it does not trust the figures written in the token notes.
+ */
+
+/* ── the inks that change on glass ───────────────────────────────────────────
+   Every glass surface re-points four variables for everything inside it, and
+   each one is measured on the composite rather than on the card:
+
+     text-muted  -> text-secondary     muted is 2.16:1 on the light composite's
+                                       dark end. Secondary is 4.65:1. Midgard
+                                       steps muted up on a dark wash the same way.
+     accent-text -> glass-accent-text  the anchor is 2.22:1 there; the stepped
+     text-link      glass-accent-text  value is 4.54:1 light, 4.5:1+ dark.
+     focus-ring  -> glass-accent-text  so the ring clears the glass ON ITS OWN,
+     shadow-focus-> glass-focus        and still gets the focus-offset collar.
+
+   These are custom properties, so they reach every descendant — an opaque
+   control inside the bar (the search field's wash, a white button) inherits
+   them too. All four only ever move ink AWAY from a pale fill in light and away
+   from a dark one in dark, so a descendant on its own opaque fill only gains. */
+:root[data-skin='lucent'] .jrk-topbar,
+:root[data-skin='lucent'] .jrk-menu,
+:root[data-skin='lucent'] .jrk-hovercard,
+:root[data-skin='lucent'] .jrk-modal,
+:root[data-skin='lucent'] .jrk-toast,
+:root[data-skin='lucent'] .jrk-mention__list,
+:root[data-skin='lucent'] .jrk-spotlight__callout {
+  --jrk-text-muted: var(--jrk-text-secondary);
+  --jrk-accent-text: var(--jrk-glass-accent-text);
+  --jrk-text-link: var(--jrk-glass-accent-text);
+  --jrk-focus-ring: var(--jrk-glass-accent-text);
+  --jrk-shadow-focus: var(--jrk-glass-focus);
+}
+
+/* ── the topbar: a glass capsule ──────────────────────────────────────────────
+   THE ONE SURFACE CONTENT REALLY SCROLLS UNDER, which is why it is the one the
+   whole skin is built around — shell.css says the same about base's vibrancy.
+
+   ALL THREE VARIANTS TAKE THE SAME GLASS. `--vivid` and `--brand` paint base's
+   ribbon through the `background` shorthand at 0-2-0 and 0-3-0; this is 0-5-0
+   and states `background-image` explicitly, because a fill alone leaves the
+   shorthand's gradient painted over it — the trap industry's wedge and
+   vitrine's masthead both record. Their ink runs through --jrk-gradient-ink,
+   so that one variable re-inks every caption, status and ghost button on them.
+
+   The base bar's border-bottom is COLOURED transparent, never removed: the 1px
+   stays reserved, so the bar is the same height under every skin. */
+:root[data-skin='lucent'] .jrk-topbar,
+:root[data-skin='lucent'] .jrk-topbar.jrk-topbar--vivid,
+:root[data-skin='lucent'] .jrk-topbar.jrk-topbar--vivid.jrk-topbar--brand {
+  --jrk-gradient-ink: var(--jrk-text-primary);
+  background-color: var(--jrk-surface-default);
+  background-image: none;
+  color: var(--jrk-text-primary);
+  border-bottom-color: transparent;
+  box-shadow: var(--jrk-glass-rim), var(--jrk-glass-lens), var(--jrk-glass-drop);
+}
+
+/* Behind @supports so the opaque card fill above stays the fallback — and it is
+   a real one: every glass ink is 4.5:1+ on surface-default by the base gate. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  :root[data-skin='lucent'] .jrk-topbar,
+  :root[data-skin='lucent'] .jrk-topbar.jrk-topbar--vivid,
+  :root[data-skin='lucent'] .jrk-topbar.jrk-topbar--vivid.jrk-topbar--brand {
+    background-color: var(--jrk-glass-tint);
+    background-image: var(--jrk-glass-sheen);
+    -webkit-backdrop-filter: var(--jrk-glass-filter);
+    backdrop-filter: var(--jrk-glass-filter);
+  }
+}
+
+/* THE FLOAT. Inset from the content column on three sides and fully rounded, so
+   the page is visible AROUND the bar as well as through it — the gap above it is
+   where content scrolls past unblurred, which is what tells the eye the bar is a
+   pane over the page rather than a band across it.
+
+   `top` matches the margin, so the capsule rests where it sticks and nothing
+   jumps when the page starts to move. Desktop only: under 720px the rail is a
+   drawer and the bar is the page's whole width of chrome, which base handles.
+
+   Only the IN-SHELL bar floats. `.jrk-topbar--masthead` is a sibling ABOVE the
+   shell, and the rail's offset below it is computed from the bar's height; a
+   floating masthead would need that arithmetic redone. It takes the glass and
+   stays a band. */
+@media (min-width: 721px) {
+  :root[data-skin='lucent'] .jrk-main > .jrk-topbar {
+    top: var(--jrk-space-3);
+    margin: var(--jrk-space-3) var(--jrk-space-4) 0;
+    padding-inline: var(--jrk-space-3);
+    border-radius: var(--jrk-radius-full);
+  }
+}
+
+/* ── segmented controls ON glass: THE BAR IS THE WELL ─────────────────────────
+   Base seats the control in an opaque surface-track well; `--brand` swaps that
+   for a translucent hover veil. On glass neither is right. An opaque well is a
+   slab of plastic set into the pane; the veil is the wrong DIRECTION in dark —
+   it is white, so it lightens the ground under light ink and costs
+   text-secondary its margin (4.79 -> 4.0:1).
+
+   So the well goes and the glass is the well, which is exactly the reference:
+   unselected segments are bare labels on the pane (text-secondary, measured on
+   the composite by validate:skin) and the selected one is the only object in the
+   control — base's accent.wash thumb plus the rim below, a lifted lens. The
+   thumb keeps every channel base gives it, semibold included.
+
+   Hover stays base's opaque surface-hover, which is measured against its ink. */
+:root[data-skin='lucent'] .jrk-topbar .jrk-btn-group,
+:root[data-skin='lucent'] .jrk-topbar .jrk-tabs--pills,
+:root[data-skin='lucent'] .jrk-topbar--vivid.jrk-topbar--brand .jrk-btn-group {
+  background: transparent;
+}
+
+/* The ghost buttons on the variants carry translucent fills — a resting veil on
+   `--brand`, a mark wash on hover on `--vivid` — both built for a pale or a
+   saturated ramp, and both the wrong direction on dark glass. Bare at rest, the
+   opaque hover plane on hover, as on a plain bar. */
+:root[data-skin='lucent'] .jrk-topbar--vivid.jrk-topbar--brand .jrk-btn--ghost {
+  background: transparent;
+}
+
+:root[data-skin='lucent'] .jrk-topbar--vivid .jrk-btn--ghost:hover:not(:disabled),
+:root[data-skin='lucent'] .jrk-topbar--vivid.jrk-topbar--brand .jrk-btn--ghost:hover:not(:disabled) {
+  background: var(--jrk-surface-hover);
+}
+
+/* ── the rail: a floating pane, NOT GLAZED ────────────────────────────────────
+   It floats — inset, rounded, rimmed, dropped — and it is opaque, on base's own
+   surface-default, so every ink on it is exactly what base measures. Two reasons
+   it is not glass, either of which would be enough:
+
+   1. NOTHING SCROLLS BEHIND IT. The rail sits BESIDE the content, so all its
+      backdrop ever holds is the flat page — and a blurred flat page is the flat
+      page. shell.css says the same about base's vibrancy. In dark the clamp
+      then made the rail darker than the page it floats on, for nothing.
+   2. GLAZING IT BREAKS THINGS. backdrop-filter on the rail makes it the
+      CONTAINING BLOCK for its position: fixed descendants, and the nav flyouts
+      are exactly that — pinned inside, then clipped to nothing by the rail's own
+      `overflow: hidden`. Moving the filter to a ::before avoids that and then
+      fails the other way: anywhere the rail is `position: static` (every framed
+      gallery demo), the absolutely-positioned pane escapes to the viewport and
+      blurs the WHOLE PAGE. The first build of this skin did both, in that order.
+
+   The rim goes on the rail itself: an inset shadow is part of the background
+   layer and paints under the rows, which is where it belongs. The base inline-end
+   hairline is coloured transparent, never removed. */
+@media (min-width: 721px) {
+  :root[data-skin='lucent'] .jrk-sidebar {
+    top: var(--jrk-space-3);
+    height: calc(100vh - 2 * var(--jrk-space-3));
+    margin-block: var(--jrk-space-3);
+    margin-inline-start: var(--jrk-space-3);
+    border-radius: var(--jrk-radius-2xl);
+    border-inline-end-color: transparent;
+    box-shadow: var(--jrk-glass-rim), var(--jrk-glass-drop);
+  }
+
+  /* Below a masthead the rail starts under the bar, as base computes it, plus
+     the float's gap on both ends. Restated because the rule above ties base's
+     masthead rule at 0-3-0 and wins on source order. */
+  :root[data-skin='lucent'] .jrk-topbar--masthead + .jrk-app > .jrk-sidebar {
+    top: calc(var(--jrk-topbar-default) + var(--jrk-space-3));
+    height: calc(100vh - var(--jrk-topbar-default) - 2 * var(--jrk-space-3));
+  }
+
+  /* PEEK keeps its no-reflow contract. Base pulls the open rail's end margin in
+     by exactly the width it gained, so the grid track stays at the collapsed
+     width while the panel lays over the page. The start margin above is in the
+     track both ways, so the same arithmetic still nets to zero. */
+  :root[data-skin='lucent'] .jrk-sidebar[data-peek='true'] {
+    box-shadow: var(--jrk-glass-rim), var(--jrk-glass-drop);
+  }
+}
+
+/* ── overlays: the DENSER glass ──────────────────────────────────────────────
+   glass-tint-raised rather than the chrome tint. An overlay is read IN FRONT of
+   the page, and a menu opened over a chart must not let the chart's labels
+   through as a second line of text — so it keeps more of its own body (0.6
+   alpha against chrome's 0.25 in light) under the same bound.
+
+   `.jrk-nav-flyout` is a `.jrk-menu`, so the rail's flyouts are covered here.
+   Menus, the column filter and the combobox float in the top layer as popovers,
+   where backdrop-filter sees the page exactly as it would anywhere else.
+
+   The base 1px border is coloured transparent: the rim is the edge now, and a
+   grey hairline under a white catch reads as two edges. */
+:root[data-skin='lucent'] .jrk-menu,
+:root[data-skin='lucent'] .jrk-hovercard,
+:root[data-skin='lucent'] .jrk-modal,
+:root[data-skin='lucent'] .jrk-toast,
+:root[data-skin='lucent'] .jrk-mention__list,
+:root[data-skin='lucent'] .jrk-spotlight__callout {
+  border-color: transparent;
+  border-radius: var(--jrk-radius-xl);
+  box-shadow: var(--jrk-glass-rim), var(--jrk-glass-lens), var(--jrk-glass-drop);
+}
+
+/* A dialog is the largest overlay, so it keeps the larger radius base gives it. */
+:root[data-skin='lucent'] .jrk-modal {
+  border-radius: var(--jrk-radius-2xl);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  :root[data-skin='lucent'] .jrk-menu,
+  :root[data-skin='lucent'] .jrk-hovercard,
+  :root[data-skin='lucent'] .jrk-modal,
+  :root[data-skin='lucent'] .jrk-toast,
+  :root[data-skin='lucent'] .jrk-mention__list,
+  :root[data-skin='lucent'] .jrk-spotlight__callout {
+    background-color: var(--jrk-glass-tint-raised);
+    background-image: var(--jrk-glass-sheen);
+    -webkit-backdrop-filter: var(--jrk-glass-filter);
+    backdrop-filter: var(--jrk-glass-filter);
+  }
+}
+
+/* ── glossy controls: a catch on the edge, nowhere near the ink ──────────────
+   The filled controls and the segmented thumb take glass-gloss on top of the
+   shadow base already gives them. It is the only part of the material that
+   transfers to an OPAQUE control: one pixel of light along the top and a fainter
+   one along the bottom, which is what makes a pill read as a lens, and which no
+   label ever sits on.
+
+   GLOSS, NOT RIM. glass-rim also draws an all-round 1px ring, which bounds a
+   pane and on a button reads as a BORDER — the thing every control in this
+   library gave up on 2026-08-19/20. The first capture of this skin had every
+   button outlined in dark; gloss is the rim with the ring taken out.
+
+   The tint, the sheen and the blur do NOT transfer — a button is not a pane, and
+   a sheen over the CTA's fill would lighten the ground under its white label.
+
+   A SEGMENT IS NOT A BUTTON HERE. The segmented controls are built from
+   `.jrk-btn--secondary`, and base strips their shadow at 0-2-0 so that the
+   unselected ones are bare labels in the well; this rule at 0-5-0 would hand
+   every one of them a raised white pill back — which the first capture did. The
+   `:not()` keeps them bare; the thumb gets its own rule below.
+
+   `:not(:active)` keeps base's pressed state, which drops the shadow to say
+   "pushed in"; `:not(:focus-visible)` keeps the focus halo, which base also
+   paints through box-shadow. Both would otherwise lose to this. */
+:root[data-skin='lucent'] .jrk-btn--secondary:not(.jrk-btn-group > .jrk-btn):not(:active):not(:focus-visible),
+:root[data-skin='lucent'] .jrk-btn--danger:not(.jrk-btn-group > .jrk-btn):not(:active):not(:focus-visible),
+:root[data-skin='lucent'] .jrk-btn--cta:not(.jrk-btn-group > .jrk-btn):not(:active):not(:focus-visible) {
+  box-shadow: var(--jrk-glass-gloss), var(--jrk-shadow-md);
+}
+
+:root[data-skin='lucent'] .jrk-btn--primary:not(.jrk-btn-group > .jrk-btn):not(:active):not(:focus-visible) {
+  box-shadow: var(--jrk-glass-gloss), var(--jrk-shadow-sm);
+}
+
+/* The thumb. Every selected state base styles, in both markup contracts — the
+   two segmented controls are one widget and move together. */
+:root[data-skin='lucent'] .jrk-btn-group > .jrk-btn[aria-pressed='true']:not(:focus-visible),
+:root[data-skin='lucent'] .jrk-btn-group > .jrk-btn[aria-selected='true']:not(:focus-visible),
+:root[data-skin='lucent'] .jrk-btn-group > .jrk-btn[aria-current='page']:not(:focus-visible),
+:root[data-skin='lucent'] .jrk-tabs--pills > .jrk-tab[aria-selected='true']:not(:focus-visible),
+:root[data-skin='lucent'] .jrk-tabs--pills > .jrk-tab[aria-current='page']:not(:focus-visible) {
+  box-shadow: var(--jrk-glass-gloss), var(--jrk-shadow-md);
+}
+
+/* ── tiles: solid, and rounded ───────────────────────────────────────────────
+   CONTENT IS SOLID — every tile keeps its opaque plane, its hairline and its
+   shadow exactly as base draws them, so every measurement base makes about
+   content is true here verbatim.
+
+   What changes is the corner. Base reaches for radius.none DIRECTLY on tiles
+   (square tiles, rounded overlays — directed 2026-08-14), so overriding the
+   radius TOKENS would round nothing and the tiles have to be named. This list is
+   the skin's contract, and it runs the same way vitrine's does: ANYTHING NEW
+   STAYS SQUARE UNTIL IT IS ADDED HERE. Org cards take their radius from tokens
+   and need no entry.
+
+   radius-xl, against the overlays' xl and the dialog's 2xl: a tile is a pane in
+   the same family as the glass that floats over it, one step flatter. */
+:root[data-skin='lucent'] .jrk-card,
+:root[data-skin='lucent'] .jrk-chart-card,
+:root[data-skin='lucent'] .jrk-stat,
+:root[data-skin='lucent'] .jrk-stat-row,
+:root[data-skin='lucent'] .jrk-table-wrap,
+:root[data-skin='lucent'] .jrk-sheet,
+:root[data-skin='lucent'] .jrk-auth__panel {
+  border-radius: var(--jrk-radius-xl);
+}
+
+/* A stat inside a JOINED row is a cell, not a tile: the row is the enclosure and
+   its hairlines divide it. Rounding the cells would notch the dividers. */
+:root[data-skin='lucent'] .jrk-stat-row:not(.jrk-stat-row--split) > .jrk-stat {
+  border-radius: 0;
+}
+
+/* CONCENTRIC CORNERS. A tile inside a tile sits a padding's width in from its
+   parent's edge, so the same radius reads as a fatter curve than the one around
+   it. One step down keeps the two curves parallel. */
+:root[data-skin='lucent'] .jrk-card .jrk-card,
+:root[data-skin='lucent'] .jrk-card .jrk-stat,
+:root[data-skin='lucent'] .jrk-card .jrk-chart-card,
+:root[data-skin='lucent'] .jrk-card .jrk-table-wrap {
+  border-radius: var(--jrk-radius-lg);
+}
+
+/* ── when the reader asks for less glass ─────────────────────────────────────
+   prefers-reduced-transparency is the OS-level "reduce transparency" switch, and
+   honouring it is the cheapest accessibility win this skin has: every pane goes
+   to the opaque plane its inks were already measured against, and the shape, the
+   float and the rim all stay. Nothing about the layout changes. */
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-skin='lucent'] .jrk-topbar,
+  :root[data-skin='lucent'] .jrk-topbar.jrk-topbar--vivid,
+  :root[data-skin='lucent'] .jrk-topbar.jrk-topbar--vivid.jrk-topbar--brand {
+    background-color: var(--jrk-surface-default);
+    background-image: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  :root[data-skin='lucent'] .jrk-menu,
+  :root[data-skin='lucent'] .jrk-hovercard,
+  :root[data-skin='lucent'] .jrk-modal,
+  :root[data-skin='lucent'] .jrk-toast,
+  :root[data-skin='lucent'] .jrk-mention__list,
+  :root[data-skin='lucent'] .jrk-spotlight__callout {
+    background-color: var(--jrk-surface-raised);
+    background-image: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+/* ── print ───────────────────────────────────────────────────────────────────
+   Glass is screen furniture. On paper there is nothing behind a pane to blur,
+   and a floating sticky capsule would print once, over the first page's content.
+   Every pane goes opaque and the bar goes back into the flow. */
+@media print {
+  :root[data-skin='lucent'] .jrk-topbar,
+  :root[data-skin='lucent'] .jrk-menu,
+  :root[data-skin='lucent'] .jrk-modal {
+    background-color: var(--jrk-surface-default);
+    background-image: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  :root[data-skin='lucent'] .jrk-main > .jrk-topbar {
+    position: static;
+    margin: 0;
+  }
+}

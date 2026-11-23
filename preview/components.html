@@ -21,6 +21,8 @@
 <link rel="stylesheet" href="../css/skins/midgard.css">
 <link rel="stylesheet" href="../dist/jrk-skin-vitrine.css">
 <link rel="stylesheet" href="../css/skins/vitrine.css">
+<link rel="stylesheet" href="../dist/jrk-skin-lucent.css">
+<link rel="stylesheet" href="../css/skins/lucent.css">
 <link rel="stylesheet" href="preview.css">
 </head>
 <body>
@@ -43,13 +45,15 @@
         <button class="jrk-tab" data-skin-btn="industry" type="button">Industry</button>
         <button class="jrk-tab" data-skin-btn="midgard" type="button">Midgard</button>
         <button class="jrk-tab" data-skin-btn="vitrine" type="button">Vitrine</button>
+        <button class="jrk-tab" data-skin-btn="lucent" type="button">Lucent</button>
       </div>
       <div class="gal-note" style="margin-top:6px">
         Each skin has a dedicated page with its own notes and, for
         <code class="jrk-mono">industry</code>, its hazard-hue picker:
         <a href="skin-industry.html">Industry</a> &middot;
         <a href="skin-midgard.html">Midgard</a> &middot;
-        <a href="skin-vitrine.html">Vitrine</a>.
+        <a href="skin-vitrine.html">Vitrine</a> &middot;
+        <a href="skin-lucent.html">Lucent</a>.
       </div>
     </div>
 
@@ -3505,7 +3509,7 @@
      ?skin= is honoured so a link or a headless screenshot can reach any of the
      three, and an unrecognised value falls back to base rather than stamping a
      skin with no stylesheet behind it. */
-  const SKINS = ['industry', 'midgard', 'vitrine'];
+  const SKINS = ['industry', 'midgard', 'vitrine', 'lucent'];
   const wanted = new URL(location.href).searchParams.get('skin');
   applySkin(SKINS.includes(wanted) ? wanted : '');
 
